@@ -1,0 +1,69 @@
+// LegacyUpdateOCX.idl : type library source for ActiveX Control project.
+
+// This file will be processed by the MIDL compiler tool to
+// produce the type library (LegacyUpdateOCX.tlb) that will become a resource in
+// LegacyUpdateOCX.ocx.
+
+#include <olectl.h>
+#include <idispids.h>
+
+[
+	uuid(05D22F33-C7C3-4C90-BDD9-CEDC86EA8FBE),
+	version(1.0),
+	control,
+	helpstring("Legacy Update ActiveX Control")
+]
+library LegacyUpdateOCXLib {
+	importlib(STDOLE_TLB);
+
+	typedef enum {
+		e_majorVer = 0,
+		e_minorVer = 1,
+		e_buildNumber = 2,
+		e_platform = 3,
+		e_SPMajor = 4,
+		e_SPMinor = 5,
+		e_productSuite = 6,
+		e_productType = 7,
+		e_systemMetric = 8,
+		e_SPVersionString = 9,
+		e_controlVersionString = 10,
+		e_VistaProductType = 11,
+		e_maxOSVersionFieldValue = 11
+	} OSVersionField;
+
+	typedef enum {
+		e_nonAdmin = 0,
+		e_admin = 2
+	} UserType;
+
+	// Primary dispatch interface for CLegacyUpdateCtrl
+	[uuid(3A81AF5D-35C4-441A-82BA-7CA618F112CE)]
+	dispinterface ILegacyUpdateCtrl {
+		properties:
+			[id(6)] VARIANT_BOOL IsRebootRequired;
+			[id(7)] VARIANT_BOOL IsWindowsUpdateDisabled;
+
+		methods:
+			[id(1)] VARIANT_BOOL CheckControl(void);
+			[id(2)] BSTR MessageForHresult(LONG inHresult);
+			[id(3)] VARIANT GetOSVersionInfo(OSVersionField osField, LONG systemMetric);
+			[id(4)] IDispatch *CreateObject(BSTR progID);
+			[id(5)] UserType GetUserType(void);
+			[id(8)] void RebootIfRequired(void);
+	};
+
+	// Event dispatch interface for CLegacyUpdateCtrl
+	[uuid(BF62027D-E775-49FD-A7E2-A87B08E925C3)]
+	dispinterface ILegacyUpdateCtrlEvents {
+		properties:
+		methods:
+	};
+
+	// Class information for CLegacyUpdateCtrl
+	[uuid(AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F)]
+	coclass LegacyUpdateOCX {
+		[default] dispinterface ILegacyUpdateCtrl;
+		[default, source] dispinterface ILegacyUpdateCtrlEvents;
+	};
+};
