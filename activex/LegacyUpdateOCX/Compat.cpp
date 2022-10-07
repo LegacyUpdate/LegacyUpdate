@@ -2,11 +2,21 @@
 #include <comdef.h>
 #include "Utils.h"
 
+#pragma comment(lib, "advapi32.lib")
+
 typedef BOOL (WINAPI *_InitiateSystemShutdownExW)(LPSTR, LPSTR, DWORD, BOOL, BOOL, DWORD);
 typedef BOOL (WINAPI *_GetProductInfo)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 
+// TODO: Latest MSDN docs say XP+, but VS2010 docs say 2k+. Who's correct?
 _InitiateSystemShutdownExW $InitiateSystemShutdownExW = (_InitiateSystemShutdownExW)GetProcAddress(GetModuleHandle(L"advapi32.dll"), "InitiateSystemShutdownExW");
+
+// Vista+
 _GetProductInfo $GetProductInfo = (_GetProductInfo)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "GetProductInfo");
+
+// Defined as being Vista+, older versions ignore the flag.
+#ifndef EWX_RESTARTAPPS
+#define EWX_RESTARTAPPS 0x00000040
+#endif
 
 void Reboot() {
 	// Make sure we have permission to shut down.

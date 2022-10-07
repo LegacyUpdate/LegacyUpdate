@@ -25,5 +25,4 @@ SourceFiles0=.
 [SourceFiles0]
 LegacyUpdate.inf=
 LegacyUpdate.dll=
-msvcr100.dll=
-mfc100u.dll=
+vcredist_x86.exe=

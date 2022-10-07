@@ -7,9 +7,8 @@ path %PATH%;%ProgramFiles%\Resource Hacker
 :: Copy files
 copy ..\%build%\LegacyUpdateOCX.dll LegacyUpdate.dll
 
-set redist=%ProgramFiles%\Microsoft Visual Studio 10.0\VC\redist
-if not exist msvcr100.dll copy "%redist%\x86\Microsoft.VC100.CRT\msvcr100.dll" msvcr100.dll
-if not exist mfc100u.dll copy "%redist%\x86\Microsoft.VC100.MFC\mfc100u.dll" mfc100u.dll
+set redist=%ProgramFiles%\Microsoft SDKs\Windows\v6.0A\Bootstrapper\Packages
+if not exist vcredist_x86.exe copy "%redist%\vcredist_x86\vcredist_x86.exe" vcredist_x86.exe
 
 :: cab for IE installation
 :: makecab /f LegacyUpdate.ddf

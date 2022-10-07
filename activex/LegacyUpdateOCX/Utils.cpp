@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include <comdef.h>
 
+#pragma comment(lib, "version.lib")
+
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+
 #define OwnModule ((HMODULE)&__ImageBase)
 
 static BOOL _loadedVersionInfo = FALSE;

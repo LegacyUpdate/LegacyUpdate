@@ -11,7 +11,7 @@ UPDATE_URL="http://legacyupdate.net/windowsupdate/v6/"
 WSUS_SERVER="http://legacyupdate.net/v6"
 WSUS_STATUS_SERVER="http://stats.update.microsoft.com"
 INSTALL_PROMPT="Legacy Update will be installed. Windows Update will be configured to use the Legacy Update proxy server."
-INSTALL_END_PROMPT="Legacy Update has been installed."
+INSTALL_END_PROMPT="Legacy Update has been installed. If the Legacy Update website is open, refresh the page to proceed."
 UNINSTALL_PROMPT="Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
 UNINSTALL_END_PROMPT="Legacy Update has been uninstalled."
 
@@ -19,18 +19,14 @@ UNINSTALL_END_PROMPT="Legacy Update has been uninstalled."
 [DestinationDirs]
 Files.Inf=17
 Files.System32=11
-Files.Runtime=11
+Files.Runtime=49000
 Files.AllUsersStartMenu=16406
 
 [Files.Inf]
-LegacyUpdate.inf
+LegacyUpdate.inf,,,4
 
 [Files.System32]
-LegacyUpdate.dll
-
-[Files.Runtime]
-msvcr100.dll,,,32
-mfc100u.dll,,,32
+LegacyUpdate.dll,,,4
 
 [Files.CommonStartMenu]
 Legacy Update.lnk
@@ -72,6 +68,9 @@ regsvr32 /s %11%\LegacyUpdate.dll
 [Command.UnregisterOCX]
 regsvr32 /s /u %11%\LegacyUpdate.dll
 
+[Command.InstallRuntime]
+%01%\vcredist_x86.exe /q
+
 [Command.RestartService]
 net stop wuauserv
 rundll32 advpack.dll,DelNodeRunDLL32 %11%\SoftwareDistribution\WuRedir
@@ -84,9 +83,9 @@ ComponentVersion="%PRODUCT_VERSION%"
 BeginPrompt=Install.Prompt
 EndPrompt=Install.EndPrompt
 AddReg=Registry.Uninstall,Registry.Control,Registry.Wsus,Registry.Zone
-CopyFiles=Files.Inf,Files.System32,Files.Runtime
+CopyFiles=Files.Inf,Files.System32
 UpdateInis=Install.Shortcut
-RunPostSetupCommands=Command.RegisterOCX,Command.RestartService:1
+RunPostSetupCommands=Command.InstallRuntime,Command.RegisterOCX,Command.RestartService:1
 
 [Install.Prompt]
 Title=%PRODUCT_NAME%

@@ -20,5 +20,4 @@
 
 LegacyUpdate.dll
 LegacyUpdate.inf
-msvcr100.dll
-mfc100u.dll
+vcredist_x86.exe
