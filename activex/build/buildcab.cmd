@@ -20,3 +20,6 @@ iexpress /n /q LegacyUpdate.sed
 ResourceHacker -open versioninfo.rc -save versioninfo.res -action compile -log CONSOLE
 ResourceHacker -script resources.txt
 del versioninfo.res
+
+:: Highlight in Explorer
+start "" explorer /select,LegacyUpdate.exe
