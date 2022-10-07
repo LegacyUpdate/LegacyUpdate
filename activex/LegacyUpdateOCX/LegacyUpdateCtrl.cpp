@@ -237,7 +237,7 @@ VARIANT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemM
 			VariantClear(&result);
 			return result;
 		}
-		result.bstrVal = SysAllocStringLen(data, size);
+		result.bstrVal = SysAllocStringLen(data, size - 1);
 		result.vt = VT_BSTR;
 		break;
 							}
@@ -250,7 +250,7 @@ VARIANT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemM
 			VariantClear(&result);
 			return result;
 		}
-		result.bstrVal = SysAllocStringLen(data, size);
+		result.bstrVal = SysAllocStringLen(data, size - 1);
 		result.vt = VT_BSTR;
 		break;
 								 }
@@ -334,11 +334,11 @@ VARIANT_BOOL CLegacyUpdateCtrl::IsWindowsUpdateDisabled(void) {
 	}
 
 	DWORD noWU;
-	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", NULL, &noWU, NULL);
+	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", NULL, &noWU);
 	BOOL isEnabled = !SUCCEEDED(result) || noWU == 1;
 
 	DWORD disableWUAccess;
-	result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", NULL, &disableWUAccess, NULL);
+	result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", NULL, &disableWUAccess);
 	isEnabled = isEnabled && (!SUCCEEDED(result) || disableWUAccess == 1);
 	return isEnabled;
 }

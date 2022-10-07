@@ -64,20 +64,20 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWO
 	}
 
 	if (data != NULL && size != NULL) {
-		DWORD length = 8192;
-		LPWSTR buffer = (LPTSTR)malloc(length);
+		DWORD length = 512 * sizeof(WCHAR);
+		LPWSTR buffer = (LPWSTR)malloc(length);
 		do {
 			result = RegQueryValueEx(subkey, valueName, NULL, type, (BYTE *)buffer, &length);
 			if (result == ERROR_MORE_DATA) {
-				length += 4096;
-				buffer = (LPTSTR)realloc(buffer, length);
+				length += 256 * sizeof(WCHAR);
+				buffer = (LPWSTR)realloc(buffer, length);
 			} else if (!SUCCEEDED(result)) {
 				goto end;
 			}
 		} while (result == ERROR_MORE_DATA);
 
 		*data = buffer;
-		*size = length;
+		*size = length / sizeof(WCHAR);
 	}
 
 end:
