@@ -5,6 +5,7 @@
 // CLegacyUpdateCtrl : See LegacyUpdateCtrl.cpp for implementation.
 
 #include <afxctl.h>
+#include <MsHTML.h>
 
 class CLegacyUpdateCtrl : public COleControl {
 	DECLARE_DYNCREATE(CLegacyUpdateCtrl)
@@ -55,6 +56,7 @@ protected:
 	// Event maps
 	DECLARE_EVENT_MAP()
 
+	IHTMLDocument2 *GetHTMLDocument();
 	BOOL IsPermitted();
 
 public:
@@ -67,7 +69,11 @@ public:
 		dispidGetUserType = 5L,
 		dispidIsRebootRequired = 6L,
 		dispidIsWindowsUpdateDisabled = 7L,
-		dispidRebootIfRequired = 8L
+		dispidRebootIfRequired = 8L,
+		dispidViewWindowsUpdateLog = 9L,
+		dispidIsUsingWsusServer = 10L,
+		dispidWsusServerUrl = 11L,
+		dispidWsusStatusServerUrl = 12L
 	};
 
 protected:
@@ -79,5 +85,9 @@ protected:
 	VARIANT_BOOL IsRebootRequired(void);
 	VARIANT_BOOL IsWindowsUpdateDisabled(void);
 	void RebootIfRequired(void);
+	void ViewWindowsUpdateLog(void);
+	VARIANT_BOOL IsUsingWsusServer(void);
+	BSTR WsusServerUrl(void);
+	BSTR WsusStatusServerUrl(void);
 };
 

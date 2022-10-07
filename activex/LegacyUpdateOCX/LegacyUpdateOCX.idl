@@ -43,6 +43,9 @@ library LegacyUpdateOCXLib {
 		properties:
 			[id(6)] VARIANT_BOOL IsRebootRequired;
 			[id(7)] VARIANT_BOOL IsWindowsUpdateDisabled;
+			[id(10)] VARIANT_BOOL IsUsingWsusServer;
+			[id(11)] BSTR WsusServerUrl;
+			[id(12)] BSTR WsusStatusServerUrl;
 
 		methods:
 			[id(1)] VARIANT_BOOL CheckControl(void);
@@ -51,6 +54,7 @@ library LegacyUpdateOCXLib {
 			[id(4)] IDispatch *CreateObject(BSTR progID);
 			[id(5)] UserType GetUserType(void);
 			[id(8)] void RebootIfRequired(void);
+			[id(9)] void ViewWindowsUpdateLog(void);
 	};
 
 	// Event dispatch interface for CLegacyUpdateCtrl
