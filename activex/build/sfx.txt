@@ -1,0 +1,6 @@
+;!@Install@!UTF-8!
+Title="Legacy Update"
+Progress="yes"
+ExecuteFile="rundll32.exe"
+ExecuteParameters="advpack.dll,LaunchINFSection LegacyUpdate.inf"
+;!@InstallEnd@!

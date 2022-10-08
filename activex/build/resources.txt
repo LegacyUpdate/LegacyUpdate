@@ -6,5 +6,5 @@ Save=LegacyUpdate.exe
 Log=CONSOLE
 
 [COMMANDS]
--addoverwrite ..\LegacyUpdateOCX\icon.ico, ICONGROUP,3000,0
+-addoverwrite ..\LegacyUpdateOCX\icon.ico, ICONGROUP,1,
 -addoverwrite versioninfo.res, VERSIONINFO,,

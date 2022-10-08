@@ -16,6 +16,7 @@ Debug/
 Release/
 build/*.exe
 build/*.dll
+build/*.7z
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
