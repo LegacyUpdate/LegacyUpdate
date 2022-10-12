@@ -380,13 +380,13 @@ void CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 		return;
 	}
 
-  WCHAR path[MAX_PATH];
-  HRESULT result = SHGetFolderPath(0, CSIDL_WINDOWS, NULL, 0, path);
-  if (!SUCCEEDED(result)) {
-      TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(result));
-			return;
-  }
-	ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, NULL, SW_SHOWDEFAULT);
+	WCHAR windir[MAX_PATH];
+	HRESULT result = SHGetFolderPath(0, CSIDL_WINDOWS, NULL, 0, windir);
+	if (!SUCCEEDED(result)) {
+		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(result));
+		return;
+	}
+	ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT);
 }
 
 VARIANT_BOOL CLegacyUpdateCtrl::IsUsingWsusServer(void) {
