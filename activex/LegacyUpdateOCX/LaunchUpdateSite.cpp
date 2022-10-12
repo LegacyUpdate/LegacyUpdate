@@ -1,20 +1,36 @@
 #include "stdafx.h"
 #include <comdef.h>
 #include <ExDisp.h>
+#include <strsafe.h>
 #include "Utils.h"
 
 const LPWSTR UpdateSiteURL = L"http://legacyupdate.net/windowsupdate/v6/";
 
 // Function signature required by Rundll32.exe.
 void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine, int nCmdShow) {
-	// Spawn an IE window via the COM interface. This ensures the page opens in IE (ShellExecute uses
-	// default browser), and avoids hardcoding a path to iexplore.exe. Same strategy as used by
-	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
 	HRESULT result = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
 
+	// Make sure we're elevated. If not, show UAC prompt (Vista+) or Run As prompt (XP/2k).
+	if (!IsUserAnAdmin()) {
+		LPWSTR filename;
+		DWORD filenameSize;
+		GetOwnFileName(&filename, &filenameSize);
+		WCHAR args[MAX_PATH + 20];
+		StringCchPrintfW(args, filenameSize + 20, L"\"%ls\",LaunchUpdateSite", filename);
+		int execResult = (int)ShellExecute(NULL, L"runas", L"rundll32.exe", args, NULL, SW_SHOWDEFAULT);
+		// Access denied happens when the user clicks No/Cancel.
+		if (execResult <= 32 && execResult != SE_ERR_ACCESSDENIED) {
+			result = E_FAIL;
+		}
+		goto end;
+	}
+
+	// Spawn an IE window via the COM interface. This ensures the page opens in IE (ShellExecute uses
+	// default browser), and avoids hardcoding a path to iexplore.exe. Same strategy as used by
+	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
 	IWebBrowser2 *browser;
 	result = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, IID_IWebBrowser2, (void **)&browser);
 	if (!SUCCEEDED(result)) {
@@ -39,21 +55,14 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 		goto end;
 	}
 
-	// IE window isn't visible by default, so we need to make it visible and foreground.
-	HWND browserHwnd;
-	result = browser->get_HWND((SHANDLE_PTR *)&browserHwnd);
-	if (!SUCCEEDED(result)) {
-		goto end;
-	}
-
-	SetForegroundWindow(browserHwnd);
 	browser->put_Visible(TRUE);
 	browser->Release();
 
 end:
 	if (!SUCCEEDED(result)) {
-		MessageBox(hwnd, GetMessageForHresult(result), L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(NULL, GetMessageForHresult(result), L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
 	}
 
 	CoUninitialize();
+	exit(SUCCEEDED(result) ? NOERROR : E_FAIL);
 }
