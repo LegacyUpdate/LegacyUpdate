@@ -357,11 +357,11 @@ VARIANT_BOOL CLegacyUpdateCtrl::IsWindowsUpdateDisabled(void) {
 
 	DWORD noWU;
 	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", NULL, &noWU);
-	BOOL isEnabled = !SUCCEEDED(result) || noWU == 1;
+	BOOL isEnabled = !SUCCEEDED(result) || noWU != 1;
 
 	DWORD disableWUAccess;
 	result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", NULL, &disableWUAccess);
-	isEnabled = isEnabled && (!SUCCEEDED(result) || disableWUAccess == 1);
+	isEnabled = isEnabled && (!SUCCEEDED(result) || disableWUAccess != 1);
 	return isEnabled;
 }
 
@@ -397,7 +397,7 @@ VARIANT_BOOL CLegacyUpdateCtrl::IsUsingWsusServer(void) {
 	}
 	
 	DWORD useWUServer;
-	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", &useWUServer, NULL);
+	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", NULL, &useWUServer);
 	return SUCCEEDED(result) && useWUServer == 1;
 }
 
