@@ -1,14 +1,14 @@
 !define TRUSTEDR "http://download.windowsupdate.com/msdownload/update/v3/static/trustedr/en"
 
 Function UpdateRoots
-	SetOutPath "$TEMP"
+	SetOutPath $PLUGINSDIR
 	File "..\build\updroots.exe"
 	DetailPrint "Downloading Certificate Trust List..."
-	NSISdl::download "${TRUSTEDR}\authroots.sst"      "authroots.sst"
-	NSISdl::download "${TRUSTEDR}\delroots.sst"       "delroots.sst"
-	NSISdl::download "${TRUSTEDR}\roots.sst"          "roots.sst"
-	NSISdl::download "${TRUSTEDR}\updroots.sst"       "updroots.sst"
-	NSISdl::download "${TRUSTEDR}\disallowedcert.sst" "disallowedcert.sst"
+	NSISdl::download "${TRUSTEDR}/authroots.sst"      "authroots.sst"
+	NSISdl::download "${TRUSTEDR}/delroots.sst"       "delroots.sst"
+	NSISdl::download "${TRUSTEDR}/roots.sst"          "roots.sst"
+	NSISdl::download "${TRUSTEDR}/updroots.sst"       "updroots.sst"
+	NSISdl::download "${TRUSTEDR}/disallowedcert.sst" "disallowedcert.sst"
 	DetailPrint "Installing Certificate Trust List..."
 	ExecWait "updroots.exe authroots.sst"
 	ExecWait "updroots.exe updroots.sst"
