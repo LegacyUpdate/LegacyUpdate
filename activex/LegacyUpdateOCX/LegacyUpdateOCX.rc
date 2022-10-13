@@ -20,6 +20,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -79,8 +80,8 @@ BEGIN
             VALUE "InternalName", "LegacyUpdateOCX.dll"
             VALUE "LegalCopyright", "© Hashbang Productions. All rights reserved."
             VALUE "OriginalFilename", "LegacyUpdateOCX.dll"
-            VALUE "ProductName", "Legacy Update ActiveX Control"
-            VALUE "ProductVersion", "1.0.0.0"
+            VALUE "ProductName", "Legacy Update"
+            VALUE "ProductVersion", "1.1.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -106,7 +107,7 @@ IDI_ICON1               ICON                    "icon.ico"
 
 STRINGTABLE
 BEGIN
-    IDS_LEGACYUPDATEOCX     "LegacyUpdate Control"
+    IDS_LEGACYUPDATEOCX     "Legacy Update Control"
 END
 
 #endif    // English (Australia) resources
