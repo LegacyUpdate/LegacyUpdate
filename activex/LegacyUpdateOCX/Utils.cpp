@@ -58,7 +58,7 @@ HRESULT GetOwnVersion(LPWSTR *version, LPDWORD size) {
 
 HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWORD type, LPWSTR *data, LPDWORD size) {
 	HKEY subkey;
-	HRESULT result = RegOpenKeyEx(key, subkeyPath, 0, KEY_READ, &subkey);
+	HRESULT result = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, KEY_READ, &subkey));
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
@@ -66,15 +66,17 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWO
 	if (data != NULL && size != NULL) {
 		DWORD length = 512 * sizeof(WCHAR);
 		LPWSTR buffer = (LPWSTR)malloc(length);
+		LSTATUS status;
 		do {
-			result = RegQueryValueEx(subkey, valueName, NULL, type, (BYTE *)buffer, &length);
-			if (result == ERROR_MORE_DATA) {
+			status = RegQueryValueEx(subkey, valueName, NULL, type, (BYTE *)buffer, &length);
+			if (status == ERROR_MORE_DATA) {
 				length += 256 * sizeof(WCHAR);
 				buffer = (LPWSTR)realloc(buffer, length);
-			} else if (!SUCCEEDED(result)) {
+			} else if (status != ERROR_SUCCESS) {
+				result = HRESULT_FROM_WIN32(status);
 				goto end;
 			}
-		} while (result == ERROR_MORE_DATA);
+		} while (status == ERROR_MORE_DATA);
 
 		*data = buffer;
 		*size = length / sizeof(WCHAR);
@@ -84,18 +86,27 @@ end:
 	if (subkey != NULL) {
 		RegCloseKey(subkey);
 	}
+	if (!SUCCEEDED(result)) {
+		if (data != NULL) {
+			*data = NULL;
+		}
+		if (size != NULL) {
+			*size = 0;
+		}
+	}
 	return result;
 }
 
 HRESULT GetRegistryDword(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWORD type, LPDWORD data) {
 	HKEY subkey;
-	HRESULT result = RegOpenKeyEx(key, subkeyPath, 0, KEY_READ, &subkey);
+	HRESULT result = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, KEY_READ, &subkey));
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
 
 	if (data != NULL) {
-		result = RegQueryValueEx(subkey, valueName, NULL, type, (LPBYTE)data, NULL);
+		DWORD length = sizeof(DWORD);
+		result = HRESULT_FROM_WIN32(RegQueryValueEx(subkey, valueName, NULL, type, (LPBYTE)data, &length));
 		if (!SUCCEEDED(result)) {
 			goto end;
 		}
