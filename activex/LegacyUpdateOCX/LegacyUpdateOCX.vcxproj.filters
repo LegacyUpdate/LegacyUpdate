@@ -18,6 +18,9 @@
     <None Include="LegacyUpdateOCX.def">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="icon.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
