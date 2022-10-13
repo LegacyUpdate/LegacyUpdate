@@ -13,10 +13,11 @@
 
 # Build results
 Debug/
+Debug-VC08/
+Debug-VC17/
 Release/
 build/*.exe
-build/*.dll
-build/*.7z
+!build/modern_*.exe
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
