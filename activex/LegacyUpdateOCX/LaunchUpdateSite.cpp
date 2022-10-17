@@ -64,5 +64,8 @@ end:
 	}
 
 	CoUninitialize();
-	exit(SUCCEEDED(result) ? NOERROR : E_FAIL);
+
+	if (!SUCCEEDED(result)) {
+		exit(1);
+	}
 }
