@@ -391,6 +391,12 @@ void CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(result));
 		return;
 	}
+
+	// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
+	// opening the file (most likely in Notepad).
+	if ((int)ShellExecute(NULL, L"open", L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT) > 32) {
+		return;
+	}
 	ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT);
 }
 
