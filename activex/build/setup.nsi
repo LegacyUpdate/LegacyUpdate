@@ -45,8 +45,8 @@ VIAddVersionKey /LANG=1033 "FileVersion" "${LONGVERSION}"
 VIProductVersion ${LONGVERSION}
 VIFileVersion ${LONGVERSION}
 
-!define MUI_ICON "..\LegacyUpdateOCX\icon.ico"
-!define MUI_UNICON "..\LegacyUpdateOCX\icon.ico"
+!define MUI_ICON "..\icon.ico"
+!define MUI_UNICON "..\icon.ico"
 
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "setupbanner.bmp"
