@@ -55,6 +55,50 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 		goto end;
 	}
 
+	HWND ieHwnd;
+	result = browser->get_HWND((SHANDLE_PTR *)&ieHwnd);
+	if (!SUCCEEDED(result)) {
+		goto end;
+	}
+
+	// Are we on a small display? If so, resize and maximise the window.
+	HMONITOR monitor = MonitorFromWindow(ieHwnd, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO monitorInfo;
+	monitorInfo.cbSize = sizeof(MONITORINFO);
+
+	if (GetMonitorInfo(monitor, &monitorInfo) > 0) {
+		LONG workWidth = monitorInfo.rcWork.right - monitorInfo.rcWork.left;
+		LONG workHeight = monitorInfo.rcWork.bottom - monitorInfo.rcWork.top;
+
+		LONG width, height;
+		browser->get_Width(&width);
+		browser->get_Height(&height);
+
+		if (width < 800) {
+			width = min(800, workWidth);
+			browser->put_Width(width);
+		}
+		if (height < 600) {
+			height = min(600, workHeight);
+			browser->put_Height(height);
+		}
+
+		LONG left, top;
+		browser->get_Left(&left);
+		browser->get_Top(&top);
+
+		if (left + width > workWidth) {
+			browser->put_Left(0);
+		}
+		if (top + height > workHeight) {
+			browser->put_Top(0);
+		}
+
+		if (workWidth <= 1152) {
+			ShowWindow(ieHwnd, SW_MAXIMIZE);
+		}
+	}
+
 	browser->put_Visible(TRUE);
 	browser->Release();
 
