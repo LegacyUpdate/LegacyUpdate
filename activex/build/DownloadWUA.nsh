@@ -27,16 +27,6 @@ Function DownloadWUA
 	Call DetermineWUAVersion
 	${If} $0 != ""
 		SetOutPath $PLUGINSDIR
-		DetailPrint "Downloading Windows Update Agent..."
-		NSISdl::download "$0" "WindowsUpdateAgent.exe"
-		DetailPrint "Installing Windows Update Agent..."
-		ExecWait "WindowsUpdateAgent.exe /quiet /norestart" $0
-		${If} $0 == ${ERROR_SUCCESS_REBOOT_REQUIRED}
-			SetRebootFlag true
-		${ElseIf} $0 != 0
-			MessageBox MB_OK|MB_USERICON "Internet Explorer 6 SP1 failed to install. Error code: $0"
-			Abort
-		${EndIf}
-		Delete "WindowsUpdateAgent.exe"
+		!insertmacro DownloadAndInstall "Windows Update Agent" "$0" "WindowsUpdateAgent.exe" "/quiet /norestart"
 	${EndIf}
 FunctionEnd

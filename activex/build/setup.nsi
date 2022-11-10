@@ -9,8 +9,8 @@
 !define MUI_UNCONFIRMPAGE_TEXT_TOP "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
 
 !define NAME        "Legacy Update"
-!define VERSION     "1.1"
-!define LONGVERSION "1.1.0.0"
+!define VERSION     "1.1.1"
+!define LONGVERSION "1.1.1.0"
 !define DOMAIN      "legacyupdate.net"
 
 !define WEBSITE            "http://legacyupdate.net/"
@@ -36,24 +36,24 @@ Unicode True
 RequestExecutionLevel Admin
 AutoCloseWindow true
 
-VIAddVersionKey /LANG=1033 "ProductName" "${NAME}"
-VIAddVersionKey /LANG=1033 "ProductVersion" "${LONGVERSION}"
-VIAddVersionKey /LANG=1033 "CompanyName" "Hashbang Productions"
-VIAddVersionKey /LANG=1033 "LegalCopyright" "© Hashbang Productions. All rights reserved."
+VIAddVersionKey /LANG=1033 "ProductName"     "${NAME}"
+VIAddVersionKey /LANG=1033 "ProductVersion"  "${LONGVERSION}"
+VIAddVersionKey /LANG=1033 "CompanyName"     "Hashbang Productions"
+VIAddVersionKey /LANG=1033 "LegalCopyright"  "© Hashbang Productions. All rights reserved."
 VIAddVersionKey /LANG=1033 "FileDescription" "${NAME}"
-VIAddVersionKey /LANG=1033 "FileVersion" "${LONGVERSION}"
+VIAddVersionKey /LANG=1033 "FileVersion"     "${LONGVERSION}"
 VIProductVersion ${LONGVERSION}
 VIFileVersion ${LONGVERSION}
 
-!define MUI_ICON "..\icon.ico"
+!define MUI_ICON   "..\icon.ico"
 !define MUI_UNICON "..\icon.ico"
 
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "setupbanner.bmp"
+!define MUI_HEADERIMAGE_BITMAP   "setupbanner.bmp"
 !define MUI_HEADERIMAGE_UNBITMAP "setupbanner.bmp"
 
 !define MEMENTO_REGISTRY_ROOT HKLM
-!define MEMENTO_REGISTRY_KEY "${REGPATH_LEGACYUPDATE_SETUP}"
+!define MEMENTO_REGISTRY_KEY  "${REGPATH_LEGACYUPDATE_SETUP}"
 
 !include FileFunc.nsh
 !include Integration.nsh
@@ -65,6 +65,7 @@ VIFileVersion ${LONGVERSION}
 !include WordFunc.nsh
 !include x64.nsh
 
+!include Common.nsh
 !include Reboot.nsh
 !include DownloadW2K.nsh
 !include DownloadWUA.nsh
@@ -87,7 +88,7 @@ VIFileVersion ${LONGVERSION}
 	UserInfo::GetAccountType
 	Pop $0
 	${If} $0 != "admin" ; Require admin rights on NT4+
-		MessageBox MB_USERICON "Log on as an administrator to install Legacy Update."
+		MessageBox MB_USERICON "Log on as an administrator to install Legacy Update." /SD IDOK
 		SetErrorLevel ERROR_ELEVATION_REQUIRED
 		Quit
 	${EndIf}
@@ -97,11 +98,12 @@ VIFileVersion ${LONGVERSION}
 	ClearErrors
 	Delete "${path}"
 	IfErrors 0 +3
-		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to delete "${path}".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' IDRETRY -3
+		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to delete "${path}".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' /SD IDCANCEL IDRETRY -3
 		Abort
 !macroend
 
 !macro RestartWUAUService
+	!insertmacro DetailPrint "Restarting Windows Update service..."
 	ExecShellWait "" "net" "stop wuauserv" SW_HIDE
 	Delete "$WINDIR\SoftwareDistribution\WuRedir"
 	ExecShellWait "" "net" "start wuauserv" SW_HIDE
@@ -181,7 +183,7 @@ Section "Legacy Update" LEGACYUPDATE
 
 	; Set WU URL
 	WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
-	
+
 	; Add to trusted sites
 	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}" "http"  2
 	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}" "https" 2
@@ -194,8 +196,12 @@ Section "Legacy Update" LEGACYUPDATE
 		Delete $WINDIR\System32\LegacyUpdate.dll
 	${EndIf}
 
+	; Delete old LegacyUpdate.inf
+	${If} ${FileExists} $WINDIR\inf\LegacyUpdate.inf
+		Delete $WINDIR\inf\LegacyUpdate.inf
+	${EndIf}
+
 	; Restart service
-	DetailPrint "Restarting Windows Update service..."
 	!insertmacro RestartWUAUService
 SectionEnd
 
@@ -223,20 +229,17 @@ Section -Uninstall
 
 	; Clear WU URL
 	DeleteRegValue HKLM "${REGPATH_WU}" "URL"
-	
+
 	; Remove from trusted sites
 	DeleteRegKey HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
 	DeleteRegKey HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
 
 	; Restart service
-	DetailPrint "Restarting Windows Update service..."
 	!insertmacro RestartWUAUService
 
 	; Delete the rest
 	Delete "$InstDir\Uninstall.exe"
 	!insertmacro DeleteFileOrAskAbort "$InstDir\LegacyUpdate.dll"
-	!insertmacro DeleteFileOrAskAbort "$InstDir\msvcr90.dll"
-	!insertmacro DeleteFileOrAskAbort "$InstDir\mfc90u.dll"
 	RMDir "$InstDir"
 	DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"
 SectionEnd
@@ -255,6 +258,7 @@ Function .onInit
 		SetRegView 64
 	${EndIf}
 	!insertmacro EnsureAdminRights
+	SetDetailsPrint listonly
 
 	SetOutPath $PLUGINSDIR
 	File Patches.ini
@@ -292,7 +296,7 @@ Function .onInit
 		!insertmacro RemoveSection ${ROOTCERTS}
 	${EndIf}
 
-	${If} ${AtLeastWin7}
+	${If} ${AtLeastWinVista}
 		MessageBox MB_YESNO|MB_USERICON "Legacy Update is intended for earlier versions of Windows. Visit legacyupdate.net for more information.$\r$\n$\r$\nContinue anyway?" /SD IDYES IDYES +2
 			Quit
 	${EndIf}
@@ -311,6 +315,7 @@ Function un.onInit
 		SetRegView 64
 	${EndIf}
 	!insertmacro EnsureAdminRights
+	SetDetailsPrint listonly
 FunctionEnd
 
 Function un.onUninstSuccess
