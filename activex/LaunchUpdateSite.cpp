@@ -3,8 +3,60 @@
 #include <ExDisp.h>
 #include <strsafe.h>
 #include "Utils.h"
+#include <WinInet.h>
 
-const LPWSTR UpdateSiteURL = L"http://legacyupdate.net/windowsupdate/v6/";
+#pragma comment(lib, "wininet.lib")
+
+const LPCSTR UpdateSiteHostname    = "legacyupdate.net";
+const LPWSTR UpdateSiteURLHttp     = L"http://legacyupdate.net/windowsupdate/v6/";
+const LPWSTR UpdateSiteURLHttps    = L"https://legacyupdate.net/windowsupdate/v6/";
+const LPWSTR UpdateSitePingTestURL = L"https://legacyupdate.net/v6/ClientWebService/ping.bin";
+
+HRESULT AttemptSSLConnection() {
+	HINTERNET internet, request;
+	LPWSTR version;
+	DWORD size;
+	HRESULT result = GetOwnVersion(&version, &size);
+	if (!SUCCEEDED(result)) {
+		goto end;
+	}
+
+	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
+	WCHAR userAgent[1024];
+	StringCchPrintfW(userAgent, 1024, L"Mozilla/4.0 (Legacy Update %ls; Windows NT %d.%d SP%d)",
+		version,
+		versionInfo->dwMajorVersion,
+		versionInfo->dwMinorVersion,
+		versionInfo->wServicePackMajor);
+
+	DWORD connectResult = InternetAttemptConnect(0);
+	if (connectResult != ERROR_SUCCESS) {
+		result = HRESULT_FROM_WIN32(connectResult);
+		goto end;
+	}
+
+	internet = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (internet == NULL) {
+		result = HRESULT_FROM_WIN32(GetLastError());
+		goto end;
+	}
+
+	request = InternetOpenUrl(internet, UpdateSitePingTestURL, NULL, 0, 0, NULL);
+	if (request == NULL) {
+		result = HRESULT_FROM_WIN32(GetLastError());
+		goto end;
+	}
+
+end:
+	if (request != NULL) {
+		HttpEndRequest(request, NULL, 0, 0);
+		InternetCloseHandle(request);
+	}
+	if (internet != NULL) {
+		InternetCloseHandle(internet);
+	}
+	return result;
+}
 
 // Function signature required by Rundll32.exe.
 void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine, int nCmdShow) {
@@ -29,7 +81,8 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 	}
 
 	// Spawn an IE window via the COM interface. This ensures the page opens in IE (ShellExecute uses
-	// default browser), and avoids hardcoding a path to iexplore.exe. Same strategy as used by
+	// default browser), and avoids hardcoding a path to iexplore.exe. Also conveniently allows testing
+	// on Windows 11 (iexplore.exe redirects to Edge, but COM still works). Same strategy as used by
 	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
 	IWebBrowser2 *browser;
 	result = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, IID_IWebBrowser2, (void **)&browser);
@@ -37,20 +90,21 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 		goto end;
 	}
 
+	// Can we connect with https? WinInet will throw an error if not.
+	result = AttemptSSLConnection();
+	LPWSTR siteURL = SUCCEEDED(result) ? UpdateSiteURLHttps : UpdateSiteURLHttp;
+
 	VARIANT url;
 	VariantInit(&url);
 	url.vt = VT_BSTR;
-	url.bstrVal = SysAllocString(UpdateSiteURL);
+	url.bstrVal = SysAllocString(siteURL);
 
 	VARIANT flags;
 	VariantInit(&flags);
 	flags.vt = VT_I4;
 	flags.lVal = 0;
 
-	VARIANT nullVariant;
-	VariantInit(&nullVariant);
-
-	result = browser->Navigate2(&url, &flags, &nullVariant, &nullVariant, &nullVariant);
+	result = browser->Navigate2(&url, &flags, NULL, NULL, NULL);
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
@@ -102,14 +156,13 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 	browser->put_Visible(TRUE);
 	browser->Release();
 
+	// Focus the window, since it seems to not always get focus as it should.
+	SetForegroundWindow(ieHwnd);
+
 end:
 	if (!SUCCEEDED(result)) {
 		MessageBox(NULL, GetMessageForHresult(result), L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
 	}
 
 	CoUninitialize();
-
-	if (!SUCCEEDED(result)) {
-		exit(1);
-	}
 }
