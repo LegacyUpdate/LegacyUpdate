@@ -50,7 +50,7 @@ VIAddVersionKey /LANG=1033 "LegalCopyright"  "© Hashbang Productions. All right
 VIAddVersionKey /LANG=1033 "FileDescription" "${NAME}"
 VIAddVersionKey /LANG=1033 "FileVersion"     "${LONGVERSION}"
 VIProductVersion ${LONGVERSION}
-VIFileVersion ${LONGVERSION}
+VIFileVersion    ${LONGVERSION}
 
 !define MUI_ICON   "..\icon.ico"
 !define MUI_UNICON "..\icon.ico"
@@ -211,6 +211,20 @@ Section "Legacy Update" LEGACYUPDATE
 		SW_SHOWNORMAL "" \
 		'@"$OUTDIR\LegacyUpdate.dll",-4'
 
+	; Hide WU shortcuts
+	; TODO: How can we consistently find the shortcuts for non-English installs?
+	${If} ${AtMostWin2003}
+		${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
+			CreateDirectory "$OUTDIR\Backup"
+			Rename "$COMMONSTARTMENU\Windows Update.lnk" "$OUTDIR\Backup\Windows Update.lnk"
+		${EndIf}
+
+		${If} ${FileExists} "$COMMONSTARTMENU\Microsoft Update.lnk"
+			CreateDirectory "$OUTDIR\Backup"
+			Rename "$COMMONSTARTMENU\Microsoft Update.lnk" "$OUTDIR\Backup\Microsoft Update.lnk"
+		${EndIf}
+	${EndIf}
+
 	; Set WSUS server
 	${If} ${AtMostWin2003}
 		; Check if Schannel is going to work with modern TLS
@@ -264,6 +278,15 @@ Section -Uninstall
 	DeleteRegKey HKLM "${REGPATH_CPLNAMESPACE}"
 	DeleteRegKey HKCR "${REGPATH_CPLCLSID}"
 
+	; Restore shortcuts
+	${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
+		Rename "$INSTDIR\Backup\Windows Update.lnk" "$COMMONSTARTMENU\Windows Update.lnk"
+	${EndIf}
+
+	${If} ${FileExists} "$INSTDIR\Backup\Microsoft Update.lnk"
+		Rename "$INSTDIR\Backup\Microsoft Update.lnk" "$COMMONSTARTMENU\Microsoft Update.lnk"
+	${EndIf}
+
 	; Unregister dll
 	UnRegDLL "$INSTDIR\LegacyUpdate.dll"
 
@@ -286,6 +309,7 @@ Section -Uninstall
 	Delete "$INSTDIR\Uninstall.exe"
 	!insertmacro DeleteFileOrAskAbort "$INSTDIR\LegacyUpdate.dll"
 	RMDir "$INSTDIR"
+	RMDir "$INSTDIR\Backup"
 	DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"
 SectionEnd
 
