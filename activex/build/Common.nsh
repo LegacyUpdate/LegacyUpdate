@@ -34,7 +34,6 @@
 !macroend
 
 !macro DownloadAndInstall name url filename args
-	!insertmacro DetailPrint "Downloading ${name}..."
 	!insertmacro Download "${name}" "${url}" "${filename}"
 	!insertmacro DetailPrint "Installing ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '${filename} ${args}'
