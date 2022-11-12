@@ -7,11 +7,12 @@
 !macroend
 
 !macro Download name url filename
-	NSISdl::download "${url}" "${filename}"
+	!insertmacro DetailPrint "Downloading ${name}..."
+	inetc::get "${url}" "${filename}" /end
 	Pop $0
-	${If} $0 != "success"
-		${If} $0 != "cancel"
-			MessageBox MB_OK|MB_USERICON "${name} failed to download.$\r$\n$\r$\nError code: $0" /SD IDOK
+	${If} $0 != "OK"
+		${If} $0 != "Cancelled"
+			MessageBox MB_OK|MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0" /SD IDOK
 		${EndIf}
 		SetErrorLevel 1
 		Abort

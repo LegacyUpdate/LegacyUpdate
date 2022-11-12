@@ -1,6 +1,6 @@
 ﻿!define ERROR_ELEVATION_REQUIRED 740
 
-!define MUI_UI_HEADERIMAGE "modern_headerbmp_full.exe"
+!define MUI_UI_HEADERIMAGE              "modern_headerbmp_full.exe"
 !define MUI_UI_COMPONENTSPAGE_SMALLDESC "modern_smalldesc.exe"
 
 !define MUI_COMPONENTSPAGE_TEXT_TOP "Legacy Update will be installed. Windows Update will be configured to use the Legacy Update proxy server. An internet connection is required to download additional components from Microsoft. Windows will restart automatically if needed."
@@ -15,7 +15,9 @@
 
 !define WEBSITE            "http://legacyupdate.net/"
 !define UPDATE_URL         "http://legacyupdate.net/windowsupdate/v6/"
+!define UPDATE_URL_HTTPS   "https://legacyupdate.net/windowsupdate/v6/"
 !define WSUS_SERVER        "http://legacyupdate.net/v6"
+!define WSUS_SERVER_HTTPS  "https://legacyupdate.net/v6"
 
 !define REGPATH_LEGACYUPDATE_SETUP "Software\Hashbang Productions\Legacy Update\Setup"
 !define REGPATH_UNINSTSUBKEY       "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
@@ -141,6 +143,10 @@ Section "Windows Update Agent" WUA
 	Call DownloadWUA
 SectionEnd
 
+${MementoSection} "Update root certificates store" ROOTCERTS
+	Call UpdateRoots
+${MementoSectionEnd}
+
 ; Main installation
 Section "Legacy Update" LEGACYUPDATE
 	SectionIn Ro
@@ -150,7 +156,7 @@ Section "Legacy Update" LEGACYUPDATE
 
 	; Add uninstall entry
 	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayName" "${NAME}"
-	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" "$OUTDIR\Uninstall.exe,0"
+	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" '"$OUTDIR\Uninstall.exe",0'
 	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayVersion" "${VERSION}"
 	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "Publisher" "${NAME}"
 	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "URLInfoAbout" "${WEBSITE}"
@@ -170,19 +176,33 @@ Section "Legacy Update" LEGACYUPDATE
 
 	; Register DLL
 	RegDLL "$OUTDIR\LegacyUpdate.dll"
+	IfErrors 0 +3
+		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to register Legacy Update ActiveX control.$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' /SD IDCANCEL IDRETRY -3
+		Abort
 
 	; Create shortcut
 	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" "$SYSDIR\rundll32.exe" '"$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite' "$OUTDIR\LegacyUpdate.dll" 0
 
 	; Set WSUS server
 	${If} ${AtMostWin2003}
+		; Check if Schannel is going to work with modern TLS
+		!insertmacro DetailPrint "Checking SSL connectivity..."
+		inetc::get /quiet /tostack "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" "" /end
+		Pop $0
+
+		${If} $0 == "OK"
+			; HTTPS will work
+			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER_HTTPS}"
+			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER_HTTPS}"
+			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL_HTTPS}"
+		${Else}
+			; Probably not supported; use HTTP
 		WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
 		WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
+			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
+		${EndIf}
 		WriteRegDWORD HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
 	${EndIf}
-
-	; Set WU URL
-	WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
 
 	; Add to trusted sites
 	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}" "http"  2
@@ -205,11 +225,6 @@ Section "Legacy Update" LEGACYUPDATE
 	!insertmacro RestartWUAUService
 SectionEnd
 
-; Extras
-${MementoSection} "Update root certificates store" ROOTCERTS
-	Call UpdateRoots
-${MementoSectionEnd}
-
 ${MementoSectionDone}
 
 Section -Uninstall
@@ -218,7 +233,7 @@ Section -Uninstall
 	Delete "$COMMONSTARTMENU\${NAME}.lnk"
 
 	; Unregister dll
-	UnRegDLL "$InstDir\LegacyUpdate.dll"
+	UnRegDLL "$INSTDIR\LegacyUpdate.dll"
 
 	; Clear WSUS server
 	${If} ${AtMostWin2003}
@@ -238,9 +253,9 @@ Section -Uninstall
 	!insertmacro RestartWUAUService
 
 	; Delete the rest
-	Delete "$InstDir\Uninstall.exe"
-	!insertmacro DeleteFileOrAskAbort "$InstDir\LegacyUpdate.dll"
-	RMDir "$InstDir"
+	Delete "$INSTDIR\Uninstall.exe"
+	!insertmacro DeleteFileOrAskAbort "$INSTDIR\LegacyUpdate.dll"
+	RMDir "$INSTDIR"
 	DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"
 SectionEnd
 
@@ -248,8 +263,8 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${W2KSP4}       "Updates Windows 2000 to Service Pack 4, as required to install the Windows Update Agent."
 	!insertmacro MUI_DESCRIPTION_TEXT ${IE6SP1}       "Updates Internet Explorer to 6.0 SP1, as required for Legacy Update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the appropriate version required for Legacy Update."
-	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update ActiveX control and Start Menu shortcut."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft. Fixes connection issues with some websites."
+	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update ActiveX control and Start Menu shortcut."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInit
@@ -267,10 +282,9 @@ Function .onInit
 
 	${If} ${IsWin2000}
 		; Determine whether Win2k prereqs need to be installed
-		GetWinVer $0 ServicePack
 		${GetFileVersion} "$SYSDIR\kernel32.dll" $1
 		${VersionCompare} $1 "5.0.2195.6897" $2
-		${If} $0 > 2
+		${If} ${AtLeastServicePack} 3
 		${OrIf} $2 != 2
 			!insertmacro RemoveSection ${W2KSP4}
 		${EndIf}
@@ -296,7 +310,7 @@ Function .onInit
 		!insertmacro RemoveSection ${ROOTCERTS}
 	${EndIf}
 
-	${If} ${AtLeastWinVista}
+	${If} ${AtLeastWin8}
 		MessageBox MB_YESNO|MB_USERICON "Legacy Update is intended for earlier versions of Windows. Visit legacyupdate.net for more information.$\r$\n$\r$\nContinue anyway?" /SD IDYES IDYES +2
 			Quit
 	${EndIf}
@@ -305,8 +319,9 @@ FunctionEnd
 Function .onInstSuccess
 	${MementoSectionSave}
 	Call RebootIfRequired
-	IfRebootFlag +2 0
-		Exec '$SYSDIR\rundll32.exe "$InstDir\LegacyUpdate.dll",LaunchUpdateSite'
+	${IfNot} ${RebootFlag}
+		Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite'
+	${EndIf}
 FunctionEnd
 
 Function un.onInit
@@ -320,4 +335,7 @@ FunctionEnd
 
 Function un.onUninstSuccess
 	Call un.RebootIfRequired
+	${IfNot} ${RebootFlag}
+		Quit
+	${EndIf}
 FunctionEnd

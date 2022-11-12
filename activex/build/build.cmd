@@ -13,6 +13,12 @@ if not exist "%ProgramFiles32%\NSIS\Bin\makensis.exe" (
 	exit /b 1
 )
 
+:: Make sure we have NSIS INetC plugin
+if not exist "%ProgramFiles32%\NSIS\Plugins\x86-unicode\INetC.dll" (
+	echo NSIS INetC.dll plugin not found. Refer to README.md. >&2
+	exit /b 1
+)
+
 :: Find Visual Studio installation
 if exist "%ProgramFiles32%\Microsoft Visual Studio\Installer\vswhere.exe" (
 	:: Get modern Visual Studio install path
