@@ -117,7 +117,10 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 	flags.vt = VT_I4;
 	flags.lVal = 0;
 
-	result = browser->Navigate2(&url, &flags, NULL, NULL, NULL);
+	VARIANT nullVariant;
+	VariantInit(&nullVariant);
+
+	result = browser->Navigate2(&url, &flags, &nullVariant, &nullVariant, &nullVariant);
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
