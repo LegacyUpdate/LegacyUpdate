@@ -12,7 +12,21 @@ const LPWSTR UpdateSiteURLHttp     = L"http://legacyupdate.net/windowsupdate/v6/
 const LPWSTR UpdateSiteURLHttps    = L"https://legacyupdate.net/windowsupdate/v6/";
 const LPWSTR UpdateSitePingTestURL = L"https://legacyupdate.net/v6/ClientWebService/ping.bin";
 
-HRESULT AttemptSSLConnection() {
+static HRESULT AttemptSSLConnection() {
+	// We know it won't work prior to XP SP3, so just fail immediately on XP RTM-SP2 and any Win2k.
+	OSVERSIONINFOEX* versionInfo = GetVersionInfo();
+	if (versionInfo->dwMajorVersion == 5) {
+		switch (versionInfo->dwMinorVersion) {
+		case 0:
+			return E_FAIL;
+
+		case 1:
+			if (versionInfo->wServicePackMajor < 3) {
+				return E_FAIL;
+			}
+		}
+	}
+
 	HINTERNET internet, request;
 	LPWSTR version;
 	DWORD size;
@@ -21,7 +35,6 @@ HRESULT AttemptSSLConnection() {
 		goto end;
 	}
 
-	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
 	WCHAR userAgent[1024];
 	StringCchPrintfW(userAgent, 1024, L"Mozilla/4.0 (Legacy Update %ls; Windows NT %d.%d SP%d)",
 		version,
