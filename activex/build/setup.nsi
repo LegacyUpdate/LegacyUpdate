@@ -9,8 +9,8 @@
 !define MUI_UNCONFIRMPAGE_TEXT_TOP "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
 
 !define NAME        "Legacy Update"
-!define VERSION     "1.2"
-!define LONGVERSION "1.2.0.0"
+!define VERSION     "1.2.1"
+!define LONGVERSION "1.2.1.0"
 !define DOMAIN      "legacyupdate.net"
 
 !define WEBSITE            "http://legacyupdate.net/"
