@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<applications xmlns="http://schemas.microsoft.com/windows/cpltasks/v1" xmlns:sh="http://schemas.microsoft.com/windows/tasks/v1">
+	<application id="{FFBE8D44-E9CF-4DD8-9FD6-976802C94D9C}">
+		<sh:task id="{9943E8C8-748D-47CE-AE10-9FA4A80ED28B}" needsElevation="true">
+			<sh:name>@&quot;%ProgramFiles%\Legacy Update\LegacyUpdate.dll&quot;,-3</sh:name>
+			<sh:keywords>legacy update;legacyupdate;update;windows;microsoft;driver;security;software;</sh:keywords>
+			<sh:command>%windir%\system32\rundll32.exe &quot;%ProgramFiles%\Legacy Update\LegacyUpdate.dll&quot;,LaunchUpdateSite</sh:command>
+		</sh:task>
+
+		<category id="5">
+			<sh:task idref="{9943E8C8-748D-47CE-AE10-9FA4A80ED28B}" />
+		</category>
+
+		<category id="10">
+			<sh:task idref="{9943E8C8-748D-47CE-AE10-9FA4A80ED28B}" />
+		</category>
+	</application>
+</applications>

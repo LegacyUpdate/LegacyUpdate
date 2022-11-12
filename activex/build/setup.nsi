@@ -19,6 +19,9 @@
 !define WSUS_SERVER        "http://legacyupdate.net/v6"
 !define WSUS_SERVER_HTTPS  "https://legacyupdate.net/v6"
 
+!define CPL_GUID           "{FFBE8D44-E9CF-4DD8-9FD6-976802C94D9C}"
+!define CPL_APPNAME        "LegacyUpdate"
+
 !define REGPATH_LEGACYUPDATE_SETUP "Software\Hashbang Productions\Legacy Update\Setup"
 !define REGPATH_UNINSTSUBKEY       "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
 !define REGPATH_WUPOLICY           "Software\Policies\Microsoft\Windows\WindowsUpdate"
@@ -26,6 +29,8 @@
 !define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"
 !define REGPATH_ZONEDOMAINS        "Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains"
 !define REGPATH_ZONEESCDOMAINS     "Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains"
+!define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
+!define REGPATH_CPLCLSID           "CLSID\${CPL_GUID}"
 
 Name "${NAME}"
 Caption "Install ${NAME}"
@@ -165,6 +170,25 @@ Section "Legacy Update" LEGACYUPDATE
 	WriteRegDWORD HKLM "${REGPATH_UNINSTSUBKEY}" "NoModify" 1
 	WriteRegDWORD HKLM "${REGPATH_UNINSTSUBKEY}" "NoRepair" 1
 
+	; Add Control Panel entry
+	; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
+	; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
+	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "" "${NAME}"
+	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.dll",-2'
+	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.dll",-4'
+	WriteRegStr HKCR "${REGPATH_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.dll",0'
+	WriteRegStr HKCR "${REGPATH_CPLCLSID}\Shell\Open\Command" "" 'rundll32.exe "$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite'
+	WriteRegDWORD HKCR "${REGPATH_CPLCLSID}\ShellFolder" "Attributes" 0
+	WriteRegDWORD HKCR "${REGPATH_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
+	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
+	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.ControlPanelCategory" "5,10"
+	${If} ${RunningX64}
+		WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-203"
+	${Else}
+		WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-202"
+	${EndIf}
+	WriteRegStr HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
+
 	; Install DLL, with detection for it being in use by IE
 	ClearErrors
 	SetOverwrite try
@@ -181,7 +205,11 @@ Section "Legacy Update" LEGACYUPDATE
 		Abort
 
 	; Create shortcut
-	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" "$SYSDIR\rundll32.exe" '"$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite' "$OUTDIR\LegacyUpdate.dll" 0
+	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
+		"$SYSDIR\rundll32.exe" '"$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite' \
+		"$OUTDIR\LegacyUpdate.dll" 0 \
+		SW_SHOWNORMAL "" \
+		'@"$OUTDIR\LegacyUpdate.dll",-4'
 
 	; Set WSUS server
 	${If} ${AtMostWin2003}
@@ -232,6 +260,10 @@ Section -Uninstall
 	${UnpinShortcut} "$COMMONSTARTMENU\${NAME}.lnk"
 	Delete "$COMMONSTARTMENU\${NAME}.lnk"
 
+	; Delete Control Panel entry
+	DeleteRegKey HKLM "${REGPATH_CPLNAMESPACE}"
+	DeleteRegKey HKCR "${REGPATH_CPLCLSID}"
+
 	; Unregister dll
 	UnRegDLL "$INSTDIR\LegacyUpdate.dll"
 
@@ -240,10 +272,8 @@ Section -Uninstall
 		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUServer"
 		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
 		DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
-	${EndIf}
-
-	; Clear WU URL
 	DeleteRegValue HKLM "${REGPATH_WU}" "URL"
+	${EndIf}
 
 	; Remove from trusted sites
 	DeleteRegKey HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"

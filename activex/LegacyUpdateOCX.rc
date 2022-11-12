@@ -16,10 +16,10 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (Australia) resources
+// English (United States) resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
@@ -108,9 +108,20 @@ IDI_ICON1               ICON                    "icon.ico"
 STRINGTABLE
 BEGIN
     IDS_LEGACYUPDATEOCX     "Legacy Update Control"
+    IDS_LEGACYUPDATE        "Legacy Update"
+    IDS_CHECKFORUPDATES     "Check for updates"
+    IDS_CHECKFORUPDATES_ALT "Check for software and driver updates via Legacy Update."
 END
 
-#endif    // English (Australia) resources
+/////////////////////////////////////////////////////////////////////////////
+//
+// XML
+//
+
+IDR_CPLTASKS32          XML                     "CplTasks32.xml"
+IDR_CPLTASKS64          XML                     "CplTasks64.xml"
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
