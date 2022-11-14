@@ -12,9 +12,39 @@ Function GetUpdateLanguage
 	ReadINIStr $0 $PLUGINSDIR\Patches.ini Language $1
 FunctionEnd
 
-Function DownloadW2KSP4
+Function NeedsW2KSP4
 	${If} ${IsWin2000}
 	${AndIf} ${AtMostServicePack} 2
+		Push 1
+	${Else}
+		Push 0
+	${EndIf}
+FunctionEnd
+
+Function NeedsKB835732
+	${GetFileVersion} "$SYSDIR\kernel32.dll" $0
+	${VersionCompare} $0 "5.00.2195.6897" $1
+	${If} $1 == 2
+		Push 1
+	${Else}
+		Push 0
+	${EndIf}
+FunctionEnd
+
+Function NeedsIE6
+	${GetFileVersion} "$SYSDIR\mshtml.dll" $0
+	${VersionCompare} $0 "6.0.2600.0" $1
+	${If} $1 == 2
+		Push 1
+	${Else}
+		Push 0
+	${EndIf}
+FunctionEnd
+
+Function DownloadW2KSP4
+	Call NeedsW2KSP4
+	Pop $0
+	${If} $0 == 1
 		Call GetUpdateLanguage
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini W2KSP4 $0
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini W2KSP4 Prefix
@@ -23,9 +53,9 @@ Function DownloadW2KSP4
 FunctionEnd
 
 Function DownloadKB835732
-	${GetFileVersion} "$SYSDIR\kernel32.dll" $0
-	${VersionCompare} $0 "5.00.2195.7000" $1
-	${If} $1 == 2
+	Call NeedsKB835732
+	Pop $0
+	${If} $0 == 1
 		Call GetUpdateLanguage
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB835732 $0
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini KB835732 Prefix
@@ -34,9 +64,9 @@ Function DownloadKB835732
 FunctionEnd
 
 Function DownloadIE6
-	${GetFileVersion} "$SYSDIR\mshtml.dll" $0
-	${VersionCompare} $0 "6.0.2600.0" $1
-	${If} $1 == 2
+	Call NeedsIE6
+	Pop $0
+	${If} $0 == 1
 		!insertmacro DownloadAndInstall "Internet Explorer 6 SP1" "${W2K_IE6}" "ie6setup.exe" '/q /c:"ie6setup.exe /q"'
 	${EndIf}
 FunctionEnd

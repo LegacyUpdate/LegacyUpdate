@@ -1,6 +1,4 @@
-﻿!define ERROR_ELEVATION_REQUIRED 740
-
-!define MUI_UI_HEADERIMAGE              "modern_headerbmp_full.exe"
+﻿!define MUI_UI_HEADERIMAGE              "modern_headerbmp_full.exe"
 !define MUI_UI_COMPONENTSPAGE_SMALLDESC "modern_smalldesc.exe"
 
 !define MUI_COMPONENTSPAGE_TEXT_TOP "Legacy Update will be installed. Windows Update will be configured to use the Legacy Update proxy server. An internet connection is required to download additional components from Microsoft. Windows will restart automatically if needed."
@@ -32,11 +30,11 @@
 !define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
 !define REGPATH_CPLCLSID           "CLSID\${CPL_GUID}"
 
-Name "${NAME}"
-Caption "Install ${NAME}"
+Name         "${NAME}"
+Caption      "Install ${NAME}"
 BrandingText "${NAME} ${VERSION} - ${DOMAIN}"
-OutFile "LegacyUpdate.exe"
-InstallDir "$ProgramFiles\$(^Name)"
+OutFile      "LegacyUpdate.exe"
+InstallDir   "$ProgramFiles\$(^Name)"
 InstallDirRegKey HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "InstallDir"
 
 Unicode True
@@ -68,13 +66,13 @@ VIFileVersion    ${LONGVERSION}
 !include Memento.nsh
 !include MUI2.nsh
 !include Sections.nsh
+!include Win\WinError.nsh
 !include Win\WinNT.nsh
 !include WinVer.nsh
 !include WordFunc.nsh
 !include x64.nsh
 
 !include Common.nsh
-!include Reboot.nsh
 !include DownloadW2K.nsh
 !include DownloadWUA.nsh
 !include UpdateRoots.nsh
@@ -91,24 +89,6 @@ VIFileVersion    ${LONGVERSION}
 !insertmacro MUI_UNPAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
-
-!macro EnsureAdminRights
-	UserInfo::GetAccountType
-	Pop $0
-	${If} $0 != "admin" ; Require admin rights on NT4+
-		MessageBox MB_USERICON "Log on as an administrator to install Legacy Update." /SD IDOK
-		SetErrorLevel ERROR_ELEVATION_REQUIRED
-		Quit
-	${EndIf}
-!macroend
-
-!macro DeleteFileOrAskAbort path
-	ClearErrors
-	Delete "${path}"
-	IfErrors 0 +3
-		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to delete "${path}".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' /SD IDCANCEL IDRETRY -3
-		Abort
-!macroend
 
 !macro RestartWUAUService
 	!insertmacro DetailPrint "Restarting Windows Update service..."
@@ -130,7 +110,6 @@ FunctionEnd
 ; Win2k prerequisities
 Section "Windows 2000 Service Pack 4" W2KSP4
 	SectionIn Ro
-	SetOutPath $PLUGINSDIR
 	Call DownloadW2KSP4
 	Call DownloadKB835732
 	Call RebootIfRequired
@@ -138,7 +117,6 @@ SectionEnd
 
 ${MementoSection} "Internet Explorer 6.0 Service Pack 1" IE6SP1
 	SectionIn Ro
-	SetOutPath $PLUGINSDIR
 	Call DownloadIE6
 	Call RebootIfRequired
 ${MementoSectionEnd}
@@ -161,34 +139,34 @@ Section "Legacy Update" LEGACYUPDATE
 	WriteUninstaller "Uninstall.exe"
 
 	; Add uninstall entry
-	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayName" "${NAME}"
-	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" '"$OUTDIR\Uninstall.exe",0'
-	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayVersion" "${VERSION}"
-	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "Publisher" "${NAME}"
-	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "URLInfoAbout" "${WEBSITE}"
-	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "UninstallString" '"$OUTDIR\Uninstall.exe"'
-	WriteRegStr HKLM "${REGPATH_UNINSTSUBKEY}" "QuietUninstallString" '"$OUTDIR\Uninstall.exe" /S'
-	WriteRegDWORD HKLM "${REGPATH_UNINSTSUBKEY}" "NoModify" 1
-	WriteRegDWORD HKLM "${REGPATH_UNINSTSUBKEY}" "NoRepair" 1
+	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayName" "${NAME}"
+	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" '"$OUTDIR\Uninstall.exe",0'
+	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayVersion" "${VERSION}"
+	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "Publisher" "${NAME}"
+	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "URLInfoAbout" "${WEBSITE}"
+	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "UninstallString" '"$OUTDIR\Uninstall.exe"'
+	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "QuietUninstallString" '"$OUTDIR\Uninstall.exe" /S'
+	WriteRegDword HKLM "${REGPATH_UNINSTSUBKEY}" "NoModify" 1
+	WriteRegDword HKLM "${REGPATH_UNINSTSUBKEY}" "NoRepair" 1
 
 	; Add Control Panel entry
 	; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
 	; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
-	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "" "${NAME}"
-	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.dll",-2'
-	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.dll",-4'
-	WriteRegStr HKCR "${REGPATH_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.dll",0'
-	WriteRegStr HKCR "${REGPATH_CPLCLSID}\Shell\Open\Command" "" 'rundll32.exe "$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite'
-	WriteRegDWORD HKCR "${REGPATH_CPLCLSID}\ShellFolder" "Attributes" 0
-	WriteRegDWORD HKCR "${REGPATH_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
-	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
-	WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.ControlPanelCategory" "5,10"
+	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "" "${NAME}"
+	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.dll",-2'
+	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.dll",-4'
+	WriteRegStr   HKCR "${REGPATH_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.dll",0'
+	WriteRegStr   HKCR "${REGPATH_CPLCLSID}\Shell\Open\Command" "" 'rundll32.exe "$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite'
+	WriteRegDword HKCR "${REGPATH_CPLCLSID}\ShellFolder" "Attributes" 0
+	WriteRegDword HKCR "${REGPATH_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
+	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
+	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "System.ControlPanelCategory" "5,10"
 	${If} ${RunningX64}
 		WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-203"
 	${Else}
 		WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-202"
 	${EndIf}
-	WriteRegStr HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
+	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 	; Install DLL, with detection for it being in use by IE
 	ClearErrors
@@ -240,16 +218,16 @@ Section "Legacy Update" LEGACYUPDATE
 			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL_HTTPS}"
 		${Else}
 			; Probably not supported; use HTTP
-		WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
-		WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
+			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
+			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
 			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
 		${EndIf}
-		WriteRegDWORD HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
+		WriteRegDword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
 	${EndIf}
 
 	; Add to trusted sites
-	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}" "http"  2
-	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}" "https" 2
+	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
+	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
 	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
 	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
 
@@ -296,7 +274,7 @@ Section -Uninstall
 		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUServer"
 		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
 		DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
-	DeleteRegValue HKLM "${REGPATH_WU}" "URL"
+		DeleteRegValue HKLM "${REGPATH_WU}" "URL"
 	${EndIf}
 
 	; Remove from trusted sites
@@ -337,17 +315,19 @@ Function .onInit
 
 	${If} ${IsWin2000}
 		; Determine whether Win2k prereqs need to be installed
-		${GetFileVersion} "$SYSDIR\kernel32.dll" $1
-		${VersionCompare} $1 "5.0.2195.6897" $2
-		${If} ${AtLeastServicePack} 3
-		${OrIf} $2 != 2
+		Call NeedsW2KSP4
+		Pop $0
+		Call NeedsKB835732
+		Pop $1
+		${If} $0 == 0
+		${AndIf} $1 == 0
 			!insertmacro RemoveSection ${W2KSP4}
 		${EndIf}
 
-		${GetFileVersion} "$SYSDIR\mshtml.dll" $0
-		${VersionCompare} $0 "6.0.2600.0" $1
-		${If} $1 != 2
-			!insertmacro RemoveSection ${W2KSP4}
+		Call NeedsIE6
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${IE6SP1}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${W2KSP4}
@@ -361,11 +341,10 @@ Function .onInit
 		!insertmacro SelectSection ${WUA}
 	${EndIf}
 
+	; Try not to be too intrusive on Windows 8 and newer, which are (for now) fine
 	${If} ${AtLeastWin8}
 		!insertmacro RemoveSection ${ROOTCERTS}
-	${EndIf}
 
-	${If} ${AtLeastWin8}
 		MessageBox MB_YESNO|MB_USERICON "Legacy Update is intended for earlier versions of Windows. Visit legacyupdate.net for more information.$\r$\n$\r$\nContinue anyway?" /SD IDYES IDYES +2
 			Quit
 	${EndIf}
