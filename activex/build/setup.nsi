@@ -68,6 +68,7 @@ VIFileVersion    ${LONGVERSION}
 !include Memento.nsh
 !include MUI2.nsh
 !include Sections.nsh
+!include Win\WinNT.nsh
 !include WinVer.nsh
 !include WordFunc.nsh
 !include x64.nsh

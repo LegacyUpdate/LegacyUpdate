@@ -1,5 +1,7 @@
 !define ERROR_INSTALL_USEREXIT 1602
 
+!define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'
+
 !macro DetailPrint text
 	SetDetailsPrint both
 	DetailPrint "${text}"

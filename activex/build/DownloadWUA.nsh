@@ -19,6 +19,8 @@ Function DetermineWUAVersion
 			ReadINIStr $0 $PLUGINSDIR\Patches.ini WUA $6-x86
 		${ElseIf} ${IsNativeAMD64}
 			ReadINIStr $0 $PLUGINSDIR\Patches.ini WUA $6-x64
+		${ElseIf} ${IsNativeIA64}
+			ReadINIStr $0 $PLUGINSDIR\Patches.ini WUA $6-ia64
 		${EndIf}
 	${EndIf}
 FunctionEnd
