@@ -1,4 +1,4 @@
-﻿!define MUI_UI_HEADERIMAGE              "modern_headerbmp_full.exe"
+!define MUI_UI_HEADERIMAGE              "modern_headerbmp_full.exe"
 !define MUI_UI_COMPONENTSPAGE_SMALLDESC "modern_smalldesc.exe"
 
 !define MUI_COMPONENTSPAGE_TEXT_TOP "Legacy Update will be installed. Windows Update will be configured to use the Legacy Update proxy server. An internet connection is required to download additional components from Microsoft. Windows will restart automatically if needed."
@@ -354,6 +354,7 @@ Function .onInstSuccess
 	${MementoSectionSave}
 	Call RebootIfRequired
 	${IfNot} ${RebootFlag}
+	${AndIfNot} ${Silent}
 		Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite'
 	${EndIf}
 FunctionEnd

@@ -77,6 +77,7 @@
 			System::Call 'Shell32::RestartDialog(p $HWNDPARENT, \
 				t "Windows will be restarted to complete installation of prerequisite components. Setup will resume after the restart.", \
 				i ${EWX_REBOOT})'
+		${EndIf}
 	${EndIf}
 !macroend
 
