@@ -21,9 +21,9 @@ Function UpdateRoots
 		Abort
 	${EndIf}
 	!insertmacro DetailPrint "Installing Certificate Trust List..."
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe authroots.sst"
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe updroots.sst"
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -l roots.sst"
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -d delroots.sst"
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -l -u disallowedcert.sst"
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe authroots.sst" 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe updroots.sst" 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -l roots.sst" 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -d delroots.sst" 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -l -u disallowedcert.sst" 0
 FunctionEnd

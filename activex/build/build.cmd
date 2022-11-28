@@ -13,9 +13,14 @@ if not exist "%ProgramFiles32%\NSIS\Bin\makensis.exe" (
 	exit /b 1
 )
 
-:: Make sure we have NSIS INetC plugin
+:: Make sure we have the NSIS plugins
 if not exist "%ProgramFiles32%\NSIS\Plugins\x86-unicode\INetC.dll" (
 	echo NSIS INetC.dll plugin not found. Refer to README.md. >&2
+	exit /b 1
+)
+
+if not exist "%ProgramFiles32%\NSIS\Plugins\x86-unicode\FindProcDLL.dll" (
+	echo NSIS FindProcDLL.dll plugin not found. Refer to README.md. >&2
 	exit /b 1
 )
 

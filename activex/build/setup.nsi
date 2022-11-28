@@ -5,8 +5,8 @@
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
 
 !define NAME        "Legacy Update"
-!define VERSION     "1.2.1"
-!define LONGVERSION "1.2.1.0"
+!define VERSION     "1.3"
+!define LONGVERSION "1.3.0.0"
 !define DOMAIN      "legacyupdate.net"
 
 !define WEBSITE            "http://legacyupdate.net/"
@@ -73,7 +73,8 @@ VIFileVersion    ${LONGVERSION}
 
 !include Common.nsh
 !include AeroWizard.nsh
-!include DownloadW2K.nsh
+!include Download2KXP.nsh
+!include DownloadVista7.nsh
 !include DownloadWUA.nsh
 !include UpdateRoots.nsh
 
@@ -108,9 +109,10 @@ VIFileVersion    ${LONGVERSION}
 
 !macro RestartWUAUService
 	!insertmacro DetailPrint "Restarting Windows Update service..."
+	SetDetailsPrint none
 	ExecShellWait "" "net" "stop wuauserv" SW_HIDE
-	Delete "$WINDIR\SoftwareDistribution\WuRedir"
 	ExecShellWait "" "net" "start wuauserv" SW_HIDE
+	SetDetailsPrint listonly
 !macroend
 
 Function ComponentsPageCheck
@@ -139,14 +141,59 @@ Section "Windows 2000 Service Pack 4" W2KSP4
 	Call RebootIfRequired
 SectionEnd
 
-${MementoSection} "Internet Explorer 6.0 Service Pack 1" IE6SP1
+Section "Internet Explorer 6.0 Service Pack 1" IE6SP1
 	SectionIn Ro
 	Call DownloadIE6
 	Call RebootIfRequired
+SectionEnd
+
+; XP 2002 prerequisities
+${MementoSection} "Windows XP Service Pack 3" XPSP3
+	Call DownloadXPSP2
+	Call RebootIfRequired
+	Call DownloadXPSP3
+	Call RebootIfRequired
 ${MementoSectionEnd}
 
+; XP 2003 prerequisities
+Section "Windows XP/Server 2003 Service Pack 2" 2003SP2
+	Call Download2003SP2
+	Call RebootIfRequired
+SectionEnd
+
+; Vista prerequisities
+Section "Windows Vista Service Pack 2" VISTASP2
+	SectionIn Ro
+	Call DownloadVistaSP1
+	Call RebootIfRequired
+	Call DownloadVistaSP2
+	Call RebootIfRequired
+SectionEnd
+
+Section "Windows Vista Post-Service Pack 2 Updates" VISTAPOSTSP2
+	SectionIn Ro
+	Call DownloadKB3205638
+	Call DownloadKB4012583
+	Call DownloadKB4015195
+	Call DownloadKB4015380
+	Call RebootIfRequired
+SectionEnd
+
+; 7 prerequisities
+Section "Windows 7 Service Pack 1" WIN7SP1
+	SectionIn Ro
+	Call DownloadWin7SP1
+	Call RebootIfRequired
+SectionEnd
+
+Section "Windows Update Agent update" WIN7WUA
+	SectionIn Ro
+	Call DownloadKB3138612
+	Call RebootIfRequired
+SectionEnd
+
 ; Shared prerequisites
-Section "Windows Update Agent" WUA
+Section "Windows Update Agent update" WUA
 	SectionIn Ro
 	Call DownloadWUA
 SectionEnd
@@ -156,9 +203,7 @@ ${MementoSection} "Update root certificates store" ROOTCERTS
 ${MementoSectionEnd}
 
 ; Main installation
-Section "Legacy Update" LEGACYUPDATE
-	SectionIn Ro
-
+${MementoSection} "Legacy Update" LEGACYUPDATE
 	SetOutPath $INSTDIR
 	WriteUninstaller "Uninstall.exe"
 
@@ -228,27 +273,6 @@ Section "Legacy Update" LEGACYUPDATE
 		${EndIf}
 	${EndIf}
 
-	; Set WSUS server
-	${If} ${AtMostWin2003}
-		; Check if Schannel is going to work with modern TLS
-		!insertmacro DetailPrint "Checking SSL connectivity..."
-		inetc::get /quiet /tostack "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" "" /end
-		Pop $0
-
-		${If} $0 == "OK"
-			; HTTPS will work
-			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER_HTTPS}"
-			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER_HTTPS}"
-			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL_HTTPS}"
-		${Else}
-			; Probably not supported; use HTTP
-			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
-			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
-			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
-		${EndIf}
-		WriteRegDword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
-	${EndIf}
-
 	; Add to trusted sites
 	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
 	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
@@ -266,9 +290,34 @@ Section "Legacy Update" LEGACYUPDATE
 		Delete $WINDIR\inf\LegacyUpdate.inf
 	${EndIf}
 
-	; Restart service
-	!insertmacro RestartWUAUService
-SectionEnd
+	; Set WSUS server
+	${If} ${AtMostWinVista}
+		; Check if Schannel is going to work with modern TLS
+		!insertmacro DetailPrint "Checking SSL connectivity..."
+		inetc::get /quiet /tostack "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" "" /end
+		Pop $0
+
+		${If} $0 == "OK"
+			; HTTPS will work
+			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER_HTTPS}"
+			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER_HTTPS}"
+			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL_HTTPS}"
+		${Else}
+			; Probably not supported; use HTTP
+			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
+			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
+			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
+		${EndIf}
+		WriteRegDword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
+
+		; Restart service
+		!insertmacro RestartWUAUService
+	${EndIf}
+${MementoSectionEnd}
+
+${MementoSection} "Activate Windows" ACTIVATE
+	ExecShell "" "$SYSDIR\oobe\msoobe.exe" "/a"
+${MementoSectionEnd}
 
 ${MementoSectionDone}
 
@@ -310,6 +359,7 @@ Section -Uninstall
 
 	; Delete the rest
 	Delete "$INSTDIR\Uninstall.exe"
+	Delete "$INSTDIR\LegacyUpdateSetup.exe"
 	!insertmacro DeleteFileOrAskAbort "$INSTDIR\LegacyUpdate.dll"
 	RMDir "$INSTDIR"
 	RMDir "$INSTDIR\Backup"
@@ -317,11 +367,18 @@ Section -Uninstall
 SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-	!insertmacro MUI_DESCRIPTION_TEXT ${W2KSP4}       "Updates Windows 2000 to Service Pack 4, as required to install the Windows Update Agent."
-	!insertmacro MUI_DESCRIPTION_TEXT ${IE6SP1}       "Updates Internet Explorer to 6.0 SP1, as required for Legacy Update."
-	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the appropriate version required for Legacy Update."
-	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft. Fixes connection issues with some websites."
-	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update ActiveX control and Start Menu shortcut."
+	!insertmacro MUI_DESCRIPTION_TEXT ${W2KSP4}       "Updates Windows 2000 to Service Pack 4, as required to install the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${XPSP3}        "Updates Windows XP to Service Pack 3. This is required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASP2}     "Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Microsoft Software License Terms for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${VISTAPOSTSP2} "Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SP1}      "Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. our computer will restart automatically to complete installation. By installing, you are agreeing to the Microsoft Software License Terms for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7WUA}      "Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
+	!insertmacro MUI_DESCRIPTION_TEXT ${IE6SP1}       "Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\nYour computer will restart automatically to complete installation."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
+	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website. Windows Update will be configured to use the Legacy Update proxy server."
+	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInit
@@ -340,8 +397,8 @@ Function .onInit
 	${If} ${IsWin2000}
 		; Determine whether Win2k prereqs need to be installed
 		Call NeedsW2KSP4
-		Pop $0
 		Call NeedsKB835732
+		Pop $0
 		Pop $1
 		${If} $0 == 0
 		${AndIf} $1 == 0
@@ -358,11 +415,79 @@ Function .onInit
 		!insertmacro RemoveSection ${IE6SP1}
 	${EndIf}
 
+	${If} ${IsWinXP}
+		; Determine whether XP prereqs need to be installed
+		Call NeedsXPSP3
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${XPSP3}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${XPSP3}
+	${EndIf}
+
+	${If} ${IsWin2003}
+		; Determine whether 2003 prereqs need to be installed
+		Call Needs2003SP2
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${2003SP2}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${2003SP2}
+	${EndIf}
+
+	${If} ${IsWinVista}
+		; Determine whether Vista prereqs need to be installed
+		Call NeedsVistaSP2
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${VISTASP2}
+		${EndIf}
+
+		Call NeedsVistaPostSP2
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${VISTAPOSTSP2}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${VISTASP2}
+		!insertmacro RemoveSection ${VISTAPOSTSP2}
+	${EndIf}
+
+	${If} ${IsWin7}
+		; Determine whether 7 prereqs need to be installed
+		Call NeedsWin7SP1
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${WIN7SP1}
+		${EndIf}
+
+		Call NeedsKB3138612
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${WIN7WUA}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${WIN7SP1}
+		!insertmacro RemoveSection ${WIN7WUA}
+	${EndIf}
+
 	Call DetermineWUAVersion
 	${If} $0 == ""
 		!insertmacro RemoveSection ${WUA}
+	${EndIf}
+
+	${If} ${IsWinXP}
+	${OrIf} ${IsWin2003}
+		; Get activation status from WMI
+		; TODO: Query wmic on XP Pro; just look for wpabaln.exe on XP Home
+		FindProcDLL::FindProc "wpabaln.exe"
+		${If} $0 == 0
+			!insertmacro RemoveSection ${ACTIVATE}
+		${EndIf}
 	${Else}
-		!insertmacro SelectSection ${WUA}
+		!insertmacro RemoveSection ${ACTIVATE}
 	${EndIf}
 
 	; Try not to be too intrusive on Windows 8 and newer, which are (for now) fine
@@ -376,10 +501,24 @@ FunctionEnd
 
 Function .onInstSuccess
 	${MementoSectionSave}
+
+	; Reboot now if we need to
 	Call RebootIfRequired
+
+	; Clean up temporary setup exe if we created it (likely on next reboot)
+	${IfNot} ${RebootFlag}
+	${AndIf} ${FileExists} "$INSTDIR\LegacyUpdateSetup.exe"
+		Delete /REBOOTOK "$INSTDIR\LegacyUpdateSetup.exe"
+	${EndIf}
+
+	; If we're done, launch the update site
 	${IfNot} ${RebootFlag}
 	${AndIfNot} ${Silent}
-		Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite'
+		${If} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
+			Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite'
+		${ElseIf} ${AtLeastWinVista}
+			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
+		${EndIf}
 	${EndIf}
 FunctionEnd
 
