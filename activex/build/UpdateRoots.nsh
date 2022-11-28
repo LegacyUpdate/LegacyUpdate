@@ -5,6 +5,7 @@ Function UpdateRoots
 	File "..\build\updroots.exe"
 	!insertmacro DetailPrint "Downloading Certificate Trust List..."
 	inetc::get \
+		/bgcolor FFFFFF /textcolor 000000 \
 		"${TRUSTEDR}/authroots.sst"      "authroots.sst" \
 		"${TRUSTEDR}/delroots.sst"       "delroots.sst" \
 		"${TRUSTEDR}/roots.sst"          "roots.sst" \
@@ -14,7 +15,7 @@ Function UpdateRoots
 	Pop $0
 	${If} $0 != "OK"
 		${If} $0 != "Cancelled"
-			MessageBox MB_OK|MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0" /SD IDOK
+			MessageBox MB_OK|MB_USERICON "Certificate Trust List failed to download.$\r$\n$\r$\n$0" /SD IDOK
 		${EndIf}
 		SetErrorLevel 1
 		Abort

@@ -1,10 +1,8 @@
-!define MUI_UI_HEADERIMAGE              "modern_headerbmp_full.exe"
-!define MUI_UI_COMPONENTSPAGE_SMALLDESC "modern_smalldesc.exe"
+﻿!define MUI_UI              "modern_aerowizard.exe"
+!define MUI_UI_HEADERIMAGE  "modern_aerowizard.exe"
 
-!define MUI_COMPONENTSPAGE_TEXT_TOP "Legacy Update will be installed. Windows Update will be configured to use the Legacy Update proxy server. An internet connection is required to download additional components from Microsoft. Windows will restart automatically if needed."
-!define MUI_COMPONENTSPAGE_SMALLDESC
-
-!define MUI_UNCONFIRMPAGE_TEXT_TOP "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
+!define MUI_CUSTOMFUNCTION_GUIINIT   OnShow
+!define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
 
 !define NAME        "Legacy Update"
 !define VERSION     "1.2.1"
@@ -68,11 +66,13 @@ VIFileVersion    ${LONGVERSION}
 !include Sections.nsh
 !include Win\WinError.nsh
 !include Win\WinNT.nsh
+!include WinMessages.nsh
 !include WinVer.nsh
 !include WordFunc.nsh
 !include x64.nsh
 
 !include Common.nsh
+!include AeroWizard.nsh
 !include DownloadW2K.nsh
 !include DownloadWUA.nsh
 !include UpdateRoots.nsh
@@ -80,12 +80,28 @@ VIFileVersion    ${LONGVERSION}
 !insertmacro GetParameters
 !insertmacro GetOptions
 
-!define MUI_PAGE_CUSTOMFUNCTION_PRE ComponentsPageCheck
+!define MUI_PAGE_HEADER_TEXT "Welcome to Legacy Update"
+!define MUI_COMPONENTSPAGE_TEXT_TOP "Select what you would like Legacy Update to do. An internet connection is required to download additional components from Microsoft. Your computer will restart automatically if needed. Close all other programs before continuing."
+!define MUI_PAGE_CUSTOMFUNCTION_PRE  ComponentsPageCheck
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
+!define MUI_PAGE_FUNCTION_GUIINIT   OnShow
 
 !insertmacro MUI_PAGE_COMPONENTS
+
+!define MUI_PAGE_HEADER_TEXT "Performing Actions"
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
+
 !insertmacro MUI_PAGE_INSTFILES
 
+!define MUI_PAGE_HEADER_TEXT "Uninstall Legacy Update"
+!define MUI_UNCONFIRMPAGE_TEXT_TOP "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW un.OnShow
+
 !insertmacro MUI_UNPAGE_CONFIRM
+
+!define MUI_PAGE_HEADER_TEXT "Performing Actions"
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW un.OnShow
+
 !insertmacro MUI_UNPAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
@@ -105,6 +121,14 @@ Function ComponentsPageCheck
 	${IfNot} ${Errors}
 		Abort
 	${EndIf}
+FunctionEnd
+
+Function OnShow
+	Call AeroWizardOnShow
+FunctionEnd
+
+Function un.OnShow
+	Call un.AeroWizardOnShow
 FunctionEnd
 
 ; Win2k prerequisities

@@ -12,7 +12,10 @@
 
 !macro Download name url filename
 	!insertmacro DetailPrint "Downloading ${name}..."
-	inetc::get "${url}" "${filename}" /end
+	inetc::get \
+		/bgcolor FFFFFF /textcolor 000000 \
+		"${url}" "${filename}" \
+		/end
 	Pop $0
 	${If} $0 != "OK"
 		${If} $0 != "Cancelled"
@@ -73,7 +76,7 @@
 		Reboot
 	${Else}
 		; Prompt for reboot
-		IfSilent +2
+		${IfNot} ${Silent}
 			System::Call 'Shell32::RestartDialog(p $HWNDPARENT, \
 				t "Windows will be restarted to complete installation of prerequisite components. Setup will resume after the restart.", \
 				i ${EWX_REBOOT})'
