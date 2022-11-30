@@ -438,7 +438,7 @@ Function .onInit
 		!insertmacro RemoveSection ${IE6SP1}
 	${EndIf}
 
-	${If} ${IsWinXP}
+	${If} ${IsWinXP2002}
 		; Determine whether XP prereqs need to be installed
 		Call NeedsXPSP3
 		Pop $0
@@ -449,7 +449,7 @@ Function .onInit
 		!insertmacro RemoveSection ${XPSP3}
 	${EndIf}
 
-	${If} ${IsWin2003}
+	${If} ${IsWinXP2003}
 		; Determine whether 2003 prereqs need to be installed
 		Call Needs2003SP2
 		Pop $0

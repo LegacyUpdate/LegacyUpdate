@@ -41,7 +41,7 @@ Function NeedsIE6
 FunctionEnd
 
 Function NeedsXPSP2
-	${If} ${IsWinXP}
+	${If} ${IsWinXP2002}
 	${AndIf} ${AtMostServicePack} 0
 		Push 1
 	${Else}
@@ -50,7 +50,7 @@ Function NeedsXPSP2
 FunctionEnd
 
 Function NeedsXPSP3
-	${If} ${IsWinXP}
+	${If} ${IsWinXP2002}
 	${AndIf} ${AtMostServicePack} 2
 		Push 1
 	${Else}
@@ -59,7 +59,7 @@ Function NeedsXPSP3
 FunctionEnd
 
 Function Needs2003SP2
-	${If} ${IsWin2003}
+	${If} ${IsWinXP2003}
 	${AndIf} ${AtMostServicePack} 1
 		Push 1
 	${Else}
@@ -127,7 +127,7 @@ Function Download2003SP2
 		Call GetArch
 		Pop $1
 		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini 2003SP2 $0-$1
-		!insertmacro DownloadAndInstall "Windows XP/Server 2003 Service Pack 2" "$0" "w2k3sp2.exe" "/passive /norestart"
+		ReadINIStr $0 $PLUGINSDIR\Patches.ini 2003SP2 $0-$1
+		!insertmacro DownloadAndInstall "Windows XP x64 Edition/Server 2003 Service Pack 2" "$0" "w2k3sp2.exe" "/passive /norestart"
 	${EndIf}
 FunctionEnd

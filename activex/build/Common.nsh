@@ -5,6 +5,20 @@
 
 !define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'
 
+; Work around WinVer.nsh deciding that XP x64 should be seen as XP 2002 (5.1), rather than 2003 (5.2)
+!macro _WinXPVerIs _a _b _t _f
+	!insertmacro _LOGICLIB_TEMP
+	GetWinVer $_LOGICLIB_TEMP Major
+	!insertmacro _= $_LOGICLIB_TEMP 5 +1 `${_f}`
+
+	!insertmacro _LOGICLIB_TEMP
+	GetWinVer $_LOGICLIB_TEMP Minor
+	!insertmacro _= $_LOGICLIB_TEMP `${_b}` `${_t}` `${_f}`
+!macroend
+
+!define IsWinXP2002 `"" WinXPVerIs 1`
+!define IsWinXP2003 `"" WinXPVerIs 2`
+
 Function GetArch
 	${If} ${IsNativeIA32}
 		Push "x86"
