@@ -27,11 +27,12 @@
 !define REGPATH_ZONEESCDOMAINS     "Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains"
 !define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
 !define REGPATH_CPLCLSID           "CLSID\${CPL_GUID}"
+!define REGPATH_WINLOGON           "Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 
 Name         "${NAME}"
 Caption      "Install ${NAME}"
 BrandingText "${NAME} ${VERSION} - ${DOMAIN}"
-OutFile      "LegacyUpdate.exe"
+OutFile      "LegacyUpdate-${VERSION}.exe"
 InstallDir   "$ProgramFiles\$(^Name)"
 InstallDirRegKey HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "InstallDir"
 
@@ -76,6 +77,7 @@ VIFileVersion    ${LONGVERSION}
 !include Download2KXP.nsh
 !include DownloadVista7.nsh
 !include DownloadWUA.nsh
+!include RunOnce.nsh
 !include UpdateRoots.nsh
 
 !insertmacro GetParameters
@@ -117,10 +119,13 @@ VIFileVersion    ${LONGVERSION}
 
 Function ComponentsPageCheck
 	; Skip the page if we're being launched via RunOnce
-	${GetParameters} $0
-	ClearErrors
-	${GetOptions} $0 /runonce $1
-	${IfNot} ${Errors}
+	!insertmacro IsRunOnce
+	Pop $1
+	!insertmacro IsPostInstall
+	Pop $0
+	${If} $1 == 1
+	${OrIf} $0 == 1
+		Call OnRunOnceLogon
 		Abort
 	${EndIf}
 FunctionEnd
@@ -131,6 +136,24 @@ FunctionEnd
 
 Function un.OnShow
 	Call un.AeroWizardOnShow
+FunctionEnd
+
+Function PostInstall
+	!insertmacro IsRunOnce
+	Pop $0
+	${IfNot} ${Silent}
+	${AndIf} $0 == 0
+		${If} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
+			Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite'
+		${ElseIf} ${AtLeastWinVista}
+			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
+		${EndIf}
+
+		; Clean up temporary setup exe if we created it (likely on next reboot)
+		${If} ${FileExists} "$INSTDIR\LegacyUpdateSetup.exe"
+			Delete /REBOOTOK "$INSTDIR\LegacyUpdateSetup.exe"
+		${EndIf}
+	${EndIf}
 FunctionEnd
 
 ; Win2k prerequisities
@@ -368,11 +391,11 @@ SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 	!insertmacro MUI_DESCRIPTION_TEXT ${W2KSP4}       "Updates Windows 2000 to Service Pack 4, as required to install the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
-	!insertmacro MUI_DESCRIPTION_TEXT ${XPSP3}        "Updates Windows XP to Service Pack 3. This is required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${XPSP3}        "Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASP2}     "Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Microsoft Software License Terms for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTAPOSTSP2} "Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
-	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SP1}      "Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. our computer will restart automatically to complete installation. By installing, you are agreeing to the Microsoft Software License Terms for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SP1}      "Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Microsoft Software License Terms for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7WUA}      "Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
 	!insertmacro MUI_DESCRIPTION_TEXT ${IE6SP1}       "Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\nYour computer will restart automatically to complete installation."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
@@ -502,24 +525,12 @@ FunctionEnd
 Function .onInstSuccess
 	${MementoSectionSave}
 
-	; Reboot now if we need to
+	; Reboot now if we need to. Nothing further in this function will be run if we do need to reboot.
 	Call RebootIfRequired
 
-	; Clean up temporary setup exe if we created it (likely on next reboot)
-	${IfNot} ${RebootFlag}
-	${AndIf} ${FileExists} "$INSTDIR\LegacyUpdateSetup.exe"
-		Delete /REBOOTOK "$INSTDIR\LegacyUpdateSetup.exe"
-	${EndIf}
-
 	; If we're done, launch the update site
-	${IfNot} ${RebootFlag}
-	${AndIfNot} ${Silent}
-		${If} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
-			Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite'
-		${ElseIf} ${AtLeastWinVista}
-			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
-		${EndIf}
-	${EndIf}
+	Call PostInstall
+	Call CleanUpRunOnce
 FunctionEnd
 
 Function un.onInit

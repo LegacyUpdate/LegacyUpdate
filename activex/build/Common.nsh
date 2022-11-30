@@ -1,6 +1,7 @@
 !define REGPATH_RUNONCE "Software\Microsoft\Windows\CurrentVersion\RunOnce"
 
-!define EWX_REBOOT 0x02
+!define EWX_REBOOT      0x02
+!define EWX_FORCEIFHUNG 0x10
 
 !define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'
 
@@ -15,6 +16,17 @@ Function GetArch
 		Push ""
 	${EndIf}
 FunctionEnd
+
+!macro HasFlag flag
+	${GetParameters} $0
+	ClearErrors
+	${GetOptions} $0 "${flag}" $0
+	${If} ${Errors}
+		Push 0
+	${Else}
+		Push 1
+	${EndIf}
+!macroend
 
 !macro DetailPrint text
 	SetDetailsPrint both
@@ -123,44 +135,3 @@ FunctionEnd
 		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to delete "${path}".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' /SD IDCANCEL IDRETRY -3
 		Abort
 !macroend
-
-!macro -PromptReboot
-	SetErrorLevel ${ERROR_SUCCESS_REBOOT_REQUIRED}
-
-	${GetParameters} $0
-	ClearErrors
-	${GetOptions} $0 /norestart $1
-	${If} ${Errors}
-		; Reboot immediately
-		Reboot
-	${Else}
-		; Prompt for reboot
-		${IfNot} ${Silent}
-			System::Call 'Shell32::RestartDialog(p $HWNDPARENT, \
-				t "Windows will be restarted to complete installation of prerequisite components. Setup will resume after the restart.", \
-				i ${EWX_REBOOT})'
-		${EndIf}
-	${EndIf}
-!macroend
-
-!macro -RebootIfRequired
-	${If} ${RebootFlag}
-		; Copy to a local path, just in case the installer is on a network share, or the user next logs
-		; in as a different user.
-		CreateDirectory "$INSTDIR"
-		CopyFiles /SILENT "$EXEPATH" "$INSTDIR\LegacyUpdateSetup.exe"
-		${GetParameters} $0
-		WriteRegStr HKLM "${REGPATH_RUNONCE}" "Legacy Update" '"$INSTDIR\LegacyUpdateSetup.exe" $0 /runonce'
-		!insertmacro -PromptReboot
-		Quit
-	${EndIf}
-!macroend
-
-Function RebootIfRequired
-	${MementoSectionSave}
-	!insertmacro -RebootIfRequired
-FunctionEnd
-
-Function un.RebootIfRequired
-	!insertmacro -RebootIfRequired
-FunctionEnd
