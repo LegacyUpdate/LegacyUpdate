@@ -102,10 +102,16 @@ Function un.RebootIfRequired
 FunctionEnd
 
 Function OnRunOnceLogon
-	; Trick Vista+ winlogon into thinking the shell has started, so it doesn't appear to be stuck at
-	; a "Preparing your desktop..." screen
+	; Trick winlogon into thinking the shell has started, so it doesn't appear to be stuck at
+	; "Welcome" (XP) or "Preparing your desktop..." (Vista+)
 	; https://social.msdn.microsoft.com/Forums/WINDOWS/en-US/ca253e22-1ef8-4582-8710-9cd9c89b15c3
-	System::Call 'kernel32::OpenEventW(i ${EVENT_MODIFY_STATE}, i 0, t "ShellDesktopSwitchEvent") i .r0'
+	${If} ${AtLeastWinVista}
+		StrCpy $0 "ShellDesktopSwitchEvent"
+	${Else}
+		StrCpy $0 "msgina: ShellReadyEvent"
+	${EndIf}
+
+	System::Call 'kernel32::OpenEventW(i ${EVENT_MODIFY_STATE}, i 0, t .r0) i .r0'
 	${If} $0 != 0
 		System::Call 'kernel32::SetEvent(i $0)'
 		System::Call 'kernel32::CloseHandle(i $0)'
@@ -116,26 +122,38 @@ Function CleanUpRunOnce
 	; Restore autologon keys
 	ClearErrors
 	ReadRegStr $0 HKLM "${REGPATH_WINLOGON}" "LegacyUpdate_AutoAdminLogon"
-	${IfNot} ${Errors}
+	${If} ${Errors}
+		DeleteRegValue HKLM "${REGPATH_WINLOGON}" "AutoAdminLogon"
+	${Else}
 		WriteRegStr HKLM "${REGPATH_WINLOGON}" "AutoAdminLogon" $0
+		DeleteRegValue HKLM "${REGPATH_WINLOGON}" "LegacyUpdate_AutoAdminLogon"
 	${EndIf}
 
 	ClearErrors
 	ReadRegStr $0 HKLM "${REGPATH_WINLOGON}" "LegacyUpdate_DefaultDomainName"
-	${IfNot} ${Errors}
+	${If} ${Errors}
+		DeleteRegValue HKLM "${REGPATH_WINLOGON}" "DefaultDomainName"
+	${Else}
 		WriteRegStr HKLM "${REGPATH_WINLOGON}" "DefaultDomainName" $0
+		DeleteRegValue HKLM "${REGPATH_WINLOGON}" "LegacyUpdate_DefaultDomainName"
 	${EndIf}
 
 	ClearErrors
 	ReadRegStr $0 HKLM "${REGPATH_WINLOGON}" "LegacyUpdate_DefaultUserName"
-	${IfNot} ${Errors}
+	${If} ${Errors}
+		DeleteRegValue HKLM "${REGPATH_WINLOGON}" "DefaultUserName"
+	${Else}
 		WriteRegStr HKLM "${REGPATH_WINLOGON}" "DefaultUserName" $0
+		DeleteRegValue HKLM "${REGPATH_WINLOGON}" "LegacyUpdate_DefaultUserName"
 	${EndIf}
 
 	ClearErrors
 	ReadRegStr $0 HKLM "${REGPATH_WINLOGON}" "LegacyUpdate_DefaultPassword"
-	${IfNot} ${Errors}
+	${If} ${Errors}
+		DeleteRegValue HKLM "${REGPATH_WINLOGON}" "DefaultPassword"
+	${Else}
 		WriteRegStr HKLM "${REGPATH_WINLOGON}" "DefaultPassword" $0
+		DeleteRegValue HKLM "${REGPATH_WINLOGON}" "LegacyUpdate_DefaultPassword"
 	${EndIf}
 
 	; Register postinstall runonce for the next admin user logon, and log out of the temporary user
