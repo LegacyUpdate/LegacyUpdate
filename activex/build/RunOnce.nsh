@@ -1,36 +1,21 @@
-!macro IsRunOnce
-	!insertmacro HasFlag /runonce
-!macroend
 
-!macro IsPostInstall
-	!insertmacro HasFlag /postinstall
-!macroend
-
-!macro CanRestart
-	!insertmacro HasFlag /norestart
-	Pop $0
-	${If} $0 == 0
-		Push 1
-	${Else}
-		Push 0
-	${EndIf}
-!macroend
+!define IsRunOnce     `"" HasFlag "/runonce"`
+!define IsPostInstall `"" HasFlag "/postinstall"`
+!define NoRestart     `"" HasFlag "/norestart"`
 
 !macro -PromptReboot un
 	SetErrorLevel ${ERROR_SUCCESS_REBOOT_REQUIRED}
 
-	!insertmacro CanRestart
-	Pop $0
-	${If} $0 == 1
-		; Reboot immediately
-		Reboot
-	${Else}
+	${If} ${NoRestart}
 		; Prompt for reboot
 		${IfNot} ${Silent}
 			System::Call 'shell32::RestartDialog(p 0, \
 				t "Windows will be restarted to complete installation of prerequisite components. Setup will resume after the restart.", \
 				i ${EWX_REBOOT})'
 		${EndIf}
+	${Else}
+		; Reboot immediately
+		Reboot
 	${EndIf}
 !macroend
 
@@ -40,12 +25,8 @@
 
 !macro -RebootIfRequired un
 	${If} ${RebootFlag}
-		!insertmacro IsRunOnce
-		Pop $1
-		!insertmacro CanRestart
-		Pop $2
-		${If} $1 == 0
-		${AndIf} $2 == 1
+		${IfNot} ${IsRunOnce}
+		${AndIfNot} ${NoRestart}
 			; Create the admin user
 			ExecShellWait "" "net" "user /add LegacyUpdateAdmin Legacy_Update0" SW_HIDE
 			ExecShellWait "" "net" "localgroup /add Administrators LegacyUpdateAdmin" SW_HIDE
@@ -157,9 +138,7 @@ Function CleanUpRunOnce
 	${EndIf}
 
 	; Register postinstall runonce for the next admin user logon, and log out of the temporary user
-	!insertmacro IsRunOnce
-	Pop $0
-	${If} $0 == 1
+	${If} ${IsRunOnce}
 		!insertmacro RegisterRunOnce "/postinstall"
 		ExecShellWait "" "net" "user /delete LegacyUpdateAdmin" SW_HIDE
 

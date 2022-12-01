@@ -31,15 +31,12 @@ Function GetArch
 	${EndIf}
 FunctionEnd
 
-!macro HasFlag flag
-	${GetParameters} $0
+!macro _HasFlag _a _b _t _f
+	!insertmacro _LOGICLIB_TEMP
+	${GetParameters} $_LOGICLIB_TEMP
 	ClearErrors
-	${GetOptions} $0 "${flag}" $0
-	${If} ${Errors}
-		Push 0
-	${Else}
-		Push 1
-	${EndIf}
+	${GetOptions} $_LOGICLIB_TEMP `${_a}` $_LOGICLIB_TEMP
+	IfErrors `${_f}` `${_t}`
 !macroend
 
 !macro DetailPrint text

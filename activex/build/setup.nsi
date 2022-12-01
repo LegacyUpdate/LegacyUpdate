@@ -119,13 +119,8 @@ VIFileVersion    ${LONGVERSION}
 
 Function ComponentsPageCheck
 	; Skip the page if we're being launched via RunOnce
-	!insertmacro IsRunOnce
-	Pop $1
-	!insertmacro IsPostInstall
-	Pop $0
-	${If} $1 == 1
-	${OrIf} $0 == 1
-		Call OnRunOnceLogon
+	${If} ${IsRunOnce}
+	${OrIf} ${IsPostInstall}
 		Abort
 	${EndIf}
 FunctionEnd
@@ -139,10 +134,8 @@ Function un.OnShow
 FunctionEnd
 
 Function PostInstall
-	!insertmacro IsRunOnce
-	Pop $0
 	${IfNot} ${Silent}
-	${AndIf} $0 == 0
+	${AndIfNot} ${IsRunOnce}
 		${If} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
 			Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite'
 		${ElseIf} ${AtLeastWinVista}
@@ -411,6 +404,11 @@ Function .onInit
 	${EndIf}
 	!insertmacro EnsureAdminRights
 	SetDetailsPrint listonly
+
+	${If} ${IsRunOnce}
+	${OrIf} ${IsPostInstall}
+		Call OnRunOnceLogon
+	${EndIf}
 
 	SetOutPath $PLUGINSDIR
 	File Patches.ini
