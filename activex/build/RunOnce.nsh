@@ -1,3 +1,5 @@
+!define RUNONCE_USERNAME "LegacyUpdateTemp"
+!define RUNONCE_PASSWORD "Legacy_Update0"
 
 !define IsRunOnce     `"" HasFlag "/runonce"`
 !define IsPostInstall `"" HasFlag "/postinstall"`
@@ -28,8 +30,8 @@
 		${IfNot} ${IsRunOnce}
 		${AndIfNot} ${NoRestart}
 			; Create the admin user
-			ExecShellWait "" "net" "user /add LegacyUpdateAdmin Legacy_Update0" SW_HIDE
-			ExecShellWait "" "net" "localgroup /add Administrators LegacyUpdateAdmin" SW_HIDE
+			ExecShellWait "" "net" "user /add ${RUNONCE_USERNAME} ${RUNONCE_PASSWORD}" SW_HIDE
+			ExecShellWait "" "net" "localgroup /add Administrators ${RUNONCE_USERNAME}" SW_HIDE
 
 			; Backup autologon keys if any
 			ClearErrors
@@ -59,8 +61,8 @@
 			; Set autologon
 			WriteRegStr HKLM "${REGPATH_WINLOGON}" "AutoAdminLogon" "1"
 			WriteRegStr HKLM "${REGPATH_WINLOGON}" "DefaultDomainName" "."
-			WriteRegStr HKLM "${REGPATH_WINLOGON}" "DefaultUserName" "LegacyUpdateAdmin"
-			WriteRegStr HKLM "${REGPATH_WINLOGON}" "DefaultPassword" "Legacy_Update0"
+			WriteRegStr HKLM "${REGPATH_WINLOGON}" "DefaultUserName" "${RUNONCE_USERNAME}"
+			WriteRegStr HKLM "${REGPATH_WINLOGON}" "DefaultPassword" "${RUNONCE_PASSWORD}"
 
 			; Copy to a local path, just in case the installer is on a network share
 			CreateDirectory "$INSTDIR"
@@ -140,11 +142,11 @@ Function CleanUpRunOnce
 	; Register postinstall runonce for the next admin user logon, and log out of the temporary user
 	${If} ${IsRunOnce}
 		!insertmacro RegisterRunOnce "/postinstall"
-		ExecShellWait "" "net" "user /delete LegacyUpdateAdmin" SW_HIDE
+		ExecShellWait "" "net" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
 
 		; Be really really sure this is the right user before we nuke their profile
 		System::Call 'advapi32::GetUserName(t .r0, *i ${NSIS_MAX_STRLEN} r1) i.r2'
-		${If} $0 == "LegacyUpdateAdmin"
+		${If} $0 == "${RUNONCE_USERNAME}"
 			RMDir /r /REBOOTOK "$PROFILE"
 		${EndIf}
 
