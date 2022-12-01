@@ -526,8 +526,14 @@ Function .onInit
 	${If} ${AtLeastWin8}
 		!insertmacro RemoveSection ${ROOTCERTS}
 
-		MessageBox MB_YESNO|MB_USERICON "Legacy Update is intended for earlier versions of Windows. Visit legacyupdate.net for more information.$\r$\n$\r$\nContinue anyway?" /SD IDYES IDYES +2
+		!insertmacro TaskDialog `'Legacy Update'` \
+			`'Legacy Update is intended for earlier versions of Windows'` \
+			`'Visit legacyupdate.net for more information.$\r$\n$\r$\nContinue anyway?'` \
+			${TDCBF_YES_BUTTON}|${TDCBF_NO_BUTTON} \
+			${TD_WARNING_ICON}
+		${If} $0 != ${IDYES}
 			Quit
+		${EndIf}
 	${EndIf}
 FunctionEnd
 
