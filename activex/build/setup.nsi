@@ -28,6 +28,7 @@
 !define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
 !define REGPATH_CPLCLSID           "CLSID\${CPL_GUID}"
 !define REGPATH_WINLOGON           "Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+!define REGPATH_POSREADY           "System\WPA\PosReady"
 
 Name         "${NAME}"
 Caption      "Install ${NAME}"
@@ -214,6 +215,10 @@ Section "Windows Update Agent update" WUA
 	Call DownloadWUA
 SectionEnd
 
+${MementoUnselectedSection} "Enable Windows Embedded 2009 updates" WES09
+	WriteRegDword HKLM "${REGPATH_POSREADY}" "Installed" 1
+${MementoSectionEnd}
+
 ${MementoSection} "Update root certificates store" ROOTCERTS
 	Call UpdateRoots
 ${MementoSectionEnd}
@@ -385,6 +390,7 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 	!insertmacro MUI_DESCRIPTION_TEXT ${W2KSP4}       "Updates Windows 2000 to Service Pack 4, as required to install the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${XPSP3}        "Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WES09}        "Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this."
 	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASP2}     "Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Microsoft Software License Terms for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTAPOSTSP2} "Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
@@ -443,8 +449,14 @@ Function .onInit
 		${If} $0 == 0
 			!insertmacro RemoveSection ${XPSP3}
 		${EndIf}
+
+		ReadRegDword $0 HKLM "${REGPATH_POSREADY}" "Installed"
+		${If} $0 == 1
+			!insertmacro RemoveSection ${WES09}
+		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${XPSP3}
+		!insertmacro RemoveSection ${WES09}
 	${EndIf}
 
 	${If} ${IsWinXP2003}
@@ -501,10 +513,9 @@ Function .onInit
 
 	${If} ${IsWinXP}
 	${OrIf} ${IsWin2003}
-		; Get activation status from WMI
-		; TODO: Query wmic on XP Pro; just look for wpabaln.exe on XP Home
+		; Assume not activated if the activation tray icon process is running
 		FindProcDLL::FindProc "wpabaln.exe"
-		${If} $0 == 0
+		${If} $R0 != 1
 			!insertmacro RemoveSection ${ACTIVATE}
 		${EndIf}
 	${Else}
@@ -541,6 +552,7 @@ Function un.onInit
 FunctionEnd
 
 Function un.onUninstSuccess
+	!insertmacro DetailPrint "Done"
 	Call un.RebootIfRequired
 	${IfNot} ${RebootFlag}
 		Quit
