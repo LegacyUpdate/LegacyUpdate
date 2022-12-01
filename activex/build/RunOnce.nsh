@@ -141,7 +141,10 @@ Function CleanUpRunOnce
 
 	; Register postinstall runonce for the next admin user logon, and log out of the temporary user
 	${If} ${IsRunOnce}
-		!insertmacro RegisterRunOnce "/postinstall"
+		${IfNot} ${Abort}
+			!insertmacro RegisterRunOnce "/postinstall"
+		${EndIf}
+
 		ExecShellWait "" "net" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
 
 		; Be really really sure this is the right user before we nuke their profile

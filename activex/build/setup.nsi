@@ -3,6 +3,7 @@
 
 !define MUI_CUSTOMFUNCTION_GUIINIT   OnShow
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
+!define MUI_CUSTOMFUNCTION_ABORT     CleanUpRunOnce
 
 !define NAME        "Legacy Update"
 !define VERSION     "1.3"
@@ -545,6 +546,10 @@ Function .onInstSuccess
 
 	; If we're done, launch the update site
 	Call PostInstall
+	Call CleanUpRunOnce
+FunctionEnd
+
+Function .onInstFailed
 	Call CleanUpRunOnce
 FunctionEnd
 
