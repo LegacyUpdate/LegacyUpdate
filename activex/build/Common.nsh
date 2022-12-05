@@ -35,7 +35,7 @@ FunctionEnd
 	!insertmacro _LOGICLIB_TEMP
 	${GetParameters} $_LOGICLIB_TEMP
 	ClearErrors
-	${GetOptions} $_LOGICLIB_TEMP `${_a}` $_LOGICLIB_TEMP
+	${GetOptions} $_LOGICLIB_TEMP `${_b}` $_LOGICLIB_TEMP
 	IfErrors `${_f}` `${_t}`
 !macroend
 
