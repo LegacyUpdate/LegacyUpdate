@@ -44,7 +44,7 @@
 		CreateFont $2 "Segoe UI" 8 400
 		CreateFont $3 "Segoe UI" 12 400
 		!insertmacro SetFont $3 $HWNDPARENT 1037
-		!insertmacro SetControlColor $HWNDPARENT 1037 003399
+		!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
 		!insertmacro SetFont $2 $HWNDPARENT 1
 		!insertmacro SetFont $2 $HWNDPARENT 2
 		!insertmacro SetFont $2 $HWNDPARENT 3
@@ -61,9 +61,15 @@
 		!insertmacro SetFont $2 $0 1043
 	${Else}
 		; Wizard97 style
-		CreateFont $2 "Verdana" 12 800
-		!insertmacro SetFont $2 $HWNDPARENT 1037
-		!insertmacro SetControlColor $HWNDPARENT 1037 SYSCLR:WINDOWTEXT
+		${If} ${FileExists} "$FONTS\framd.ttf"
+			CreateFont $2 "Franklin Gothic Medium" 12 400
+			!insertmacro SetFont $2 $HWNDPARENT 1037
+			!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
+		${Else}
+			CreateFont $2 "Verdana" 12 800
+			!insertmacro SetFont $2 $HWNDPARENT 1037
+			!insertmacro SetControlColor $HWNDPARENT 1037 SYSCLR:WINDOWTEXT
+		${EndIf}
 	${EndIf}
 
 	; Set white background
