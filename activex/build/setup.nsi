@@ -6,8 +6,8 @@
 !define MUI_CUSTOMFUNCTION_ABORT     CleanUpRunOnce
 
 !define NAME        "Legacy Update"
-!define VERSION     "1.4.1"
-!define LONGVERSION "1.4.1.0"
+!define VERSION     "1.5"
+!define LONGVERSION "1.5.0.0"
 !define DOMAIN      "legacyupdate.net"
 
 !define WEBSITE            "http://legacyupdate.net/"
@@ -73,6 +73,7 @@ VIFileVersion    ${LONGVERSION}
 !include Win\WinError.nsh
 !include Win\WinNT.nsh
 !include WinMessages.nsh
+!include WinCore.nsh
 !include WinVer.nsh
 !include WordFunc.nsh
 !include x64.nsh
