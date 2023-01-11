@@ -4,6 +4,7 @@ Function IsWinXPHomeSP3
 	${If} ${IsWinXP2002}
 	${AndIf} ${AtLeastServicePack} 3
 		; Call GetVersionEx to get the suite mask
+		System::Alloc $0
 		System::Call '*(&i ${OSVERSIONINFOEXW_SIZE}) p .r0'
 		System::Call '*$0(i ${OSVERSIONINFOEXW_SIZE})'
 		System::Call 'kernel32::GetVersionExW(pr0) i .r3'
