@@ -23,14 +23,16 @@
 !define REGPATH_LEGACYUPDATE_SETUP "Software\Hashbang Productions\Legacy Update\Setup"
 !define REGPATH_UNINSTSUBKEY       "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
 !define REGPATH_WUPOLICY           "Software\Policies\Microsoft\Windows\WindowsUpdate"
-!define REGPATH_WUAUPOLICY         "Software\Policies\Microsoft\Windows\WindowsUpdate\AU"
+!define REGPATH_WUAUPOLICY         "${REGPATH_WUAUPOLICY}\AU"
 !define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"
-!define REGPATH_ZONEDOMAINS        "Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains"
-!define REGPATH_ZONEESCDOMAINS     "Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\EscDomains"
+!define REGPATH_INETSETTINGS       "Software\Microsoft\Windows\CurrentVersion\Internet Settings"
+!define REGPATH_ZONEDOMAINS        "${REGPATH_INETSETTINGS}\ZoneMap\Domains"
+!define REGPATH_ZONEESCDOMAINS     "${REGPATH_INETSETTINGS}\ZoneMap\EscDomains"
 !define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
 !define REGPATH_CPLCLSID           "CLSID\${CPL_GUID}"
 !define REGPATH_WINLOGON           "Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 !define REGPATH_POSREADY           "System\WPA\PosReady"
+!define REGPATH_SCHANNEL_PROTOCOLS "System\CurrentControlSet\Control\SecurityProviders\SChannel\Protocols"
 
 Name         "${NAME}"
 Caption      "Install ${NAME}"
@@ -237,6 +239,7 @@ ${MementoUnselectedSection} "Enable Windows Embedded 2009 updates" WES09
 ${MementoSectionEnd}
 
 ${MementoSection} "Update root certificates store" ROOTCERTS
+	Call ConfigureCrypto
 	Call UpdateRoots
 ${MementoSectionEnd}
 
@@ -419,7 +422,7 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPDATE1} "Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10.$\r$\nYour computer will restart automatically to complete installation."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81WUA}     "Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
-	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
+	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
 	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website. Windows Update will be configured to use the Legacy Update proxy server."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
