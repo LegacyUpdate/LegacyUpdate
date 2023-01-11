@@ -7,10 +7,11 @@
 
 #pragma comment(lib, "wininet.lib")
 
-const LPCSTR UpdateSiteHostname    = "legacyupdate.net";
-const LPWSTR UpdateSiteURLHttp     = L"http://legacyupdate.net/windowsupdate/v6/";
-const LPWSTR UpdateSiteURLHttps    = L"https://legacyupdate.net/windowsupdate/v6/";
-const LPWSTR UpdateSitePingTestURL = L"https://legacyupdate.net/v6/ClientWebService/ping.bin";
+const LPCSTR UpdateSiteHostname     = "legacyupdate.net";
+const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
+const LPWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
+const LPWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
+const LPWSTR UpdateSitePingTestURL  = L"https://legacyupdate.net/v6/ClientWebService/ping.bin";
 
 static HRESULT AttemptSSLConnection() {
 	// We know it won't work prior to XP SP3, so just fail immediately on XP RTM-SP2 and any Win2k.
@@ -106,6 +107,13 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 	// Can we connect with https? WinInet will throw an error if not.
 	result = AttemptSSLConnection();
 	LPWSTR siteURL = SUCCEEDED(result) ? UpdateSiteURLHttps : UpdateSiteURLHttp;
+
+	// Is this a first run launch? Append first run flag if so.
+	if (strcmp(lpszCmdLine, "firstrun") == 0) {
+		WCHAR newSiteURL[256];
+		StringCchPrintfW(newSiteURL, 256, L"%s%s", siteURL, UpdateSiteFirstRunFlag);
+		siteURL = newSiteURL;
+	}
 
 	VARIANT url;
 	VariantInit(&url);
