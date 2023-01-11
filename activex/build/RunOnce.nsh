@@ -94,10 +94,10 @@ Function OnRunOnceLogon
 		StrCpy $0 "msgina: ShellReadyEvent"
 	${EndIf}
 
-	System::Call 'kernel32::OpenEventW(i ${EVENT_MODIFY_STATE}, i 0, t .r0) i .r0'
-	${If} $0 != 0
-		System::Call 'kernel32::SetEvent(i $0)'
-		System::Call 'kernel32::CloseHandle(i $0)'
+	System::Call 'kernel32::OpenEventW(i ${EVENT_MODIFY_STATE}, i 0, t .r0) p .r1'
+	${If} $1 != 0
+		System::Call 'kernel32::SetEvent(p $1)'
+		System::Call 'kernel32::CloseHandle(p $1)'
 	${EndIf}
 FunctionEnd
 
