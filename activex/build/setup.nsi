@@ -15,6 +15,7 @@
 !define UPDATE_URL_HTTPS   "https://legacyupdate.net/windowsupdate/v6/"
 !define WSUS_SERVER        "http://legacyupdate.net/v6"
 !define WSUS_SERVER_HTTPS  "https://legacyupdate.net/v6"
+!define WIN81UPGRADE_URL   "https://go.microsoft.com/fwlink/?LinkId=798437"
 
 !define CPL_GUID           "{FFBE8D44-E9CF-4DD8-9FD6-976802C94D9C}"
 !define CPL_APPNAME        "LegacyUpdate"
@@ -78,6 +79,7 @@ VIFileVersion    ${LONGVERSION}
 !include AeroWizard.nsh
 !include Download2KXP.nsh
 !include DownloadVista7.nsh
+!include Download8.nsh
 !include DownloadWUA.nsh
 !include RunOnce.nsh
 !include UpdateRoots.nsh
@@ -135,22 +137,6 @@ Function un.OnShow
 	Call un.AeroWizardOnShow
 FunctionEnd
 
-Function PostInstall
-	${IfNot} ${Silent}
-	${AndIfNot} ${IsRunOnce}
-		${If} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
-			Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite'
-		${ElseIf} ${AtLeastWinVista}
-			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
-		${EndIf}
-
-		; Clean up temporary setup exe if we created it (likely on next reboot)
-		${If} ${FileExists} "$INSTDIR\LegacyUpdateSetup.exe"
-			Delete /REBOOTOK "$INSTDIR\LegacyUpdateSetup.exe"
-		${EndIf}
-	${EndIf}
-FunctionEnd
-
 ; Win2k prerequisities
 Section "Windows 2000 Service Pack 4" W2KSP4
 	SectionIn Ro
@@ -204,9 +190,39 @@ Section "Windows 7 Service Pack 1" WIN7SP1
 	Call RebootIfRequired
 SectionEnd
 
-Section "Windows Update Agent update" WIN7WUA
+Section "Windows Servicing Stack update" WIN7WUA
 	SectionIn Ro
 	Call DownloadKB3138612
+	Call RebootIfRequired
+SectionEnd
+
+; 8 prerequisities
+Section "Windows Servicing Stack update" WIN8WUA
+	SectionIn Ro
+	Call DownloadKB2937636
+	Call RebootIfRequired
+SectionEnd
+
+Section "Windows 8.1" WIN81UPGRADE
+	; No-op; we'll launch the support site in post-install.
+SectionEnd
+
+; 8.1 prerequisities
+Section "Windows 8.1 Update 1" WIN81UPDATE1
+	SectionIn Ro
+	Call DownloadKB3021910
+	Call DownloadClearCompressionFlag
+	Call DownloadKB2919355
+	Call DownloadKB2932046
+	Call DownloadKB2959977
+	Call DownloadKB2937592
+	Call DownloadKB2934018
+	Call RebootIfRequired
+SectionEnd
+
+Section "Windows Servicing Stack update" WIN81WUA
+	SectionIn Ro
+	Call DownloadKB3021910
 	Call RebootIfRequired
 SectionEnd
 
@@ -390,6 +406,7 @@ SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 	!insertmacro MUI_DESCRIPTION_TEXT ${W2KSP4}       "Updates Windows 2000 to Service Pack 4, as required to install the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
+	!insertmacro MUI_DESCRIPTION_TEXT ${IE6SP1}       "Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\nYour computer will restart automatically to complete installation."
 	!insertmacro MUI_DESCRIPTION_TEXT ${XPSP3}        "Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WES09}        "Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this."
 	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Supplemental End User License Agreement for for this update."
@@ -397,7 +414,10 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTAPOSTSP2} "Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SP1}      "Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. Your computer will restart automatically to complete installation. By installing, you are agreeing to the Microsoft Software License Terms for this update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7WUA}      "Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
-	!insertmacro MUI_DESCRIPTION_TEXT ${IE6SP1}       "Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\nYour computer will restart automatically to complete installation."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN8WUA}      "Updates Windows 8 or Windows Server 2012 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPGRADE} "Windows 8 can be updated to Windows 8.1. This process involves a manual download. After Legacy Update setup completes, a Microsoft website will be opened with more information."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPDATE1} "Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10.$\r$\nYour computer will restart automatically to complete installation."
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81WUA}     "Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\nYour computer will restart automatically to complete installation."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
 	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website. Windows Update will be configured to use the Legacy Update proxy server."
@@ -509,6 +529,43 @@ Function .onInit
 		!insertmacro RemoveSection ${WIN7WUA}
 	${EndIf}
 
+	${If} ${IsWin8}
+	${OrIf} ${IsWin2012}
+		; Determine whether 8 prereqs need to be installed
+		${IfNot} ${IsWin8}
+			!insertmacro RemoveSection ${WIN81UPGRADE}
+		${EndIf}
+
+		Call NeedsKB2937636
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${WIN8WUA}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${WIN81UPGRADE}
+		!insertmacro RemoveSection ${WIN8WUA}
+	${EndIf}
+
+	${If} ${IsWin8.1}
+	${OrIf} ${IsWin2012R2}
+		; Determine whether 8.1 prereqs need to be installed
+		Call NeedsWin81Update1
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${WIN81UPDATE1}
+			!insertmacro RemoveSection ${WIN81WUA}
+		${EndIf}
+
+		Call NeedsKB3021910
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${WIN81WUA}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${WIN81UPDATE1}
+		!insertmacro RemoveSection ${WIN81WUA}
+	${EndIf}
+
 	Call DetermineWUAVersion
 	${If} $0 == ""
 		!insertmacro RemoveSection ${WUA}
@@ -525,8 +582,13 @@ Function .onInit
 		!insertmacro RemoveSection ${ACTIVATE}
 	${EndIf}
 
-	; Try not to be too intrusive on Windows 8 and newer, which are (for now) fine
-	${If} ${AtLeastWin8}
+	; Don't install Legacy Update itself on Windows 7 and newer
+	${If} ${AtLeastWin7}
+		!insertmacro RemoveSection ${LEGACYUPDATE}
+	${EndIf}
+
+	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
+	${If} ${AtLeastWin10}
 		!insertmacro RemoveSection ${ROOTCERTS}
 
 		!insertmacro TaskDialog `'Legacy Update'` \
@@ -536,6 +598,27 @@ Function .onInit
 			${TD_WARNING_ICON}
 		${If} $0 != ${IDYES}
 			Quit
+		${EndIf}
+	${EndIf}
+FunctionEnd
+
+Function PostInstall
+	${IfNot} ${Silent}
+	${AndIfNot} ${IsRunOnce}
+		${If} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
+			Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite firstrun'
+		${ElseIf} ${AtLeastWinVista}
+			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
+		${EndIf}
+
+		; Launch Windows 8.1 upgrade site if requested by the user
+		${If} ${SectionIsSelected} ${WIN81UPGRADE}
+			ExecShell "" "${WIN81UPGRADE_URL}"
+		${EndIf}
+
+		; Clean up temporary setup exe if we created it (likely on next reboot)
+		${If} ${FileExists} "$INSTDIR\LegacyUpdateSetup.exe"
+			Delete /REBOOTOK "$INSTDIR\LegacyUpdateSetup.exe"
 		${EndIf}
 	${EndIf}
 FunctionEnd

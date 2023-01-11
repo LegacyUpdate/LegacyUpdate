@@ -136,7 +136,7 @@ Function DownloadKB3205638
 		Call GetArch
 		Pop $0
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB3205638 $0
-		!insertmacro DownloadAndInstallMSU "KB3205638" "$1"
+		!insertmacro DownloadAndInstallMSU "KB3205638" "Security Update for Windows Vista" "$1"
 	${EndIf}
 FunctionEnd
 
@@ -147,7 +147,7 @@ Function DownloadKB4012583
 		Call GetArch
 		Pop $0
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB4012583 $0
-		!insertmacro DownloadAndInstallMSU "KB4012583" "$1"
+		!insertmacro DownloadAndInstallMSU "KB4012583" "Security Update for Windows Vista" "$1"
 	${EndIf}
 FunctionEnd
 
@@ -158,7 +158,7 @@ Function DownloadKB4015195
 		Call GetArch
 		Pop $0
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB4015195 $0
-		!insertmacro DownloadAndInstallMSU "KB4015195" "$1"
+		!insertmacro DownloadAndInstallMSU "KB4015195" "Security Update for Windows Vista" "$1"
 	${EndIf}
 FunctionEnd
 
@@ -169,7 +169,7 @@ Function DownloadKB4015380
 		Call GetArch
 		Pop $0
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB4015380 $0
-		!insertmacro DownloadAndInstallMSU "KB4015380" "$1"
+		!insertmacro DownloadAndInstallMSU "KB4015380" "Security Update for Windows Vista" "$1"
 	${EndIf}
 FunctionEnd
 
@@ -180,6 +180,6 @@ Function DownloadKB3138612
 		Call GetArch
 		Pop $0
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB3138612 $0
-		!insertmacro DownloadAndInstallMSU "KB3138612" "$1"
+		!insertmacro DownloadAndInstallMSU "KB3138612" "Servicing Stack Update for Windows 7" "$1"
 	${EndIf}
 FunctionEnd

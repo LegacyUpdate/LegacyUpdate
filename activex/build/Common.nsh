@@ -112,21 +112,21 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro DownloadAndInstallMSU name url
-	${If} ${FileExists} "$EXEDIR\${name}.msu"
-		StrCpy $0 "$EXEDIR\${name}.msu"
+!macro DownloadAndInstallMSU kbid name url
+	${If} ${FileExists} "$EXEDIR\${kbid}.msu"
+		StrCpy $0 "$EXEDIR\${kbid}.msu"
 	${Else}
-		!insertmacro Download '${name}' '${url}' '${name}.msu'
-		StrCpy $0 "${name}.msu"
+		!insertmacro Download '${name} (${kbid})' '${url}' '${kbid}.msu'
+		StrCpy $0 "${kbid}.msu"
 	${EndIf}
 
 	; Stop AU service before running wusa so it doesn't try checking for updates online first (which
 	; may never complete before we install our patches).
-	!insertmacro DetailPrint "Installing ${name}..."
+	!insertmacro DetailPrint "Installing ${name} (${kbid})..."
 	SetDetailsPrint none
 	ExecShellWait "" "net" "stop wuauserv" SW_HIDE
 	SetDetailsPrint listonly
-	!insertmacro ExecWithErrorHandling '${name}' 'wusa.exe /quiet /norestart $0' 1
+	!insertmacro ExecWithErrorHandling '${name} (${kbid})' 'wusa.exe /quiet /norestart $0' 1
 !macroend
 
 !macro EnsureAdminRights
