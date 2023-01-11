@@ -33,8 +33,12 @@ FunctionEnd
 
 Function NeedsVistaSP2
 	${If} ${IsWinVista}
-	${AndIf} ${AtMostServicePack} 1
-		Push 1
+	${OrIf} ${IsWin2008}
+		${If} ${AtMostServicePack} 1
+			Push 1
+		${Else}
+			Push 0
+		${EndIf}
 	${Else}
 		Push 0
 	${EndIf}
@@ -42,8 +46,12 @@ FunctionEnd
 
 Function NeedsWin7SP1
 	${If} ${IsWin7}
-	${AndIf} ${AtMostServicePack} 0
-		Push 1
+	${OrIf} ${IsWin2008R2}
+		${If} ${AtMostServicePack} 0
+			Push 1
+		${Else}
+			Push 0
+		${EndIf}
 	${Else}
 		Push 0
 	${EndIf}

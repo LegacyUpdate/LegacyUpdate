@@ -472,6 +472,7 @@ Function .onInit
 	${EndIf}
 
 	${If} ${IsWinVista}
+	${OrIf} ${IsWin2008}
 		; Determine whether Vista prereqs need to be installed
 		Call NeedsVistaSP2
 		Pop $0
@@ -490,6 +491,7 @@ Function .onInit
 	${EndIf}
 
 	${If} ${IsWin7}
+	${OrIf} ${IsWin2008R2}
 		; Determine whether 7 prereqs need to be installed
 		Call NeedsWin7SP1
 		Pop $0
