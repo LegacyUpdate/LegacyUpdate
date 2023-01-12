@@ -1,4 +1,4 @@
-Function DetermineComponentArch
+Function GetComponentArch
 	${If} ${IsNativeIA32}
 		Push "x86"
 	${ElseIf} ${IsNativeAMD64}
@@ -10,14 +10,40 @@ Function DetermineComponentArch
 	${EndIf}
 FunctionEnd
 
-!macro NeedsServicingPackage name version
-	Call DetermineComponentArch
-	Pop $0
-	${If} ${FileExists} "$WINDIR\servicing\Packages\${name}~31bf3856ad364e35~$0~~${version}.mum"
-		Push 0
-	${Else}
-		Push 1
-	${EndIf}
+!macro SPHandler kbid title
+	Function Download${kbid}
+		Call Needs${kbid}
+		Pop $0
+		${If} $0 == 1
+			Call GetArch
+			Pop $0
+			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
+			!insertmacro DownloadAndInstallSP "${title}" "$0" "${kbid}"
+		${EndIf}
+	FunctionEnd
+!macroend
+
+!macro MSUHandler kbid title packagename packageversion
+	Function Needs${kbid}
+		Call GetComponentArch
+		Pop $0
+		${If} ${FileExists} "$WINDIR\servicing\Packages\${packagename}~31bf3856ad364e35~$0~~${packageversion}.mum"
+			Push 0
+		${Else}
+			Push 1
+		${EndIf}
+	FunctionEnd
+
+	Function Download${kbid}
+		Call Needs${kbid}
+		Pop $0
+		${If} $0 == 1
+			Call GetArch
+			Pop $0
+			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" $0
+			!insertmacro DownloadAndInstallMSU "${kbid}" "${title}" "$1"
+		${EndIf}
+	FunctionEnd
 !macroend
 
 Function NeedsVistaSP1
@@ -57,25 +83,19 @@ Function NeedsWin7SP1
 	${EndIf}
 FunctionEnd
 
-Function NeedsKB3205638
-	!insertmacro NeedsServicingPackage "Package_for_KB3205638" "6.0.1.0"
-FunctionEnd
+; Service Packs
+!insertmacro SPHandler  "VistaSP1"  "Windows Vista Service Pack 1"
+!insertmacro SPHandler  "VistaSP2"  "Windows Vista Service Pack 2"
+!insertmacro SPHandler  "Win7SP1"   "Windows 7 Service Pack 1"
 
-Function NeedsKB4012583
-	!insertmacro NeedsServicingPackage "Package_for_KB4012583" "6.0.1.2"
-FunctionEnd
+; Windows Vista post-SP2 update combination that fixes WU indefinitely checking for updates
+!insertmacro MSUHandler "KB3205638" "Security Update for Windows Vista"    "Package_for_KB3205638" "6.0.1.0"
+!insertmacro MSUHandler "KB4012583" "Security Update for Windows Vista"    "Package_for_KB4012583" "6.0.1.2"
+!insertmacro MSUHandler "KB4015195" "Security Update for Windows Vista"    "Package_for_KB4015195" "6.0.1.0"
+!insertmacro MSUHandler "KB4015380" "Security Update for Windows Vista"    "Package_for_KB4015380" "6.0.1.0"
 
-Function NeedsKB4015195
-	!insertmacro NeedsServicingPackage "Package_for_KB4015195" "6.0.1.0"
-FunctionEnd
-
-Function NeedsKB4015380
-	!insertmacro NeedsServicingPackage "Package_for_KB4015380" "6.0.1.0"
-FunctionEnd
-
-Function NeedsKB3138612
-	!insertmacro NeedsServicingPackage "Package_for_KB3138612" "6.1.1.1"
-FunctionEnd
+; Windows 7 Servicing Stack Update
+!insertmacro MSUHandler "KB3138612" "Servicing Stack Update for Windows 7" "Package_for_KB3138612" "6.1.1.1"
 
 Function NeedsVistaPostSP2
 	Call NeedsKB3205638
@@ -93,93 +113,5 @@ Function NeedsVistaPostSP2
 		Push 1
 	${Else}
 		Push 0
-	${EndIf}
-FunctionEnd
-
-Function DownloadVistaSP1
-	Call NeedsVistaSP1
-	Pop $0
-	${If} $0 == 1
-		Call GetArch
-		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini VistaSP1 $0
-		!insertmacro DownloadAndInstallSP "Windows Vista Service Pack 1" "$1" "vistasp1"
-	${EndIf}
-FunctionEnd
-
-Function DownloadVistaSP2
-	Call NeedsVistaSP2
-	Pop $0
-	${If} $0 == 1
-		Call GetArch
-		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini VistaSP2 $0
-		!insertmacro DownloadAndInstallSP "Windows Vista Service Pack 2" "$1" "vistasp2"
-	${EndIf}
-FunctionEnd
-
-Function DownloadWin7SP1
-	Call NeedsWin7SP1
-	Pop $0
-	${If} $0 == 1
-		Call GetArch
-		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini Win7SP1 $0
-		!insertmacro DownloadAndInstallSP "Windows 7 Service Pack 1" "$1" "win7sp1"
-	${EndIf}
-FunctionEnd
-
-Function DownloadKB3205638
-	Call NeedsKB3205638
-	Pop $0
-	${If} $0 == 1
-		Call GetArch
-		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB3205638 $0
-		!insertmacro DownloadAndInstallMSU "KB3205638" "Security Update for Windows Vista" "$1"
-	${EndIf}
-FunctionEnd
-
-Function DownloadKB4012583
-	Call NeedsKB4012583
-	Pop $0
-	${If} $0 == 1
-		Call GetArch
-		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB4012583 $0
-		!insertmacro DownloadAndInstallMSU "KB4012583" "Security Update for Windows Vista" "$1"
-	${EndIf}
-FunctionEnd
-
-Function DownloadKB4015195
-	Call NeedsKB4015195
-	Pop $0
-	${If} $0 == 1
-		Call GetArch
-		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB4015195 $0
-		!insertmacro DownloadAndInstallMSU "KB4015195" "Security Update for Windows Vista" "$1"
-	${EndIf}
-FunctionEnd
-
-Function DownloadKB4015380
-	Call NeedsKB4015380
-	Pop $0
-	${If} $0 == 1
-		Call GetArch
-		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB4015380 $0
-		!insertmacro DownloadAndInstallMSU "KB4015380" "Security Update for Windows Vista" "$1"
-	${EndIf}
-FunctionEnd
-
-Function DownloadKB3138612
-	Call NeedsKB3138612
-	Pop $0
-	${If} $0 == 1
-		Call GetArch
-		Pop $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini KB3138612 $0
-		!insertmacro DownloadAndInstallMSU "KB3138612" "Servicing Stack Update for Windows 7" "$1"
 	${EndIf}
 FunctionEnd

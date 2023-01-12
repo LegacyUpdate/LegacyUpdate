@@ -35,7 +35,7 @@
 !define REGPATH_SCHANNEL_PROTOCOLS "System\CurrentControlSet\Control\SecurityProviders\SChannel\Protocols"
 
 Name         "${NAME}"
-Caption      "Install ${NAME}"
+Caption      "${NAME}"
 BrandingText "${NAME} ${VERSION} - ${DOMAIN}"
 OutFile      "LegacyUpdate-${VERSION}.exe"
 InstallDir   "$ProgramFiles\$(^Name)"
@@ -284,14 +284,18 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	SetOverwrite try
 	File /oname=LegacyUpdate.dll "..\Release\LegacyUpdateOCX.dll"
 	IfErrors 0 +3
-		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to write to "$OUTDIR\LegacyUpdate.dll".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' /SD IDCANCEL IDRETRY -3
+		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to write to "$OUTDIR\LegacyUpdate.dll".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
+			/SD IDCANCEL \
+			IDRETRY -3
 		Abort
 	SetOverwrite on
 
 	; Register DLL
 	RegDLL "$OUTDIR\LegacyUpdate.dll"
 	IfErrors 0 +3
-		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to register Legacy Update ActiveX control.$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' /SD IDCANCEL IDRETRY -3
+		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to register Legacy Update ActiveX control.$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
+			/SD IDCANCEL \
+			IDRETRY -3
 		Abort
 
 	; Create shortcut
@@ -321,13 +325,12 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
 	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
 
-	; Delete old LegacyUpdate.dll in System32
+	; Delete LegacyUpdate.dll in System32 from 1.0 installer
 	${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
-		UnRegDLL $WINDIR\System32\LegacyUpdate.dll
 		Delete $WINDIR\System32\LegacyUpdate.dll
 	${EndIf}
 
-	; Delete old LegacyUpdate.inf
+	; Delete LegacyUpdate.inf from 1.0 installer
 	${If} ${FileExists} $WINDIR\inf\LegacyUpdate.inf
 		Delete $WINDIR\inf\LegacyUpdate.inf
 	${EndIf}
