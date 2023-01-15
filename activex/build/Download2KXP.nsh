@@ -1,5 +1,3 @@
-!define W2K_IE6 "http://content.legacyupdate.net/legacyupdate/ie/ie6/ie6sp1_w2k.exe"
-
 Function GetUpdateLanguage
 	ReadRegStr $0 HKLM "Hardware\Description\System" "Identifier"
 	${If} $0 == "NEC PC-98"
@@ -67,6 +65,16 @@ Function DownloadIE6
 	Call NeedsIE6
 	Pop $0
 	${If} $0 == 1
-		!insertmacro DownloadAndInstall "Internet Explorer 6 SP1" "${W2K_IE6}" "ie6setup.exe" '/q /c:"ie6setup.exe /q"'
+		Call GetUpdateLanguage
+		Call GetArch
+		Pop $1
+		Pop $0
+		ReadINIStr $0 $PLUGINSDIR\Patches.ini "W2KIE6" $0-$1
+		!insertmacro DownloadIfNeeded "Internet Explorer 6 SP1" "$0" "ie6sp1.cab"
+		!insertmacro DetailPrint "Extracting Internet Explorer 6 SP1..."
+		ExecShellWait "" "expand.exe" '"$0" -F:ie6setup.exe .' SW_HIDE
+		ExecShellWait "" "expand.exe" '"$0" -F:iebatch.txt .' SW_HIDE
+		!insertmacro DetailPrint "Installing Internet Explorer 6 SP1..."
+		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' 'ie6setup.exe /q' 0
 	${EndIf}
 FunctionEnd

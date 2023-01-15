@@ -60,29 +60,27 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro DownloadAndInstall name url filename args
+!macro DownloadIfNeeded name url filename
 	${If} ${FileExists} "$EXEDIR\${filename}"
 		StrCpy $0 "$EXEDIR\${filename}"
 	${Else}
 		!insertmacro Download '${name}' '${url}' '${filename}'
 		StrCpy $0 "${filename}"
 	${EndIf}
+!macroend
 
+!macro DownloadAndInstall name url filename args
+	!insertmacro DownloadIfNeeded '${name}' '${url}' '${filename}'
 	!insertmacro DetailPrint "Installing ${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '$0 ${args}' 0
+	!insertmacro ExecWithErrorHandling '${name}' '"$0" ${args}' 0
 !macroend
 
 !macro DownloadAndInstallSP name url filename
-	${If} ${FileExists} "$EXEDIR\${filename}.exe"
-		StrCpy $0 "$EXEDIR\${filename}.exe"
-	${Else}
-		!insertmacro Download '${name}' '${url}' '${filename}.exe'
-		StrCpy $0 "${filename}.exe"
-	${EndIf}
+	!insertmacro DownloadIfNeeded '${name}' '${url}' '${filename}'
 
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
 	!insertmacro DetailPrint "Extracting ${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '$0 /X:"$PLUGINSDIR\${filename}"' 0
+	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"' 0
 	!insertmacro DetailPrint "Installing ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '${filename}\spinstall.exe /unattend /nodialog /warnrestart:600' 0
 
@@ -94,12 +92,7 @@ FunctionEnd
 !macroend
 
 !macro DownloadAndInstallMSU kbid name url
-	${If} ${FileExists} "$EXEDIR\${kbid}.msu"
-		StrCpy $0 "$EXEDIR\${kbid}.msu"
-	${Else}
-		!insertmacro Download '${name} (${kbid})' '${url}' '${kbid}.msu'
-		StrCpy $0 "${kbid}.msu"
-	${EndIf}
+	!insertmacro DownloadIfNeeded '${name} (${kbid})' '${url}' '${kbid}.msu'
 
 	; Stop AU service before running wusa so it doesn't try checking for updates online first (which
 	; may never complete before we install our patches).
@@ -107,7 +100,7 @@ FunctionEnd
 	SetDetailsPrint none
 	ExecShellWait "" "net" "stop wuauserv" SW_HIDE
 	SetDetailsPrint listonly
-	!insertmacro ExecWithErrorHandling '${name} (${kbid})' 'wusa.exe /quiet /norestart $0' 1
+	!insertmacro ExecWithErrorHandling '${name} (${kbid})' 'wusa.exe /quiet /norestart "$0"' 1
 !macroend
 
 !macro EnsureAdminRights
