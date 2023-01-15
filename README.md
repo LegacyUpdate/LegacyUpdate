@@ -1,5 +1,7 @@
 # [<img src="https://legacyupdate.net/socialbanner.png" alt="Legacy Update">](http://legacyupdate.net/)
 
+[![wakatime](https://wakatime.com/badge/github/kirb/LegacyUpdate.svg)](https://wakatime.com/badge/github/kirb/LegacyUpdate)
+
 Since Windows XP was discontinued in 2014, followed by Windows 7 in 2020, Microsoft’s support for their earlier OSes has significantly dwindled. As XP and earlier don’t officially support modern security improvements, such as the SHA256 hash algorithm required by modern SSL and Authenticode certificates [as of 2019](https://support.microsoft.com/en-us/topic/2019-sha-2-code-signing-support-requirement-for-windows-and-wsus-64d1c82d-31ee-c273-3930-69a4cde8e64f), much of the internet has become inaccessible to these devices. Adding insult to injury, Microsoft [actively removed](https://techcommunity.microsoft.com/t5/windows-it-pro-blog/sha-1-windows-content-to-be-retired-august-3-2020/ba-p/1544373) many downloads for XP and earlier versions in 2020. In effect, working with these OSes is now incredibly difficult.
 
 To address this, [**Legacy Update**](https://legacyupdate.net/) hosts a patched instance of the Windows Update website. This works because the original Windows Update website simply accesses an ActiveX control that connects to the Windows Update service running on your computer.
