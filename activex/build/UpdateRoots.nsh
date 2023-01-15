@@ -60,7 +60,6 @@ Function ConfigureCrypto
 FunctionEnd
 
 Function UpdateRoots
-	SetOutPath $PLUGINSDIR
 	File "..\build\updroots.exe"
 	!insertmacro DetailPrint "Downloading Certificate Trust List..."
 	inetc::get \

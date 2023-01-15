@@ -578,8 +578,8 @@ Function .onInit
 		!insertmacro RemoveSection ${WUA}
 	${EndIf}
 
-	${If} ${IsWinXP}
-	${OrIf} ${IsWin2003}
+	${If} ${IsWinXP2002}
+	${OrIf} ${IsWinXP2003}
 		; Assume not activated if the activation tray icon process is running
 		FindProcDLL::FindProc "wpabaln.exe"
 		${If} $R0 != 1

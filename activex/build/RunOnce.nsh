@@ -1,3 +1,8 @@
+!define REGPATH_RUNONCE "Software\Microsoft\Windows\CurrentVersion\RunOnce"
+
+!define EWX_REBOOT      0x02
+!define EWX_FORCEIFHUNG 0x10
+
 !define RUNONCE_USERNAME "LegacyUpdateTemp"
 !define RUNONCE_PASSWORD "Legacy_Update0"
 
