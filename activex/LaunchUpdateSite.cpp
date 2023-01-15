@@ -94,12 +94,27 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 		goto end;
 	}
 
+	// Get the OS Version Information and the System Information
+	// This is done to allow us to workaround behavior in Windows Server 2003 x64
+	// and Windows XP x64, where CLSCTX_ACTIVATE_32_BIT_SERVER is needed when activating
+	// the COM interface. This causes issues on 32-bit XP and 2000 though, and newer
+	// versions of Windows do not require it.
+	OSVERSIONINFOEX* versionInfo = GetVersionInfo();
+	SYSTEM_INFO systemInfo;
+	GetSystemInfo(&systemInfo);
+	
 	// Spawn an IE window via the COM interface. This ensures the page opens in IE (ShellExecute uses
 	// default browser), and avoids hardcoding a path to iexplore.exe. Also conveniently allows testing
 	// on Windows 11 (iexplore.exe redirects to Edge, but COM still works). Same strategy as used by
 	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
 	IWebBrowser2 *browser;
-	result = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_ACTIVATE_32_BIT_SERVER, IID_IWebBrowser2, (void **)&browser);
+	if ((versionInfo->dwMajorVersion == 5) && (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)) {
+		// Server 2003 x64 and XP x64 specific quirk
+		result = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER | CLSCTX_ACTIVATE_32_BIT_SERVER, IID_IWebBrowser2, (void **)&browser);
+	} else {
+		// Every other version of Windows
+		result = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, IID_IWebBrowser2, (void **)&browser);
+	}
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
