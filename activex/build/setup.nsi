@@ -376,7 +376,7 @@ Section -Uninstall
 	DeleteRegKey HKCR "${REGPATH_CPLCLSID}"
 
 	; Restore shortcuts
-	${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
+	${If} ${FileExists} "$INSTDIR\Backup\Windows Update.lnk"
 		Rename "$INSTDIR\Backup\Windows Update.lnk" "$COMMONSTARTMENU\Windows Update.lnk"
 	${EndIf}
 
@@ -388,7 +388,7 @@ Section -Uninstall
 	UnRegDLL "$INSTDIR\LegacyUpdate.dll"
 
 	; Clear WSUS server
-	${If} ${AtMostWin2003}
+	${If} ${AtMostWinVista}
 		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUServer"
 		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
 		DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
