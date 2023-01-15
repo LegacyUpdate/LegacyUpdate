@@ -333,7 +333,7 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	${EndIf}
 
 	; Set WSUS server
-	${If} ${AtMostWinVista}
+	${If} ${AtMostWin7}
 		; Check if Schannel is going to work with modern TLS
 		!insertmacro DetailPrint "Checking SSL connectivity..."
 		inetc::get /silent /tostack "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" "" /end
@@ -373,7 +373,7 @@ Section -Uninstall
 	DeleteRegKey HKCR "${REGPATH_CPLCLSID}"
 
 	; Restore shortcuts
-	${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
+	${If} ${FileExists} "$INSTDIR\Backup\Windows Update.lnk"
 		Rename "$INSTDIR\Backup\Windows Update.lnk" "$COMMONSTARTMENU\Windows Update.lnk"
 	${EndIf}
 
@@ -385,7 +385,7 @@ Section -Uninstall
 	UnRegDLL "$INSTDIR\LegacyUpdate.dll"
 
 	; Clear WSUS server
-	${If} ${AtMostWin2003}
+	${If} ${AtMostWin7}
 		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUServer"
 		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
 		DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
