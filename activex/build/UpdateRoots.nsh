@@ -63,7 +63,7 @@ Function UpdateRoots
 	File "..\build\updroots.exe"
 	!insertmacro DetailPrint "Downloading Certificate Trust List..."
 	inetc::get \
-		/bgcolor FFFFFF /textcolor 000000 \
+		/silent /bgcolor FFFFFF /textcolor 000000 \
 		"${TRUSTEDR}/authroots.sst"      "authroots.sst" \
 		"${TRUSTEDR}/delroots.sst"       "delroots.sst" \
 		"${TRUSTEDR}/roots.sst"          "roots.sst" \
