@@ -11,7 +11,7 @@
 	; On XP, we'll also enable TLSv1.0, given TLSv1.1 and v1.2 are only offered through an optional
 	; POSReady 2009 update.
 	${If} $0 == 0
-	${AndIf} ${AtMostWin2003}
+	${AndIf} ${AtMostWinXP2003}
 		IntOp $0 $0 | ${WINHTTP_FLAG_SECURE_PROTOCOL_TLS1}
 	${EndIf}
 	IntOp $0 $0 | ${WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_1}

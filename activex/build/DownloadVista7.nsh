@@ -10,7 +10,9 @@ Function GetComponentArch
 	${EndIf}
 FunctionEnd
 
-!macro SPHandler kbid title
+!macro SPHandler kbid title os sp
+	!insertmacro NeedsSPHandler "${kbid}" "${os}" "${sp}"
+
 	Function Download${kbid}
 		Call Needs${kbid}
 		Pop $0
@@ -46,47 +48,10 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
-Function NeedsVistaSP1
-	; Server 2008 RTM is equivalent to Vista SP1.
-	${If} ${IsWinVista}
-	${AndIf} ${AtMostServicePack} 0
-	${AndIfNot} ${IsServerOS}
-		Push 1
-	${Else}
-		Push 0
-	${EndIf}
-FunctionEnd
-
-Function NeedsVistaSP2
-	${If} ${IsWinVista}
-	${OrIf} ${IsWin2008}
-		${If} ${AtMostServicePack} 1
-			Push 1
-		${Else}
-			Push 0
-		${EndIf}
-	${Else}
-		Push 0
-	${EndIf}
-FunctionEnd
-
-Function NeedsWin7SP1
-	${If} ${IsWin7}
-	${OrIf} ${IsWin2008R2}
-		${If} ${AtMostServicePack} 0
-			Push 1
-		${Else}
-			Push 0
-		${EndIf}
-	${Else}
-		Push 0
-	${EndIf}
-FunctionEnd
-
 ; Service Packs
-!insertmacro SPHandler  "VistaSP1"  "Windows Vista Service Pack 1"
-!insertmacro SPHandler  "VistaSP2"  "Windows Vista Service Pack 2"
-!insertmacro SPHandler  "Win7SP1"   "Windows 7 Service Pack 1"
+!insertmacro SPHandler  "VistaSP1"  "Windows Vista Service Pack 1"         "WinVista" 0
+!insertmacro SPHandler  "VistaSP2"  "Windows Vista Service Pack 2"         "WinVista" 1
+!insertmacro SPHandler  "Win7SP1"   "Windows 7 Service Pack 1"             "Win7"     0
 
 ; Windows Vista post-SP2 update combination that fixes WU indefinitely checking for updates
 !insertmacro MSUHandler "KB3205638" "Security Update for Windows Vista"    "Package_for_KB3205638" "6.0.1.0"

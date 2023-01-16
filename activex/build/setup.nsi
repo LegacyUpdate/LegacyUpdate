@@ -307,7 +307,7 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 
 	; Hide WU shortcuts
 	; TODO: How can we consistently find the shortcuts for non-English installs?
-	${If} ${AtMostWin2003}
+	${If} ${AtMostWinXP2003}
 		${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
 			CreateDirectory "$OUTDIR\Backup"
 			Rename "$COMMONSTARTMENU\Windows Update.lnk" "$OUTDIR\Backup\Windows Update.lnk"
@@ -503,7 +503,6 @@ Function .onInit
 	${EndIf}
 
 	${If} ${IsWinVista}
-	${OrIf} ${IsWin2008}
 		; Determine whether Vista prereqs need to be installed
 		Call NeedsVistaSP2
 		Pop $0
@@ -522,7 +521,6 @@ Function .onInit
 	${EndIf}
 
 	${If} ${IsWin7}
-	${OrIf} ${IsWin2008R2}
 		; Determine whether 7 prereqs need to be installed
 		Call NeedsWin7SP1
 		Pop $0
@@ -541,7 +539,6 @@ Function .onInit
 	${EndIf}
 
 	${If} ${IsWin8}
-	${OrIf} ${IsWin2012}
 		; Determine whether 8 prereqs need to be installed
 		${IfNot} ${IsWin8}
 			!insertmacro RemoveSection ${WIN81UPGRADE}
@@ -558,7 +555,6 @@ Function .onInit
 	${EndIf}
 
 	${If} ${IsWin8.1}
-	${OrIf} ${IsWin2012R2}
 		; Determine whether 8.1 prereqs need to be installed
 		Call NeedsWin81Update1
 		Pop $0
