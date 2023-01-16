@@ -1,10 +1,3 @@
-!define TDCBF_YES_BUTTON 0x2
-!define TDCBF_NO_BUTTON  0x4
-
-!define TD_WARNING_ICON 65535
-
-!define IDYES 6
-
 !macro TaskDialog title mainInstruction content buttons icon
 	System::Call "comctl32::TaskDialog(p $HWNDPARENT, \
 		p 0, \

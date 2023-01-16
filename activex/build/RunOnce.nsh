@@ -1,11 +1,3 @@
-!define REGPATH_RUNONCE "Software\Microsoft\Windows\CurrentVersion\RunOnce"
-
-!define EWX_REBOOT      0x02
-!define EWX_FORCEIFHUNG 0x10
-
-!define RUNONCE_USERNAME "LegacyUpdateTemp"
-!define RUNONCE_PASSWORD "Legacy_Update0"
-
 !define IsRunOnce     `"" HasFlag "/runonce"`
 !define IsPostInstall `"" HasFlag "/postinstall"`
 !define NoRestart     `"" HasFlag "/norestart"`
@@ -153,7 +145,7 @@ Function CleanUpRunOnce
 		ExecShellWait "" "net" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
 
 		; Be really really sure this is the right user before we nuke their profile
-		System::Call 'advapi32::GetUserName(t .r0, *i ${NSIS_MAX_STRLEN} r1) i.r2'
+		System::Call 'advapi32::GetUserName(t .r0, *i ${NSIS_MAX_STRLEN} r1) i .r2'
 		${If} $0 == "${RUNONCE_USERNAME}"
 			RMDir /r /REBOOTOK "$PROFILE"
 		${EndIf}

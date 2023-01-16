@@ -1,9 +1,3 @@
-!define TRUSTEDR "http://download.windowsupdate.com/msdownload/update/v3/static/trustedr/en"
-
-!define WINHTTP_FLAG_SECURE_PROTOCOL_TLS1   0x00000080
-!define WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_1 0x00000200
-!define WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2 0x00000800
-
 !macro -SetSecureProtocolsBitmask
 	; If the value isn't yet set, ReadRegDword will return 0. This means TLSv1.1 and v1.2 will be the
 	; only enabled protocols. This is intentional behavior, because SSLv2 and SSLv3 are not secure,
