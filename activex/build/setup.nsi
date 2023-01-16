@@ -33,6 +33,8 @@
 !define REGPATH_WINLOGON           "Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 !define REGPATH_POSREADY           "System\WPA\PosReady"
 !define REGPATH_SCHANNEL_PROTOCOLS "System\CurrentControlSet\Control\SecurityProviders\SChannel\Protocols"
+!define REGPATH_DOTNET_V2          "Software\Microsoft\.NETFramework\v2.0.50727"
+!define REGPATH_DOTNET_V4          "Software\Microsoft\.NETFramework\v4.0.30319"
 
 Name         "${NAME}"
 Caption      "${NAME}"

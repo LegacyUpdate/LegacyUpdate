@@ -46,6 +46,11 @@ Function _ConfigureCrypto
 	ReadRegDword $0 HKCU "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols"
 	!insertmacro -SetSecureProtocolsBitmask
 	WriteRegDword HKCU "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols" $0
+
+	; Enable .NET inheriting SChannel protocol config
+	; .NET 3 uses the same registry keys as .NET 2.
+	WriteRegDword HKLM "${REGPATH_DOTNET_V2}" "SystemDefaultTlsVersions" 1
+	WriteRegDword HKLM "${REGPATH_DOTNET_V4}" "SystemDefaultTlsVersions" 1
 FunctionEnd
 
 Function ConfigureCrypto
