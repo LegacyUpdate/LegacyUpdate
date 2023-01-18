@@ -66,11 +66,11 @@
 
 		Push $0
 		Push $1
-		System::Alloc $0
-		System::Call '*(&i ${OSVERSIONINFOEXW_SIZE}) p .r0'
+		System::Alloc ${OSVERSIONINFOEXW_SIZE}
+		Pop $0
 		System::Call '*$0(i ${OSVERSIONINFOEXW_SIZE})'
 		System::Call 'kernel32::GetVersionEx(pr .r0) i'
-		System::Call '*$0(i .s, i .s, i .s, i .s, i .s, &t128 .s, &i2 .s, &i2 .s, &i2 .r1, &i1 .s, &i1)'
+		System::Call '*$0(i, i, i, i, i, &t128, h, h, h .r1, b, b)'
 		System::Free $0
 		StrCpy $__WINVERSUITE $1
 		Pop $1
