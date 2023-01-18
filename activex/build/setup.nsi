@@ -618,6 +618,17 @@ Function .onInstFailed
 	Call CleanUpRunOnce
 FunctionEnd
 
+Function .onSelChange
+	${If} ${SectionIsSelected} ${WES09}
+		; Check for SSE2.
+		System::Call 'kernel32::IsProcessorFeaturePresent(i ${PF_XMMI64_INSTRUCTIONS_AVAILABLE}) i .r0'
+		${If} $0 == 0
+			MessageBox MB_OK|MB_USERICON "Your processor does not support the Streaming SIMD Extensions 2 (SSE2) instruction set, which is required to install Windows Embedded 2009 updates released after May 2018. Processors that initially implemented SSE2 instructions include the Intel Pentium 4, Pentium M, and AMD Athlon 64.$\r$\n$\r$\nTo protect your Windows installation from becoming corrupted by incompatible updates, this option will be disabled." /SD IDOK
+			!insertmacro UnselectSection ${WES09}
+		${EndIf}
+	${EndIf}
+FunctionEnd
+
 Function un.onInit
 	SetShellVarContext All
 	${If} ${RunningX64}
