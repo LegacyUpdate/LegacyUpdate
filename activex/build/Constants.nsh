@@ -2,6 +2,15 @@
 !define NAME               "Legacy Update"
 !define DOMAIN             "legacyupdate.net"
 
+; Version
+!getdllversion "..\Release\LegacyUpdateOCX.dll" DLLVersion_
+!define LONGVERSION        "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}.${DLLVersion_4}"
+!define VERSION            "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}"
+
+!if ${DLLVersion_3} == 0
+	!define /redef VERSION   "${DLLVersion_1}.${DLLVersion_2}"
+!endif
+
 ; Main URLs
 !define WEBSITE            "http://legacyupdate.net/"
 !define UPDATE_URL         "http://legacyupdate.net/windowsupdate/v6/"

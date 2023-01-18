@@ -75,6 +75,6 @@ Function DownloadIE6
 		ExecShellWait "" "expand.exe" '"$0" -F:ie6setup.exe .' SW_HIDE
 		ExecShellWait "" "expand.exe" '"$0" -F:iebatch.txt .' SW_HIDE
 		!insertmacro DetailPrint "Installing Internet Explorer 6 SP1..."
-		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' 'ie6setup.exe /q' 0
+		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' '$PLUGINSDIR\ie6setup.exe /q' 0
 	${EndIf}
 FunctionEnd
