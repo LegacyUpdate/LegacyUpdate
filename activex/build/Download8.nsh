@@ -34,7 +34,7 @@ Function NeedsWin81Update1
 	${EndIf}
 FunctionEnd
 
-; Weird prerequisite to Update 1 that prevents the main KB2919355 update from failing to install
+; Weird prerequisite to Update 1 that fixes the main KB2919355 update failing to install
 Function DownloadClearCompressionFlag
 	Call GetArch
 	Pop $0

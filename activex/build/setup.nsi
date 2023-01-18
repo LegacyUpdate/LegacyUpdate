@@ -1,11 +1,4 @@
-﻿!define MUI_UI              "modern_aerowizard.exe"
-!define MUI_UI_HEADERIMAGE  "modern_aerowizard.exe"
-
-!define MUI_CUSTOMFUNCTION_GUIINIT   OnShow
-!define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
-!define MUI_CUSTOMFUNCTION_ABORT     CleanUpRunOnce
-
-!include Constants.nsh
+﻿!include Constants.nsh
 
 Name         "${NAME}"
 Caption      "${NAME}"
@@ -26,6 +19,13 @@ VIAddVersionKey /LANG=1033 "FileDescription" "${NAME}"
 VIAddVersionKey /LANG=1033 "FileVersion"     "${LONGVERSION}"
 VIProductVersion ${LONGVERSION}
 VIFileVersion    ${LONGVERSION}
+
+!define MUI_UI              "modern_aerowizard.exe"
+!define MUI_UI_HEADERIMAGE  "modern_aerowizard.exe"
+
+!define MUI_CUSTOMFUNCTION_GUIINIT   OnShow
+!define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
+!define MUI_CUSTOMFUNCTION_ABORT     CleanUpRunOnce
 
 !define MUI_ICON   "..\icon.ico"
 !define MUI_UNICON "..\icon.ico"
@@ -404,7 +404,7 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81WUA}     "Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
-	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website on Windows 2000/XP and Windows Update Control Panel on Windows Vista. Windows Update will be configured to use the Legacy Update proxy server."
+	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website on Windows 2000/XP, and Windows Update Control Panel on Windows Vista. Windows Update will be configured to use the Legacy Update proxy server."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
