@@ -76,11 +76,11 @@ FunctionEnd
 !macroend
 
 !macro DownloadAndInstallSP name url filename
-	!insertmacro DownloadIfNeeded '${name}' '${url}' '${filename}'
+	!insertmacro DownloadIfNeeded '${name}' '${url}' '${filename}.exe'
 
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
 	!insertmacro DetailPrint "Extracting ${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"' 0
+	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}.exe"' 0
 	!insertmacro DetailPrint "Installing ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '${filename}\spinstall.exe /unattend /nodialog /warnrestart:600' 0
 
