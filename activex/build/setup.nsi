@@ -7,9 +7,11 @@ OutFile      "LegacyUpdate-${VERSION}.exe"
 InstallDir   "$ProgramFiles\${NAME}"
 InstallDirRegKey HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "InstallDir"
 
-Unicode True
+Unicode               true
 RequestExecutionLevel Admin
-AutoCloseWindow true
+AutoCloseWindow       true
+ManifestSupportedOS   all
+ManifestDPIAware      true
 
 VIAddVersionKey /LANG=1033 "ProductName"     "${NAME}"
 VIAddVersionKey /LANG=1033 "ProductVersion"  "${LONGVERSION}"
@@ -25,7 +27,7 @@ VIFileVersion    ${LONGVERSION}
 
 !define MUI_CUSTOMFUNCTION_GUIINIT   OnShow
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
-!define MUI_CUSTOMFUNCTION_ABORT     CleanUpRunOnce
+!define MUI_CUSTOMFUNCTION_ABORT     CleanUp
 
 !define MUI_ICON   "..\icon.ico"
 !define MUI_UNICON "..\icon.ico"
@@ -112,6 +114,10 @@ FunctionEnd
 Function un.OnShow
 	Call un.AeroWizardOnShow
 FunctionEnd
+
+Section -BeforeInstall
+	!insertmacro InhibitSleep 1
+SectionEnd
 
 ; Win2k prerequisities
 Section "Windows 2000 Service Pack 4" W2KSP4
@@ -603,6 +609,11 @@ Function PostInstall
 	${EndIf}
 FunctionEnd
 
+Function CleanUp
+	Call CleanUpRunOnce
+	!insertmacro InhibitSleep 0
+FunctionEnd
+
 Function .onInstSuccess
 	${MementoSectionSave}
 
@@ -611,11 +622,11 @@ Function .onInstSuccess
 
 	; If we're done, launch the update site
 	Call PostInstall
-	Call CleanUpRunOnce
+	Call CleanUp
 FunctionEnd
 
 Function .onInstFailed
-	Call CleanUpRunOnce
+	Call CleanUp
 FunctionEnd
 
 Function .onSelChange

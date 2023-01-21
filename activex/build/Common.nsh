@@ -113,6 +113,14 @@ FunctionEnd
 	${EndIf}
 !macroend
 
+!macro InhibitSleep state
+	${If} ${state} == 1
+		System::Call 'kernel32::SetThreadExecutionState(i ${ES_CONTINUOUS}|${ES_SYSTEM_REQUIRED}) i'
+	${Else}
+		System::Call 'kernel32::SetThreadExecutionState(i ${ES_CONTINUOUS}) i'
+	${EndIf}
+!macroend
+
 !macro DeleteFileOrAskAbort path
 	ClearErrors
 	Delete "${path}"
