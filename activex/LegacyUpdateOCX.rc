@@ -10,7 +10,7 @@
 #ifndef APSTUDIO_INVOKED
 #include "targetver.h"
 #endif
-#include "afxres.h"
+#include "winres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -38,7 +38,7 @@ BEGIN
     "#ifndef APSTUDIO_INVOKED\r\n"
     "#include ""targetver.h""\r\n"
     "#endif\r\n"
-    "#include ""afxres.h""\r\n"
+    "#include ""winres.h""\r\n"
     "\0"
 END
 
@@ -112,6 +112,14 @@ BEGIN
     IDS_CHECKFORUPDATES     "Check for updates"
     IDS_CHECKFORUPDATES_ALT "Check for software and driver updates via Legacy Update."
 END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// REGISTRY
+//
+
+IDR_LEGACYUPDATEOCX     REGISTRY                "LegacyUpdateOCX.rgs"
+IDR_LEGACYUPDATECTRL    REGISTRY                "LegacyUpdateCtrl.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //

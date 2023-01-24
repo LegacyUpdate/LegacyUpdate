@@ -4,21 +4,23 @@
 // or project specific include files that are used frequently,
 // but are changed infrequently
 
-#ifndef VC_EXTRALEAN
-#define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
+#ifndef STRICT
+#define STRICT
 #endif
 
 #include "targetver.h"
 
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // some CString constructors will be explicit
+#define _ATL_APARTMENT_THREADED
+#define _ATL_NO_AUTOMATIC_NAMESPACE
 
-#include <afxctl.h>         // MFC support for ActiveX Controls
-#include <afxext.h>         // MFC extensions
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 
-#ifndef _AFX_NO_OLE_SUPPORT
-#include <afxdtctl.h>           // MFC support for Internet Explorer 4 Comon Controls
-#endif
+#include "resource.h"
+#include <atltrace.h>
+#include <atlbase.h>
+#include <atlcom.h>
+#include <atlctl.h>
 
-#ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>                     // MFC support for Windows Common Controls
-#endif // _AFX_NO_AFXCMN_SUPPORT
+using namespace ATL;
+
+#define TRACE ATLTRACE

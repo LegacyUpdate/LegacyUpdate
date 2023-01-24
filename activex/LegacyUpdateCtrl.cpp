@@ -1,12 +1,13 @@
 // LegacyUpdateCtrl.cpp : Implementation of the CLegacyUpdateCtrl ActiveX Control class.
 
 #include "stdafx.h"
-#include "LegacyUpdateOCX.h"
 #include "LegacyUpdateCtrl.h"
 #include "Utils.h"
 #include "Compat.h"
 #include <atlbase.h>
 #include <atlcom.h>
+#include <ShellAPI.h>
+#include <ShlObj.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,112 +26,17 @@ const BSTR permittedHosts[] = {
 };
 const int permittedHostsMax = 2;
 
-IMPLEMENT_DYNCREATE(CLegacyUpdateCtrl, COleControl)
-
-// Message map
-
-BEGIN_MESSAGE_MAP(CLegacyUpdateCtrl, COleControl)
-	ON_OLEVERB(AFX_IDS_VERB_PROPERTIES, OnProperties)
-END_MESSAGE_MAP()
-
-// Dispatch map
-
-BEGIN_DISPATCH_MAP(CLegacyUpdateCtrl, COleControl)
-	DISP_FUNCTION_ID(CLegacyUpdateCtrl, "CheckControl", dispidCheckControl, CheckControl, VT_I1, VTS_NONE)
-	DISP_FUNCTION_ID(CLegacyUpdateCtrl, "MessageForHresult", dispidMessageForHresult, MessageForHresult, VT_BSTR, VTS_I4)
-	DISP_FUNCTION_ID(CLegacyUpdateCtrl, "GetOSVersionInfo", dispidGetOSVersionInfo, GetOSVersionInfo, VT_VARIANT, VTS_I4 VTS_I4)
-	DISP_FUNCTION_ID(CLegacyUpdateCtrl, "CreateObject", dispidCreateObject, CreateComObject, VT_DISPATCH, VTS_BSTR)
-	DISP_FUNCTION_ID(CLegacyUpdateCtrl, "GetUserType", dispidGetUserType, GetUserType, VT_I1, VTS_NONE)
-	DISP_PROPERTY_EX_ID(CLegacyUpdateCtrl, "IsRebootRequired", dispidIsRebootRequired, IsRebootRequired, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX_ID(CLegacyUpdateCtrl, "IsWindowsUpdateDisabled", dispidIsWindowsUpdateDisabled, IsWindowsUpdateDisabled, SetNotSupported, VT_BOOL)
-	DISP_FUNCTION_ID(CLegacyUpdateCtrl, "RebootIfRequired", dispidRebootIfRequired, RebootIfRequired, VT_EMPTY, VTS_NONE)
-	DISP_FUNCTION_ID(CLegacyUpdateCtrl, "ViewWindowsUpdateLog", dispidViewWindowsUpdateLog, ViewWindowsUpdateLog, VT_EMPTY, VTS_NONE)
-	DISP_PROPERTY_EX_ID(CLegacyUpdateCtrl, "IsUsingWsusServer", dispidIsUsingWsusServer, IsUsingWsusServer, SetNotSupported, VT_BOOL)
-	DISP_PROPERTY_EX_ID(CLegacyUpdateCtrl, "WsusServerUrl", dispidWsusServerUrl, WsusServerUrl, SetNotSupported, VT_BSTR)
-	DISP_PROPERTY_EX_ID(CLegacyUpdateCtrl, "WsusStatusServerUrl", dispidWsusStatusServerUrl, WsusStatusServerUrl, SetNotSupported, VT_BSTR)
-END_DISPATCH_MAP()
-
-// Event map
-
-BEGIN_EVENT_MAP(CLegacyUpdateCtrl, COleControl)
-END_EVENT_MAP()
-
-// Initialize class factory and guid
-
-IMPLEMENT_OLECREATE_EX(CLegacyUpdateCtrl, "LegacyUpdate.Control.1", 0xAD28E0DF, 0x5F5A, 0x40B5, 0x94, 0x32, 0x85, 0xEF, 0xD9, 0x7D, 0x1F, 0x9F)
-
-// Type library ID and version
-
-IMPLEMENT_OLETYPELIB(CLegacyUpdateCtrl, _tlid, _wVerMajor, _wVerMinor)
-
-// Interface IDs
-
-const IID IID_IDispatch               = { 0x00020400, 0x0000, 0x0000, { 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 } };
-const IID IID_ILegacyUpdateCtrl       = { 0x3A81AF5D, 0x35C4, 0x441A, { 0x82, 0xBA, 0x7C, 0xA6, 0x18, 0xF1, 0x12, 0xCE } };
-const IID IID_ILegacyUpdateCtrlEvents = { 0xBF62027D, 0xE775, 0x49FD, { 0xA7, 0xE2, 0xA8, 0x7B, 0x08, 0xE9, 0x25, 0xC3 } };
-
-// Control type information
-
-static const DWORD _dwLegacyUpdateOCXOleMisc =
-	OLEMISC_INVISIBLEATRUNTIME |
-	OLEMISC_ACTIVATEWHENVISIBLE |
-	OLEMISC_SETCLIENTSITEFIRST |
-	OLEMISC_INSIDEOUT |
-	OLEMISC_CANTLINKINSIDE |
-	OLEMISC_RECOMPOSEONRESIZE;
-
-IMPLEMENT_OLECTLTYPE(CLegacyUpdateCtrl, IDS_LEGACYUPDATEOCX, _dwLegacyUpdateOCXOleMisc)
-
-// CLegacyUpdateCtrl::CLegacyUpdateCtrlFactory::UpdateRegistry -
-// Adds or removes system registry entries for CLegacyUpdateCtrl
-
-BOOL CLegacyUpdateCtrl::CLegacyUpdateCtrlFactory::UpdateRegistry(BOOL bRegister) {
-	// TODO: Verify that your control follows apartment-model threading rules.
-	// Refer to MFC TechNote 64 for more information.
-	// If your control does not conform to the apartment-model rules, then
-	// you must modify the code below, changing the 6th parameter from
-	// afxRegApartmentThreading to 0.
-
-	if (bRegister) {
-		return AfxOleRegisterControlClass(AfxGetInstanceHandle(), m_clsid, m_lpszProgID, IDS_LEGACYUPDATEOCX, 0, afxRegApartmentThreading, _dwLegacyUpdateOCXOleMisc, _tlid, _wVerMajor, _wVerMinor);
-	} else {
-		return AfxOleUnregisterClass(m_clsid, m_lpszProgID);
-	}
-}
-
-
-CLegacyUpdateCtrl::CLegacyUpdateCtrl() {
-	InitializeIIDs(&IID_ILegacyUpdateCtrl, &IID_ILegacyUpdateCtrlEvents);
-}
-
-CLegacyUpdateCtrl::~CLegacyUpdateCtrl() {
-	// TODO: Cleanup your control's instance data here.
-}
-
-void CLegacyUpdateCtrl::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid) {
-}
-
-void CLegacyUpdateCtrl::DoPropExchange(CPropExchange* pPX) {
-	ExchangeVersion(pPX, MAKELONG(_wVerMinor, _wVerMajor));
-	COleControl::DoPropExchange(pPX);
-	// TODO: Call PX_ functions for each persistent custom property.
-}
-
-void CLegacyUpdateCtrl::OnResetState() {
-	COleControl::OnResetState();  // Resets defaults found in DoPropExchange
-	// TODO: Reset any other control state here.
-}
-
 // CLegacyUpdateCtrl message handlers
 
 IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
-	IOleClientSite *clientSite = GetClientSite();
-	if (clientSite == NULL) {
-		return FALSE;
+	IOleClientSite *clientSite;
+	HRESULT result = GetClientSite(&clientSite);
+	if (!SUCCEEDED(result)) {
+		goto end;
 	}
 
 	IOleContainer *container;
-	HRESULT result = clientSite->GetContainer(&container);
+	result = clientSite->GetContainer(&container);
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
@@ -184,31 +90,30 @@ end:
 	return FALSE;
 }
 
-VARIANT_BOOL CLegacyUpdateCtrl::CheckControl(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+#define DoIsPermittedCheck() \
+	if (!IsPermitted()) { \
+		return E_ACCESSDENIED; \
+	}
+
+HRESULT CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
+	DoIsPermittedCheck();
 
 	// Just return true so the site can confirm the control is working.
-	return TRUE;
+	*retval = TRUE;
+	return S_OK;
 }
 
-BSTR CLegacyUpdateCtrl::MessageForHresult(LONG inHresult) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	if (!IsPermitted()) {
-		return NULL;
-	}
-	return GetMessageForHresult(inHresult);
+HRESULT CLegacyUpdateCtrl::MessageForHresult(LONG inHresult, BSTR *retval) {
+	DoIsPermittedCheck();
+	*retval = GetMessageForHresult(inHresult);
+	return S_OK;
 }
 
-VARIANT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemMetric) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+HRESULT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval) {
+	DoIsPermittedCheck();
 
 	VARIANT result;
 	VariantInit(&result);
-
-	if (!IsPermitted()) {
-		return result;
-	}
 
 	result.vt = VT_I4;
 
@@ -257,7 +162,7 @@ VARIANT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemM
 		HRESULT regResult = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", NULL, &data, &size);
 		if (!SUCCEEDED(regResult)) {
 			VariantClear(&result);
-			return result;
+			return regResult;
 		}
 		result.bstrVal = SysAllocStringLen(data, size - 1);
 		result.vt = VT_BSTR;
@@ -270,7 +175,7 @@ VARIANT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemM
 		HRESULT verResult = GetOwnVersion(&data, &size);
 		if (!SUCCEEDED(verResult)) {
 			VariantClear(&result);
-			return result;
+			return verResult;
 		}
 		result.bstrVal = SysAllocStringLen(data, size - 1);
 		result.vt = VT_BSTR;
@@ -285,11 +190,12 @@ VARIANT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemM
 													 }
 	}
 
-	return result;
+	*retval = result;
+	return S_OK;
 }
 
-IDispatch *CLegacyUpdateCtrl::CreateComObject(BSTR progID) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+HRESULT CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
+	DoIsPermittedCheck();
 
 	if (!IsPermitted() || progID == NULL) {
 		return NULL;
@@ -306,140 +212,129 @@ IDispatch *CLegacyUpdateCtrl::CreateComObject(BSTR progID) {
 	}
 	if (!isPermitted) {
 		TRACE("CreateObject(%ls) failed: not permitted\n", progID);
-		return NULL;
+		return E_ACCESSDENIED;
 	}
 
 	CLSID clsid;
 	HRESULT result = CLSIDFromProgID(progID, &clsid);
 	if (!SUCCEEDED(result)) {
-		TRACE("CreateObject(%ls) failed: %ls\n", progID, MessageForHresult(result));
-		return NULL;
+		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(result));
+		return result;
 	}
 
 	IDispatch *object;
 	result = CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, IID_IDispatch, (void **)&object);
 	if (!SUCCEEDED(result)) {
-		TRACE("CreateObject(%ls) failed: %ls\n", progID, MessageForHresult(result));
-		return NULL;
+		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(result));
+		return result;
 	}
 
-	return object;
+	*retval = object;
+	return S_OK;
 }
 
-CLegacyUpdateCtrl::UserType CLegacyUpdateCtrl::GetUserType(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	return IsPermitted() && IsUserAnAdmin() ? e_admin : e_nonAdmin;
+HRESULT CLegacyUpdateCtrl::GetUserType(UserType *retval) {
+	DoIsPermittedCheck();
+	*retval = IsUserAnAdmin() ? e_admin : e_nonAdmin;
+	return S_OK;
 }
 
-VARIANT_BOOL CLegacyUpdateCtrl::IsRebootRequired(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	if (!IsPermitted()) {
-		return FALSE;
-	}
+HRESULT CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
+	DoIsPermittedCheck();
 
 	HKEY subkey;
 	HRESULT result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, KEY_READ, &subkey);
+	*retval = subkey != NULL;
 	if (subkey != NULL) {
 		RegCloseKey(subkey);
-		return TRUE;
 	}
-	return FALSE;
+	return S_OK;
 }
 
-VARIANT_BOOL CLegacyUpdateCtrl::IsWindowsUpdateDisabled(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	if (!IsPermitted()) {
-		return TRUE;
-	}
+HRESULT CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval) {
+	DoIsPermittedCheck();
 
 	DWORD noWU;
 	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", NULL, &noWU);
 	if (SUCCEEDED(result) && noWU == 1) {
-		return TRUE;
+		*retval = TRUE;
+		return S_OK;
 	}
 
 	DWORD disableWUAccess;
 	result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", NULL, &disableWUAccess);
 	if (SUCCEEDED(result) && disableWUAccess == 1) {
-		return TRUE;
+		*retval = TRUE;
+		return S_OK;
 	}
 
-	return FALSE;
+	*retval = FALSE;
+	return S_OK;
 }
 
-void CLegacyUpdateCtrl::RebootIfRequired(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+HRESULT CLegacyUpdateCtrl::RebootIfRequired(void) {
+	DoIsPermittedCheck();
 
-	if (IsPermitted() && IsRebootRequired()) {
+	VARIANT_BOOL isRebootRequired;
+	if (SUCCEEDED(get_IsRebootRequired(&isRebootRequired)) && isRebootRequired) {
 		Reboot();
 	}
+	return S_OK;
 }
 
-void CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	if (!IsPermitted()) {
-		return;
-	}
+HRESULT CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
+	DoIsPermittedCheck();
 
 	WCHAR windir[MAX_PATH];
 	HRESULT result = SHGetFolderPath(0, CSIDL_WINDOWS, NULL, 0, windir);
 	if (!SUCCEEDED(result)) {
 		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(result));
-		return;
+		return result;
 	}
 
 	// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
 	// opening the file (most likely in Notepad).
 	if ((int)ShellExecute(NULL, L"open", L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT) > 32) {
-		return;
+		return S_OK;
 	}
 	ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT);
+	return S_OK;
 }
 
-VARIANT_BOOL CLegacyUpdateCtrl::IsUsingWsusServer(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+HRESULT CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
+	DoIsPermittedCheck();
 
-	if (!IsPermitted()) {
-		return FALSE;
-	}
-	
 	DWORD useWUServer;
 	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", NULL, &useWUServer);
-	return SUCCEEDED(result) && useWUServer == 1;
+	if (!SUCCEEDED(result)) {
+		return result;
+	}
+	*retval = useWUServer == 1;
+	return S_OK;
 }
 
-BSTR CLegacyUpdateCtrl::WsusServerUrl(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	if (!IsPermitted()) {
-		return NULL;
-	}
+HRESULT CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
+	DoIsPermittedCheck();
 
 	LPWSTR data;
 	DWORD size;
 	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", NULL, &data, &size);
 	if (!SUCCEEDED(result)) {
-		return NULL;
+		return result;
 	}
-	return SysAllocStringLen(data, size - 1);
+	*retval = SysAllocStringLen(data, size - 1);
+	return S_OK;
 }
 
-BSTR CLegacyUpdateCtrl::WsusStatusServerUrl(void) {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	if (!IsPermitted()) {
-		return NULL;
-	}
+HRESULT CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
+	DoIsPermittedCheck();
 
 	LPWSTR data;
 	DWORD size;
 	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", NULL, &data, &size);
 	if (!SUCCEEDED(result)) {
-		return NULL;
+		return result;
 	}
-	return SysAllocStringLen(data, size - 1);
+	*retval = SysAllocStringLen(data, size - 1);
+	return S_OK;
 }

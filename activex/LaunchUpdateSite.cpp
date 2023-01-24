@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <comdef.h>
+#include <ShellAPI.h>
+#include <ShlObj.h>
 #include <ExDisp.h>
 #include <strsafe.h>
 #include "Utils.h"

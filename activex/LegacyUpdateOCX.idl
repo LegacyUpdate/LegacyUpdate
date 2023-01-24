@@ -1,73 +1,75 @@
-// LegacyUpdateOCX.idl : type library source for ActiveX Control project.
+// LegacyUpdateOCX.idl : IDL source for LegacyUpdateOCX
+//
 
-// This file will be processed by the MIDL compiler tool to
-// produce the type library (LegacyUpdateOCX.tlb) that will become a resource in
-// LegacyUpdateOCX.ocx.
+// This file will be processed by the MIDL tool to
+// produce the type library (LegacyUpdateOCX.tlb) and marshalling code.
 
 #include <olectl.h>
 #include <idispids.h>
+import "oaidl.idl";
+import "ocidl.idl";
+
+typedef enum {
+	e_majorVer = 0,
+	e_minorVer = 1,
+	e_buildNumber = 2,
+	e_platform = 3,
+	e_SPMajor = 4,
+	e_SPMinor = 5,
+	e_productSuite = 6,
+	e_productType = 7,
+	e_systemMetric = 8,
+	e_SPVersionString = 9,
+	e_controlVersionString = 10,
+	e_VistaProductType = 11,
+	e_maxOSVersionFieldValue = 11
+} OSVersionField;
+
+typedef enum {
+	e_nonAdmin = 0,
+	e_admin = 2
+} UserType;
+
+// Primary dispatch interface for CLegacyUpdateCtrl
+[
+	object,
+	uuid(C33085BB-C3E1-4D27-A214-AF01953DF5E5),
+	dual,
+	nonextensible,
+	helpstring("ILegacyUpdateCtrl Interface"),
+	pointer_default(unique)
+]
+interface ILegacyUpdateCtrl : IDispatch {
+	[id(1)] HRESULT CheckControl([out, retval] VARIANT_BOOL *retval);
+	[id(2)] HRESULT MessageForHresult(LONG inHresult, [out, retval] BSTR *retval);
+	[id(3)] HRESULT GetOSVersionInfo(OSVersionField osField, LONG systemMetric, [out, retval] VARIANT *retval);
+	[id(4)] HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
+	[id(5)] HRESULT GetUserType([out, retval] UserType *retval);
+	[id(8)] HRESULT RebootIfRequired(void);
+	[id(9)] HRESULT ViewWindowsUpdateLog(void);
+
+	[id(6), propget] HRESULT IsRebootRequired([out, retval] VARIANT_BOOL *retval);
+	[id(7), propget] HRESULT IsWindowsUpdateDisabled([out, retval] VARIANT_BOOL *retval);
+	[id(10), propget] HRESULT IsUsingWsusServer([out, retval] VARIANT_BOOL *retval);
+	[id(11), propget] HRESULT WsusServerUrl([out, retval] BSTR *retval);
+	[id(12), propget] HRESULT WsusStatusServerUrl([out, retval] BSTR *retval);
+};
 
 [
 	uuid(05D22F33-C7C3-4C90-BDD9-CEDC86EA8FBE),
 	version(1.0),
-	control,
-	helpstring("Legacy Update ActiveX Control")
+	helpstring("Legacy Update Control")
 ]
 library LegacyUpdateOCXLib {
 	importlib(STDOLE_TLB);
 
-	typedef enum {
-		e_majorVer = 0,
-		e_minorVer = 1,
-		e_buildNumber = 2,
-		e_platform = 3,
-		e_SPMajor = 4,
-		e_SPMinor = 5,
-		e_productSuite = 6,
-		e_productType = 7,
-		e_systemMetric = 8,
-		e_SPVersionString = 9,
-		e_controlVersionString = 10,
-		e_VistaProductType = 11,
-		e_maxOSVersionFieldValue = 11
-	} OSVersionField;
-
-	typedef enum {
-		e_nonAdmin = 0,
-		e_admin = 2
-	} UserType;
-
-	// Primary dispatch interface for CLegacyUpdateCtrl
-	[uuid(3A81AF5D-35C4-441A-82BA-7CA618F112CE)]
-	dispinterface ILegacyUpdateCtrl {
-		properties:
-			[id(6)] VARIANT_BOOL IsRebootRequired;
-			[id(7)] VARIANT_BOOL IsWindowsUpdateDisabled;
-			[id(10)] VARIANT_BOOL IsUsingWsusServer;
-			[id(11)] BSTR WsusServerUrl;
-			[id(12)] BSTR WsusStatusServerUrl;
-
-		methods:
-			[id(1)] VARIANT_BOOL CheckControl(void);
-			[id(2)] BSTR MessageForHresult(LONG inHresult);
-			[id(3)] VARIANT GetOSVersionInfo(OSVersionField osField, LONG systemMetric);
-			[id(4)] IDispatch *CreateObject(BSTR progID);
-			[id(5)] UserType GetUserType(void);
-			[id(8)] void RebootIfRequired(void);
-			[id(9)] void ViewWindowsUpdateLog(void);
-	};
-
-	// Event dispatch interface for CLegacyUpdateCtrl
-	[uuid(BF62027D-E775-49FD-A7E2-A87B08E925C3)]
-	dispinterface ILegacyUpdateCtrlEvents {
-		properties:
-		methods:
-	};
-
 	// Class information for CLegacyUpdateCtrl
-	[uuid(AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F)]
-	coclass LegacyUpdateOCX {
-		[default] dispinterface ILegacyUpdateCtrl;
-		[default, source] dispinterface ILegacyUpdateCtrlEvents;
+	[
+		uuid(AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F),
+		control,
+		helpstring("LegacyUpdateCtrl Class")
+	]
+	coclass LegacyUpdateCtrl {
+		[default] interface ILegacyUpdateCtrl;
 	};
 };

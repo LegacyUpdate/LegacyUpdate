@@ -6,6 +6,8 @@
 #define IDS_LEGACYUPDATE                2
 #define IDS_CHECKFORUPDATES             3
 #define IDS_CHECKFORUPDATES_ALT         4
+#define IDR_LEGACYUPDATEOCX             101
+#define IDR_LEGACYUPDATECTRL            102
 #define IDI_ICON1                       201
 #define IDR_CPLTASKS32                  202
 #define IDR_CPLTASKS64                  203

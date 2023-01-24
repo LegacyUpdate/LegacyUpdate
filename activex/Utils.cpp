@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <comdef.h>
+#include <atlstr.h>
 
 #pragma comment(lib, "version.lib")
 

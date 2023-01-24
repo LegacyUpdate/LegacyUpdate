@@ -28,7 +28,7 @@ Generated\ Files/
 # Files built by Visual Studio
 *_i.c
 *_p.c
-*_h.h
+*_i.h
 *idl.h
 *.ilk
 *.meta

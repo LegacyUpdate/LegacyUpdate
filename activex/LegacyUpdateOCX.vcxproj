@@ -17,21 +17,21 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{95F3E1A1-5DDA-4C4D-B52B-981D46E6C98B}</ProjectGuid>
     <RootNamespace>LegacyUpdateOCX</RootNamespace>
-    <Keyword>MFCActiveXProj</Keyword>
+    <Keyword>AtlProj</Keyword>
+    <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
     <PlatformToolset>v90</PlatformToolset>
+    <UseOfAtl>Dynamic</UseOfAtl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -39,7 +39,6 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
     <PlatformToolset>v90</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -72,21 +71,26 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>.\LegacyUpdateOCX.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
-      <AdditionalDependencies>Version.lib</AdditionalDependencies>
     </Link>
     <Midl>
-      <MkTypLibCompatible>false</MkTypLibCompatible>
-      <ValidateAllParameters>true</ValidateAllParameters>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <GenerateStublessProxies>true</GenerateStublessProxies>
       <TypeLibraryName>$(IntDir)LegacyUpdateOCX.tlb</TypeLibraryName>
-      <HeaderFileName>$(ProjectName)idl.h</HeaderFileName>
+      <HeaderFileName>LegacyUpdateOCX_i.h</HeaderFileName>
+      <DllDataFileName>
+      </DllDataFileName>
+      <InterfaceIdentifierFileName>LegacyUpdateOCX_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>LegacyUpdateOCX_p.c</ProxyFileName>
+      <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -106,21 +110,26 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>.\LegacyUpdateOCX.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
-      <AdditionalDependencies>Version.lib</AdditionalDependencies>
     </Link>
     <Midl>
-      <MkTypLibCompatible>false</MkTypLibCompatible>
-      <ValidateAllParameters>true</ValidateAllParameters>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <GenerateStublessProxies>true</GenerateStublessProxies>
       <TypeLibraryName>$(IntDir)LegacyUpdateOCX.tlb</TypeLibraryName>
-      <HeaderFileName>$(ProjectName)idl.h</HeaderFileName>
+      <HeaderFileName>LegacyUpdateOCX_i.h</HeaderFileName>
+      <DllDataFileName>
+      </DllDataFileName>
+      <InterfaceIdentifierFileName>LegacyUpdateOCX_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>LegacyUpdateOCX_p.c</ProxyFileName>
+      <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -142,7 +151,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,11 +164,17 @@
       </AdditionalDependencies>
     </Link>
     <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MkTypLibCompatible>false</MkTypLibCompatible>
-      <ValidateAllParameters>true</ValidateAllParameters>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <GenerateStublessProxies>true</GenerateStublessProxies>
       <TypeLibraryName>$(IntDir)LegacyUpdateOCX.tlb</TypeLibraryName>
-      <HeaderFileName>$(ProjectName)idl.h</HeaderFileName>
+      <HeaderFileName>LegacyUpdateOCX_i.h</HeaderFileName>
+      <DllDataFileName>
+      </DllDataFileName>
+      <InterfaceIdentifierFileName>LegacyUpdateOCX_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>LegacyUpdateOCX_p.c</ProxyFileName>
+      <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -170,6 +185,8 @@
   <ItemGroup>
     <None Include="icon.ico" />
     <None Include="LegacyUpdateOCX.def" />
+    <None Include="LegacyUpdateOCX.rgs" />
+    <None Include="LegacyUpdateCtrl.rgs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaunchUpdateSite.cpp" />
@@ -182,6 +199,39 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="dlldatax.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="LegacyUpdateOCX_i.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Compat.h" />
@@ -192,6 +242,9 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="dlldatax.h" />
+    <ClInclude Include="dllmain.h" />
+    <ClInclude Include="LegacyUpdateOCX_i.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LegacyUpdateOCX.rc" />
