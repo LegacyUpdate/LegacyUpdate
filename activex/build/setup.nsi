@@ -1,4 +1,4 @@
-!include Constants.nsh
+﻿!include Constants.nsh
 
 Name         "${NAME}"
 Caption      "${NAME}"
@@ -22,22 +22,24 @@ VIAddVersionKey /LANG=1033 "FileVersion"     "${LONGVERSION}"
 VIProductVersion ${LONGVERSION}
 VIFileVersion    ${LONGVERSION}
 
-!define MUI_UI              "modern_aerowizard.exe"
-!define MUI_UI_HEADERIMAGE  "modern_aerowizard.exe"
+!define MUI_UI                       "modern_aerowizard.exe"
+!define MUI_UI_HEADERIMAGE           "modern_aerowizard.exe"
 
 !define MUI_CUSTOMFUNCTION_GUIINIT   OnShow
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
 !define MUI_CUSTOMFUNCTION_ABORT     CleanUp
 
-!define MUI_ICON   "..\icon.ico"
-!define MUI_UNICON "..\icon.ico"
+!define MUI_ICON                     "..\icon.ico"
+!define MUI_UNICON                   "..\icon.ico"
 
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP   "setupbanner.bmp"
-!define MUI_HEADERIMAGE_UNBITMAP "setupbanner.bmp"
+!define MUI_HEADERIMAGE_BITMAP       "setupbanner.bmp"
+!define MUI_HEADERIMAGE_UNBITMAP     "setupbanner.bmp"
 
-!define MEMENTO_REGISTRY_ROOT HKLM
-!define MEMENTO_REGISTRY_KEY  "${REGPATH_LEGACYUPDATE_SETUP}"
+!define MUI_TEXT_ABORT_TITLE         "Installation Failed"
+
+!define MEMENTO_REGISTRY_ROOT        HKLM
+!define MEMENTO_REGISTRY_KEY         "${REGPATH_LEGACYUPDATE_SETUP}"
 
 !include FileFunc.nsh
 !include Integration.nsh
@@ -65,7 +67,7 @@ VIFileVersion    ${LONGVERSION}
 !insertmacro GetParameters
 !insertmacro GetOptions
 
-!define MUI_PAGE_HEADER_TEXT "Welcome to Legacy Update"
+!define MUI_PAGE_HEADER_TEXT         "Welcome to Legacy Update"
 !define MUI_COMPONENTSPAGE_TEXT_TOP  "Select what you would like Legacy Update to do. An internet connection is required to download additional components from Microsoft. Your computer will restart automatically if needed. Close all other programs before continuing."
 !define MUI_PAGE_CUSTOMFUNCTION_PRE  ComponentsPageCheck
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
@@ -73,18 +75,18 @@ VIFileVersion    ${LONGVERSION}
 
 !insertmacro MUI_PAGE_COMPONENTS
 
-!define MUI_PAGE_HEADER_TEXT "Performing Actions"
+!define MUI_PAGE_HEADER_TEXT         "Performing Actions"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
 
 !insertmacro MUI_PAGE_INSTFILES
 
-!define MUI_PAGE_HEADER_TEXT "Uninstall Legacy Update"
+!define MUI_PAGE_HEADER_TEXT         "Uninstall Legacy Update"
 !define MUI_UNCONFIRMPAGE_TEXT_TOP   "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW un.OnShow
 
 !insertmacro MUI_UNPAGE_CONFIRM
 
-!define MUI_PAGE_HEADER_TEXT "Performing Actions"
+!define MUI_PAGE_HEADER_TEXT         "Performing Actions"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW un.OnShow
 
 !insertmacro MUI_UNPAGE_INSTFILES
