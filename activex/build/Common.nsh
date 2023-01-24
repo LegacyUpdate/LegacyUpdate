@@ -110,10 +110,10 @@ FunctionEnd
 	!insertmacro DetailPrint "Extracting ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"' 0
 	!insertmacro DetailPrint "Installing ${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '${filename}\spinstall.exe /unattend /nodialog /warnrestart:600' 0
+	!insertmacro ExecWithErrorHandling '${name}' '"$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600' 0
 
 	; If we successfully abort a shutdown, we'll get exit code 0, so we know a reboot is required.
-	ExecWait "shutdown.exe /a" $0
+	ExecWait "$WINDIR\system32\shutdown.exe /a" $0
 	${If} $0 == 0
 		SetRebootFlag true
 	${EndIf}
@@ -126,9 +126,9 @@ FunctionEnd
 	; may never complete before we install our patches).
 	!insertmacro DetailPrint "Installing ${name} (${kbid})..."
 	SetDetailsPrint none
-	ExecShellWait "" "net" "stop wuauserv" SW_HIDE
+	ExecShellWait "" "$WINDIR\system32\net.exe" "stop wuauserv" SW_HIDE
 	SetDetailsPrint listonly
-	!insertmacro ExecWithErrorHandling '${name} (${kbid})' 'wusa.exe /quiet /norestart "$0"' 1
+	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '$WINDIR\system32\wusa.exe /quiet /norestart "$0"' 1
 !macroend
 
 !macro EnsureAdminRights

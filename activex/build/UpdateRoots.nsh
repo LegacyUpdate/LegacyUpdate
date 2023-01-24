@@ -82,9 +82,9 @@ Function UpdateRoots
 	!insertmacro _DownloadSST "updroots"
 	!insertmacro _DownloadSST "disallowedcert"
 	!insertmacro DetailPrint "Installing Certificate Trust List..."
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe authroots.sst" 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe updroots.sst" 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -l roots.sst" 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -d delroots.sst" 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe -l -u disallowedcert.sst" 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" authroots.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" updroots.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" -l roots.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" -d delroots.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" -l -u disallowedcert.sst' 0
 FunctionEnd

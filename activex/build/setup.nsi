@@ -96,8 +96,8 @@ VIFileVersion    ${LONGVERSION}
 !macro RestartWUAUService
 	!insertmacro DetailPrint "Restarting Windows Update service..."
 	SetDetailsPrint none
-	ExecShellWait "" "net" "stop wuauserv" SW_HIDE
-	ExecShellWait "" "net" "start wuauserv" SW_HIDE
+	ExecShellWait "" "$WINDIR\system32\net.exe" "stop wuauserv" SW_HIDE
+	ExecShellWait "" "$WINDIR\system32\net.exe" "start wuauserv" SW_HIDE
 	SetDetailsPrint listonly
 !macroend
 
@@ -345,7 +345,7 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 ${MementoSectionEnd}
 
 ${MementoSection} "Activate Windows" ACTIVATE
-	ExecShell "" "$SYSDIR\oobe\msoobe.exe" "/a"
+	ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
 ${MementoSectionEnd}
 
 ${MementoSectionDone}

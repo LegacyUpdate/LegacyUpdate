@@ -60,8 +60,8 @@
 			System::Call 'advapi32::FreeSid(i r1)'
 
 			; Create the admin user
-			ExecShellWait "" "net" "user /add ${RUNONCE_USERNAME} ${RUNONCE_PASSWORD}" SW_HIDE
-			ExecShellWait "" "net" 'localgroup /add "$0" ${RUNONCE_USERNAME}' SW_HIDE
+			ExecShellWait "" "$WINDIR\system32\net.exe" "user /add ${RUNONCE_USERNAME} ${RUNONCE_PASSWORD}" SW_HIDE
+			ExecShellWait "" "$WINDIR\system32\net.exe" 'localgroup /add "$0" ${RUNONCE_USERNAME}' SW_HIDE
 
 			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "AutoAdminLogon" "1"
 			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "DefaultDomainName" "."
@@ -118,7 +118,7 @@ Function CleanUpRunOnce
 			!insertmacro RegisterRunOnce "/postinstall"
 		${EndIf}
 
-		ExecShellWait "" "net" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
+		ExecShellWait "" "$WINDIR\system32\net.exe" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
 
 		; Be really really sure this is the right user before we nuke their profile and log out
 		System::Call 'advapi32::GetUserName(t .r0, *i ${NSIS_MAX_STRLEN}) i .r1'

@@ -72,9 +72,9 @@ Function DownloadIE6
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini "W2KIE6" $0-$1
 		!insertmacro DownloadIfNeeded "Internet Explorer 6 SP1" "$0" "ie6sp1.cab"
 		!insertmacro DetailPrint "Extracting Internet Explorer 6 SP1..."
-		ExecShellWait "" "expand.exe" '"$0" -F:ie6setup.exe .' SW_HIDE
-		ExecShellWait "" "expand.exe" '"$0" -F:iebatch.txt .' SW_HIDE
+		ExecShellWait "" "$WINDIR\system32\expand.exe" '"$0" -F:ie6setup.exe "$PLUGINSDIR"' SW_HIDE
+		ExecShellWait "" "$WINDIR\system32\expand.exe" '"$0" -F:iebatch.txt "$PLUGINSDIR"' SW_HIDE
 		!insertmacro DetailPrint "Installing Internet Explorer 6 SP1..."
-		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' '$PLUGINSDIR\ie6setup.exe /q' 0
+		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' '"$PLUGINSDIR\ie6setup.exe" /q' 0
 	${EndIf}
 FunctionEnd
