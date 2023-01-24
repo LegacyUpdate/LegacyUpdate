@@ -1,4 +1,4 @@
-﻿!include Constants.nsh
+!include Constants.nsh
 
 Name         "${NAME}"
 Caption      "${NAME}"
@@ -563,7 +563,7 @@ Function .onInit
 	${If} ${IsWinXP2002}
 	${OrIf} ${IsWinXP2003}
 		; Assume not activated if the activation tray icon process is running
-		FindProcDLL::FindProc "wpabaln.exe"
+		FindProc::FindProc "wpabaln.exe"
 		${If} $R0 != 1
 			!insertmacro RemoveSection ${ACTIVATE}
 		${EndIf}

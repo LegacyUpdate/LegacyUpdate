@@ -1,3 +1,5 @@
+!addplugindir /x86-unicode x86-unicode
+
 !define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'
 
 Function GetArch
