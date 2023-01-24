@@ -74,7 +74,7 @@ FunctionEnd
 !macroend
 
 Function UpdateRoots
-	File "..\build\updroots.exe"
+	File "updroots.exe"
 	!insertmacro DetailPrint "Downloading Certificate Trust List..."
 	!insertmacro _DownloadSST "authroots"
 	!insertmacro _DownloadSST "delroots"

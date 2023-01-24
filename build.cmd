@@ -28,7 +28,7 @@ if exist "%ProgramFiles32%\Microsoft Visual Studio\Installer\vswhere.exe" (
 	exit /b 1
 )
 
-msbuild ..\LegacyUpdate.sln /m /p:Configuration=Release /p:Platform=Win32 %*
+msbuild LegacyUpdate.sln /m /p:Configuration=Release /p:Platform=Win32 %*
 if "%errorlevel%" neq "0" exit /b %errorlevel%
-makensis setup.nsi
+makensis setup\setup.nsi
 if "%errorlevel%" neq "0" exit /b %errorlevel%

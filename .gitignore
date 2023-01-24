@@ -16,8 +16,8 @@ Debug/
 Debug-VC08/
 Debug-VC17/
 Release/
-build/*.exe
-!build/modern_*.exe
+*.exe
+!setup/modern_aerowizard.exe
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

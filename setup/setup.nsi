@@ -29,8 +29,8 @@ VIFileVersion    ${LONGVERSION}
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
 !define MUI_CUSTOMFUNCTION_ABORT     CleanUp
 
-!define MUI_ICON                     "..\icon.ico"
-!define MUI_UNICON                   "..\icon.ico"
+!define MUI_ICON                     "..\activex\icon.ico"
+!define MUI_UNICON                   "..\activex\icon.ico"
 
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP       "setupbanner.bmp"
