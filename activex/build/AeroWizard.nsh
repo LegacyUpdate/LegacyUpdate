@@ -76,6 +76,9 @@
 	!insertmacro SetBackground $0 1029
 	!insertmacro SetBackground $0 1032
 	!insertmacro SetBackground $0 1043
+
+	; Activate taskbar progress bar plugin
+	w7tbp::Start
 !macroend
 
 Function AeroWizardOnShow
