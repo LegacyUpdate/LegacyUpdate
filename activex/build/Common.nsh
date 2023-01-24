@@ -26,16 +26,42 @@ FunctionEnd
 	SetDetailsPrint listonly
 !macroend
 
+!macro DownloadRequest url local
+	NSxfer::Request \
+		/TIMEOUTCONNECT 60000 \
+		/TIMEOUTRECONNECT 60000 \
+		/OPTCONNECTTIMEOUT 60000 \
+		/OPTRECEIVETIMEOUT 60000 \
+		/OPTSENDTIMEOUT 60000 \
+		/URL "${url}" /LOCAL "${local}" \
+		/END
+!macroend
+
+!macro DownloadWait id mode
+	NSxfer::Wait \
+		/ID ${id} \
+		/MODE ${mode} \
+		/STATUSTEXT \
+			"{TIMEREMAINING} left - {RECVSIZE} of {FILESIZE} ({SPEED})" \
+			"{TIMEREMAINING} left - {TOTALRECVSIZE} of {TOTALFILESIZE} ({SPEED})" \
+		/ABORT "$(^Caption)" "Cancelling will terminate Legacy Update setup." \
+		/END
+	NSxfer::Query \
+		/ID ${id} \
+		/ERRORCODE /ERRORTEXT \
+		/END
+!macroend
+
 !macro Download name url filename
 	!insertmacro DetailPrint "Downloading ${name}..."
-	inetc::get \
-		/bgcolor FFFFFF /textcolor 000000 \
-		"${url}" "${filename}" \
-		/end
+	!insertmacro DownloadRequest "${url}" "$PLUGINSDIR\${filename}"
+	Pop $0
+	!insertmacro DownloadWait $0 PAGE
+	Pop $1
 	Pop $0
 	${If} $0 != "OK"
-		${If} $0 != "Cancelled"
-			MessageBox MB_OK|MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0" /SD IDOK
+		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
+			MessageBox MB_OK|MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
 		${EndIf}
 		SetErrorLevel 1
 		Abort
@@ -65,7 +91,7 @@ FunctionEnd
 		StrCpy $0 "$EXEDIR\${filename}"
 	${Else}
 		!insertmacro Download '${name}' '${url}' '${filename}'
-		StrCpy $0 "${filename}"
+		StrCpy $0 "$PLUGINSDIR\${filename}"
 	${EndIf}
 !macroend
 
@@ -80,7 +106,7 @@ FunctionEnd
 
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
 	!insertmacro DetailPrint "Extracting ${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}.exe"' 0
+	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"' 0
 	!insertmacro DetailPrint "Installing ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '${filename}\spinstall.exe /unattend /nodialog /warnrestart:600' 0
 

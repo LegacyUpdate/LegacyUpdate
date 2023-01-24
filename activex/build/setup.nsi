@@ -318,7 +318,10 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	${If} ${AtMostWinVista}
 		; Check if Schannel is going to work with modern TLS
 		!insertmacro DetailPrint "Checking SSL connectivity..."
-		inetc::get /silent /tostack "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" "" /end
+		!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE
+		Pop $0
+		!insertmacro DownloadWait $0 SILENT
+		Pop $0
 		Pop $0
 
 		${If} $0 == "OK"

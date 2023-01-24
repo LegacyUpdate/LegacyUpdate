@@ -58,25 +58,29 @@ Function ConfigureCrypto
 	${EndIf}
 FunctionEnd
 
-Function UpdateRoots
-	File "..\build\updroots.exe"
-	!insertmacro DetailPrint "Downloading Certificate Trust List..."
-	inetc::get \
-		/silent /bgcolor FFFFFF /textcolor 000000 \
-		"${TRUSTEDR}/authroots.sst"      "authroots.sst" \
-		"${TRUSTEDR}/delroots.sst"       "delroots.sst" \
-		"${TRUSTEDR}/roots.sst"          "roots.sst" \
-		"${TRUSTEDR}/updroots.sst"       "updroots.sst" \
-		"${TRUSTEDR}/disallowedcert.sst" "disallowedcert.sst" \
-		/end
+!macro _DownloadSST name
+	!insertmacro DownloadRequest "${TRUSTEDR}/${name}.sst"      "${name}.sst"
+	Pop $0
+	!insertmacro DownloadWait $0 SILENT
+	Pop $1
 	Pop $0
 	${If} $0 != "OK"
-		${If} $0 != "Cancelled"
-			MessageBox MB_OK|MB_USERICON "Certificate Trust List failed to download.$\r$\n$\r$\n$0" /SD IDOK
+		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
+			MessageBox MB_OK|MB_USERICON "Certificate Trust List failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
 		${EndIf}
 		SetErrorLevel 1
 		Abort
 	${EndIf}
+!macroend
+
+Function UpdateRoots
+	File "..\build\updroots.exe"
+	!insertmacro DetailPrint "Downloading Certificate Trust List..."
+	!insertmacro _DownloadSST "authroots"
+	!insertmacro _DownloadSST "delroots"
+	!insertmacro _DownloadSST "roots"
+	!insertmacro _DownloadSST "updroots"
+	!insertmacro _DownloadSST "disallowedcert"
 	!insertmacro DetailPrint "Installing Certificate Trust List..."
 	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe authroots.sst" 0
 	!insertmacro ExecWithErrorHandling "Certificate Trust List" "updroots.exe updroots.sst" 0
