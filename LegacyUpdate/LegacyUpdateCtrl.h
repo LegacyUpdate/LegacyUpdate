@@ -32,57 +32,55 @@ public:
 		m_bWindowOnly = TRUE;
 	}
 
-DECLARE_OLEMISC_STATUS(
-	OLEMISC_INVISIBLEATRUNTIME |
-	OLEMISC_ACTIVATEWHENVISIBLE |
-	OLEMISC_SETCLIENTSITEFIRST |
-	OLEMISC_INSIDEOUT |
-	OLEMISC_CANTLINKINSIDE |
-	OLEMISC_RECOMPOSEONRESIZE
-)
+	DECLARE_OLEMISC_STATUS(
+		OLEMISC_INVISIBLEATRUNTIME |
+		OLEMISC_ACTIVATEWHENVISIBLE |
+		OLEMISC_SETCLIENTSITEFIRST |
+		OLEMISC_INSIDEOUT |
+		OLEMISC_CANTLINKINSIDE |
+		OLEMISC_RECOMPOSEONRESIZE
+	)
 
-DECLARE_REGISTRY_RESOURCEID(IDR_LEGACYUPDATECTRL)
+	DECLARE_REGISTRY_RESOURCEID(IDR_LEGACYUPDATECTRL)
 
+	BEGIN_COM_MAP(CLegacyUpdateCtrl)
+		COM_INTERFACE_ENTRY(ILegacyUpdateCtrl)
+		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY(IViewObjectEx)
+		COM_INTERFACE_ENTRY(IViewObject2)
+		COM_INTERFACE_ENTRY(IViewObject)
+		COM_INTERFACE_ENTRY(IOleInPlaceObjectWindowless)
+		COM_INTERFACE_ENTRY(IOleInPlaceObject)
+		COM_INTERFACE_ENTRY2(IOleWindow, IOleInPlaceObjectWindowless)
+		COM_INTERFACE_ENTRY(IOleInPlaceActiveObject)
+		COM_INTERFACE_ENTRY(IOleControl)
+		COM_INTERFACE_ENTRY(IOleObject)
+		COM_INTERFACE_ENTRY(IPersistStreamInit)
+		COM_INTERFACE_ENTRY2(IPersist, IPersistStreamInit)
+		COM_INTERFACE_ENTRY(ISupportErrorInfo)
+		COM_INTERFACE_ENTRY(IQuickActivate)
+		COM_INTERFACE_ENTRY(IPersistStorage)
+		COM_INTERFACE_ENTRY(IProvideClassInfo)
+		COM_INTERFACE_ENTRY(IProvideClassInfo2)
+	END_COM_MAP()
 
-BEGIN_COM_MAP(CLegacyUpdateCtrl)
-	COM_INTERFACE_ENTRY(ILegacyUpdateCtrl)
-	COM_INTERFACE_ENTRY(IDispatch)
-	COM_INTERFACE_ENTRY(IViewObjectEx)
-	COM_INTERFACE_ENTRY(IViewObject2)
-	COM_INTERFACE_ENTRY(IViewObject)
-	COM_INTERFACE_ENTRY(IOleInPlaceObjectWindowless)
-	COM_INTERFACE_ENTRY(IOleInPlaceObject)
-	COM_INTERFACE_ENTRY2(IOleWindow, IOleInPlaceObjectWindowless)
-	COM_INTERFACE_ENTRY(IOleInPlaceActiveObject)
-	COM_INTERFACE_ENTRY(IOleControl)
-	COM_INTERFACE_ENTRY(IOleObject)
-	COM_INTERFACE_ENTRY(IPersistStreamInit)
-	COM_INTERFACE_ENTRY2(IPersist, IPersistStreamInit)
-	COM_INTERFACE_ENTRY(ISupportErrorInfo)
-	COM_INTERFACE_ENTRY(IQuickActivate)
-	COM_INTERFACE_ENTRY(IPersistStorage)
-	COM_INTERFACE_ENTRY(IProvideClassInfo)
-	COM_INTERFACE_ENTRY(IProvideClassInfo2)
-END_COM_MAP()
+	BEGIN_PROP_MAP(CLegacyUpdateCtrl)
+	END_PROP_MAP()
 
-BEGIN_PROP_MAP(CLegacyUpdateCtrl)
-END_PROP_MAP()
+	BEGIN_MSG_MAP(CLegacyUpdateCtrl)
+		CHAIN_MSG_MAP(CComControl<CLegacyUpdateCtrl>)
+		DEFAULT_REFLECTION_HANDLER()
+	END_MSG_MAP()
 
-BEGIN_MSG_MAP(CLegacyUpdateCtrl)
-	CHAIN_MSG_MAP(CComControl<CLegacyUpdateCtrl>)
-	DEFAULT_REFLECTION_HANDLER()
-END_MSG_MAP()
-
-// ISupportsErrorInfo
+	// ISupportsErrorInfo
 	STDMETHOD(InterfaceSupportsErrorInfo)(REFIID riid) {
 		return IsEqualGUID(riid, IID_ILegacyUpdateCtrl) ? S_OK : S_FALSE;
 	}
 
-// IViewObjectEx
+	// IViewObjectEx
 	DECLARE_VIEW_STATUS(VIEWSTATUS_SOLIDBKGND | VIEWSTATUS_OPAQUE)
 
-// ILegacyUpdateCtrl
-
+	// ILegacyUpdateCtrl
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 	HRESULT FinalConstruct() { return S_OK; }
@@ -93,18 +91,18 @@ private:
 	BOOL IsPermitted();
 
 public:
-	HRESULT STDMETHODCALLTYPE CheckControl(VARIANT_BOOL *retval);
-	HRESULT STDMETHODCALLTYPE MessageForHresult(LONG inHresult, BSTR *retval);
-	HRESULT STDMETHODCALLTYPE GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
-	HRESULT STDMETHODCALLTYPE CreateObject(BSTR progID, IDispatch **retval);
-	HRESULT STDMETHODCALLTYPE GetUserType(UserType *retval);
-	HRESULT STDMETHODCALLTYPE get_IsRebootRequired(VARIANT_BOOL *retval);
-	HRESULT STDMETHODCALLTYPE get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);
-	HRESULT STDMETHODCALLTYPE RebootIfRequired(void);
-	HRESULT STDMETHODCALLTYPE ViewWindowsUpdateLog(void);
-	HRESULT STDMETHODCALLTYPE get_IsUsingWsusServer(VARIANT_BOOL *retval);
-	HRESULT STDMETHODCALLTYPE get_WsusServerUrl(BSTR *retval);
-	HRESULT STDMETHODCALLTYPE get_WsusStatusServerUrl(BSTR *retval);
+	STDMETHODIMP CheckControl(VARIANT_BOOL *retval);
+	STDMETHODIMP MessageForHresult(LONG inHresult, BSTR *retval);
+	STDMETHODIMP GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
+	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
+	STDMETHODIMP GetUserType(UserType *retval);
+	STDMETHODIMP get_IsRebootRequired(VARIANT_BOOL *retval);
+	STDMETHODIMP get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);
+	STDMETHODIMP RebootIfRequired(void);
+	STDMETHODIMP ViewWindowsUpdateLog(void);
+	STDMETHODIMP get_IsUsingWsusServer(VARIANT_BOOL *retval);
+	STDMETHODIMP get_WsusServerUrl(BSTR *retval);
+	STDMETHODIMP get_WsusStatusServerUrl(BSTR *retval);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LegacyUpdateCtrl), CLegacyUpdateCtrl)

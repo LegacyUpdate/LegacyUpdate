@@ -50,7 +50,7 @@ IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
 	return document;
 
 end:
-	if (result != S_OK) {
+	if (!SUCCEEDED(result)) {
 		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(result));
 	}
 	return NULL;
@@ -95,7 +95,7 @@ end:
 		return E_ACCESSDENIED; \
 	}
 
-HRESULT CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	// Just return true so the site can confirm the control is working.
@@ -103,69 +103,69 @@ HRESULT CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::MessageForHresult(LONG inHresult, BSTR *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::MessageForHresult(LONG inHresult, BSTR *retval) {
 	DoIsPermittedCheck();
 	*retval = GetMessageForHresult(inHresult);
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval) {
 	DoIsPermittedCheck();
 
-	VARIANT result;
-	VariantInit(&result);
-
-	result.vt = VT_I4;
+	VariantInit(retval);
+	retval->vt = VT_I4;
 
 	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
 
 	switch (osField) {
 	case e_majorVer:
-		result.lVal = versionInfo->dwMajorVersion;
+		retval->lVal = versionInfo->dwMajorVersion;
 		break;
 
 	case e_minorVer:
-		result.lVal = versionInfo->dwMinorVersion;
+		retval->lVal = versionInfo->dwMinorVersion;
 		break;
 
 	case e_buildNumber:
-		result.lVal = versionInfo->dwBuildNumber;
+		retval->lVal = versionInfo->dwBuildNumber;
 		break;
 
 	case e_platform:
-		result.lVal = versionInfo->dwPlatformId;
+		retval->lVal = versionInfo->dwPlatformId;
 		break;
 
 	case e_SPMajor:
-		result.lVal = versionInfo->wServicePackMajor;
+		retval->lVal = versionInfo->wServicePackMajor;
 		break;
 
 	case e_SPMinor:
-		result.lVal = versionInfo->wServicePackMinor;
+		retval->lVal = versionInfo->wServicePackMinor;
 		break;
 
 	case e_productSuite:
-		result.lVal = versionInfo->wSuiteMask;
+		retval->lVal = versionInfo->wSuiteMask;
 		break;
 
 	case e_productType:
-		result.lVal = versionInfo->wProductType;
+		retval->lVal = versionInfo->wProductType;
 		break;
 
 	case e_systemMetric:
-		result.lVal = GetSystemMetrics(systemMetric);
+		retval->lVal = GetSystemMetrics(systemMetric);
 		break;
 
 	case e_SPVersionString: {
 		LPWSTR data;
 		DWORD size;
 		HRESULT regResult = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", NULL, &data, &size);
-		if (!SUCCEEDED(regResult)) {
-			VariantClear(&result);
-			return regResult;
+		if (SUCCEEDED(regResult)) {
+			retval->vt = VT_BSTR;
+			retval->bstrVal = SysAllocStringLen(data, size - 1);
+		} else {
+			// BuildLab doesn't exist on Windows 2000.
+			retval->vt = VT_BSTR;
+			retval->bstrVal = SysAllocString(versionInfo->szCSDVersion);
 		}
-		result.bstrVal = SysAllocStringLen(data, size - 1);
-		result.vt = VT_BSTR;
 		break;
 													}
 
@@ -174,31 +174,30 @@ HRESULT CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemM
 		DWORD size;
 		HRESULT verResult = GetOwnVersion(&data, &size);
 		if (!SUCCEEDED(verResult)) {
-			VariantClear(&result);
 			return verResult;
 		}
-		result.bstrVal = SysAllocStringLen(data, size - 1);
-		result.vt = VT_BSTR;
+		retval->vt = VT_BSTR;
+		retval->bstrVal = SysAllocStringLen(data, size - 1);
 		break;
 															 }
 
 	case e_VistaProductType: {
 		DWORD productType;
 		GetVistaProductInfo(versionInfo->dwMajorVersion, versionInfo->dwMinorVersion, versionInfo->wServicePackMajor, versionInfo->wServicePackMinor, &productType);
-		result.lVal = productType;
+		retval->vt = VT_UI4;
+		retval->ulVal = productType;
 		break;
 													 }
 	}
 
-	*retval = result;
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
+STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 	DoIsPermittedCheck();
 
-	if (!IsPermitted() || progID == NULL) {
-		return NULL;
+	if (progID == NULL) {
+		return E_INVALIDARG;
 	}
 
 	BOOL isPermitted = FALSE;
@@ -233,13 +232,13 @@ HRESULT CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::GetUserType(UserType *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 	DoIsPermittedCheck();
 	*retval = IsUserAnAdmin() ? e_admin : e_nonAdmin;
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	HKEY subkey;
@@ -251,7 +250,7 @@ HRESULT CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	DWORD noWU;
@@ -272,7 +271,7 @@ HRESULT CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval) {
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::RebootIfRequired(void) {
+STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	DoIsPermittedCheck();
 
 	VARIANT_BOOL isRebootRequired;
@@ -282,7 +281,7 @@ HRESULT CLegacyUpdateCtrl::RebootIfRequired(void) {
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
+STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	DoIsPermittedCheck();
 
 	WCHAR windir[MAX_PATH];
@@ -301,40 +300,31 @@ HRESULT CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	DWORD useWUServer;
 	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", NULL, &useWUServer);
-	if (!SUCCEEDED(result)) {
-		return result;
-	}
-	*retval = useWUServer == 1;
+	*retval = SUCCEEDED(result) && useWUServer == 1;
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 	DoIsPermittedCheck();
 
 	LPWSTR data;
 	DWORD size;
 	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", NULL, &data, &size);
-	if (!SUCCEEDED(result)) {
-		return result;
-	}
-	*retval = SysAllocStringLen(data, size - 1);
+	*retval = SUCCEEDED(result) ? SysAllocStringLen(data, size - 1) : NULL;
 	return S_OK;
 }
 
-HRESULT CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 	DoIsPermittedCheck();
 
 	LPWSTR data;
 	DWORD size;
 	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", NULL, &data, &size);
-	if (!SUCCEEDED(result)) {
-		return result;
-	}
-	*retval = SysAllocStringLen(data, size - 1);
+	*retval = SUCCEEDED(result) ? SysAllocStringLen(data, size - 1) : NULL;
 	return S_OK;
 }
