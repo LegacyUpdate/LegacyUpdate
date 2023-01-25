@@ -261,23 +261,14 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 	; Install DLL, with detection for it being in use by IE
-	ClearErrors
 	SetOverwrite try
-	File "..\Release\LegacyUpdate.dll"
-	IfErrors 0 +3
-		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to write to "$OUTDIR\LegacyUpdate.dll".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
-			/SD IDCANCEL \
-			IDRETRY -3
-		Abort
+	!insertmacro TryWithRetry \
+		`File "..\Release\LegacyUpdate.dll"` \
+		'Unable to write to "$OUTDIR\LegacyUpdate.dll".'
 	SetOverwrite on
 
 	; Register DLL
-	RegDLL "$OUTDIR\LegacyUpdate.dll"
-	IfErrors 0 +3
-		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to register Legacy Update ActiveX control.$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
-			/SD IDCANCEL \
-			IDRETRY -3
-		Abort
+	!insertmacro RegisterDLL "" "$OUTDIR\LegacyUpdate.dll"
 
 	; Create shortcut
 	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
@@ -370,7 +361,7 @@ Section -Uninstall
 	${EndIf}
 
 	; Unregister dll
-	UnRegDLL "$INSTDIR\LegacyUpdate.dll"
+	!insertmacro RegisterDLL "Un" "$INSTDIR\LegacyUpdate.dll"
 
 	; Clear WSUS server
 	${If} ${AtMostWinVista}
@@ -390,7 +381,9 @@ Section -Uninstall
 	; Delete the rest
 	Delete "$INSTDIR\Uninstall.exe"
 	Delete "$INSTDIR\LegacyUpdateSetup.exe"
-	!insertmacro DeleteFileOrAskAbort "$INSTDIR\LegacyUpdate.dll"
+	!insertmacro TryWithRetry \
+		`Delete "$INSTDIR\LegacyUpdate.dll"` \
+		'Unable to delete "$INSTDIR\LegacyUpdate.dll".'
 	RMDir "$INSTDIR"
 	RMDir "$INSTDIR\Backup"
 	DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"

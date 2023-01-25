@@ -150,10 +150,35 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro DeleteFileOrAskAbort path
+!macro TryWithRetry command error
 	ClearErrors
-	Delete "${path}"
-	IfErrors 0 +3
-		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to delete "${path}".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' /SD IDCANCEL IDRETRY -3
+	${command}
+	IfErrors 0 +6
+		MessageBox MB_RETRYCANCEL|MB_USERICON \
+			'${error}$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
+			/SD IDCANCEL \
+			IDRETRY -6
 		Abort
+!macroend
+
+!macro RegisterDLL un file
+	ClearErrors
+	${un}RegDLL "${file}"
+	${If} ${Errors}
+		; Try again with regsvr32. RegDLL seems to fail on Win2k, not sure why.
+		ClearErrors
+
+		${If} "${un}" == "Un"
+			StrCpy $0 "/u"
+		${Else}
+			StrCpy $0 ""
+		${EndIf}
+
+		ExecWait '"$SYSDIR\regsvr32.exe" /s $0 "${file}"'
+		${If} ${Errors}
+			; Do it again non-silently so the user can see the error.
+			ExecWait '"$SYSDIR\regsvr32.exe" $0 "${file}"'
+			Abort
+		${EndIf}
+	${EndIf}
 !macroend
