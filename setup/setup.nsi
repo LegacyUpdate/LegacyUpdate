@@ -600,11 +600,6 @@ Function PostInstall
 		${If} ${SectionIsSelected} ${WIN81UPGRADE}
 			ExecShell "" "${WIN81UPGRADE_URL}"
 		${EndIf}
-
-		; Clean up temporary setup exe if we created it (likely on next reboot)
-		${If} ${FileExists} "$INSTDIR\LegacyUpdateSetup.exe"
-			Delete /REBOOTOK "$INSTDIR\LegacyUpdateSetup.exe"
-		${EndIf}
 	${EndIf}
 FunctionEnd
 

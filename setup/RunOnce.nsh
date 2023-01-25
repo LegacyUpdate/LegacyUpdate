@@ -2,7 +2,7 @@
 !define IsPostInstall `"" HasFlag "/postinstall"`
 !define NoRestart     `"" HasFlag "/norestart"`
 
-!macro -PromptReboot un
+!macro -PromptReboot
 	SetErrorLevel ${ERROR_SUCCESS_REBOOT_REQUIRED}
 
 	${If} ${NoRestart}
@@ -18,9 +18,21 @@
 	${EndIf}
 !macroend
 
-!macro RegisterRunOnce flags
+!macro -RegisterRunOnce flags
 	WriteRegStr HKLM "${REGPATH_RUNONCE}" "Legacy Update" '"$INSTDIR\LegacyUpdateSetup.exe" ${flags}'
 !macroend
+
+Function RegisterRunOnce
+	!insertmacro -RegisterRunOnce "/runonce"
+FunctionEnd
+
+Function un.RegisterRunOnce
+	; Unused, just needs to exist to make the compiler happy
+FunctionEnd
+
+Function RegisterRunOncePostInstall
+	!insertmacro -RegisterRunOnce "/postinstall"
+FunctionEnd
 
 !macro -WriteRegStrWithBackup root key name value
 	; Backup the key if it exists
@@ -73,8 +85,8 @@
 			CopyFiles /SILENT "$EXEPATH" "$INSTDIR\LegacyUpdateSetup.exe"
 		${EndIf}
 
-		!insertmacro RegisterRunOnce "/runonce"
-		!insertmacro -PromptReboot "${un}"
+		Call ${un}RegisterRunOnce
+		!insertmacro -PromptReboot
 		Quit
 	${EndIf}
 !macroend
@@ -103,6 +115,13 @@ Function OnRunOnceLogon
 		System::Call 'kernel32::SetEvent(i r0)'
 		System::Call 'kernel32::CloseHandle(i r0)'
 	${EndIf}
+
+	; Handle Safe Mode case. Runonce can still be processed in Safe Mode in some edge cases. If that
+	; happens, just silently register runonce again and quit.
+	${If} ${IsSafeMode}
+		Call RegisterRunOnce
+		Quit
+	${EndIf}
 FunctionEnd
 
 Function CleanUpRunOnce
@@ -113,16 +132,21 @@ Function CleanUpRunOnce
 	!insertmacro -RestoreRegStr HKLM "${REGPATH_WINLOGON}" "DefaultPassword"
 
 	; Register postinstall runonce for the next admin user logon, and log out of the temporary user
-	${If} ${IsRunOnce}
-		${IfNot} ${Abort}
-			!insertmacro RegisterRunOnce "/postinstall"
-		${EndIf}
+	ExecShellWait "" "$WINDIR\system32\net.exe" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
 
-		ExecShellWait "" "$WINDIR\system32\net.exe" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
+	${If} ${IsRunOnce}
+		; Clean up temporary setup exe if we created it (likely on next reboot)
+		${If} ${FileExists} "$INSTDIR\LegacyUpdateSetup.exe"
+			Delete /REBOOTOK "$INSTDIR\LegacyUpdateSetup.exe"
+		${EndIf}
 
 		; Be really really sure this is the right user before we nuke their profile and log out
 		System::Call 'advapi32::GetUserName(t .r0, *i ${NSIS_MAX_STRLEN}) i .r1'
 		${If} $0 == "${RUNONCE_USERNAME}"
+			${IfNot} ${Abort}
+				Call RegisterRunOncePostInstall
+			${EndIf}
+
 			RMDir /r /REBOOTOK "$PROFILE"
 			System::Call "user32::ExitWindowsEx(i ${EWX_FORCEIFHUNG}, i 0) i .r0"
 		${EndIf}

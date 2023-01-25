@@ -5,27 +5,27 @@
 
 ; Defines
 
-!define OSVERSIONINFOW_SIZE   276
-!define OSVERSIONINFOEXW_SIZE 284
+!define OSVERSIONINFOW_SIZE      276
+!define OSVERSIONINFOEXW_SIZE    284
 
-!define WINVER_2000   0x0500 ;  5.0.2195
-!define WINVER_XP     0x0501 ;  5.1.2600
-!define WINVER_XP2002 0x0501 ;  5.1.2600
-!define WINVER_XP2003 0x0502 ;  5.2.3790
-!define WINVER_VISTA  0x0600 ;  6.0.6000
-!define WINVER_7      0x0601 ;  6.1.7600
-!define WINVER_8      0x0602 ;  6.2.9200
-!define WINVER_8.1    0x0603 ;  6.3.9600
-!define WINVER_10     0x0A00 ; 10.0.10240
+!define WINVER_2000              0x0500 ;  5.0.2195
+!define WINVER_XP                0x0501 ;  5.1.2600
+!define WINVER_XP2002            0x0501 ;  5.1.2600
+!define WINVER_XP2003            0x0502 ;  5.2.3790
+!define WINVER_VISTA             0x0600 ;  6.0.6000
+!define WINVER_7                 0x0601 ;  6.1.7600
+!define WINVER_8                 0x0602 ;  6.2.9200
+!define WINVER_8.1               0x0603 ;  6.3.9600
+!define WINVER_10                0x0A00 ; 10.0.10240
 
-!define WINVER_SERVER_2000   ${WINVER_2000}
-!define WINVER_SERVER_2003   ${WINVER_XP2003}
-!define WINVER_SERVER_2003R2 ${WINVER_XP2003}
-!define WINVER_SERVER_2008   ${WINVER_VISTA}
-!define WINVER_SERVER_2008R2 ${WINVER_7}
-!define WINVER_SERVER_2012   ${WINVER_8}
-!define WINVER_SERVER_2012R2 ${WINVER_8.1}
-!define WINVER_SERVER_2016   ${WINVER_10}
+!define WINVER_SERVER_2000       ${WINVER_2000}
+!define WINVER_SERVER_2003       ${WINVER_XP2003}
+!define WINVER_SERVER_2003R2     ${WINVER_XP2003}
+!define WINVER_SERVER_2008       ${WINVER_VISTA}
+!define WINVER_SERVER_2008R2     ${WINVER_7}
+!define WINVER_SERVER_2012       ${WINVER_8}
+!define WINVER_SERVER_2012R2     ${WINVER_8.1}
+!define WINVER_SERVER_2016       ${WINVER_10}
 
 !define /ifndef VER_NT_WORKSTATION 1
 
@@ -43,6 +43,8 @@
 !define VER_SUITE_TERMINAL       0x00000010 ; Terminal Services (always true)
 !define VER_SUITE_WH_SERVER      0x00008000 ; Windows Home Server
 !define VER_SUITE_MULTIUSERTS    0x00020000 ; Multi-user Remote Desktop
+
+!define SM_CLEANBOOT             67
 
 ; Init
 
@@ -101,12 +103,22 @@
 	!insertmacro _= $_LOGICLIB_TEMP ${num} `${_t}` `${_f}`
 !macroend
 
+!macro __WinVer_TestSystemMetric op metric _t _f
+	!insertmacro _LOGICLIB_TEMP
+	${CallArtificialFunction} __WinVer_Init
+	System::Call 'user32::GetSystemMetrics(i ${metric}) i .s'
+	Pop $_LOGICLIB_TEMP
+	!insertmacro _${op} $_LOGICLIB_TEMP 0 `${_t}` `${_f}`
+!macroend
+
 ; Defines
 
 !define IsClientOS         `=  _WinVer_TestProduct ${VER_NT_WORKSTATION}`
 !define IsServerOS         `!= _WinVer_TestProduct ${VER_NT_WORKSTATION}`
 
 !define IsHomeEdition      `"" _WinVer_TestSuite ${VER_SUITE_PERSONAL}`
+
+!define IsSafeMode         `!= _WinVer_TestSystemMetric ${SM_CLEANBOOT}`
 
 !define IsServicePack      `=  _WinVer_TestSP`
 !define AtLeastServicePack `>= _WinVer_TestSP`
