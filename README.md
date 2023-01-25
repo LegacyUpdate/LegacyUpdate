@@ -9,7 +9,7 @@ To address this, [**Legacy Update**](https://legacyupdate.net/) hosts a patched 
 > *If this website helped you to update your old PCs, please consider [leaving a tip](https://github.com/sponsors/kirb) to help me pay for the server costs. Thank you!*
 
 ## The ActiveX Control
-This repo hosts LegacyUpdateOCX, an ActiveX control used as a replica of the original one developed by Microsoft for the official Windows Update website. The original version of Legacy Update required using a proxy autoconfiguration file (.pac) and some additional configuration of IE security settings to intercept requests to the **update.microsoft.com** site, because the Microsoft Wuweb.dll control validates that it is being used on the official update.microsoft.com domain. With the custom LegacyUpdateOCX ActiveX control, proxying is no longer required, because we have full control over the validation logic. This also allows adding additional convenient features not possible with JavaScript alone.
+This repo hosts an ActiveX control used as a replica of the original one developed by Microsoft for the official Windows Update website. The original version of Legacy Update required using a proxy autoconfiguration file (.pac) and some additional configuration of IE security settings to intercept requests to the **update.microsoft.com** site, because the Microsoft Wuweb.dll control validates that it is being used on the official update.microsoft.com domain. With the custom Legacy Update ActiveX control, proxying is no longer required, because we have full control over the validation logic. This also allows adding additional convenient features not possible with JavaScript alone.
 
 ### Building
 The project can be built on any version of Windows from XP to 11, though if you run a later OS you’ll ideally want to set up an XP VM for testing.
@@ -25,16 +25,18 @@ You will need to install:
 * [Visual Studio 2008](https://my.visualstudio.com/Downloads?q=Visual%20Studio%20Express%202008%20with%20Service%20Pack%201&pgroup=) for compiling a build that works on XP RTM and 2000 SP4 - not required if you only want to build for XP SP2 and later
 * [NSIS](https://nsis.sourceforge.io/)
 
-In `activex/build/` you will need to download the following additional files:
+In `setup/` you will need to download the following additional files:
 
 * A copy of updroots.exe, which you can extract from [this update](http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe) using 7-Zip or extract.exe.
+
+I’ve already bundled copies of the NSIS plugins [w7tbp](https://nsis.sourceforge.io/TaskbarProgress_plug-in) (Windows 7+ taskbar progress bar feature - zlib license), [FindProc](https://nsis.sourceforge.io/FindProcDLL_plug-in) (checks if a process is running - ? license), and my fork of [NSxfer](https://github.com/kirb/nsis-nsxfer) (file downloader - zlib license).
 
 ### Testing
 For debugging, if running on XP with IE8, install [Utilu IE Collection](https://www.utilu.com/iecollection/). IE6/IE7 is much more useful for debugging the native code, because of its simplistic single-process model. Visual Studio is able to launch it and directly attach to the process the code is running in.
 
 To configure the debugger:
 
-1. Right click LegacyUpdateOCX in the Solution Explorer &rarr; Properties
+1. Right click LegacyUpdate in the Solution Explorer &rarr; Properties
 2. In the Debugging tab, set the Command field to:
 	* For system IE install: `$(ProgramW6432)\Internet Explorer\iexplore.exe`
 	* For Utilu IE6 RTM: `$(ProgramW6432)\Utilu IE Collection\IE600\iexplore.exe`
@@ -42,7 +44,7 @@ To configure the debugger:
 	* For Utilu IE7: `$(ProgramW6432)\Utilu IE Collection\IE700\iexplore.exe`
 3. Set the Command Arguments field to `http://legacyupdate.net/windowsupdate/v6/`, or any other URL you want to use for debugging
 4. If running on XP, in the Debugger tab, set Register Output to Yes.
-	If running on Vista or later, this will throw a permission denied error due to UAC. You’ll need to manually register the control using `regsvr32 LegacyUpdateOCX.dll` in an administrator command prompt.
+	If running on Vista or later, this will throw a permission denied error due to UAC. You’ll need to manually register the control using `regsvr32 LegacyUpdate.dll` in an administrator command prompt.
 
 ## Disclaimer
 The existence of this project shouldn’t be taken as an endorsement to continue using unsupported OSes. You should stick to a supported OS such as Windows 10 or 11 (or, try Linux?!). However, this service exists anyway in recognition that using these OSes is sometimes necessary to run legacy hardware/software, or just interesting to play around with.

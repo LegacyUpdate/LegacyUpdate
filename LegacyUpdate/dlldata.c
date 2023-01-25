@@ -19,12 +19,12 @@
 extern "C"   {
 #endif
 
-EXTERN_PROXY_FILE( LegacyUpdateOCX )
+EXTERN_PROXY_FILE( LegacyUpdate )
 
 
 PROXYFILE_LIST_START
 /* Start of list */
-  REFERENCE_PROXY_FILE( LegacyUpdateOCX ),
+  REFERENCE_PROXY_FILE( LegacyUpdate ),
 /* End of list */
 PROXYFILE_LIST_END
 

@@ -13,6 +13,6 @@
 #define ENTRY_PREFIX	Prx
 
 #include "dlldata.c"
-#include "LegacyUpdateOCX_p.c"
+#include "LegacyUpdate_p.c"
 
 #endif //_MERGE_PROXYSTUB

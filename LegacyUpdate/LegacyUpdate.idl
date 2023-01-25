@@ -1,8 +1,8 @@
-// LegacyUpdateOCX.idl : IDL source for LegacyUpdateOCX
+// LegacyUpdate.idl : IDL source for LegacyUpdate
 //
 
 // This file will be processed by the MIDL tool to
-// produce the type library (LegacyUpdateOCX.tlb) and marshalling code.
+// produce the type library (LegacyUpdate.tlb) and marshalling code.
 
 #include <olectl.h>
 #include <idispids.h>
@@ -60,7 +60,7 @@ interface ILegacyUpdateCtrl : IDispatch {
 	version(1.0),
 	helpstring("Legacy Update Control")
 ]
-library LegacyUpdateOCXLib {
+library LegacyUpdateLib {
 	importlib(STDOLE_TLB);
 
 	// Class information for CLegacyUpdateCtrl

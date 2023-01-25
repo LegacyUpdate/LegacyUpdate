@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by LegacyUpdateOCX.rc
+// Used by LegacyUpdate.rc
 //
 #define IDS_LEGACYUPDATEOCX             1
 #define IDS_LEGACYUPDATE                2

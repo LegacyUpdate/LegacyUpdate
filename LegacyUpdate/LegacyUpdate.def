@@ -1,4 +1,4 @@
-; LegacyUpdateOCX.def : Declares the module parameters.
+; LegacyUpdate.def : Declares the module parameters.
 
 EXPORTS
 	DllCanUnloadNow     PRIVATE

@@ -7,12 +7,12 @@
 #include <atlctl.h>
 #include <MsHTML.h>
 #include "resource.h"
-#include "LegacyUpdateOCX_i.h"
+#include "LegacyUpdate_i.h"
 
 // CLegacyUpdateCtrl
 class ATL_NO_VTABLE CLegacyUpdateCtrl :
 	public CComObjectRootEx<CComSingleThreadModel>,
-	public IDispatchImpl<ILegacyUpdateCtrl, &IID_ILegacyUpdateCtrl, &LIBID_LegacyUpdateOCXLib, /*wMajor =*/ 1, /*wMinor =*/ 0>,
+	public IDispatchImpl<ILegacyUpdateCtrl, &IID_ILegacyUpdateCtrl, &LIBID_LegacyUpdateLib, /*wMajor =*/ 1, /*wMinor =*/ 0>,
 	public IPersistStreamInitImpl<CLegacyUpdateCtrl>,
 	public IOleControlImpl<CLegacyUpdateCtrl>,
 	public IOleObjectImpl<CLegacyUpdateCtrl>,
@@ -23,7 +23,7 @@ class ATL_NO_VTABLE CLegacyUpdateCtrl :
 	public IObjectWithSiteImpl<CLegacyUpdateCtrl>,
 	public IPersistStorageImpl<CLegacyUpdateCtrl>,
 	public IQuickActivateImpl<CLegacyUpdateCtrl>,
-	public IProvideClassInfo2Impl<&CLSID_LegacyUpdateCtrl, NULL, &LIBID_LegacyUpdateOCXLib>,
+	public IProvideClassInfo2Impl<&CLSID_LegacyUpdateCtrl, NULL, &LIBID_LegacyUpdateLib>,
 	public CComCoClass<CLegacyUpdateCtrl, &CLSID_LegacyUpdateCtrl>,
 	public CComControl<CLegacyUpdateCtrl> {
 

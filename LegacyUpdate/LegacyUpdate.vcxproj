@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug-VC17|Win32">
@@ -16,7 +16,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{95F3E1A1-5DDA-4C4D-B52B-981D46E6C98B}</ProjectGuid>
-    <RootNamespace>LegacyUpdateOCX</RootNamespace>
+    <RootNamespace>LegacyUpdate</RootNamespace>
     <Keyword>AtlProj</Keyword>
     <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -76,7 +76,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>.\LegacyUpdateOCX.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
     </Link>
     <Midl>
@@ -84,12 +84,12 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)LegacyUpdateOCX.tlb</TypeLibraryName>
-      <HeaderFileName>LegacyUpdateOCX_i.h</HeaderFileName>
+      <TypeLibraryName>$(IntDir)LegacyUpdate.tlb</TypeLibraryName>
+      <HeaderFileName>LegacyUpdate_i.h</HeaderFileName>
       <DllDataFileName>
       </DllDataFileName>
-      <InterfaceIdentifierFileName>LegacyUpdateOCX_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>LegacyUpdateOCX_p.c</ProxyFileName>
+      <InterfaceIdentifierFileName>LegacyUpdate_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>LegacyUpdate_p.c</ProxyFileName>
       <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ResourceCompile>
@@ -115,7 +115,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>.\LegacyUpdateOCX.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
     </Link>
     <Midl>
@@ -123,12 +123,12 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)LegacyUpdateOCX.tlb</TypeLibraryName>
-      <HeaderFileName>LegacyUpdateOCX_i.h</HeaderFileName>
+      <TypeLibraryName>$(IntDir)LegacyUpdate.tlb</TypeLibraryName>
+      <HeaderFileName>LegacyUpdate_i.h</HeaderFileName>
       <DllDataFileName>
       </DllDataFileName>
-      <InterfaceIdentifierFileName>LegacyUpdateOCX_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>LegacyUpdateOCX_p.c</ProxyFileName>
+      <InterfaceIdentifierFileName>LegacyUpdate_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>LegacyUpdate_p.c</ProxyFileName>
       <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ResourceCompile>
@@ -158,7 +158,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>.\LegacyUpdateOCX.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalDependencies>
       </AdditionalDependencies>
@@ -168,12 +168,12 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)LegacyUpdateOCX.tlb</TypeLibraryName>
-      <HeaderFileName>LegacyUpdateOCX_i.h</HeaderFileName>
+      <TypeLibraryName>$(IntDir)LegacyUpdate.tlb</TypeLibraryName>
+      <HeaderFileName>LegacyUpdate_i.h</HeaderFileName>
       <DllDataFileName>
       </DllDataFileName>
-      <InterfaceIdentifierFileName>LegacyUpdateOCX_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>LegacyUpdateOCX_p.c</ProxyFileName>
+      <InterfaceIdentifierFileName>LegacyUpdate_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>LegacyUpdate_p.c</ProxyFileName>
       <ValidateAllParameters>true</ValidateAllParameters>
     </Midl>
     <ResourceCompile>
@@ -184,14 +184,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="icon.ico" />
-    <None Include="LegacyUpdateOCX.def" />
-    <None Include="LegacyUpdateOCX.rgs" />
+    <None Include="LegacyUpdate.def" />
+    <None Include="LegacyUpdate.rgs" />
     <None Include="LegacyUpdateCtrl.rgs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaunchUpdateSite.cpp" />
     <ClCompile Include="LegacyUpdateCtrl.cpp" />
-    <ClCompile Include="LegacyUpdateOCX.cpp" />
     <ClCompile Include="Compat.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">Create</PrecompiledHeader>
@@ -221,7 +220,7 @@
       </PrecompiledHeader>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="LegacyUpdateOCX_i.c">
+    <ClCompile Include="LegacyUpdate_i.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">
       </PrecompiledHeader>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">false</CompileAsManaged>
@@ -237,27 +236,27 @@
     <ClInclude Include="Compat.h" />
     <ClInclude Include="LaunchUpdateSite.h" />
     <ClInclude Include="LegacyUpdateCtrl.h" />
-    <ClInclude Include="LegacyUpdateOCX.h" />
+    <ClInclude Include="LegacyUpdate.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="dlldatax.h" />
     <ClInclude Include="dllmain.h" />
-    <ClInclude Include="LegacyUpdateOCX_i.h" />
+    <ClInclude Include="LegacyUpdate_i.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LegacyUpdateOCX.rc" />
+    <ResourceCompile Include="LegacyUpdate.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="LegacyUpdateOCX.idl" />
+    <Midl Include="LegacyUpdate.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="LegacyUpdateOCX.rc" />
+      <UserProperties RESOURCE_FILE="LegacyUpdate.rc" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

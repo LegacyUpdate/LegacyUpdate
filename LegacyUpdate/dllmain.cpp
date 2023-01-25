@@ -1,11 +1,23 @@
-// LegacyUpdateOCX.cpp : Implementation of DLL Exports.
-
+// dllmain.cpp : Implementation of DLL Exports.
 
 #include "stdafx.h"
 #include "resource.h"
-#include "LegacyUpdateOCX_i.h"
+#include "LegacyUpdate_i.h"
 #include "dllmain.h"
 #include "dlldatax.h"
+
+CLegacyUpdateModule _AtlModule;
+
+// DLL Entry Point
+extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
+#ifdef _MERGE_PROXYSTUB
+	if (!PrxDllMain(hInstance, dwReason, lpReserved))
+		return FALSE;
+#endif
+	hInstance;
+	return _AtlModule.DllMain(dwReason, lpReserved);
+}
+
 
 // Used to determine whether the DLL can be unloaded by OLE
 STDAPI DllCanUnloadNow(void) {
@@ -60,6 +72,7 @@ STDAPI DllUnregisterServer(void) {
 	return hr;
 }
 
+
 // DllInstall - Adds/Removes entries to the system registry per user per machine.
 STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
 	HRESULT hr = E_FAIL;
@@ -82,5 +95,3 @@ STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
 
 	return hr;
 }
-
-

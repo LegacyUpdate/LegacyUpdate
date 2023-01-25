@@ -3,7 +3,7 @@ HKCR
 	NoRemove AppID
 	{
 		'%APPID%' = s 'Legacy Update Control'
-		'LegacyUpdateOCX.dll'
+		'LegacyUpdate.dll'
 		{
 			val AppID = s '%APPID%'
 		}

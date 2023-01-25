@@ -3,7 +3,7 @@
 !define DOMAIN             "legacyupdate.net"
 
 ; Version
-!getdllversion "..\Release\LegacyUpdateOCX.dll" DLLVersion_
+!getdllversion "..\Release\LegacyUpdate.dll" DLLVersion_
 !define LONGVERSION        "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}.${DLLVersion_4}"
 !define VERSION            "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}"
 

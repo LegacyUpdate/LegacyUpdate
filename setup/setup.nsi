@@ -1,4 +1,4 @@
-﻿!include Constants.nsh
+!include Constants.nsh
 
 Name         "${NAME}"
 Caption      "${NAME}"
@@ -29,8 +29,8 @@ VIFileVersion    ${LONGVERSION}
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
 !define MUI_CUSTOMFUNCTION_ABORT     CleanUp
 
-!define MUI_ICON                     "..\activex\icon.ico"
-!define MUI_UNICON                   "..\activex\icon.ico"
+!define MUI_ICON                     "..\LegacyUpdate\icon.ico"
+!define MUI_UNICON                   "..\LegacyUpdate\icon.ico"
 
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP       "setupbanner.bmp"
@@ -263,7 +263,7 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	; Install DLL, with detection for it being in use by IE
 	ClearErrors
 	SetOverwrite try
-	File /oname=LegacyUpdate.dll "..\Release\LegacyUpdateOCX.dll"
+	File "..\Release\LegacyUpdate.dll"
 	IfErrors 0 +3
 		MessageBox MB_RETRYCANCEL|MB_USERICON 'Unable to write to "$OUTDIR\LegacyUpdate.dll".$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
 			/SD IDCANCEL \
