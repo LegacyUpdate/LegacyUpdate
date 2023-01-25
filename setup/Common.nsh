@@ -28,7 +28,7 @@ FunctionEnd
 	SetDetailsPrint listonly
 !macroend
 
-!macro DownloadRequest url local
+!macro DownloadRequest url local extra
 	NSxfer::Request \
 		/TIMEOUTCONNECT 60000 \
 		/TIMEOUTRECONNECT 60000 \
@@ -36,6 +36,7 @@ FunctionEnd
 		/OPTRECEIVETIMEOUT 60000 \
 		/OPTSENDTIMEOUT 60000 \
 		/URL "${url}" /LOCAL "${local}" \
+		${extra} \
 		/END
 !macroend
 
@@ -56,7 +57,7 @@ FunctionEnd
 
 !macro Download name url filename
 	!insertmacro DetailPrint "Downloading ${name}..."
-	!insertmacro DownloadRequest "${url}" "$PLUGINSDIR\${filename}"
+	!insertmacro DownloadRequest "${url}" "$PLUGINSDIR\${filename}" ""
 	Pop $0
 	!insertmacro DownloadWait $0 PAGE
 	Pop $1

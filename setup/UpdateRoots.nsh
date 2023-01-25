@@ -59,7 +59,7 @@ Function ConfigureCrypto
 FunctionEnd
 
 !macro _DownloadSST name
-	!insertmacro DownloadRequest "${TRUSTEDR}/${name}.sst"      "${name}.sst"
+	!insertmacro DownloadRequest "${TRUSTEDR}/${name}.sst" "${name}.sst" ""
 	Pop $0
 	!insertmacro DownloadWait $0 SILENT
 	Pop $1
