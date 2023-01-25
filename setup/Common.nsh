@@ -1,5 +1,7 @@
 !addplugindir /x86-unicode x86-unicode
 
+SetCompressor /SOLID lzma
+
 !define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'
 
 Function GetArch
