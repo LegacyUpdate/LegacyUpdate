@@ -66,7 +66,7 @@ FunctionEnd
 	Pop $0
 	${If} $0 != "OK"
 		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
-			MessageBox MB_OK|MB_USERICON "Certificate Trust List failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
+			MessageBox MB_USERICON "Certificate Trust List failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
 		${EndIf}
 		SetErrorLevel 1
 		Abort

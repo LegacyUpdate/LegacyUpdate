@@ -66,7 +66,7 @@ FunctionEnd
 	Pop $0
 	${If} $0 != "OK"
 		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
-			MessageBox MB_OK|MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
+			MessageBox MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
 		${EndIf}
 		SetErrorLevel 1
 		Abort
@@ -85,7 +85,7 @@ FunctionEnd
 		; wusa exits with 1 if the patch is already installed. Treat this as success.
 		Return
 	${ElseIf} $0 != 0
-		MessageBox MB_OK|MB_USERICON "${name} failed to install.$\r$\n$\r$\nError code: $0" /SD IDOK
+		MessageBox MB_USERICON "${name} failed to install.$\r$\n$\r$\nError code: $0" /SD IDOK
 		SetErrorLevel $0
 		Abort
 	${EndIf}

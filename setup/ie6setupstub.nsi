@@ -70,14 +70,14 @@ Function .onInit
 	SetDetailsPrint listonly
 
 	${IfNot} ${IsWin2000}
-		MessageBox MB_OK|MB_USERICON "This tool is intended only for use on Windows 2000." /SD IDOK
+		MessageBox MB_USERICON "This tool is intended only for use on Windows 2000." /SD IDOK
 		Quit
 	${EndIf}
 
 	Call NeedsIE6
 	Pop $0
 	${If} $0 == 0
-		MessageBox MB_OK|MB_USERICON "Internet Explorer 6 Service Pack 1 is already installed." /SD IDOK
+		MessageBox MB_USERICON "Internet Explorer 6 Service Pack 1 is already installed." /SD IDOK
 		Quit
 	${EndIf}
 
