@@ -46,6 +46,11 @@ To configure the debugger:
 4. If running on XP, in the Debugger tab, set Register Output to Yes.
 	If running on Vista or later, this will throw a permission denied error due to UAC. You’ll need to manually register the control using `regsvr32 LegacyUpdate.dll` in an administrator command prompt.
 
+## Website source code
+I haven’t yet open sourced the website. This is because the vast majority of it is Microsoft code - just with a handful of patches I’ve made to remove Microsoft trademark branding, switch it to the Legacy Update ActiveX control, and make some slight bug fixes/improvements. It doesn’t feel appropriate to put an open source license on something I don’t own. However, if you would like to review it, you can right click &rarr; View Source on the website and take a poke around, mainly in the JavaScript files. You might find [DebugBar](https://www.debugbar.com/download.php) and [CompanionJS](https://www.my-debugbar.com/wiki/CompanionJS/HomePage) (requires Visual Studio or standalone [Microsoft Script Debugger](https://web.archive.org/web/20131113042519/http://download.microsoft.com/download/7/7/d/77d8df05-6fbc-4718-a319-be14317a6811/scd10en.exe)) useful.
+
+I’ve tinkered with writing a [ground-up replacement](https://twitter.com/hbkirb/status/1584537446716350466) of the Microsoft-developed Windows Update website, which I’ll open source when I feel it’s ready for public use (there are currently a number of bugs and missing features).
+
 ## Disclaimer
 The existence of this project shouldn’t be taken as an endorsement to continue using unsupported OSes. You should stick to a supported OS such as Windows 10 or 11 (or, try Linux?!). However, this service exists anyway in recognition that using these OSes is sometimes necessary to run legacy hardware/software, or just interesting to play around with.
 
