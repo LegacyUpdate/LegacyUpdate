@@ -63,6 +63,7 @@ VIFileVersion    ${LONGVERSION}
 !include DownloadWUA.nsh
 !include RunOnce.nsh
 !include UpdateRoots.nsh
+!include EnableMicrosoftUpdate.nsh
 
 !insertmacro GetParameters
 !insertmacro GetOptions
@@ -223,6 +224,11 @@ ${MementoSectionEnd}
 ${MementoSection} "Update root certificates store" ROOTCERTS
 	Call ConfigureCrypto
 	Call UpdateRoots
+${MementoSectionEnd}
+
+${MementoSection} "Enable Microsoft Update" MSUPDATE
+	Call EnableMicrosoftUpdate
+	!insertmacro RestartWUAUService
 ${MementoSectionEnd}
 
 ; Main installation
@@ -411,6 +417,7 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
 	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website on Windows 2000/XP, and Windows Update Control Panel on Windows Vista. Windows Update will be configured to use the Legacy Update proxy server."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
+	!insertmacro MUI_DESCRIPTION_TEXT ${MSUPDATE}	  "Enables Microsoft Update on Windows 7, giving you access to updates for Microsoft products such as Office and Visual Studio through Windows Update."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInit
@@ -514,6 +521,7 @@ Function .onInit
 	${Else}
 		!insertmacro RemoveSection ${WIN7SP1}
 		!insertmacro RemoveSection ${WIN7WUA}
+		!insertmacro RemoveSection ${MSUPDATE}
 	${EndIf}
 
 	${If} ${IsWin8}
