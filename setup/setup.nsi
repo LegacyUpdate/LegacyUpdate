@@ -72,6 +72,7 @@ VIFileVersion    ${LONGVERSION}
 !define MUI_PAGE_CUSTOMFUNCTION_PRE  ComponentsPageCheck
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
 !define MUI_PAGE_FUNCTION_GUIINIT    OnShow
+!define MUI_CUSTOMFUNCTION_ONMOUSEOVERSECTION OnMouseOverSection
 
 !insertmacro MUI_PAGE_COMPONENTS
 
@@ -410,9 +411,23 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81SSU}     "Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
-	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website on Windows 2000/XP, and Windows Update Control Panel on Windows Vista. Windows Update will be configured to use the Legacy Update proxy server."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+Function OnMouseOverSection
+	${If} $0 == ${LEGACYUPDATE}
+		${If} ${AtMostWinXP2003}
+			StrCpy $0 "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website. Windows Update will be configured to use the Legacy Update proxy server."
+		${ElseIf} ${AtMostWinVista}
+			StrCpy $0 "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website, and Windows Update Control Panel. Windows Update will be configured to use the Legacy Update proxy server."
+		${Else}
+			StrCpy $0 "Installs the Legacy Update ActiveX control, enabling access to the classic Windows Update interface via the legacyupdate.net website."
+		${EndIf}
+		SendMessage $mui.ComponentsPage.DescriptionText ${WM_SETTEXT} 0 "STR:"
+		EnableWindow $mui.ComponentsPage.DescriptionText 1
+		SendMessage $mui.ComponentsPage.DescriptionText ${WM_SETTEXT} 0 "STR:$0"
+	${EndIf}
+FunctionEnd
 
 Function .onInit
 	SetShellVarContext All
@@ -565,11 +580,6 @@ Function .onInit
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${ACTIVATE}
-	${EndIf}
-
-	; Don't install Legacy Update itself on Windows 7 and newer
-	${If} ${AtLeastWin7}
-		!insertmacro RemoveSection ${LEGACYUPDATE}
 	${EndIf}
 
 	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
