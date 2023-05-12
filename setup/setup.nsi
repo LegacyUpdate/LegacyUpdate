@@ -178,7 +178,8 @@ SectionEnd
 
 Section "Windows Servicing Stack update" WIN7SSU
 	SectionIn Ro
-	Call DownloadKB3138612
+	Call DownloadKB4474419
+	Call DownloadKB4490628
 	Call RebootIfRequired
 SectionEnd
 
@@ -522,7 +523,7 @@ Function .onInit
 			!insertmacro RemoveSection ${WIN7SP1}
 		${EndIf}
 
-		Call NeedsKB3138612
+		Call NeedsWin7SHA2
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN7SSU}

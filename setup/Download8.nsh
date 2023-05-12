@@ -1,15 +1,15 @@
 ; Windows 8 Servicing Stack
-!insertmacro MSUHandler "KB4598297" "Servicing Stack Update for Windows 8"   "Package_for_KB4598297" "6.2.1.8"
+!insertmacro MSUHandler "KB4598297" "Servicing Stack Update for Windows 8"   "Package_for_KB4598297"
 
 ; Windows 8.1 Servicing Stack
-!insertmacro MSUHandler "KB3021910" "Servicing Stack Update for Windows 8.1" "Package_for_KB3021910"     "6.3.1.2"
+!insertmacro MSUHandler "KB3021910" "Servicing Stack Update for Windows 8.1" "Package_for_KB3021910"
 
 ; Windows 8.1 Update 1
-!insertmacro MSUHandler "KB2919355" "Windows 8.1 Update 1"                   "Package_for_KB2919355"     "6.3.1.14"
-!insertmacro MSUHandler "KB2932046" "Windows 8.1 Update 1"                   "Package_for_KB2932046"     "6.3.1.5"
-!insertmacro MSUHandler "KB2959977" "Windows 8.1 Update 1"                   "Package_for_KB2959977"     "6.3.1.1"
-!insertmacro MSUHandler "KB2937592" "Windows 8.1 Update 1"                   "Package_for_KB2937592"     "6.3.1.0"
-!insertmacro MSUHandler "KB2934018" "Windows 8.1 Update 1"                   "Package_for_KB2934018"     "6.3.1.5"
+!insertmacro MSUHandler "KB2919355" "Windows 8.1 Update 1"                   "Package_for_KB2919355"
+!insertmacro MSUHandler "KB2932046" "Windows 8.1 Update 1"                   "Package_for_KB2932046"
+!insertmacro MSUHandler "KB2959977" "Windows 8.1 Update 1"                   "Package_for_KB2959977"
+!insertmacro MSUHandler "KB2937592" "Windows 8.1 Update 1"                   "Package_for_KB2937592"
+!insertmacro MSUHandler "KB2934018" "Windows 8.1 Update 1"                   "Package_for_KB2934018"
 
 Function NeedsWin81Update1
 	Call NeedsKB2919355

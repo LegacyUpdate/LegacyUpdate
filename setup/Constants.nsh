@@ -45,6 +45,8 @@
 !define REGPATH_DOTNET_V2          "Software\Microsoft\.NETFramework\v2.0.50727"
 !define REGPATH_DOTNET_V4          "Software\Microsoft\.NETFramework\v4.0.30319"
 !define REGPATH_RUNONCE            "Software\Microsoft\Windows\CurrentVersion\RunOnce"
+!define REGPATH_PACKAGEINDEX       "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\PackageIndex"
+!define REGPATH_SERVICING_SHA2     "Software\Microsoft\Windows\CurrentVersion\Servicing\Codesigning\SHA2"
 
 ; Win32 constants
 !define EWX_REBOOT       0x02
