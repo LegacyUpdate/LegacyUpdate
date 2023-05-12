@@ -83,6 +83,15 @@ FunctionEnd
 	${ElseIf} ${iswusa} == 1
 	${AndIf} $0 == 1
 		; wusa exits with 1 if the patch is already installed. Treat this as success.
+		DetailPrint "Installation skipped - already installed"
+		Return
+	${ElseIf} ${iswusa} == 1
+	${AndIf} $0 == ${WU_S_ALREADY_INSTALLED}
+		DetailPrint "Installation skipped - already installed"
+		Return
+	${ElseIf} ${iswusa} == 1
+	${AndIf} $0 == ${WU_E_NOT_APPLICABLE}
+		DetailPrint "Installation skipped - not applicable"
 		Return
 	${ElseIf} $0 != 0
 		MessageBox MB_USERICON "${name} failed to install.$\r$\n$\r$\nError code: $0" /SD IDOK

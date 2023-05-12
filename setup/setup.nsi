@@ -73,6 +73,7 @@ VIFileVersion    ${LONGVERSION}
 !define MUI_PAGE_CUSTOMFUNCTION_PRE  ComponentsPageCheck
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
 !define MUI_PAGE_FUNCTION_GUIINIT    OnShow
+!define MUI_CUSTOMFUNCTION_ONMOUSEOVERSECTION OnMouseOverSection
 
 !insertmacro MUI_PAGE_COMPONENTS
 
@@ -159,12 +160,13 @@ Section "Windows Vista Service Pack 2" VISTASP2
 	Call RebootIfRequired
 SectionEnd
 
-Section "Windows Vista Post-Service Pack 2 Updates" VISTAPOSTSP2
+Section "Windows Servicing Stack update" VISTASSU
 	SectionIn Ro
 	Call DownloadKB3205638
 	Call DownloadKB4012583
 	Call DownloadKB4015195
 	Call DownloadKB4015380
+	Call DownloadKB4493730
 	Call RebootIfRequired
 SectionEnd
 
@@ -175,16 +177,17 @@ Section "Windows 7 Service Pack 1" WIN7SP1
 	Call RebootIfRequired
 SectionEnd
 
-Section "Windows Servicing Stack update" WIN7WUA
+Section "Windows Servicing Stack update" WIN7SSU
 	SectionIn Ro
-	Call DownloadKB3138612
+	Call DownloadKB4474419
+	Call DownloadKB4490628
 	Call RebootIfRequired
 SectionEnd
 
 ; 8 prerequisities
-Section "Windows Servicing Stack update" WIN8WUA
+Section "Windows Servicing Stack update" WIN8SSU
 	SectionIn Ro
-	Call DownloadKB2937636
+	Call DownloadKB4598297
 	Call RebootIfRequired
 SectionEnd
 
@@ -205,7 +208,7 @@ Section "Windows 8.1 Update 1" WIN81UPDATE1
 	Call RebootIfRequired
 SectionEnd
 
-Section "Windows Servicing Stack update" WIN81WUA
+Section "Windows Servicing Stack update" WIN81SSU
 	SectionIn Ro
 	Call DownloadKB3021910
 	Call RebootIfRequired
@@ -406,19 +409,33 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${WES09}        "Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this."
 	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASP2}     "Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
-	!insertmacro MUI_DESCRIPTION_TEXT ${VISTAPOSTSP2} "Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASSU}     "Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SP1}      "Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
-	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7WUA}      "Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
-	!insertmacro MUI_DESCRIPTION_TEXT ${WIN8WUA}      "Updates Windows 8 or Windows Server 2012 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SSU}      "Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN8SSU}      "Updates Windows 8 or Windows Server 2012 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPGRADE} "Windows 8 can be updated to Windows 8.1. This process involves a manual download. After Legacy Update setup completes, a Microsoft website will be opened with more information."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPDATE1} "Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10.$\r$\n${DESCRIPTION_REBOOTS}"
-	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81WUA}     "Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81SSU}     "Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
-	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website on Windows 2000/XP, and Windows Update Control Panel on Windows Vista. Windows Update will be configured to use the Legacy Update proxy server."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
 	!insertmacro MUI_DESCRIPTION_TEXT ${MSUPDATE}	  "Enables Microsoft Update on Windows 7, giving you access to updates for Microsoft products such as Office and Visual Studio through Windows Update."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+Function OnMouseOverSection
+	${If} $0 == ${LEGACYUPDATE}
+		${If} ${AtMostWinXP2003}
+			StrCpy $0 "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website. Windows Update will be configured to use the Legacy Update proxy server."
+		${ElseIf} ${AtMostWinVista}
+			StrCpy $0 "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website, and Windows Update Control Panel. Windows Update will be configured to use the Legacy Update proxy server."
+		${Else}
+			StrCpy $0 "Installs the Legacy Update ActiveX control, enabling access to the classic Windows Update interface via the legacyupdate.net website."
+		${EndIf}
+		SendMessage $mui.ComponentsPage.DescriptionText ${WM_SETTEXT} 0 "STR:"
+		EnableWindow $mui.ComponentsPage.DescriptionText 1
+		SendMessage $mui.ComponentsPage.DescriptionText ${WM_SETTEXT} 0 "STR:$0"
+	${EndIf}
+FunctionEnd
 
 Function .onInit
 	SetShellVarContext All
@@ -498,11 +515,11 @@ Function .onInit
 		Call NeedsVistaPostSP2
 		Pop $0
 		${If} $0 == 0
-			!insertmacro RemoveSection ${VISTAPOSTSP2}
+			!insertmacro RemoveSection ${VISTASSU}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${VISTASP2}
-		!insertmacro RemoveSection ${VISTAPOSTSP2}
+		!insertmacro RemoveSection ${VISTASSU}
 	${EndIf}
 
 	${If} ${IsWin7}
@@ -513,14 +530,14 @@ Function .onInit
 			!insertmacro RemoveSection ${WIN7SP1}
 		${EndIf}
 
-		Call NeedsKB3138612
+		Call NeedsWin7SHA2
 		Pop $0
 		${If} $0 == 0
-			!insertmacro RemoveSection ${WIN7WUA}
+			!insertmacro RemoveSection ${WIN7SSU}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN7SP1}
-		!insertmacro RemoveSection ${WIN7WUA}
+		!insertmacro RemoveSection ${WIN7SSU}
 		!insertmacro RemoveSection ${MSUPDATE}
 	${EndIf}
 
@@ -530,14 +547,14 @@ Function .onInit
 			!insertmacro RemoveSection ${WIN81UPGRADE}
 		${EndIf}
 
-		Call NeedsKB2937636
+		Call NeedsKB4598297
 		Pop $0
 		${If} $0 == 0
-			!insertmacro RemoveSection ${WIN8WUA}
+			!insertmacro RemoveSection ${WIN8SSU}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN81UPGRADE}
-		!insertmacro RemoveSection ${WIN8WUA}
+		!insertmacro RemoveSection ${WIN8SSU}
 	${EndIf}
 
 	${If} ${IsWin8.1}
@@ -546,17 +563,16 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN81UPDATE1}
-			!insertmacro RemoveSection ${WIN81WUA}
 		${EndIf}
 
 		Call NeedsKB3021910
 		Pop $0
 		${If} $0 == 0
-			!insertmacro RemoveSection ${WIN81WUA}
+			!insertmacro RemoveSection ${WIN81SSU}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN81UPDATE1}
-		!insertmacro RemoveSection ${WIN81WUA}
+		!insertmacro RemoveSection ${WIN81SSU}
 	${EndIf}
 
 	Call DetermineWUAVersion
@@ -573,11 +589,6 @@ Function .onInit
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${ACTIVATE}
-	${EndIf}
-
-	; Don't install Legacy Update itself on Windows 7 and newer
-	${If} ${AtLeastWin7}
-		!insertmacro RemoveSection ${LEGACYUPDATE}
 	${EndIf}
 
 	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine

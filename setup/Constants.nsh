@@ -45,10 +45,13 @@
 !define REGPATH_DOTNET_V2          "Software\Microsoft\.NETFramework\v2.0.50727"
 !define REGPATH_DOTNET_V4          "Software\Microsoft\.NETFramework\v4.0.30319"
 !define REGPATH_RUNONCE            "Software\Microsoft\Windows\CurrentVersion\RunOnce"
+!define REGPATH_PACKAGEINDEX       "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\PackageIndex"
+!define REGPATH_SERVICING_SHA2     "Software\Microsoft\Windows\CurrentVersion\Servicing\Codesigning\SHA2"
+!define REGPATH_COMPONENT_THEMES   "Software\Microsoft\Active Setup\Installed Components\{2C7339CF-2B09-4501-B3F3-F3508C9228ED}"
 
 ; Win32 constants
 !define EWX_REBOOT       0x02
-!define EWX_FORCEIFHUNG  0x10
+!define EWX_FORCE        0x04
 
 !define TDCBF_YES_BUTTON 0x2
 !define TDCBF_NO_BUTTON  0x4
@@ -68,3 +71,7 @@
 !define WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2 0x00000800
 
 !define ERROR_INTERNET_OPERATION_CANCELLED  12017
+
+; Windows Update constants
+!define WU_S_ALREADY_INSTALLED 2359302     ; 0x00240006
+!define WU_E_NOT_APPLICABLE    -2145124329 ; 0x80240017

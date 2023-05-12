@@ -122,6 +122,14 @@ Function OnRunOnceLogon
 		Call RegisterRunOnce
 		Quit
 	${EndIf}
+
+	; Allow the themes component to be registered if necessary. This sets the theme to Aero Basic
+	; rather than Classic in Vista/7.
+	ClearErrors
+	ReadRegStr $0 HKLM "${REGPATH_COMPONENT_THEMES}" "StubPath"
+	${IfNot} ${Errors}
+		ExecShellWait "" "$WINDIR\system32\cmd.exe" "/c $0" SW_HIDE
+	${EndIf}
 FunctionEnd
 
 Function CleanUpRunOnce
@@ -148,7 +156,7 @@ Function CleanUpRunOnce
 			${EndIf}
 
 			RMDir /r /REBOOTOK "$PROFILE"
-			System::Call "user32::ExitWindowsEx(i ${EWX_FORCEIFHUNG}, i 0) i .r0"
+			System::Call "user32::ExitWindowsEx(i ${EWX_FORCE} , i 0) i .r0"
 		${EndIf}
 	${EndIf}
 FunctionEnd
