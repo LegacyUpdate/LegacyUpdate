@@ -1,5 +1,5 @@
 ; Windows 8 Servicing Stack
-!insertmacro MSUHandler "KB2937636" "Servicing Stack Update for Windows 8"   "Package_for_KB2937636_RTM" "6.2.1.4"
+!insertmacro MSUHandler "KB4598297" "Servicing Stack Update for Windows 8"   "Package_for_KB4598297" "6.2.1.8"
 
 ; Windows 8.1 Servicing Stack
 !insertmacro MSUHandler "KB3021910" "Servicing Stack Update for Windows 8.1" "Package_for_KB3021910"     "6.3.1.2"

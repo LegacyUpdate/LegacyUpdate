@@ -181,9 +181,10 @@ Section "Windows Servicing Stack update" WIN7WUA
 SectionEnd
 
 ; 8 prerequisities
+
 Section "Windows Servicing Stack update" WIN8WUA
 	SectionIn Ro
-	Call DownloadKB2937636
+	Call DownloadKB4598297
 	Call RebootIfRequired
 SectionEnd
 
@@ -522,7 +523,7 @@ Function .onInit
 			!insertmacro RemoveSection ${WIN81UPGRADE}
 		${EndIf}
 
-		Call NeedsKB2937636
+		Call NeedsKB4598297
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN8WUA}
