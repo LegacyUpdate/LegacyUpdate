@@ -539,7 +539,6 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN81UPDATE1}
-			!insertmacro RemoveSection ${WIN81WUA}
 		${EndIf}
 
 		Call NeedsKB3021910

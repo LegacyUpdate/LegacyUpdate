@@ -14,7 +14,6 @@
 Function NeedsWin81Update1
 	Call NeedsKB2919355
 	Call NeedsKB2932046
-	Call NeedsKB2959977
 	Call NeedsKB2937592
 	Call NeedsKB2934018
 	Pop $0
@@ -27,7 +26,6 @@ Function NeedsWin81Update1
 	${OrIf} $1 == 1
 	${OrIf} $2 == 1
 	${OrIf} $3 == 1
-	${OrIf} $4 == 1
 		Push 1
 	${Else}
 		Push 0
