@@ -148,7 +148,7 @@ Function CleanUpRunOnce
 			${EndIf}
 
 			RMDir /r /REBOOTOK "$PROFILE"
-			System::Call "user32::ExitWindowsEx(i ${EWX_FORCEIFHUNG}, i 0) i .r0"
+			System::Call "user32::ExitWindowsEx(i ${EWX_FORCE} , i 0) i .r0"
 		${EndIf}
 	${EndIf}
 FunctionEnd

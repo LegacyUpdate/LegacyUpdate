@@ -48,7 +48,7 @@
 
 ; Win32 constants
 !define EWX_REBOOT       0x02
-!define EWX_FORCEIFHUNG  0x10
+!define EWX_FORCE        0x04
 
 !define TDCBF_YES_BUTTON 0x2
 !define TDCBF_NO_BUTTON  0x4
