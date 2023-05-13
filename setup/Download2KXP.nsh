@@ -47,9 +47,27 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
+!macro PatchHandler_NoLang kbid title params
+	; Used because Windows XP Embedded SP3 has no other languages than English.
+	; This presents a problem because PatchHandler looks for a language specific
+	; URL inside patches.ini, and as a result will not be able to find the URL.
+	; Work around this by creating a new version of this macro with no language.
+	Function Download${kbid}
+		Call Needs${kbid}
+		Pop $0
+		${If} $0 == 1
+			Call GetArch
+			Pop $0
+			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
+			!insertmacro DownloadAndInstall "${title}" "$0" "${kbid}.exe" "${params}"
+		${EndIf}
+	FunctionEnd
+!macroend
+
 !insertmacro NeedsSPHandler "W2KSP4"  "Win2000"   2
 !insertmacro NeedsSPHandler "XPSP2"   "WinXP2002" 0
 !insertmacro NeedsSPHandler "XPSP3"   "WinXP2002" 2
+!insertmacro NeedsSPHandler "XPESP3"  "WinXP2002" 2
 !insertmacro NeedsSPHandler "2003SP2" "WinXP2003" 1
 
 !insertmacro NeedsFileVersionHandler "KB835732" "kernel32.dll" "5.00.2195.6897"
@@ -60,6 +78,7 @@ FunctionEnd
 !insertmacro PatchHandler "XPSP2"    "Windows XP Service Pack 2"                         "/passive /norestart"
 !insertmacro PatchHandler "XPSP3"    "Windows XP Service Pack 3"                         "/passive /norestart"
 !insertmacro PatchHandler "2003SP2"  "Windows XP x64 Edition/Server 2003 Service Pack 2" "/passive /norestart"
+!insertmacro PatchHandler_NoLang "XPESP3"   "Windows XP Embedded Service Pack 3"		 "/passive /norestart"
 
 Function DownloadIE6
 	Call NeedsIE6

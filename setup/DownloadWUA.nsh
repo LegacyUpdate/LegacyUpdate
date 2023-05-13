@@ -5,6 +5,7 @@ Function DetermineWUAVersion
 	${If} ${IsWinXP2002}
 	${AndIf} ${AtLeastServicePack} 3
 	${AndIf} ${IsHomeEdition}
+	${OrIf} ${IsEmbedded} ; XP Embedded requires the same WUA as Home.
 		StrCpy $1 "5.1.3-home"
 	${Else}
 		GetWinVer $1 Major
