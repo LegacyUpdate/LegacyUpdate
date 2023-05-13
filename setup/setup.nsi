@@ -149,6 +149,11 @@ ${MementoSection} "Windows XP Service Pack 3" XPSP3
 	Call RebootIfRequired
 ${MementoSectionEnd}
 
+${MementoSection} "Windows XP Embedded Service Pack 3" XPESP3
+	Call InstallXPESP3
+	Call RebootIfRequired
+${MementoSectionEnd}
+
 ; XP 2003 prerequisities
 ${MementoSection} "Windows XP/Server 2003 Service Pack 2" 2003SP2
 	Call Install2003SP2
@@ -454,6 +459,7 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${W2KSP4}       "Updates Windows 2000 to Service Pack 4, as required to install the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${IE6SP1}       "Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\n${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${XPSP3}        "Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${XPESP3}       "Updates Windows XP Embedded to Service Pack 3. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WES09}        "Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this."
 	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASP2}     "Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
@@ -552,12 +558,29 @@ Function .onInit
 	${EndIf}
 
 	${If} ${IsWinXP2002}
-		; Determine whether XP prereqs need to be installed
-		Call NeedsXPSP3
-		Pop $0
-		${If} $0 == 0
+		${If} ${IsEmbedded}
+			; Determine whether XP Embedded prereqs need to be installed
+			; Windows XP Embedded (version 2001), including FLP and WEPOS, has a different service pack
 			!insertmacro RemoveSection ${XPSP3}
-			StrCpy $HasAllPrereqs 0
+
+			Call NeedsXPESP3
+			Pop $0
+			${If} $0 == 0
+				!insertmacro RemoveSection ${XPESP3}
+				StrCpy $HasAllPrereqs 0
+			${EndIf}
+		${EndIf}
+
+		${IfNot} ${IsEmbedded}
+			; Determine whether XP prereqs need to be installed
+			!insertmacro RemoveSection ${XPESP3}
+
+			Call NeedsXPSP3
+			Pop $0
+			${If} $0 == 0
+				!insertmacro RemoveSection ${XPSP3}
+				StrCpy $HasAllPrereqs 0
+			${EndIf}
 		${EndIf}
 
 		ReadRegDword $0 HKLM "${REGPATH_POSREADY}" "Installed"
@@ -566,6 +589,7 @@ Function .onInit
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${XPSP3}
+		!insertmacro RemoveSection ${XPESP3}
 		!insertmacro RemoveSection ${WES09}
 	${EndIf}
 
@@ -709,6 +733,11 @@ Function PreDownload
 	${AndIf} ${SectionIsSelected} ${XPSP3}
 		Call DownloadXPSP2
 		Call DownloadXPSP3
+	${EndIf}
+
+	${If} ${IsWinXP2002}
+	${AndIf} ${SectionIsSelected} ${XPESP3}
+		Call DownloadXPESP3
 	${EndIf}
 
 	; XP 2003

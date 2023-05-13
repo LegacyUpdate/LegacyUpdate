@@ -84,6 +84,7 @@ FunctionEnd
 !insertmacro NeedsSPHandler "W2KSP4"  "Win2000"   2
 !insertmacro NeedsSPHandler "XPSP2"   "WinXP2002" 0
 !insertmacro NeedsSPHandler "XPSP3"   "WinXP2002" 2
+!insertmacro NeedsSPHandler "XPESP3"  "WinXP2002" 2
 !insertmacro NeedsSPHandler "2003SP2" "WinXP2003" 1
 
 !insertmacro NeedsFileVersionHandler "KB835732" "kernel32.dll" "5.00.2195.6897"
@@ -94,6 +95,7 @@ FunctionEnd
 !insertmacro PatchHandler "XPSP2"    "Windows XP Service Pack 2"                         "/passive /norestart"
 !insertmacro PatchHandler "XPSP3"    "Windows XP Service Pack 3"                         "/passive /norestart"
 !insertmacro PatchHandler "2003SP2"  "Windows XP x64 Edition/Server 2003 Service Pack 2" "/passive /norestart"
+!insertmacro PatchHandler "XPESP3"   "Windows XP Embedded Service Pack 3"                "/passive /norestart"
 
 Function DownloadIE6
 	Call NeedsIE6

@@ -1,10 +1,11 @@
 Function DetermineWUAVersion
-	; Hardcoded special case for XP Home SP3, because the WUA 7.6.7600.256 setup SFX is seriously
-	; broken on it, potentially causing an unbootable Windows install due to it entering an infinite
-	; loop of creating folders in the root of C:.
+	; Hardcoded special case for XP Home/Embedded SP3, because the WUA 7.6.7600.256 setup SFX is
+	; seriously broken on it, potentially causing an unbootable Windows install due to it entering an
+	; infinite loop of creating folders in the root of C:.
 	${If} ${IsWinXP2002}
 	${AndIf} ${AtLeastServicePack} 3
 	${AndIf} ${IsHomeEdition}
+	${OrIf} ${IsEmbedded}
 		StrCpy $1 "5.1.3-home"
 	${Else}
 		GetWinVer $1 Major
