@@ -78,7 +78,7 @@ FunctionEnd
 !insertmacro PatchHandler "XPSP2"    "Windows XP Service Pack 2"                         "/passive /norestart"
 !insertmacro PatchHandler "XPSP3"    "Windows XP Service Pack 3"                         "/passive /norestart"
 !insertmacro PatchHandler "2003SP2"  "Windows XP x64 Edition/Server 2003 Service Pack 2" "/passive /norestart"
-!insertmacro PatchHandler_NoLang "XPESP3"   "Windows XP Embedded Service Pack 3"		 "/passive /norestart"
+!insertmacro PatchHandler_NoLang "XPESP3"   "Windows XP Embedded Service Pack 3"         "/passive /norestart"
 
 Function DownloadIE6
 	Call NeedsIE6

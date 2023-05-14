@@ -117,7 +117,7 @@
 !define IsServerOS         `!= _WinVer_TestProduct ${VER_NT_WORKSTATION}`
 
 !define IsHomeEdition      `"" _WinVer_TestSuite ${VER_SUITE_PERSONAL}`
-!define IsEmbedded		   `"" _WinVer_TestSuite ${VER_SUITE_EMBEDDEDNT}`
+!define IsEmbedded         `"" _WinVer_TestSuite ${VER_SUITE_EMBEDDEDNT}`
 
 !define IsSafeMode         `!= _WinVer_TestSystemMetric ${SM_CLEANBOOT}`
 
