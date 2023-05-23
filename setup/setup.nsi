@@ -178,6 +178,7 @@ SectionEnd
 
 Section "Windows Servicing Stack update" WIN7SSU
 	SectionIn Ro
+	Call DownloadKB3138612
 	Call DownloadKB4474419
 	Call DownloadKB4490628
 	Call RebootIfRequired
