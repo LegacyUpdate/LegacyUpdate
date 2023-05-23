@@ -90,6 +90,7 @@ FunctionEnd
 !insertmacro MSUHandler "KB4493730" "2019-04 Servicing Stack Update for Windows Server 2008" "Package_1_for_KB4493730"
 
 ; Windows 7 Servicing Stack Update
+!insertmacro MSUHandler "KB3138612" "2016-03 Servicing Stack Update for Windows 7"           "Package_for_KB3138612"
 !insertmacro MSUHandler "KB4474419" "SHA-2 Code Signing Support Update for Windows 7"        "Package_for_KB4474419"
 !insertmacro MSUHandler "KB4490628" "2019-03 Servicing Stack Update for Windows 7"           "Package_for_KB3138612"
 
@@ -120,12 +121,15 @@ Function NeedsWin7SHA2
 	${If} $0 == 1
 		Push 0
 	${Else}
+		Call NeedsKB3138612
 		Call NeedsKB4474419
 		Call NeedsKB4490628
 		Pop $0
 		Pop $1
+		Pop $2
 		${If} $0 == 1
 		${OrIf} $1 == 1
+		${OrIf} $2 == 1
 			Push 1
 		${Else}
 			Push 0
