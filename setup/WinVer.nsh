@@ -117,7 +117,7 @@
 !define IsServerOS         `!= _WinVer_TestProduct ${VER_NT_WORKSTATION}`
 
 !define IsHomeEdition      `"" _WinVer_TestSuite ${VER_SUITE_PERSONAL}`
-
+!define IsHomeServer       `"" _WinVer_TestSuite ${VER_SUITE_WH_SERVER}`
 !define IsSafeMode         `!= _WinVer_TestSystemMetric ${SM_CLEANBOOT}`
 
 !define IsServicePack      `=  _WinVer_TestSP`

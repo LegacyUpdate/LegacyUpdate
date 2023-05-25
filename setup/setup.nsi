@@ -61,6 +61,7 @@ VIFileVersion    ${LONGVERSION}
 !include DownloadVista7.nsh
 !include Download8.nsh
 !include DownloadWUA.nsh
+!include DownloadWHS.nsh
 !include RunOnce.nsh
 !include UpdateRoots.nsh
 
@@ -166,6 +167,13 @@ Section "Windows Servicing Stack update" VISTASSU
 	Call DownloadKB4015195
 	Call DownloadKB4015380
 	Call DownloadKB4493730
+	Call RebootIfRequired
+SectionEnd
+
+; Windows Home Server prerequisites
+Section "Windows Home Server Update Rollup 4" WHS2011U4
+	SectionIn Ro
+	Call DownloadKB2757011
 	Call RebootIfRequired
 SectionEnd
 
@@ -410,6 +418,7 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPGRADE} "Windows 8 can be updated to Windows 8.1. This process involves a manual download. After Legacy Update setup completes, a Microsoft website will be opened with more information."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPDATE1} "Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81SSU}     "Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${WHS2011U4}	  "Updates Windows Home Server 2011 to Update Rollup 4 to resolve issues with the Windows Update Agent. Also fixes data corruption problems.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
@@ -523,6 +532,16 @@ Function .onInit
 			!insertmacro RemoveSection ${WIN7SP1}
 		${EndIf}
 
+		${If} ${IsHomeServer}
+			Call NeedsKB2757011
+			Pop $0
+			${If} $0 == 0
+				!insertmacro RemoveSection ${WHS2011U4}
+			${EndIf}
+		${Else}
+			!insertmacro RemoveSection ${WHS2011U4}
+		${EndIf}
+
 		Call NeedsWin7SHA2
 		Pop $0
 		${If} $0 == 0
@@ -531,6 +550,7 @@ Function .onInit
 	${Else}
 		!insertmacro RemoveSection ${WIN7SP1}
 		!insertmacro RemoveSection ${WIN7SSU}
+		!insertmacro RemoveSection ${WHS2011U4}
 	${EndIf}
 
 	${If} ${IsWin8}

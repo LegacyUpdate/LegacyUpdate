@@ -143,6 +143,18 @@ FunctionEnd
 	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '$WINDIR\system32\wusa.exe /quiet /norestart "$0"' 1
 !macroend
 
+!macro DownloadAndInstallCAB kbid name url
+	!insertmacro DownloadIfNeeded '${name} (${kbid})' '${url}' '${kbid}.cab'
+
+	; To install a CAB file, we need to use DISM.
+	!insertmacro DetailPrint "Installing ${name} (${kbid})..."
+	; Because NSIS is running in 32-bit mode, we need to use the 'sysnative' shortcut.
+	; Without this, we'll get an Error Code 11, which means that it's trying to use
+	; a 32-bit DISM to apply updates to a 64-bit installation of Windows.
+	; On 32-bit installations, this seems to have no detrimental impact.
+	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '$WINDIR\sysnative\dism.exe /Online /Add-Package /PackagePath:"$0" /Quiet /NoRestart' 1
+!macroend
+
 !macro EnsureAdminRights
 	UserInfo::GetAccountType
 	Pop $0
