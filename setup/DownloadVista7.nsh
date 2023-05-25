@@ -98,6 +98,9 @@ FunctionEnd
 !insertmacro MSUHandler "KB4474419" "SHA-2 Code Signing Support Update for Windows 7"        "Package_for_KB4474419"
 !insertmacro MSUHandler "KB4490628" "2019-03 Servicing Stack Update for Windows 7"           "Package_for_KB3138612"
 
+; Windows Home Server 2011 Update Rollup 4
+!insertmacro MSUHandler "KB2757011" "Windows Home Server 2011 Update Rollup 4"               "Package_for_KB2757011"
+
 Function NeedsVistaPostSP2
 	Call NeedsKB3205638
 	Call NeedsKB4012583
