@@ -74,6 +74,7 @@ FunctionEnd
 !macroend
 
 Function UpdateRoots
+	SetOutPath $PLUGINSDIR
 	File "updroots.exe"
 	!insertmacro DetailPrint "Downloading Certificate Trust List..."
 	!insertmacro _DownloadSST "authroots"

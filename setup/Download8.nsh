@@ -1,8 +1,8 @@
 ; Windows 8 Servicing Stack
-!insertmacro MSUHandler "KB4598297" "Servicing Stack Update for Windows 8"   "Package_for_KB4598297"
+!insertmacro MSUHandler "KB4598297" "2021-01 Servicing Stack Update for Windows Server 2012" "Package_for_KB4598297"
 
 ; Windows 8.1 Servicing Stack
-!insertmacro MSUHandler "KB3021910" "Servicing Stack Update for Windows 8.1" "Package_for_KB3021910"
+!insertmacro MSUHandler "KB3021910" "2015-04 Servicing Stack Update for Windows 8.1" "Package_for_KB3021910"
 
 ; Windows 8.1 Update 1
 !insertmacro MSUHandler "KB2919355" "Windows 8.1 Update 1"                   "Package_for_KB2919355"

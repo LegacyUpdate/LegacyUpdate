@@ -4,7 +4,7 @@ Name         "${NAME}"
 Caption      "${NAME}"
 BrandingText "${NAME} ${VERSION} - ${DOMAIN}"
 OutFile      "LegacyUpdate-${VERSION}.exe"
-InstallDir   "$ProgramFiles\${NAME}"
+InstallDir   "$PROGRAMFILES\${NAME}"
 InstallDirRegKey HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "InstallDir"
 
 Unicode               true
@@ -12,6 +12,8 @@ RequestExecutionLevel Admin
 AutoCloseWindow       true
 ManifestSupportedOS   all
 ManifestDPIAware      true
+AllowSkipFiles        off
+SetCompressor         /SOLID lzma
 
 VIAddVersionKey /LANG=1033 "ProductName"     "${NAME}"
 VIAddVersionKey /LANG=1033 "ProductVersion"  "${LONGVERSION}"
@@ -93,6 +95,8 @@ VIFileVersion    ${LONGVERSION}
 !insertmacro MUI_UNPAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
+
+Var InstallDir
 
 !macro RestartWUAUService
 	!insertmacro DetailPrint "Restarting Windows Update service..."
@@ -230,7 +234,7 @@ ${MementoSectionEnd}
 
 ; Main installation
 ${MementoSection} "Legacy Update" LEGACYUPDATE
-	SetOutPath $INSTDIR
+	SetOutPath $InstallDir
 	WriteUninstaller "Uninstall.exe"
 
 	; Add uninstall entry
@@ -256,22 +260,30 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	WriteRegDword HKCR "${REGPATH_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
 	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
 	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "System.ControlPanelCategory" "5,10"
-	${If} ${RunningX64}
-		WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-203"
-	${Else}
-		WriteRegStr HKCR "${REGPATH_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-202"
-	${EndIf}
+	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-202"
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 	; Install DLL, with detection for it being in use by IE
+	; NOTE: Here we specifically check for amd64, because the DLL is amd64.
+	; We still install to native Program Files on IA64, but with x86 binaries.
 	SetOverwrite try
-	!insertmacro TryWithRetry \
-		`File "..\Release\LegacyUpdate.dll"` \
-		'Unable to write to "$OUTDIR\LegacyUpdate.dll".'
+	!insertmacro TryFile "..\Release\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
+	${If} ${IsNativeAMD64}
+		${If} ${FileExists} "$OUTDIR\LegacyUpdate32.dll"
+			!insertmacro TryDelete "$OUTDIR\LegacyUpdate32.dll"
+		${EndIf}
+		!insertmacro TryRename "$OUTDIR\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate32.dll"
+		!insertmacro TryFile "..\x64\Release\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
+	${EndIf}
 	SetOverwrite on
 
 	; Register DLL
-	!insertmacro RegisterDLL "" "$OUTDIR\LegacyUpdate.dll"
+	${If} ${IsNativeAMD64}
+		!insertmacro RegisterDLL "" x64 "$OUTDIR\LegacyUpdate.dll"
+		!insertmacro RegisterDLL "" x86 "$OUTDIR\LegacyUpdate32.dll"
+	${Else}
+		!insertmacro RegisterDLL "" x86 "$OUTDIR\LegacyUpdate.dll"
+	${EndIf}
 
 	; Create shortcut
 	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
@@ -310,6 +322,14 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 		Delete $WINDIR\inf\LegacyUpdate.inf
 	${EndIf}
 
+	; If 32-bit Legacy Update exists, move it to 64-bit Program Files
+	${If} ${RunningX64}
+	${AndIf} ${FileExists} "$PROGRAMFILES32\Legacy Update\Backup"
+		CreateDirectory "$PROGRAMFILES64\Legacy Update"
+		Rename "$PROGRAMFILES32\Legacy Update\Backup" "$PROGRAMFILES64\Legacy Update\Backup"
+		RMDir /r "$PROGRAMFILES32\Legacy Update"
+	${EndIf}
+
 	; Set WSUS server
 	${If} ${AtMostWinVista}
 		; Check if Schannel is going to work with modern TLS
@@ -346,6 +366,8 @@ ${MementoSectionEnd}
 ${MementoSectionDone}
 
 Section -Uninstall
+	SetOutPath $InstallDir
+
 	; Delete shortcut
 	${UnpinShortcut} "$COMMONSTARTMENU\${NAME}.lnk"
 	Delete "$COMMONSTARTMENU\${NAME}.lnk"
@@ -355,16 +377,23 @@ Section -Uninstall
 	DeleteRegKey HKCR "${REGPATH_CPLCLSID}"
 
 	; Restore shortcuts
-	${If} ${FileExists} "$INSTDIR\Backup\Windows Update.lnk"
-		Rename "$INSTDIR\Backup\Windows Update.lnk" "$COMMONSTARTMENU\Windows Update.lnk"
+	${If} ${FileExists} "$OUTDIR\Backup\Windows Update.lnk"
+		Rename "$OUTDIR\Backup\Windows Update.lnk" "$COMMONSTARTMENU\Windows Update.lnk"
 	${EndIf}
 
-	${If} ${FileExists} "$INSTDIR\Backup\Microsoft Update.lnk"
-		Rename "$INSTDIR\Backup\Microsoft Update.lnk" "$COMMONSTARTMENU\Microsoft Update.lnk"
+	${If} ${FileExists} "$OUTDIR\Backup\Microsoft Update.lnk"
+		Rename "$OUTDIR\Backup\Microsoft Update.lnk" "$COMMONSTARTMENU\Microsoft Update.lnk"
 	${EndIf}
 
 	; Unregister dll
-	!insertmacro RegisterDLL "Un" "$INSTDIR\LegacyUpdate.dll"
+	SetOverwrite try
+	${If} ${IsNativeAMD64}
+		!insertmacro RegisterDLL Un x64 "$OUTDIR\LegacyUpdate.dll"
+		!insertmacro RegisterDLL Un x86 "$OUTDIR\LegacyUpdate32.dll"
+	${Else}
+		!insertmacro RegisterDLL Un x86 "$OUTDIR\LegacyUpdate.dll"
+	${EndIf}
+	SetOverwrite on
 
 	; Clear WSUS server
 	${If} ${AtMostWinVista}
@@ -382,13 +411,16 @@ Section -Uninstall
 	!insertmacro RestartWUAUService
 
 	; Delete the rest
-	Delete "$INSTDIR\Uninstall.exe"
-	Delete "$INSTDIR\LegacyUpdateSetup.exe"
-	!insertmacro TryWithRetry \
-		`Delete "$INSTDIR\LegacyUpdate.dll"` \
-		'Unable to delete "$INSTDIR\LegacyUpdate.dll".'
-	RMDir "$INSTDIR"
-	RMDir "$INSTDIR\Backup"
+	Delete "$OUTDIR\Uninstall.exe"
+	Delete "$OUTDIR\LegacyUpdateSetup.exe"
+
+	SetOverwrite try
+	!insertmacro TryDelete "$OUTDIR\LegacyUpdate.dll"
+	!insertmacro TryDelete "$OUTDIR\LegacyUpdate32.dll"
+	SetOverwrite on
+
+	RMDir "$OUTDIR"
+	RMDir "$OUTDIR\Backup"
 	DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"
 SectionEnd
 
@@ -434,6 +466,9 @@ Function .onInit
 	SetShellVarContext All
 	${If} ${RunningX64}
 		SetRegView 64
+		StrCpy $InstallDir "$PROGRAMFILES64\${NAME}"
+	${Else}
+		StrCpy $InstallDir "$PROGRAMFILES32\${NAME}"
 	${EndIf}
 	!insertmacro EnsureAdminRights
 	SetDetailsPrint listonly
@@ -447,6 +482,8 @@ Function .onInit
 	File Patches.ini
 
 	${MementoSectionRestore}
+
+	; !insertmacro DownloadRequest "https://legacyupdate.net/" "$PLUGINSDIR\test" ""
 
 	${If} ${IsWin2000}
 		; Determine whether Win2k prereqs need to be installed
@@ -586,23 +623,14 @@ Function .onInit
 	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
 	${If} ${AtLeastWin10}
 		!insertmacro RemoveSection ${ROOTCERTS}
-
-		!insertmacro TaskDialog `'Legacy Update'` \
-			`'Legacy Update is intended for earlier versions of Windows'` \
-			`'Visit legacyupdate.net for more information.$\r$\n$\r$\nContinue anyway?'` \
-			${TDCBF_YES_BUTTON}|${TDCBF_NO_BUTTON} \
-			${TD_WARNING_ICON}
-		${If} $0 != ${IDYES}
-			Quit
-		${EndIf}
 	${EndIf}
 FunctionEnd
 
 Function PostInstall
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
-		${If} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
-			Exec '$SYSDIR\rundll32.exe "$INSTDIR\LegacyUpdate.dll",LaunchUpdateSite firstrun'
+		${If} ${FileExists} "$InstallDir\LegacyUpdate.dll"
+			Exec '$SYSDIR\rundll32.exe "$InstallDir\LegacyUpdate.dll",LaunchUpdateSite firstrun'
 		${ElseIf} ${AtLeastWinVista}
 			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
 		${EndIf}
@@ -649,6 +677,9 @@ Function un.onInit
 	SetShellVarContext All
 	${If} ${RunningX64}
 		SetRegView 64
+		StrCpy $InstallDir "$PROGRAMFILES64\${NAME}"
+	${Else}
+		StrCpy $InstallDir "$PROGRAMFILES32\${NAME}"
 	${EndIf}
 	!insertmacro EnsureAdminRights
 	SetDetailsPrint listonly

@@ -164,32 +164,44 @@ FunctionEnd
 !macro TryWithRetry command error
 	ClearErrors
 	${command}
-	IfErrors 0 +6
+	IfErrors 0 +3
 		MessageBox MB_RETRYCANCEL|MB_USERICON \
 			'${error}$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
 			/SD IDCANCEL \
-			IDRETRY -6
+			IDRETRY -3
 		Abort
 !macroend
 
-!macro RegisterDLL un file
+!macro TryFile file oname
+	!insertmacro TryWithRetry `File "/ONAME=${oname}" "${file}"` 'Unable to write to "${oname}".'
+!macroend
+
+!macro TryDelete file
+	!insertmacro TryWithRetry `Delete "${file}"` 'Unable to delete "${file}".'
+!macroend
+
+!macro TryRename src dest
+	!insertmacro TryWithRetry `Rename "${src}" "${dest}"` 'Unable to write to "${dest}".2'
+!macroend
+
+!macro RegisterDLL un arch file
+	${If} "${un}" == "Un"
+		StrCpy $0 "/u"
+	${Else}
+		StrCpy $0 ""
+	${EndIf}
+
+	${If} "${arch}" == "x86"
+		StrCpy $1 "$WINDIR\system32"
+	${ElseIf} "${arch}" == "x64"
+		StrCpy $1 "$WINDIR\Sysnative"
+	${EndIf}
+
 	ClearErrors
-	${un}RegDLL "${file}"
+	ExecWait '"$1\regsvr32.exe" /s $0 "${file}"'
 	${If} ${Errors}
-		; Try again with regsvr32. RegDLL seems to fail on Win2k, not sure why.
-		ClearErrors
-
-		${If} "${un}" == "Un"
-			StrCpy $0 "/u"
-		${Else}
-			StrCpy $0 ""
-		${EndIf}
-
-		ExecWait '"$SYSDIR\regsvr32.exe" /s $0 "${file}"'
-		${If} ${Errors}
-			; Do it again non-silently so the user can see the error.
-			ExecWait '"$SYSDIR\regsvr32.exe" $0 "${file}"'
-			Abort
-		${EndIf}
+		; Do it again non-silently so the user can see the error.
+		ExecWait '"$1\regsvr32.exe" $0 "${file}"'
+		Abort
 	${EndIf}
 !macroend

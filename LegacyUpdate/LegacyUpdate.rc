@@ -126,8 +126,7 @@ IDR_LEGACYUPDATECTRL    REGISTRY                "LegacyUpdateCtrl.rgs"
 // XML
 //
 
-IDR_CPLTASKS32          XML                     "CplTasks32.xml"
-IDR_CPLTASKS64          XML                     "CplTasks64.xml"
+IDR_CPLTASKS            XML                     "CplTasks.xml"
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////

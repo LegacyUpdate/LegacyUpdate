@@ -9,8 +9,7 @@
 #define IDR_LEGACYUPDATEOCX             101
 #define IDR_LEGACYUPDATECTRL            102
 #define IDI_ICON1                       201
-#define IDR_CPLTASKS32                  202
-#define IDR_CPLTASKS64                  203
+#define IDR_CPLTASKS                    202
 
 // Next default values for new objects
 //
