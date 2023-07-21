@@ -49,6 +49,11 @@
 !define REGPATH_SERVICING_SHA2     "Software\Microsoft\Windows\CurrentVersion\Servicing\Codesigning\SHA2"
 !define REGPATH_COMPONENT_THEMES   "Software\Microsoft\Active Setup\Installed Components\{2C7339CF-2B09-4501-B3F3-F3508C9228ED}"
 
+; COM
+!define CLSID_UpdateServiceManager "{F8D253D9-89A4-4DAA-87B6-1168369F0B21}"
+!define IID_IUpdateServiceManager2 "{B596CC9F-56E5-419E-A622-E01BB457431E}"
+!define METHOD_AddService2         0x60030003
+
 ; Win32 constants
 !define EWX_REBOOT       0x02
 !define EWX_FORCE        0x04
@@ -75,3 +80,5 @@
 ; Windows Update constants
 !define WU_S_ALREADY_INSTALLED 2359302     ; 0x00240006
 !define WU_E_NOT_APPLICABLE    -2145124329 ; 0x80240017
+
+!define WU_MU_SERVICE_ID       "7971f918-a847-4430-9279-4a52d1efe18d"
