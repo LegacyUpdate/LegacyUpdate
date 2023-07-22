@@ -57,9 +57,9 @@ FunctionEnd
 		/END
 !macroend
 
-!macro Download name url filename
+!macro -Download name url filename
 	!insertmacro DetailPrint "Downloading ${name}..."
-	!insertmacro DownloadRequest "${url}" "$PLUGINSDIR\${filename}" ""
+	!insertmacro DownloadRequest "${url}" "$RunOnceDir\${filename}" ""
 	Pop $0
 	!insertmacro DownloadWait $0 PAGE
 	Pop $1
@@ -100,24 +100,25 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro DownloadIfNeeded name url filename
+!macro Download name url filename
 	${If} ${FileExists} "$EXEDIR\${filename}"
+		SetOutPath "$EXEDIR"
 		StrCpy $0 "$EXEDIR\${filename}"
 	${Else}
-		!insertmacro Download '${name}' '${url}' '${filename}'
-		StrCpy $0 "$PLUGINSDIR\${filename}"
+		SetOutPath "$RunOnceDir"
+		StrCpy $0 "$RunOnceDir\${filename}"
+		${IfNot} ${FileExists} "$0"
+			!insertmacro -Download '${name}' '${url}' '${filename}'
+		${EndIf}
 	${EndIf}
 !macroend
 
-!macro DownloadAndInstall name url filename args
-	!insertmacro DownloadIfNeeded '${name}' '${url}' '${filename}'
+!macro Install name filename args
 	!insertmacro DetailPrint "Installing ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" ${args}' 0
 !macroend
 
-!macro DownloadAndInstallSP name url filename
-	!insertmacro DownloadIfNeeded '${name}' '${url}' '${filename}.exe'
-
+!macro InstallSP name filename
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
 	!insertmacro DetailPrint "Extracting ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"' 0
@@ -131,9 +132,11 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro DownloadAndInstallMSU kbid name url
-	!insertmacro DownloadIfNeeded '${name} (${kbid})' '${url}' '${kbid}.msu'
+!macro DownloadMSU kbid name url
+	!insertmacro Download '${name} (${kbid})' '${url}' '${kbid}.msu'
+!macroend
 
+!macro InstallMSU kbid name
 	; Stop AU service before running wusa so it doesn't try checking for updates online first (which
 	; may never complete before we install our patches).
 	!insertmacro DetailPrint "Installing ${name} (${kbid})..."

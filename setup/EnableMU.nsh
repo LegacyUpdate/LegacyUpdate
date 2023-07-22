@@ -1,5 +1,5 @@
 Function EnableMicrosoftUpdate
-	DetailPrint "Enabling Microsoft Update..."
+	!insertmacro DetailPrint "Enabling Microsoft Update..."
 	System::Call 'ole32::CoCreateInstance(g "${CLSID_UpdateServiceManager}", p 0, i ${CLSCTX_INPROC_SERVER}, g "${IID_IUpdateServiceManager2}", *p .r0) i.r1'
 	${If} $0 != 0
 	${OrIf} $1 == 0

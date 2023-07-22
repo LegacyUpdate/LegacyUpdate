@@ -19,7 +19,7 @@
 !macroend
 
 !macro -RegisterRunOnce flags
-	WriteRegStr HKLM "${REGPATH_RUNONCE}" "Legacy Update" '"$INSTDIR\LegacyUpdateSetup.exe" ${flags}'
+	WriteRegStr HKLM "${REGPATH_RUNONCE}" "Legacy Update" '"$RunOnceDir\LegacyUpdateSetup.exe" ${flags}'
 !macroend
 
 Function RegisterRunOnce
@@ -81,8 +81,8 @@ FunctionEnd
 			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "DefaultPassword" "${RUNONCE_PASSWORD}"
 
 			; Copy to a local path, just in case the installer is on a network share
-			CreateDirectory "$INSTDIR"
-			CopyFiles /SILENT "$EXEPATH" "$INSTDIR\LegacyUpdateSetup.exe"
+			CreateDirectory "$RunOnceDir"
+			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
 		${EndIf}
 
 		Call ${un}RegisterRunOnce
@@ -116,7 +116,7 @@ Function OnRunOnceLogon
 		System::Call 'kernel32::CloseHandle(i r0)'
 	${EndIf}
 
-	; Handle Safe Mode case. Runonce can still be processed in Safe Mode in some edge cases. If that
+	; Handle Safe Mode case. RunOnce can still be processed in Safe Mode in some edge cases. If that
 	; happens, just silently register runonce again and quit.
 	${If} ${IsSafeMode}
 		Call RegisterRunOnce
@@ -139,18 +139,19 @@ Function CleanUpRunOnce
 	!insertmacro -RestoreRegStr HKLM "${REGPATH_WINLOGON}" "DefaultUserName"
 	!insertmacro -RestoreRegStr HKLM "${REGPATH_WINLOGON}" "DefaultPassword"
 
-	; Register postinstall runonce for the next admin user logon, and log out of the temporary user
+	; Delete the temp user
 	ExecShellWait "" "$WINDIR\system32\net.exe" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
 
 	${If} ${IsRunOnce}
 		; Clean up temporary setup exe if we created it (likely on next reboot)
-		${If} ${FileExists} "$INSTDIR\LegacyUpdateSetup.exe"
-			Delete /REBOOTOK "$INSTDIR\LegacyUpdateSetup.exe"
+		${If} ${FileExists} "$RunOnceDir"
+			RMDir /r /REBOOTOK "$RunOnceDir"
 		${EndIf}
 
 		; Be really really sure this is the right user before we nuke their profile and log out
 		System::Call 'advapi32::GetUserName(t .r0, *i ${NSIS_MAX_STRLEN}) i .r1'
 		${If} $0 == "${RUNONCE_USERNAME}"
+			; Register postinstall runonce for the next admin user logon, and log out of the temporary user
 			${IfNot} ${Abort}
 				Call RegisterRunOncePostInstall
 			${EndIf}

@@ -42,7 +42,16 @@ FunctionEnd
 			Pop $1
 			Pop $0
 			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0-$1
-			!insertmacro DownloadAndInstall "${title}" "$0" "${kbid}.exe" "${params}"
+			!insertmacro Download "${title}" "$0" "${kbid}.exe"
+		${EndIf}
+	FunctionEnd
+
+	Function Install${kbid}
+		Call Needs${kbid}
+		Pop $0
+		${If} $0 == 1
+			Call Download${kbid}
+			!insertmacro Install "${title}" "${kbid}.exe" "${params}"
 		${EndIf}
 	FunctionEnd
 !macroend
@@ -70,10 +79,18 @@ Function DownloadIE6
 		Pop $1
 		Pop $0
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini "W2KIE6" $0-$1
-		!insertmacro DownloadIfNeeded "Internet Explorer 6 SP1" "$0" "ie6sp1.cab"
+		!insertmacro Download "Internet Explorer 6 SP1" "$0" "ie6sp1.cab"
+	${EndIf}
+FunctionEnd
+
+Function InstallIE6
+	Call NeedsIE6
+	Pop $0
+	${If} $0 == 1
+		Call DownloadIE6
 		!insertmacro DetailPrint "Extracting Internet Explorer 6 SP1..."
-		ExecShellWait "" "$WINDIR\system32\expand.exe" '"$0" -F:ie6setup.exe "$PLUGINSDIR"' SW_HIDE
-		ExecShellWait "" "$WINDIR\system32\expand.exe" '"$0" -F:iebatch.txt "$PLUGINSDIR"' SW_HIDE
+		ExecShellWait "" "$WINDIR\system32\expand.exe" '"$OUTDIR\ie6sp1.cab" -F:ie6setup.exe "$PLUGINSDIR"' SW_HIDE
+		ExecShellWait "" "$WINDIR\system32\expand.exe" '"$OUTDIR\ie6sp1.cab" -F:iebatch.txt "$PLUGINSDIR"' SW_HIDE
 		!insertmacro DetailPrint "Installing Internet Explorer 6 SP1..."
 		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' '"$PLUGINSDIR\ie6setup.exe" /q' 0
 	${EndIf}

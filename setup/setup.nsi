@@ -43,12 +43,16 @@ VIFileVersion    ${LONGVERSION}
 !define MEMENTO_REGISTRY_ROOT        HKLM
 !define MEMENTO_REGISTRY_KEY         "${REGPATH_LEGACYUPDATE_SETUP}"
 
+Var /GLOBAL InstallDir
+Var /GLOBAL RunOnceDir
+
 !include FileFunc.nsh
 !include Integration.nsh
 !include LogicLib.nsh
 !include Memento.nsh
 !include MUI2.nsh
 !include Sections.nsh
+!include Win\COM.nsh
 !include Win\WinError.nsh
 !include Win\WinNT.nsh
 !include WinMessages.nsh
@@ -97,8 +101,6 @@ VIFileVersion    ${LONGVERSION}
 
 !insertmacro MUI_LANGUAGE "English"
 
-Var InstallDir
-
 !macro RestartWUAUService
 	!insertmacro DetailPrint "Restarting Windows Update service..."
 	SetDetailsPrint none
@@ -127,71 +129,133 @@ Section -BeforeInstall
 	!insertmacro InhibitSleep 1
 SectionEnd
 
+Section -PreDownload
+	; Win2k
+	${If} ${IsWin2000}
+		Call DownloadW2KSP4
+		Call DownloadKB835732
+		Call DownloadIE6
+	${EndIf}
+
+	; XP 2002
+	${If} ${IsWinXP2002}
+		Call DownloadXPSP2
+		Call DownloadXPSP3
+	${EndIf}
+
+	; XP 2003
+	${If} ${IsWinXP2003}
+		Call Download2003SP2
+	${EndIf}
+
+	; Vista
+	${If} ${IsWinVista}
+		Call DownloadVistaSP1
+		Call DownloadVistaSP2
+		Call DownloadKB3205638
+		Call DownloadKB4012583
+		Call DownloadKB4015195
+		Call DownloadKB4015380
+		Call DownloadKB4493730
+	${EndIf}
+
+	; 7
+	${If} ${IsWin7}
+		Call DownloadWin7SP1
+		Call DownloadKB4474419
+		Call DownloadKB4490628
+	${EndIf}
+
+	; 8
+	${If} ${IsWin8}
+		Call DownloadKB4598297
+	${EndIf}
+
+	; 8.1
+	${If} ${IsWin8.1}
+		Call DownloadKB3021910
+		Call DownloadClearCompressionFlag
+		Call DownloadKB2919355
+		Call DownloadKB2932046
+		Call DownloadKB2959977
+		Call DownloadKB2937592
+		Call DownloadKB2934018
+		Call DownloadKB3021910
+	${EndIf}
+
+	; General
+	Call DownloadWUA
+
+	${If} ${AtMostWin8.1}
+		Call DownloadRoots
+	${EndIf}
+SectionEnd
+
 ; Win2k prerequisities
 Section "Windows 2000 Service Pack 4" W2KSP4
 	SectionIn Ro
-	Call DownloadW2KSP4
-	Call DownloadKB835732
+	Call InstallW2KSP4
+	Call InstallKB835732
 	Call RebootIfRequired
 SectionEnd
 
 Section "Internet Explorer 6.0 Service Pack 1" IE6SP1
 	SectionIn Ro
-	Call DownloadIE6
+	Call InstallIE6
 	Call RebootIfRequired
 SectionEnd
 
 ; XP 2002 prerequisities
 ${MementoSection} "Windows XP Service Pack 3" XPSP3
-	Call DownloadXPSP2
+	Call InstallXPSP2
 	Call RebootIfRequired
-	Call DownloadXPSP3
+	Call InstallXPSP3
 	Call RebootIfRequired
 ${MementoSectionEnd}
 
 ; XP 2003 prerequisities
 Section "Windows XP/Server 2003 Service Pack 2" 2003SP2
-	Call Download2003SP2
+	Call Install2003SP2
 	Call RebootIfRequired
 SectionEnd
 
 ; Vista prerequisities
 Section "Windows Vista Service Pack 2" VISTASP2
 	SectionIn Ro
-	Call DownloadVistaSP1
+	Call InstallVistaSP1
 	Call RebootIfRequired
-	Call DownloadVistaSP2
+	Call InstallVistaSP2
 	Call RebootIfRequired
 SectionEnd
 
 Section "Windows Servicing Stack update" VISTASSU
 	SectionIn Ro
-	Call DownloadKB3205638
-	Call DownloadKB4012583
-	Call DownloadKB4015195
-	Call DownloadKB4015380
-	Call DownloadKB4493730
+	Call InstallKB3205638
+	Call InstallKB4012583
+	Call InstallKB4015195
+	Call InstallKB4015380
+	Call InstallKB4493730
 	Call RebootIfRequired
 SectionEnd
 
 ; 7 prerequisities
 Section "Windows 7 Service Pack 1" WIN7SP1
 	SectionIn Ro
-	Call DownloadWin7SP1
+	Call InstallWin7SP1
 	Call RebootIfRequired
 SectionEnd
 
 Section "Windows Servicing Stack update" WIN7SSU
 	SectionIn Ro
-	Call DownloadKB4474419
-	Call DownloadKB4490628
+	Call InstallKB4474419
+	Call InstallKB4490628
 	Call RebootIfRequired
 SectionEnd
 
 ; 8 prerequisities
 Section "Windows Servicing Stack update" WIN8SSU
 	SectionIn Ro
-	Call DownloadKB4598297
+	Call InstallKB4598297
 	Call RebootIfRequired
 SectionEnd
 
@@ -202,26 +266,26 @@ SectionEnd
 ; 8.1 prerequisities
 Section "Windows 8.1 Update 1" WIN81UPDATE1
 	SectionIn Ro
-	Call DownloadKB3021910
-	Call DownloadClearCompressionFlag
-	Call DownloadKB2919355
-	Call DownloadKB2932046
-	Call DownloadKB2959977
-	Call DownloadKB2937592
-	Call DownloadKB2934018
+	Call InstallKB3021910
+	Call InstallClearCompressionFlag
+	Call InstallKB2919355
+	Call InstallKB2932046
+	Call InstallKB2959977
+	Call InstallKB2937592
+	Call InstallKB2934018
 	Call RebootIfRequired
 SectionEnd
 
 Section "Windows Servicing Stack update" WIN81SSU
 	SectionIn Ro
-	Call DownloadKB3021910
+	Call InstallKB3021910
 	Call RebootIfRequired
 SectionEnd
 
 ; Shared prerequisites
 Section "Windows Update Agent update" WUA
 	SectionIn Ro
-	Call DownloadWUA
+	Call InstallWUA
 SectionEnd
 
 ${MementoUnselectedSection} "Enable Windows Embedded 2009 updates" WES09
@@ -391,22 +455,26 @@ Section -Uninstall
 		Rename "$OUTDIR\Backup\Microsoft Update.lnk" "$COMMONSTARTMENU\Microsoft Update.lnk"
 	${EndIf}
 
-	; Unregister dll
-	SetOverwrite try
+	; Unregister DLLS
 	${If} ${IsNativeAMD64}
 		!insertmacro RegisterDLL Un x64 "$OUTDIR\LegacyUpdate.dll"
 		!insertmacro RegisterDLL Un x86 "$OUTDIR\LegacyUpdate32.dll"
 	${Else}
 		!insertmacro RegisterDLL Un x86 "$OUTDIR\LegacyUpdate.dll"
 	${EndIf}
+
+	; Delete DLLs
+	SetOverwrite try
+	!insertmacro TryDelete "$OUTDIR\LegacyUpdate.dll"
+	!insertmacro TryDelete "$OUTDIR\LegacyUpdate32.dll"
 	SetOverwrite on
 
 	; Clear WSUS server
 	${If} ${AtMostWinVista}
-		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUServer"
-		DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
+		DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUServer"
+		DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer"
 		DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
-		DeleteRegValue HKLM "${REGPATH_WU}" "URL"
+		DeleteRegValue HKLM "${REGPATH_WU}"         "URL"
 	${EndIf}
 
 	; Remove from trusted sites
@@ -416,17 +484,11 @@ Section -Uninstall
 	; Restart service
 	!insertmacro RestartWUAUService
 
-	; Delete the rest
-	Delete "$OUTDIR\Uninstall.exe"
-	Delete "$OUTDIR\LegacyUpdateSetup.exe"
+	; Delete folders
+	RMDir /r "$OUTDIR"
+	RMDir /r /REBOOTOK "$RunOnceDir"
 
-	SetOverwrite try
-	!insertmacro TryDelete "$OUTDIR\LegacyUpdate.dll"
-	!insertmacro TryDelete "$OUTDIR\LegacyUpdate32.dll"
-	SetOverwrite on
-
-	RMDir "$OUTDIR"
-	RMDir "$OUTDIR\Backup"
+	; Delete uninstall entry
 	DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"
 SectionEnd
 
@@ -469,7 +531,7 @@ Function OnMouseOverSection
 	${EndIf}
 FunctionEnd
 
-Function .onInit
+!macro Init
 	SetShellVarContext All
 	${If} ${RunningX64}
 		SetRegView 64
@@ -477,8 +539,13 @@ Function .onInit
 	${Else}
 		StrCpy $InstallDir "$PROGRAMFILES32\${NAME}"
 	${EndIf}
+	StrCpy $RunOnceDir "$COMMONPROGRAMDATA\Legacy Update"
 	!insertmacro EnsureAdminRights
 	SetDetailsPrint listonly
+!macroend
+
+Function .onInit
+	!insertmacro Init
 
 	${If} ${IsRunOnce}
 	${OrIf} ${IsPostInstall}
@@ -488,9 +555,9 @@ Function .onInit
 	SetOutPath $PLUGINSDIR
 	File Patches.ini
 
-	${MementoSectionRestore}
+	SetOutPath $RunOnceDir
 
-	; !insertmacro DownloadRequest "https://legacyupdate.net/" "$PLUGINSDIR\test" ""
+	${MementoSectionRestore}
 
 	${If} ${IsWin2000}
 		; Determine whether Win2k prereqs need to be installed
@@ -682,15 +749,7 @@ Function .onSelChange
 FunctionEnd
 
 Function un.onInit
-	SetShellVarContext All
-	${If} ${RunningX64}
-		SetRegView 64
-		StrCpy $InstallDir "$PROGRAMFILES64\${NAME}"
-	${Else}
-		StrCpy $InstallDir "$PROGRAMFILES32\${NAME}"
-	${EndIf}
-	!insertmacro EnsureAdminRights
-	SetDetailsPrint listonly
+	!insertmacro Init
 FunctionEnd
 
 Function un.onUninstSuccess

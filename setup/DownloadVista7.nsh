@@ -20,7 +20,16 @@ FunctionEnd
 			Call GetArch
 			Pop $0
 			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
-			!insertmacro DownloadAndInstallSP "${title}" "$0" "${kbid}"
+			!insertmacro Download "${title}" "$0" "${kbid}"
+		${EndIf}
+	FunctionEnd
+
+	Function Install${kbid}
+		Call Needs${kbid}
+		Pop $0
+		${If} $0 == 1
+			Call Download${kbid}
+			!insertmacro InstallSP "${title}" "${kbid}"
 		${EndIf}
 	FunctionEnd
 !macroend
@@ -45,7 +54,16 @@ FunctionEnd
 			Call GetArch
 			Pop $0
 			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" $0
-			!insertmacro DownloadAndInstallMSU "${kbid}" "${title}" "$1"
+			!insertmacro DownloadMSU "${kbid}" "${title}" "$1"
+		${EndIf}
+	FunctionEnd
+
+	Function Install${kbid}
+		Call Needs${kbid}
+		Pop $0
+		${If} $0 == 1
+			Call Download${kbid}
+			!insertmacro InstallMSU "${kbid}" "${title}"
 		${EndIf}
 	FunctionEnd
 !macroend
