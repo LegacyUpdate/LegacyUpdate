@@ -13,10 +13,6 @@
 #define new DEBUG_NEW
 #endif
 
-// Ignore C4311 and C4302, which is for typecasts. It is due to ShellExec and should be safe to bypass.
-#pragma warning(disable: 4311)
-#pragma warning(disable: 4302)
-
 const BSTR permittedProgIDs[] = {
 	L"Microsoft.Update.",
 	NULL
@@ -297,11 +293,14 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 
 	// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
 	// opening the file (most likely in Notepad).
+	// Ignore C4311 and C4302, which is for typecasts. It is due to ShellExec and should be safe to bypass.
+	#pragma warning(disable: 4311 4302)
 	if ((int)ShellExecute(NULL, L"open", L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT) > 32) {
 		return S_OK;
 	}
 	ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT);
 	return S_OK;
+	#pragma warning(default: 4311 4302) // Allow 4311/4302 again
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {

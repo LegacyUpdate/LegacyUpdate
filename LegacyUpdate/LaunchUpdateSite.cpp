@@ -9,9 +9,6 @@
 
 #pragma comment(lib, "wininet.lib")
 
-// Ignore C4311 and C4302, which is for typecasts. It is due to ShellExec and should be safe to bypass.
-#pragma warning(disable: 4311)
-#pragma warning(disable: 4302)
 
 const LPCSTR UpdateSiteHostname     = "legacyupdate.net";
 const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
@@ -92,7 +89,10 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 		GetOwnFileName(&filename, &filenameSize);
 		WCHAR args[MAX_PATH + 20];
 		StringCchPrintfW(args, filenameSize + 20, L"\"%ls\",LaunchUpdateSite", filename);
+		// Ignore C4311 and C4302, which is for typecasts. It is due to ShellExec and should be safe to bypass.
+		#pragma warning(disable: 4311 4302)
 		int execResult = (int)ShellExecute(NULL, L"runas", L"rundll32.exe", args, NULL, SW_SHOWDEFAULT);
+		#pragma warning(default: 4311 4302) // Allow 4311/4302 again
 		// Access denied happens when the user clicks No/Cancel.
 		if (execResult <= 32 && execResult != SE_ERR_ACCESSDENIED) {
 			result = E_FAIL;
