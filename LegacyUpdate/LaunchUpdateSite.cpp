@@ -9,6 +9,10 @@
 
 #pragma comment(lib, "wininet.lib")
 
+// Ignore C4311 and C4302, which is for typecasts. It is due to ShellExec and should be safe to bypass.
+#pragma warning(disable: 4311)
+#pragma warning(disable: 4302)
+
 const LPCSTR UpdateSiteHostname     = "legacyupdate.net";
 const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
 const LPWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";

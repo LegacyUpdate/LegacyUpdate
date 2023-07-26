@@ -13,6 +13,10 @@
 #define new DEBUG_NEW
 #endif
 
+// Ignore C4311 and C4302, which is for typecasts. It is due to ShellExec and should be safe to bypass.
+#pragma warning(disable: 4311)
+#pragma warning(disable: 4302)
+
 const BSTR permittedProgIDs[] = {
 	L"Microsoft.Update.",
 	NULL
