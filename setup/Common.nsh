@@ -194,7 +194,15 @@ FunctionEnd
 	${If} "${arch}" == "x86"
 		StrCpy $1 "$WINDIR\system32"
 	${ElseIf} "${arch}" == "x64"
+	${AndIfNot} ${IsWinXP2003}
 		StrCpy $1 "$WINDIR\Sysnative"
+	${ElseIf} "${arch}" == "x64"
+	${AndIf} ${IsWinXP2003}
+		; This system call will force the system to use the 64-bit copy of RegSvr32 on
+		; Windows XP 64-bit and Windows Server 2003 x64. This is needed because there is
+		; no equivalent for C:\Windows\Sysnative on these platforms.
+		System::Call "kernel32.dll::Wow64DisableWow64FsRedirection(NULL)"
+		StrCpy $1 "$WINDIR\system32"
 	${EndIf}
 
 	ClearErrors
