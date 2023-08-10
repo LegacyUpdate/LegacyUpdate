@@ -20,7 +20,7 @@ FunctionEnd
 			Call GetArch
 			Pop $0
 			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
-			!insertmacro Download "${title}" "$0" "${kbid}"
+			!insertmacro Download "${title}" "$0" "${kbid}.exe"
 		${EndIf}
 	FunctionEnd
 
@@ -29,7 +29,7 @@ FunctionEnd
 		Pop $0
 		${If} $0 == 1
 			Call Download${kbid}
-			!insertmacro InstallSP "${title}" "${kbid}"
+			!insertmacro InstallSP "${title}" "${kbid}.exe"
 		${EndIf}
 	FunctionEnd
 !macroend
@@ -78,6 +78,13 @@ FunctionEnd
 !insertmacro MSUHandler "KB4012583" "Security Update for Windows Vista"                      "Package_for_KB4012583"
 !insertmacro MSUHandler "KB4015195" "Security Update for Windows Vista"                      "Package_for_KB4015195"
 !insertmacro MSUHandler "KB4015380" "Security Update for Windows Vista"                      "Package_for_KB4015380"
+
+; Vista IE9
+!insertmacro MSUHandler "KB971512"  "Update for Windows Vista"                               "Package_for_KB971512"
+!insertmacro MSUHandler "KB2117917" "Platform Update Supplement for Windows Vista"           "Package_for_KB2117917"
+
+!insertmacro NeedsFileVersionHandler "IE9" "mshtml.dll" "9.0.8112.16421"
+!insertmacro PatchHandlerNeutral     "IE9" "Internet Explorer 9 for Windows Vista" "/passive /norestart /update-no /closeprograms"
 
 ; Windows Vista Servicing Stack Update
 !insertmacro MSUHandler "KB4493730" "2019-04 Servicing Stack Update for Windows Server 2008" "Package_1_for_KB4493730"

@@ -56,6 +56,28 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
+!macro PatchHandlerNeutral kbid title params
+	Function Download${kbid}
+		Call Needs${kbid}
+		Pop $0
+		${If} $0 == 1
+			Call GetArch
+			Pop $0
+			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
+			!insertmacro Download "${title}" "$0" "${kbid}.exe"
+		${EndIf}
+	FunctionEnd
+
+	Function Install${kbid}
+		Call Needs${kbid}
+		Pop $0
+		${If} $0 == 1
+			Call Download${kbid}
+			!insertmacro Install "${title}" "${kbid}.exe" "${params}"
+		${EndIf}
+	FunctionEnd
+!macroend
+
 !insertmacro NeedsSPHandler "W2KSP4"  "Win2000"   2
 !insertmacro NeedsSPHandler "XPSP2"   "WinXP2002" 0
 !insertmacro NeedsSPHandler "XPSP3"   "WinXP2002" 2

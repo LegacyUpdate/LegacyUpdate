@@ -130,65 +130,7 @@ Section -BeforeInstall
 SectionEnd
 
 Section -PreDownload
-	; Win2k
-	${If} ${IsWin2000}
-		Call DownloadW2KSP4
-		Call DownloadKB835732
-		Call DownloadIE6
-	${EndIf}
-
-	; XP 2002
-	${If} ${IsWinXP2002}
-		Call DownloadXPSP2
-		Call DownloadXPSP3
-	${EndIf}
-
-	; XP 2003
-	${If} ${IsWinXP2003}
-		Call Download2003SP2
-	${EndIf}
-
-	; Vista
-	${If} ${IsWinVista}
-		Call DownloadVistaSP1
-		Call DownloadVistaSP2
-		Call DownloadKB3205638
-		Call DownloadKB4012583
-		Call DownloadKB4015195
-		Call DownloadKB4015380
-		Call DownloadKB4493730
-	${EndIf}
-
-	; 7
-	${If} ${IsWin7}
-		Call DownloadWin7SP1
-		Call DownloadKB4474419
-		Call DownloadKB4490628
-	${EndIf}
-
-	; 8
-	${If} ${IsWin8}
-		Call DownloadKB4598297
-	${EndIf}
-
-	; 8.1
-	${If} ${IsWin8.1}
-		Call DownloadKB3021910
-		Call DownloadClearCompressionFlag
-		Call DownloadKB2919355
-		Call DownloadKB2932046
-		Call DownloadKB2959977
-		Call DownloadKB2937592
-		Call DownloadKB2934018
-		Call DownloadKB3021910
-	${EndIf}
-
-	; General
-	Call DownloadWUA
-
-	${If} ${AtMostWin8.1}
-		Call DownloadRoots
-	${EndIf}
+	Call PreDownload
 SectionEnd
 
 ; Win2k prerequisities
@@ -237,6 +179,14 @@ Section "Windows Servicing Stack update" VISTASSU
 	Call InstallKB4493730
 	Call RebootIfRequired
 SectionEnd
+
+${MementoSection} "Internet Explorer 9" VISTAIE9
+	Call InstallKB971512
+	Call InstallKB2117917
+	Call RebootIfRequired
+	Call InstallIE9
+	Call RebootIfRequired
+${MementoSectionEnd}
 
 ; 7 prerequisities
 Section "Windows 7 Service Pack 1" WIN7SP1
@@ -504,6 +454,7 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASP2}     "Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASSU}     "Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${VISTAIE9}     "Updates Internet Explorer to 9.0.$\r$\n${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SP1}      "Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SSU}      "Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN8SSU}      "Updates Windows 8 or Windows Server 2012 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
@@ -621,9 +572,16 @@ Function .onInit
 		${If} $0 == 0
 			!insertmacro RemoveSection ${VISTASSU}
 		${EndIf}
+
+		Call NeedsIE9
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${VISTAIE9}
+		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${VISTASP2}
 		!insertmacro RemoveSection ${VISTASSU}
+		!insertmacro RemoveSection ${VISTAIE9}
 	${EndIf}
 
 	${If} ${IsWin7}
@@ -698,6 +656,74 @@ Function .onInit
 	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
 	${If} ${AtLeastWin10}
 		!insertmacro RemoveSection ${ROOTCERTS}
+	${EndIf}
+FunctionEnd
+
+Function PreDownload
+	; Win2k
+	${If} ${IsWin2000}
+		Call DownloadW2KSP4
+		Call DownloadKB835732
+		Call DownloadIE6
+	${EndIf}
+
+	; XP 2002
+	${If} ${IsWinXP2002}
+		Call DownloadXPSP2
+		Call DownloadXPSP3
+	${EndIf}
+
+	; XP 2003
+	${If} ${IsWinXP2003}
+		Call Download2003SP2
+	${EndIf}
+
+	; Vista
+	${If} ${IsWinVista}
+		Call DownloadVistaSP1
+		Call DownloadVistaSP2
+		Call DownloadKB3205638
+		Call DownloadKB4012583
+		Call DownloadKB4015195
+		Call DownloadKB4015380
+		Call DownloadKB4493730
+
+		${If} ${SectionIsSelected} ${VISTAIE9}
+			Call DownloadKB971512
+			Call DownloadKB2117917
+			Call DownloadIE9
+		${EndIf}
+	${EndIf}
+
+	; 7
+	${If} ${IsWin7}
+		Call DownloadWin7SP1
+		Call DownloadKB4474419
+		Call DownloadKB4490628
+	${EndIf}
+
+	; 8
+	${If} ${IsWin8}
+		Call DownloadKB4598297
+	${EndIf}
+
+	; 8.1
+	${If} ${IsWin8.1}
+		Call DownloadKB3021910
+		Call DownloadClearCompressionFlag
+		Call DownloadKB2919355
+		Call DownloadKB2932046
+		Call DownloadKB2959977
+		Call DownloadKB2937592
+		Call DownloadKB2934018
+		Call DownloadKB3021910
+	${EndIf}
+
+	; General
+	Call DownloadWUA
+
+	${If} ${AtMostWin8.1}
+		Call DownloadRoots
 	${EndIf}
 FunctionEnd
 
