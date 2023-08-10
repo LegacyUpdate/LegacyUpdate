@@ -49,7 +49,7 @@ FunctionEnd
 		/STATUSTEXT \
 			"{TIMEREMAINING} left - {RECVSIZE} of {FILESIZE} ({SPEED})" \
 			"{TIMEREMAINING} left - {TOTALRECVSIZE} of {TOTALFILESIZE} ({SPEED})" \
-		/ABORT "$(^Caption)" "Cancelling will terminate Legacy Update setup." \
+		/ABORT "Legacy Update" "Cancelling will terminate Legacy Update setup." \
 		/END
 	NSxfer::Query \
 		/ID ${id} \
@@ -59,7 +59,7 @@ FunctionEnd
 
 !macro -Download name url filename
 	!insertmacro DetailPrint "Downloading ${name}..."
-	!insertmacro DownloadRequest "${url}" "$RunOnceDir\${filename}" ""
+	!insertmacro DownloadRequest "${url}" "${filename}" ""
 	Pop $0
 	!insertmacro DownloadWait $0 PAGE
 	Pop $1
@@ -68,6 +68,7 @@ FunctionEnd
 		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
 			MessageBox MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
 		${EndIf}
+		Delete /REBOOTOK "${filename}"
 		SetErrorLevel 1
 		Abort
 	${EndIf}
@@ -102,14 +103,18 @@ FunctionEnd
 
 !macro Download name url filename
 	${If} ${FileExists} "$EXEDIR\${filename}"
-		SetOutPath "$EXEDIR"
+		${If} $OUTDIR != "$EXEDIR"
+			SetOutPath "$EXEDIR"
+		${EndIf}
 		StrCpy $0 "$EXEDIR\${filename}"
 	${Else}
-		SetOutPath "$RunOnceDir"
-		StrCpy $0 "$RunOnceDir\${filename}"
-		${IfNot} ${FileExists} "$0"
-			!insertmacro -Download '${name}' '${url}' '${filename}'
+		${If} $OUTDIR != "$RunOnceDir"
+			SetOutPath "$RunOnceDir"
 		${EndIf}
+		${IfNot} ${FileExists} "$RunOnceDir\${filename}"
+			!insertmacro -Download '${name}' '${url}' '$RunOnceDir\${filename}'
+		${EndIf}
+		StrCpy $0 "$RunOnceDir\${filename}"
 	${EndIf}
 !macroend
 
