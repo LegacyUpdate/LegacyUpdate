@@ -189,7 +189,7 @@ FunctionEnd
 !macroend
 
 !macro TryRename src dest
-	!insertmacro TryWithRetry `Rename "${src}" "${dest}"` 'Unable to write to "${dest}".2'
+	!insertmacro TryWithRetry `Rename "${src}" "${dest}"` 'Unable to write to "${dest}".'
 !macroend
 
 !macro RegisterDLL un arch file
@@ -199,17 +199,22 @@ FunctionEnd
 		StrCpy $0 ""
 	${EndIf}
 
-	${If} "${arch}" == "x86"
-		StrCpy $1 "$WINDIR\system32"
-	${ElseIf} "${arch}" == "x64"
-		StrCpy $1 "$WINDIR\Sysnative"
+	${If} "${arch}" == "x64"
+		${DisableX64FSRedirection}
 	${EndIf}
 
 	ClearErrors
-	ExecWait '"$1\regsvr32.exe" /s $0 "${file}"'
+	ExecWait '"$WINDIR\system32\regsvr32.exe" /s $0 "${file}"'
 	${If} ${Errors}
 		; Do it again non-silently so the user can see the error.
-		ExecWait '"$1\regsvr32.exe" $0 "${file}"'
+		ExecWait '"$WINDIR\system32\regsvr32.exe" $0 "${file}"'
+		${If} "${arch}" == "x64"
+			${EnableX64FSRedirection}
+		${EndIf}
 		Abort
+	${EndIf}
+
+	${If} "${arch}" == "x64"
+		${EnableX64FSRedirection}
 	${EndIf}
 !macroend
