@@ -130,7 +130,9 @@ Section -BeforeInstall
 SectionEnd
 
 Section -PreDownload
-	Call PreDownload
+	${IfNot} ${IsPostInstall}
+		Call PreDownload
+	${EndIf}
 SectionEnd
 
 ; Win2k prerequisities
@@ -749,6 +751,11 @@ FunctionEnd
 Function CleanUp
 	Call CleanUpRunOnce
 	!insertmacro InhibitSleep 0
+
+	${If} ${IsPostInstall}
+	${OrIfNot} ${RebootFlag}
+		RMDir /r /REBOOTOK "$RunOnceDir"
+	${EndIf}
 FunctionEnd
 
 Function .onInstSuccess
