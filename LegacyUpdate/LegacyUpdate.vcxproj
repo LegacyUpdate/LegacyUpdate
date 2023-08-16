@@ -350,6 +350,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="CplTasks.xml" />
     <None Include="icon.ico" />
     <None Include="LegacyUpdate.def" />
     <None Include="LegacyUpdate.rgs" />
