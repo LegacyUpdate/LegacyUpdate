@@ -355,7 +355,7 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 		; Check if Schannel is going to work with modern TLS
 		!insertmacro DetailPrint "Checking SSL connectivity..."
 		!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
-			`/TIMEOUTRECONNECT 0`
+			`/TIMEOUTCONNECT 0 /TIMEOUTRECONNECT 0`
 		Pop $0
 		!insertmacro DownloadWait $0 SILENT
 		Pop $0
