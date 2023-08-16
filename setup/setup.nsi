@@ -156,10 +156,10 @@ ${MementoSection} "Windows XP Service Pack 3" XPSP3
 ${MementoSectionEnd}
 
 ; XP 2003 prerequisities
-Section "Windows XP/Server 2003 Service Pack 2" 2003SP2
+${MementoSection} "Windows XP/Server 2003 Service Pack 2" 2003SP2
 	Call Install2003SP2
 	Call RebootIfRequired
-SectionEnd
+${MementoSectionEnd}
 
 ; Vista prerequisities
 Section "Windows Vista Service Pack 2" VISTASP2
@@ -669,12 +669,14 @@ Function PreDownload
 
 	; XP 2002
 	${If} ${IsWinXP2002}
+	${AndIf} ${SectionIsSelected} ${XPSP3}
 		Call DownloadXPSP2
 		Call DownloadXPSP3
 	${EndIf}
 
 	; XP 2003
 	${If} ${IsWinXP2003}
+	${AndIf} ${SectionIsSelected} ${2003SP2}
 		Call Download2003SP2
 	${EndIf}
 
@@ -723,6 +725,7 @@ Function PreDownload
 	Call DownloadWUA
 
 	${If} ${AtMostWin8.1}
+	${AndIf} ${SectionIsSelected} ${ROOTCERTS}
 		Call DownloadRoots
 	${EndIf}
 FunctionEnd
