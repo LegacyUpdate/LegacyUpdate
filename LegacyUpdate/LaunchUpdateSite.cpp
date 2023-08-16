@@ -5,73 +5,45 @@
 #include <ExDisp.h>
 #include <strsafe.h>
 #include "Utils.h"
-#include <WinInet.h>
-
-#pragma comment(lib, "wininet.lib")
 
 const LPCSTR UpdateSiteHostname     = "legacyupdate.net";
 const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
 const LPWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
 const LPWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
-const LPWSTR UpdateSitePingTestURL  = L"https://legacyupdate.net/v6/ClientWebService/ping.bin";
 
-static HRESULT AttemptSSLConnection() {
+static BOOL CanUseSSLConnection() {
 	// We know it won't work prior to XP SP3, so just fail immediately on XP RTM-SP2 and any Win2k.
 	OSVERSIONINFOEX* versionInfo = GetVersionInfo();
 	if (versionInfo->dwMajorVersion == 5) {
 		switch (versionInfo->dwMinorVersion) {
 		case 0:
-			return E_FAIL;
+			return FALSE;
 
 		case 1:
 			if (versionInfo->wServicePackMajor < 3) {
-				return E_FAIL;
+				return FALSE;
 			}
 		}
 	}
 
-	HINTERNET internet, request;
-	LPWSTR version;
+	// Get the Windows Update website URL set by Legacy Update setup
+	LPWSTR data;
 	DWORD size;
-	HRESULT result = GetOwnVersion(&version, &size);
+	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate", L"URL", NULL, &data, &size);
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
 
-	WCHAR userAgent[1024];
-	StringCchPrintfW(userAgent, 1024, L"Mozilla/4.0 (Legacy Update %ls; Windows NT %d.%d SP%d)",
-		version,
-		versionInfo->dwMajorVersion,
-		versionInfo->dwMinorVersion,
-		versionInfo->wServicePackMajor);
-
-	DWORD connectResult = InternetAttemptConnect(0);
-	if (connectResult != ERROR_SUCCESS) {
-		result = HRESULT_FROM_WIN32(connectResult);
-		goto end;
-	}
-
-	internet = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if (internet == NULL) {
-		result = HRESULT_FROM_WIN32(GetLastError());
-		goto end;
-	}
-
-	request = InternetOpenUrl(internet, UpdateSitePingTestURL, NULL, 0, 0, NULL);
-	if (request == NULL) {
-		result = HRESULT_FROM_WIN32(GetLastError());
-		goto end;
+	// Return based on the URL value
+	if (StrCmpW(data, UpdateSiteURLHttps) == 0) {
+		return TRUE;
+	} else if (StrCmpW(data, UpdateSiteURLHttp) == 0) {
+		return FALSE;
 	}
 
 end:
-	if (request != NULL) {
-		HttpEndRequest(request, NULL, 0, 0);
-		InternetCloseHandle(request);
-	}
-	if (internet != NULL) {
-		InternetCloseHandle(internet);
-	}
-	return result;
+	// Fallback: Use SSL only on Vista and up
+	return versionInfo->dwMajorVersion > 5;
 }
 
 // Function signature required by Rundll32.exe.
@@ -112,8 +84,7 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 	}
 
 	// Can we connect with https? WinInet will throw an error if not.
-	result = AttemptSSLConnection();
-	LPWSTR siteURL = SUCCEEDED(result) ? UpdateSiteURLHttps : UpdateSiteURLHttp;
+	LPWSTR siteURL = CanUseSSLConnection() ? UpdateSiteURLHttps : UpdateSiteURLHttp;
 
 	// Is this a first run launch? Append first run flag if so.
 	if (strcmp(lpszCmdLine, "firstrun") == 0) {
