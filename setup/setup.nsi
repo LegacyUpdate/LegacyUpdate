@@ -247,7 +247,10 @@ ${MementoSectionEnd}
 
 ${MementoSection} "Update root certificates store" ROOTCERTS
 	Call ConfigureCrypto
-	Call UpdateRoots
+
+	${IfNot} ${IsPostInstall}
+		Call UpdateRoots
+	${EndIf}
 ${MementoSectionEnd}
 
 ${MementoSection} "Enable Microsoft Update" WIN7MU
