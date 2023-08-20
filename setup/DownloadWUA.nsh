@@ -33,6 +33,14 @@ FunctionEnd
 Function DownloadWUA
 	Call DetermineWUAVersion
 	${If} $0 != ""
-		!insertmacro DownloadAndInstall "Windows Update Agent" "$0" "WindowsUpdateAgent.exe" "/quiet /norestart"
+		!insertmacro Download "Windows Update Agent" "$0" "WindowsUpdateAgent.exe"
+	${EndIf}
+FunctionEnd
+
+Function InstallWUA
+	Call DetermineWUAVersion
+	${If} $0 != ""
+		Call DownloadWUA
+		!insertmacro Install "Windows Update Agent" "WindowsUpdateAgent.exe" "/quiet /norestart"
 	${EndIf}
 FunctionEnd

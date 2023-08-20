@@ -37,7 +37,10 @@ FunctionEnd
 		/OPTCONNECTTIMEOUT 60000 \
 		/OPTRECEIVETIMEOUT 60000 \
 		/OPTSENDTIMEOUT 60000 \
-		/URL "${url}" /LOCAL "${local}" \
+		/URL "${url}" \
+		/LOCAL "${local}" \
+		/INTERNETFLAGS ${INTERNET_FLAG_RELOAD}|${INTERNET_FLAG_NO_CACHE_WRITE}|${INTERNET_FLAG_KEEP_CONNECTION}|${INTERNET_FLAG_NO_COOKIES}|${INTERNET_FLAG_NO_UI} \
+		/SECURITYFLAGS ${SECURITY_FLAG_STRENGTH_STRONG} \
 		${extra} \
 		/END
 !macroend
@@ -49,7 +52,7 @@ FunctionEnd
 		/STATUSTEXT \
 			"{TIMEREMAINING} left - {RECVSIZE} of {FILESIZE} ({SPEED})" \
 			"{TIMEREMAINING} left - {TOTALRECVSIZE} of {TOTALFILESIZE} ({SPEED})" \
-		/ABORT "$(^Caption)" "Cancelling will terminate Legacy Update setup." \
+		/ABORT "Legacy Update" "Cancelling will terminate Legacy Update setup." \
 		/END
 	NSxfer::Query \
 		/ID ${id} \
@@ -57,9 +60,9 @@ FunctionEnd
 		/END
 !macroend
 
-!macro Download name url filename
+!macro -Download name url filename
 	!insertmacro DetailPrint "Downloading ${name}..."
-	!insertmacro DownloadRequest "${url}" "$PLUGINSDIR\${filename}" ""
+	!insertmacro DownloadRequest "${url}" "${filename}" ""
 	Pop $0
 	!insertmacro DownloadWait $0 PAGE
 	Pop $1
@@ -68,6 +71,7 @@ FunctionEnd
 		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
 			MessageBox MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
 		${EndIf}
+		Delete /REBOOTOK "${filename}"
 		SetErrorLevel 1
 		Abort
 	${EndIf}
@@ -100,24 +104,29 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro DownloadIfNeeded name url filename
+!macro Download name url filename
 	${If} ${FileExists} "$EXEDIR\${filename}"
+		${If} $OUTDIR != "$EXEDIR"
+			SetOutPath "$EXEDIR"
+		${EndIf}
 		StrCpy $0 "$EXEDIR\${filename}"
 	${Else}
-		!insertmacro Download '${name}' '${url}' '${filename}'
-		StrCpy $0 "$PLUGINSDIR\${filename}"
+		${If} $OUTDIR != "$RunOnceDir"
+			SetOutPath "$RunOnceDir"
+		${EndIf}
+		${IfNot} ${FileExists} "$RunOnceDir\${filename}"
+			!insertmacro -Download '${name}' '${url}' '$RunOnceDir\${filename}'
+		${EndIf}
+		StrCpy $0 "$RunOnceDir\${filename}"
 	${EndIf}
 !macroend
 
-!macro DownloadAndInstall name url filename args
-	!insertmacro DownloadIfNeeded '${name}' '${url}' '${filename}'
+!macro Install name filename args
 	!insertmacro DetailPrint "Installing ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" ${args}' 0
 !macroend
 
-!macro DownloadAndInstallSP name url filename
-	!insertmacro DownloadIfNeeded '${name}' '${url}' '${filename}.exe'
-
+!macro InstallSP name filename
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
 	!insertmacro DetailPrint "Extracting ${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"' 0
@@ -131,9 +140,11 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro DownloadAndInstallMSU kbid name url
-	!insertmacro DownloadIfNeeded '${name} (${kbid})' '${url}' '${kbid}.msu'
+!macro DownloadMSU kbid name url
+	!insertmacro Download '${name} (${kbid})' '${url}' '${kbid}.msu'
+!macroend
 
+!macro InstallMSU kbid name
 	; Stop AU service before running wusa so it doesn't try checking for updates online first (which
 	; may never complete before we install our patches).
 	!insertmacro DetailPrint "Installing ${name} (${kbid})..."
@@ -164,32 +175,49 @@ FunctionEnd
 !macro TryWithRetry command error
 	ClearErrors
 	${command}
-	IfErrors 0 +6
+	IfErrors 0 +3
 		MessageBox MB_RETRYCANCEL|MB_USERICON \
 			'${error}$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
 			/SD IDCANCEL \
-			IDRETRY -6
+			IDRETRY -3
 		Abort
 !macroend
 
-!macro RegisterDLL un file
+!macro TryFile file oname
+	!insertmacro TryWithRetry `File "/ONAME=${oname}" "${file}"` 'Unable to write to "${oname}".'
+!macroend
+
+!macro TryDelete file
+	!insertmacro TryWithRetry `Delete "${file}"` 'Unable to delete "${file}".'
+!macroend
+
+!macro TryRename src dest
+	!insertmacro TryWithRetry `Rename "${src}" "${dest}"` 'Unable to write to "${dest}".'
+!macroend
+
+!macro RegisterDLL un arch file
+	${If} "${un}" == "Un"
+		StrCpy $0 "/u"
+	${Else}
+		StrCpy $0 ""
+	${EndIf}
+
+	${If} "${arch}" == "x64"
+		${DisableX64FSRedirection}
+	${EndIf}
+
 	ClearErrors
-	${un}RegDLL "${file}"
+	ExecWait '"$WINDIR\system32\regsvr32.exe" /s $0 "${file}"'
 	${If} ${Errors}
-		; Try again with regsvr32. RegDLL seems to fail on Win2k, not sure why.
-		ClearErrors
-
-		${If} "${un}" == "Un"
-			StrCpy $0 "/u"
-		${Else}
-			StrCpy $0 ""
+		; Do it again non-silently so the user can see the error.
+		ExecWait '"$WINDIR\system32\regsvr32.exe" $0 "${file}"'
+		${If} "${arch}" == "x64"
+			${EnableX64FSRedirection}
 		${EndIf}
+		Abort
+	${EndIf}
 
-		ExecWait '"$SYSDIR\regsvr32.exe" /s $0 "${file}"'
-		${If} ${Errors}
-			; Do it again non-silently so the user can see the error.
-			ExecWait '"$SYSDIR\regsvr32.exe" $0 "${file}"'
-			Abort
-		${EndIf}
+	${If} "${arch}" == "x64"
+		${EnableX64FSRedirection}
 	${EndIf}
 !macroend

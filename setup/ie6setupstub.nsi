@@ -62,6 +62,7 @@ FunctionEnd
 Section "Internet Explorer 6.0 Service Pack 1" IE6SP1
 	SectionIn Ro
 	Call DownloadIE6
+	Call InstallIE6
 SectionEnd
 
 Function .onInit

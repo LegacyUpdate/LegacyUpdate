@@ -73,18 +73,21 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-Function UpdateRoots
-	File "updroots.exe"
+Function DownloadRoots
 	!insertmacro DetailPrint "Downloading Certificate Trust List..."
 	!insertmacro _DownloadSST "authroots"
 	!insertmacro _DownloadSST "delroots"
 	!insertmacro _DownloadSST "roots"
 	!insertmacro _DownloadSST "updroots"
 	!insertmacro _DownloadSST "disallowedcert"
+FunctionEnd
+
+Function UpdateRoots
+	File "updroots.exe"
 	!insertmacro DetailPrint "Installing Certificate Trust List..."
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" authroots.sst' 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" updroots.sst' 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" -l roots.sst' 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" -d delroots.sst' 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$PLUGINSDIR\updroots.exe" -l -u disallowedcert.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" authroots.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" updroots.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l roots.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -d delroots.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l -u disallowedcert.sst' 0
 FunctionEnd

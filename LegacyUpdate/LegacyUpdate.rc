@@ -28,12 +28,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#ifndef APSTUDIO_INVOKED\r\n"
     "#include ""targetver.h""\r\n"
@@ -42,7 +42,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "1 TYPELIB ""LegacyUpdate.tlb""\r\n"
     "\0"
@@ -57,8 +57,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,6,2,0
- PRODUCTVERSION 1,6,2,0
+ FILEVERSION 1,7,0,0
+ PRODUCTVERSION 1,7,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -75,12 +75,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Hashbang Productions"
             VALUE "FileDescription", "Legacy Update"
-            VALUE "FileVersion", "1.6.2.0"
+            VALUE "FileVersion", "1.7.0.0"
             VALUE "InternalName", "LegacyUpdate.dll"
-            VALUE "LegalCopyright", "Â© Hashbang Productions. All rights reserved."
+            VALUE "LegalCopyright", "© Hashbang Productions. All rights reserved."
             VALUE "OriginalFilename", "LegacyUpdate.dll"
             VALUE "ProductName", "Legacy Update"
-            VALUE "ProductVersion", "1.6.2.0"
+            VALUE "ProductVersion", "1.7.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -102,6 +102,24 @@ IDI_ICON1               ICON                    "icon.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// REGISTRY
+//
+
+IDR_LEGACYUPDATEOCX     REGISTRY                "LegacyUpdate.rgs"
+
+IDR_LEGACYUPDATECTRL    REGISTRY                "LegacyUpdateCtrl.rgs"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// XML
+//
+
+IDR_CPLTASKS            XML                     "CplTasks.xml"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 
@@ -112,22 +130,6 @@ BEGIN
     IDS_CHECKFORUPDATES     "Check for updates"
     IDS_CHECKFORUPDATES_ALT "Check for software and driver updates via Legacy Update."
 END
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// REGISTRY
-//
-
-IDR_LEGACYUPDATEOCX     REGISTRY                "LegacyUpdate.rgs"
-IDR_LEGACYUPDATECTRL    REGISTRY                "LegacyUpdateCtrl.rgs"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// XML
-//
-
-IDR_CPLTASKS32          XML                     "CplTasks32.xml"
-IDR_CPLTASKS64          XML                     "CplTasks64.xml"
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////

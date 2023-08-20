@@ -27,6 +27,7 @@
     <None Include="LegacyUpdateCtrl.rgs">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="CplTasks.xml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

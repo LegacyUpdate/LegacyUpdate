@@ -5,73 +5,45 @@
 #include <ExDisp.h>
 #include <strsafe.h>
 #include "Utils.h"
-#include <WinInet.h>
-
-#pragma comment(lib, "wininet.lib")
 
 const LPCSTR UpdateSiteHostname     = "legacyupdate.net";
 const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
 const LPWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
 const LPWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
-const LPWSTR UpdateSitePingTestURL  = L"https://legacyupdate.net/v6/ClientWebService/ping.bin";
 
-static HRESULT AttemptSSLConnection() {
+static BOOL CanUseSSLConnection() {
 	// We know it won't work prior to XP SP3, so just fail immediately on XP RTM-SP2 and any Win2k.
 	OSVERSIONINFOEX* versionInfo = GetVersionInfo();
 	if (versionInfo->dwMajorVersion == 5) {
 		switch (versionInfo->dwMinorVersion) {
 		case 0:
-			return E_FAIL;
+			return FALSE;
 
 		case 1:
 			if (versionInfo->wServicePackMajor < 3) {
-				return E_FAIL;
+				return FALSE;
 			}
 		}
 	}
 
-	HINTERNET internet, request;
-	LPWSTR version;
+	// Get the Windows Update website URL set by Legacy Update setup
+	LPWSTR data;
 	DWORD size;
-	HRESULT result = GetOwnVersion(&version, &size);
+	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate", L"URL", NULL, &data, &size);
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
 
-	WCHAR userAgent[1024];
-	StringCchPrintfW(userAgent, 1024, L"Mozilla/4.0 (Legacy Update %ls; Windows NT %d.%d SP%d)",
-		version,
-		versionInfo->dwMajorVersion,
-		versionInfo->dwMinorVersion,
-		versionInfo->wServicePackMajor);
-
-	DWORD connectResult = InternetAttemptConnect(0);
-	if (connectResult != ERROR_SUCCESS) {
-		result = HRESULT_FROM_WIN32(connectResult);
-		goto end;
-	}
-
-	internet = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if (internet == NULL) {
-		result = HRESULT_FROM_WIN32(GetLastError());
-		goto end;
-	}
-
-	request = InternetOpenUrl(internet, UpdateSitePingTestURL, NULL, 0, 0, NULL);
-	if (request == NULL) {
-		result = HRESULT_FROM_WIN32(GetLastError());
-		goto end;
+	// Return based on the URL value
+	if (StrCmpW(data, UpdateSiteURLHttps) == 0) {
+		return TRUE;
+	} else if (StrCmpW(data, UpdateSiteURLHttp) == 0) {
+		return FALSE;
 	}
 
 end:
-	if (request != NULL) {
-		HttpEndRequest(request, NULL, 0, 0);
-		InternetCloseHandle(request);
-	}
-	if (internet != NULL) {
-		InternetCloseHandle(internet);
-	}
-	return result;
+	// Fallback: Use SSL only on Vista and up
+	return versionInfo->dwMajorVersion > 5;
 }
 
 // Function signature required by Rundll32.exe.
@@ -88,7 +60,12 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 		GetOwnFileName(&filename, &filenameSize);
 		WCHAR args[MAX_PATH + 20];
 		StringCchPrintfW(args, filenameSize + 20, L"\"%ls\",LaunchUpdateSite", filename);
+
+		// Ignore C4311 and C4302, which is for typecasts. It is due to ShellExec and should be safe to bypass.
+		#pragma warning(disable: 4311 4302)
 		int execResult = (int)ShellExecute(NULL, L"runas", L"rundll32.exe", args, NULL, SW_SHOWDEFAULT);
+		#pragma warning(default: 4311 4302)
+
 		// Access denied happens when the user clicks No/Cancel.
 		if (execResult <= 32 && execResult != SE_ERR_ACCESSDENIED) {
 			result = E_FAIL;
@@ -96,34 +73,18 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 		goto end;
 	}
 
-	// Get the OS Version Information and the System Information
-	// This is done to allow us to workaround behavior in Windows Server 2003 x64 and Windows XP x64,
-	// where CLSCTX_ACTIVATE_32_BIT_SERVER is needed when activating the COM interface. This causes
-	// issues on 32-bit XP and 2000 though, and newer versions of Windows do not require it.
-	DWORD contextFlags = CLSCTX_LOCAL_SERVER;
-	OSVERSIONINFOEX* versionInfo = GetVersionInfo();
-	if (versionInfo->dwMajorVersion == 5) {
-		SYSTEM_INFO systemInfo;
-		GetSystemInfo(&systemInfo);
-		if (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) {
-			// Server 2003 x64 and XP x64 specific quirk
-			contextFlags |= CLSCTX_ACTIVATE_32_BIT_SERVER;
-		}
-	}
-	
 	// Spawn an IE window via the COM interface. This ensures the page opens in IE (ShellExecute uses
 	// default browser), and avoids hardcoding a path to iexplore.exe. Also conveniently allows testing
 	// on Windows 11 (iexplore.exe redirects to Edge, but COM still works). Same strategy as used by
 	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
 	IWebBrowser2 *browser;
-	result = CoCreateInstance(CLSID_InternetExplorer, NULL, contextFlags, IID_IWebBrowser2, (void **)&browser);
+	result = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, IID_IWebBrowser2, (void **)&browser);
 	if (!SUCCEEDED(result)) {
 		goto end;
 	}
 
 	// Can we connect with https? WinInet will throw an error if not.
-	result = AttemptSSLConnection();
-	LPWSTR siteURL = SUCCEEDED(result) ? UpdateSiteURLHttps : UpdateSiteURLHttp;
+	LPWSTR siteURL = CanUseSSLConnection() ? UpdateSiteURLHttps : UpdateSiteURLHttp;
 
 	// Is this a first run launch? Append first run flag if so.
 	if (strcmp(lpszCmdLine, "firstrun") == 0) {
