@@ -80,9 +80,12 @@ FunctionEnd
 			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "DefaultUserName" "${RUNONCE_USERNAME}"
 			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "DefaultPassword" "${RUNONCE_PASSWORD}"
 
-			; Copy to a local path, just in case the installer is on a network share
+			; Copy to runonce path to ensure installer is accessible by the temp user
 			CreateDirectory "$RunOnceDir"
 			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
+
+			; Remove mark of the web to prevent "Open File - Security Warning" dialog
+			System::Call 'kernel32::DeleteFile(t "$RunOnceDir\LegacyUpdateSetup.exe:Zone.Identifier") i .r0'
 		${EndIf}
 
 		Call ${un}RegisterRunOnce
