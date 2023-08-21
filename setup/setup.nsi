@@ -18,7 +18,7 @@ SetCompressor         /SOLID lzma
 VIAddVersionKey /LANG=1033 "ProductName"     "${NAME}"
 VIAddVersionKey /LANG=1033 "ProductVersion"  "${LONGVERSION}"
 VIAddVersionKey /LANG=1033 "CompanyName"     "Hashbang Productions"
-VIAddVersionKey /LANG=1033 "LegalCopyright"  "© Hashbang Productions. All rights reserved."
+VIAddVersionKey /LANG=1033 "LegalCopyright"  "${U+00A9} Hashbang Productions. All rights reserved."
 VIAddVersionKey /LANG=1033 "FileDescription" "${NAME}"
 VIAddVersionKey /LANG=1033 "FileVersion"     "${LONGVERSION}"
 VIProductVersion ${LONGVERSION}
