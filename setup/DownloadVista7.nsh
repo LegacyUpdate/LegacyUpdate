@@ -84,7 +84,7 @@ FunctionEnd
 !insertmacro MSUHandler "KB2117917" "Platform Update Supplement for Windows Vista"           "Package_for_KB2117917"
 
 !insertmacro NeedsFileVersionHandler "IE9" "mshtml.dll" "9.0.8112.16421"
-!insertmacro PatchHandlerNeutral     "IE9" "Internet Explorer 9 for Windows Vista" "/passive /norestart /update-no /closeprograms"
+!insertmacro PatchHandlerNeutral     "IE9" "Internet Explorer 9 for Windows Vista" "/quiet /norestart /update-no /closeprograms"
 
 ; Windows Vista Servicing Stack Update
 !insertmacro MSUHandler "KB4493730" "2019-04 Servicing Stack Update for Windows Server 2008" "Package_1_for_KB4493730"
