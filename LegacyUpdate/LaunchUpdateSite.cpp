@@ -12,20 +12,6 @@ const LPWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v
 const LPWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
 
 static BOOL CanUseSSLConnection() {
-	// We know it won't work prior to XP SP3, so just fail immediately on XP RTM-SP2 and any Win2k.
-	OSVERSIONINFOEX* versionInfo = GetVersionInfo();
-	if (versionInfo->dwMajorVersion == 5) {
-		switch (versionInfo->dwMinorVersion) {
-		case 0:
-			return FALSE;
-
-		case 1:
-			if (versionInfo->wServicePackMajor < 3) {
-				return FALSE;
-			}
-		}
-	}
-
 	// Get the Windows Update website URL set by Legacy Update setup
 	LPWSTR data;
 	DWORD size;
@@ -43,6 +29,7 @@ static BOOL CanUseSSLConnection() {
 
 end:
 	// Fallback: Use SSL only on Vista and up
+	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
 	return versionInfo->dwMajorVersion > 5;
 }
 
