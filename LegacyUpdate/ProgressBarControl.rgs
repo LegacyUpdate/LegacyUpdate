@@ -1,0 +1,35 @@
+HKCR
+{
+	LegacyUpdate.ProgressBar.1 = s 'ProgressBarControl Class'
+	{
+		CLSID = s '{7B875A2F-2DFB-4D38-91F5-5C0BFB74C377}'
+	}
+	LegacyUpdate.ProgressBar = s 'ProgressBarControl Class'
+	{
+		CLSID = s '{7B875A2F-2DFB-4D38-91F5-5C0BFB74C377}'
+		CurVer = s 'LegacyUpdate.ProgressBar.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {7B875A2F-2DFB-4D38-91F5-5C0BFB74C377} = s 'Legacy Update Progress Bar Control'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			ForceRemove Control
+			MiscStatus = s '0'
+			{
+			    '1' = s '%OLEMISC%'
+			}
+			TypeLib = s '{05D22F33-C7C3-4C90-BDD9-CEDC86EA8FBE}'
+			Version = s '1.0'
+			'Implemented Categories'
+			{
+				'{7DD95801-9882-11CF-9FA9-00AA006C42C4}'
+				'{7DD95802-9882-11CF-9FA9-00AA006C42C4}'
+			}
+		}
+	}
+}

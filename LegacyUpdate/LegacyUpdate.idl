@@ -56,6 +56,19 @@ interface ILegacyUpdateCtrl : IDispatch {
 };
 
 [
+	object,
+	uuid(4524BFBF-70BD-4EAC-AD33-6BADA4FB0638),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IProgressBarControl : IDispatch
+{
+	[id(1), propget] HRESULT Value([out, retval] SHORT *retval);
+	[id(1), propput] HRESULT Value([in] SHORT newVal);
+};
+
+[
 	uuid(05D22F33-C7C3-4C90-BDD9-CEDC86EA8FBE),
 	version(1.0),
 	helpstring("Legacy Update Control")
@@ -71,5 +84,15 @@ library LegacyUpdateLib {
 	]
 	coclass LegacyUpdateCtrl {
 		[default] interface ILegacyUpdateCtrl;
+	};
+
+	[
+		uuid(7B875A2F-2DFB-4D38-91F5-5C0BFB74C377),
+		control,
+		helpstring("ProgressBarControl Class")
+	]
+	coclass ProgressBarControl
+	{
+		[default] interface IProgressBarControl;
 	};
 };

@@ -28,6 +28,10 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="CplTasks.xml" />
+    <None Include="ProgressBarControl.rgs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ProgressBarControl.html" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -52,6 +56,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LegacyUpdate_i.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressBarControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -87,6 +94,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LegacyUpdate_i.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressBarControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

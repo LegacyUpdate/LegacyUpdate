@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ATL test page for object ProgressBarControl</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="MSThemeCompatible" content="yes">
+</head>
+<body>
+	<div style="border: 1px solid;">
+		<object id="ProgressBarControl" classid="CLSID:7b875a2f-2dfb-4d38-91f5-5c0bfb74c377" width="208" height="14"></object>
+	</div>
+
+	<div id="Value">-1</div>
+
+	<button onclick="marquee()">Marquee</button>
+	<button onclick="normal()">Normal</button>
+	<button onclick="zero()">Zero</button>
+
+	<script>
+		var timer = -1;
+
+		function marquee() {
+			if (timer !== -1) {
+				clearInterval(timer);
+			}
+
+			ProgressBarControl.Value = -1;
+			Value.innerText = "-1";
+		}
+
+		function normal() {
+			if (timer !== -1) {
+				clearInterval(timer);
+			}
+
+			timer = setInterval(function() {
+				var value = ProgressBarControl.Value;
+				Value.innerText = value;
+				ProgressBarControl.Value = value === 100 ? 0 : value + 1;
+			}, 100);
+		}
+
+		function zero() {
+			ProgressBarControl.Value = 0;
+		}
+	</script>
+</body>
+</html>

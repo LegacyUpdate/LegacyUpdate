@@ -13,7 +13,9 @@
 #define _ATL_APARTMENT_THREADED
 #define _ATL_NO_AUTOMATIC_NAMESPACE
 
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS // some CString constructors will be explicit
+
+#define ISOLATION_AWARE_ENABLED 1 // Enable comctl 6.0 (visual styles)
 
 #include "resource.h"
 #include <atltrace.h>
