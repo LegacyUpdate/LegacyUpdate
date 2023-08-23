@@ -40,16 +40,17 @@ typedef enum {
 	pointer_default(unique)
 ]
 interface ILegacyUpdateCtrl : IDispatch {
-	[id(1)] HRESULT CheckControl([out, retval] VARIANT_BOOL *retval);
-	[id(2)] HRESULT MessageForHresult(LONG inHresult, [out, retval] BSTR *retval);
-	[id(3)] HRESULT GetOSVersionInfo(OSVersionField osField, LONG systemMetric, [out, retval] VARIANT *retval);
-	[id(4)] HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
-	[id(5)] HRESULT GetUserType([out, retval] UserType *retval);
-	[id(8)] HRESULT RebootIfRequired(void);
-	[id(9)] HRESULT ViewWindowsUpdateLog(void);
+	[id(1)]  HRESULT CheckControl([out, retval] VARIANT_BOOL *retval);
+	[id(2)]  HRESULT MessageForHresult(LONG inHresult, [out, retval] BSTR *retval);
+	[id(3)]  HRESULT GetOSVersionInfo(OSVersionField osField, LONG systemMetric, [out, retval] VARIANT *retval);
+	[id(4)]  HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
+	[id(5)]  HRESULT GetUserType([out, retval] UserType *retval);
+	[id(8)]  HRESULT RebootIfRequired(void);
+	[id(9)]  HRESULT ViewWindowsUpdateLog(void);
+	[id(13)] HRESULT OpenWindowsUpdateSettings(void);
 
-	[id(6), propget] HRESULT IsRebootRequired([out, retval] VARIANT_BOOL *retval);
-	[id(7), propget] HRESULT IsWindowsUpdateDisabled([out, retval] VARIANT_BOOL *retval);
+	[id(6),  propget] HRESULT IsRebootRequired([out, retval] VARIANT_BOOL *retval);
+	[id(7),  propget] HRESULT IsWindowsUpdateDisabled([out, retval] VARIANT_BOOL *retval);
 	[id(10), propget] HRESULT IsUsingWsusServer([out, retval] VARIANT_BOOL *retval);
 	[id(11), propget] HRESULT WsusServerUrl([out, retval] BSTR *retval);
 	[id(12), propget] HRESULT WsusStatusServerUrl([out, retval] BSTR *retval);

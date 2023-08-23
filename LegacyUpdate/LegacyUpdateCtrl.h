@@ -100,6 +100,7 @@ public:
 	STDMETHODIMP get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);
 	STDMETHODIMP RebootIfRequired(void);
 	STDMETHODIMP ViewWindowsUpdateLog(void);
+	STDMETHODIMP OpenWindowsUpdateSettings(void);
 	STDMETHODIMP get_IsUsingWsusServer(VARIANT_BOOL *retval);
 	STDMETHODIMP get_WsusServerUrl(BSTR *retval);
 	STDMETHODIMP get_WsusStatusServerUrl(BSTR *retval);

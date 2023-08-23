@@ -303,6 +303,32 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	return S_OK;
 }
 
+STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
+	DoIsPermittedCheck();
+
+	WCHAR systemDir[MAX_PATH];
+	HRESULT result = SHGetFolderPath(0, CSIDL_SYSTEM, NULL, 0, systemDir);
+	if (!SUCCEEDED(result)) {
+		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(result));
+		return result;
+	}
+
+	#pragma warning(disable: 4311 4302)
+	DWORD majorVersion = GetVersionInfo()->dwMajorVersion;
+	if (majorVersion >= 10) {
+		// Windows 10+: Open Settings app
+		ShellExecute(NULL, L"open", L"ms-settings:windowsupdate-options", NULL, systemDir, SW_SHOWDEFAULT);
+	} else if (majorVersion >= 6) {
+		// Windows Vista, 7, 8: Open Windows Update control panel
+		ShellExecute(NULL, L"open", L"wuauclt.exe", L"/ShowOptions", systemDir, SW_SHOWDEFAULT);
+	} else {
+		// Windows 2000, XP: Open Automatic Updates control panel
+		ShellExecute(NULL, L"opencpl", L"wuaucpl.cpl", NULL, systemDir, SW_SHOWDEFAULT);
+	}
+	#pragma warning(default: 4311 4302)
+	return S_OK;
+}
+
 STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
