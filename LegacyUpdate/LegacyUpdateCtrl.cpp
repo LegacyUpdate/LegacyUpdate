@@ -167,7 +167,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 			retval->bstrVal = SysAllocString(versionInfo->szCSDVersion);
 		}
 		break;
-													}
+	}
 
 	case e_controlVersionString: {
 		LPWSTR data;
@@ -179,7 +179,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		retval->vt = VT_BSTR;
 		retval->bstrVal = SysAllocStringLen(data, size - 1);
 		break;
-															 }
+	}
 
 	case e_VistaProductType: {
 		DWORD productType;
@@ -187,7 +187,36 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		retval->vt = VT_UI4;
 		retval->ulVal = productType;
 		break;
-													 }
+	}
+
+	case e_productName: {
+		HRESULT hr = GetOSProductName(retval);
+		if (!SUCCEEDED(hr)) {
+			LPWSTR data;
+			DWORD size;
+			HRESULT regResult = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", NULL, &data, &size);
+			if (SUCCEEDED(regResult)) {
+				retval->vt = VT_BSTR;
+				retval->bstrVal = SysAllocStringLen(data, size - 1);
+			} else {
+				VariantClear(retval);
+			}
+		}
+		break;
+	}
+
+	case e_displayVersion: {
+		LPWSTR data;
+		DWORD size;
+		HRESULT regResult = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", NULL, &data, &size);
+		if (SUCCEEDED(regResult)) {
+			retval->vt = VT_BSTR;
+			retval->bstrVal = SysAllocStringLen(data, size - 1);
+		} else {
+			VariantClear(retval);
+		}
+		break;
+	}
 	}
 
 	return S_OK;

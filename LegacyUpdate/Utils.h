@@ -9,3 +9,5 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWO
 HRESULT GetRegistryDword(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWORD type, LPDWORD data);
 
 LPWSTR GetMessageForHresult(HRESULT hresult);
+
+HRESULT GetOSProductName(VARIANT* pProductName);

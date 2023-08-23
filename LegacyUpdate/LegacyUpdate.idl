@@ -22,7 +22,9 @@ typedef enum {
 	e_SPVersionString = 9,
 	e_controlVersionString = 10,
 	e_VistaProductType = 11,
-	e_maxOSVersionFieldValue = 11
+	e_productName = 12,
+	e_displayVersion = 13,
+	e_maxOSVersionFieldValue = 13
 } OSVersionField;
 
 typedef enum {

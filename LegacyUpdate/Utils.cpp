@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include <comdef.h>
 #include <atlstr.h>
+#include <Wbemidl.h>
 
 #pragma comment(lib, "version.lib")
+#pragma comment(lib, "wbemuuid.lib")
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -10,6 +12,9 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 static BOOL _loadedVersionInfo = FALSE;
 static OSVERSIONINFOEX _versionInfo;
+
+static BOOL _loadedProductName = FALSE;
+static VARIANT _productName;
 
 static BOOL _loadedOwnVersion = FALSE;
 static LPWSTR _version;
@@ -125,4 +130,70 @@ LPWSTR GetMessageForHresult(HRESULT result) {
 	CString message = error->ErrorMessage();
 	BSTR outMessage = message.AllocSysString();
 	return outMessage;
+}
+
+HRESULT GetOSProductName(VARIANT *pProductName) {
+	if (_loadedProductName) {
+		VariantCopy(pProductName, &_productName);
+		return S_OK;
+	}
+
+	VariantInit(&_productName);
+	_loadedProductName = true;
+
+	IWbemLocator *locator;
+	IWbemServices *services;
+	IEnumWbemClassObject *enumerator;
+	IWbemClassObject *object;
+
+	HRESULT hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&locator);
+	if (!SUCCEEDED(hr)) {
+		goto end;
+	}
+
+	hr = locator->ConnectServer(L"ROOT\\CIMV2", NULL, NULL, 0, NULL, 0, 0, &services);
+	if (!SUCCEEDED(hr)) {
+		goto end;
+	}
+
+	hr = CoSetProxyBlanket(services, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
+	if (!SUCCEEDED(hr)) {
+		goto end;
+	}
+
+	hr = services->ExecQuery(L"WQL", L"SELECT Caption FROM Win32_OperatingSystem", WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &enumerator);
+	if (!SUCCEEDED(hr)) {
+		goto end;
+	}
+
+	while (enumerator) {
+		ULONG uReturn = 0;
+		hr = enumerator->Next(WBEM_INFINITE, 1, &object, &uReturn);
+		if (!SUCCEEDED(hr)) {
+			goto end;
+		}
+		if (uReturn == 0) {
+			break;
+		}
+
+		hr = object->Get(L"Caption", 0, &_productName, NULL, NULL);
+		object->Release();
+		if (!SUCCEEDED(hr)) {
+			goto end;
+		}
+
+		VariantCopy(pProductName, &_productName);
+	}
+
+end:
+	if (locator != NULL) {
+		locator->Release();
+	}
+	if (services != NULL) {
+		services->Release();
+	}
+	if (enumerator != NULL) {
+		enumerator->Release();
+	}
+	return hr;
 }
