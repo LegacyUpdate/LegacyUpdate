@@ -352,7 +352,7 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 		ShellExecute(NULL, L"open", L"wuauclt.exe", L"/ShowOptions", systemDir, SW_SHOWDEFAULT);
 	} else {
 		// Windows 2000, XP: Open Automatic Updates control panel
-		ShellExecute(NULL, L"opencpl", L"wuaucpl.cpl", NULL, systemDir, SW_SHOWDEFAULT);
+		ShellExecute(NULL, L"cplopen", L"wuaucpl.cpl", NULL, systemDir, SW_SHOWDEFAULT);
 	}
 	#pragma warning(default: 4311 4302)
 	return S_OK;
