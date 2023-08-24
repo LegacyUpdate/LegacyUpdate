@@ -342,7 +342,6 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 		return result;
 	}
 
-	#pragma warning(disable: 4311 4302)
 	DWORD majorVersion = GetVersionInfo()->dwMajorVersion;
 	if (majorVersion >= 10) {
 		// Windows 10+: Open Settings app
@@ -354,7 +353,6 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 		// Windows 2000, XP: Open Automatic Updates control panel
 		ShellExecute(NULL, L"cplopen", L"wuaucpl.cpl", NULL, systemDir, SW_SHOWDEFAULT);
 	}
-	#pragma warning(default: 4311 4302)
 	return S_OK;
 }
 
