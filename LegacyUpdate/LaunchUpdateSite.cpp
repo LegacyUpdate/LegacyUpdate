@@ -34,7 +34,7 @@ end:
 }
 
 // Function signature required by Rundll32.exe.
-void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine, int nCmdShow) {
+void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow) {
 	HRESULT result = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	if (!SUCCEEDED(result)) {
 		goto end;
@@ -66,7 +66,16 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hinstance, LPSTR lpszCmdLine
 	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
 	IWebBrowser2 *browser;
 	result = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, IID_IWebBrowser2, (void **)&browser);
-	if (!SUCCEEDED(result)) {
+
+	if (result == REGDB_E_CLASSNOTREG) {
+		// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
+		WCHAR message[4096];
+		LoadString(hInstance, IDS_IENOTINSTALLED, message, 4096);
+		MessageBox(hwnd, message, L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
+		ShellExecute(NULL, L"open", L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT);
+		result = S_OK;
+		goto end;
+	} else if (!SUCCEEDED(result)) {
 		goto end;
 	}
 

@@ -108,6 +108,7 @@ IDI_ICON1               ICON                    "icon.ico"
 IDR_LEGACYUPDATEOCX     REGISTRY                "LegacyUpdate.rgs"
 
 IDR_LEGACYUPDATECTRL    REGISTRY                "LegacyUpdateCtrl.rgs"
+
 IDR_PROGRESSBARCONTROL  REGISTRY                "ProgressBarControl.rgs"
 
 
@@ -130,6 +131,7 @@ BEGIN
     IDS_LEGACYUPDATE        "Legacy Update"
     IDS_CHECKFORUPDATES     "Check for updates"
     IDS_CHECKFORUPDATES_ALT "Check for software and driver updates via Legacy Update."
+    IDS_IENOTINSTALLED      "Internet Explorer is not installed. Use Optional Features in Control Panel to install it before using Legacy Update."
 END
 
 #endif    // English (United States) resources
