@@ -5,10 +5,16 @@
 #pragma comment(lib, "advapi32.lib")
 
 typedef BOOL (WINAPI *_InitiateSystemShutdownExW)(LPSTR, LPSTR, DWORD, BOOL, BOOL, DWORD);
+typedef BOOL (WINAPI *_Wow64DisableWow64FsRedirection)(PVOID *OldValue);
+typedef BOOL (WINAPI *_Wow64RevertWow64FsRedirection)(PVOID OldValue);
 typedef BOOL (WINAPI *_GetProductInfo)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 
 // TODO: Latest MSDN docs say XP+, but VS2010 docs say 2k+. Who's correct?
 _InitiateSystemShutdownExW $InitiateSystemShutdownExW = (_InitiateSystemShutdownExW)GetProcAddress(GetModuleHandle(L"advapi32.dll"), "InitiateSystemShutdownExW");
+
+// XP+
+_Wow64DisableWow64FsRedirection $Wow64DisableWow64FsRedirection = (_Wow64DisableWow64FsRedirection)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "Wow64DisableWow64FsRedirection");
+_Wow64RevertWow64FsRedirection $Wow64RevertWow64FsRedirection = (_Wow64RevertWow64FsRedirection)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "Wow64RevertWow64FsRedirection");
 
 // Vista+
 _GetProductInfo $GetProductInfo = (_GetProductInfo)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "GetProductInfo");
@@ -60,5 +66,21 @@ BOOL GetVistaProductInfo(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD d
 	} else {
 		*pdwReturnedProductType = PRODUCT_UNDEFINED;
 		return FALSE;
+	}
+}
+
+BOOL DisableWow64FsRedirection(PVOID *OldValue) {
+	if ($Wow64DisableWow64FsRedirection) {
+		return $Wow64DisableWow64FsRedirection(OldValue);
+	} else {
+		return TRUE;
+	}
+}
+
+BOOL RevertWow64FsRedirection(PVOID OldValue) {
+	if ($Wow64RevertWow64FsRedirection) {
+		return $Wow64RevertWow64FsRedirection(OldValue);
+	} else {
+		return TRUE;
 	}
 }

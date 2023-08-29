@@ -335,6 +335,12 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	DoIsPermittedCheck();
 
+	// Some issues arise from the working directory being SysWOW64 rather than System32. Notably,
+	// Windows Vista - 8.1 don't have wuauclt.exe in SysWOW64. Disable WOW64 redirection temporarily
+	// to work around this.
+	PVOID oldValue;
+	BOOL isRedirected = DisableWow64FsRedirection(&oldValue);
+
 	WCHAR systemDir[MAX_PATH];
 	HRESULT result = SHGetFolderPath(0, CSIDL_SYSTEM, NULL, 0, systemDir);
 	if (!SUCCEEDED(result)) {
@@ -345,13 +351,18 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	DWORD majorVersion = GetVersionInfo()->dwMajorVersion;
 	if (majorVersion >= 10) {
 		// Windows 10+: Open Settings app
-		ShellExecute(NULL, L"open", L"ms-settings:windowsupdate-options", NULL, systemDir, SW_SHOWDEFAULT);
+		ShellExecute(NULL, NULL, L"ms-settings:windowsupdate-options", NULL, systemDir, SW_SHOWDEFAULT);
 	} else if (majorVersion >= 6) {
 		// Windows Vista, 7, 8: Open Windows Update control panel
-		ShellExecute(NULL, L"open", L"wuauclt.exe", L"/ShowOptions", systemDir, SW_SHOWDEFAULT);
+		ShellExecute(NULL, NULL, L"wuauclt.exe", L"/ShowOptions", systemDir, SW_SHOWDEFAULT);
 	} else {
 		// Windows 2000, XP: Open Automatic Updates control panel
-		ShellExecute(NULL, L"cplopen", L"wuaucpl.cpl", NULL, systemDir, SW_SHOWDEFAULT);
+		ShellExecute(NULL, NULL, L"wuaucpl.cpl", NULL, systemDir, SW_SHOWDEFAULT);
+	}
+
+	// Revert WOW64 redirection if we changed it.
+	if (isRedirected) {
+		RevertWow64FsRedirection(oldValue);
 	}
 	return S_OK;
 }
