@@ -11,3 +11,5 @@ HRESULT GetRegistryDword(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWOR
 LPWSTR GetMessageForHresult(HRESULT hresult);
 
 HRESULT GetOSProductName(VARIANT* pProductName);
+
+HRESULT Reboot();

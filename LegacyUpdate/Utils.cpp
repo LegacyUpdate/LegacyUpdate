@@ -5,6 +5,12 @@
 
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "wbemuuid.lib")
+#pragma comment(lib, "advapi32.lib")
+
+// Defined as being Vista+, older versions ignore the flag.
+#ifndef EWX_RESTARTAPPS
+#define EWX_RESTARTAPPS 0x00000040
+#endif
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -196,4 +202,43 @@ end:
 		enumerator->Release();
 	}
 	return hr;
+}
+
+HRESULT Reboot() {
+	HRESULT result = E_FAIL;
+
+	// Make sure we have permission to shut down.
+	HANDLE token;
+	if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token)) {
+		LUID shutdownLuid;
+		if (LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &shutdownLuid) != 0) {
+			// Ask the system nicely to give us shutdown privilege.
+			TOKEN_PRIVILEGES privileges;
+			privileges.PrivilegeCount = 1;
+			privileges.Privileges[0].Luid = shutdownLuid;
+			privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+			if (!AdjustTokenPrivileges(token, FALSE, &privileges, 0, NULL, NULL)) {
+				result = HRESULT_FROM_WIN32(GetLastError());
+				TRACE("AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(result));
+			}
+		}
+	} else {
+		result = HRESULT_FROM_WIN32(GetLastError());
+		TRACE("OpenProcessToken() failed: %ls\n", GetMessageForHresult(result));
+	}
+
+	// Reboot with reason "Operating System: Security fix (Unplanned)"
+	if (!InitiateSystemShutdownEx(NULL, NULL, 0, FALSE, TRUE, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
+		result = HRESULT_FROM_WIN32(GetLastError());
+		TRACE("InitiateSystemShutdownExW() failed: %ls\n", GetMessageForHresult(result));
+
+		// Try ExitWindowsEx instead
+		// Win2k: Use ExitWindowsEx, which is only guaranteed to work for the current logged in user
+		if (!ExitWindowsEx(EWX_REBOOT | EWX_RESTARTAPPS | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
+			result = HRESULT_FROM_WIN32(GetLastError());
+			TRACE("ExitWindowsEx() failed: %ls\n", GetMessageForHresult(result));
+		}
+	}
+
+	return result;
 }
