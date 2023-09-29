@@ -69,10 +69,23 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 
 	if (result == REGDB_E_CLASSNOTREG) {
 		// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
-		WCHAR message[4096];
-		LoadString(hInstance, IDS_IENOTINSTALLED, message, sizeof(message) / sizeof(WCHAR));
-		MessageBox(hwnd, message, L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
-		ShellExecute(NULL, L"open", L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT);
+		OSVERSIONINFOEX *versionInfo = GetVersionInfo();
+		if (versionInfo->dwMajorVersion > 6 || (versionInfo->dwMajorVersion == 6 && versionInfo->dwMinorVersion > 1)) {
+			// Directly prompt to reinstall IE using Fondue.exe.
+			SYSTEM_INFO systemInfo;
+			GetSystemInfo(&systemInfo);
+			LPWSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";
+
+			WCHAR fondueArgs[256];
+			StringCchPrintfW(fondueArgs, 256, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
+			ShellExecute(NULL, L"open", L"fondue.exe", fondueArgs, NULL, SW_SHOWDEFAULT);
+		} else {
+			// Tell the user what they need to do, then open the Optional Features dialog.
+			WCHAR message[4096];
+			LoadString(hInstance, IDS_IENOTINSTALLED, message, sizeof(message) / sizeof(WCHAR));
+			MessageBox(hwnd, message, L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
+			ShellExecute(NULL, L"open", L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT);
+		}
 		result = S_OK;
 		goto end;
 	} else if (!SUCCEEDED(result)) {
