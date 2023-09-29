@@ -1,6 +1,6 @@
 #pragma once
 
-// ProgressBarControl.h : Declaration of the CProgressBarControl
+// ProgressBarControl.h : Declaration of the CProgressBarControl class.
 
 #include <atlctl.h>
 #include "resource.h"

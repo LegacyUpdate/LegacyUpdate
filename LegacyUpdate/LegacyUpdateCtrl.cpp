@@ -12,12 +12,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-const BSTR permittedProgIDs[] = {
-	L"Microsoft.Update.",
-	NULL
-};
-const int permittedProgIDsMax = 1;
+#include "ElevationHelper.h"
 
 const BSTR permittedHosts[] = {
 	L"legacyupdate.net",
@@ -31,19 +26,19 @@ const int permittedHostsMax = 2;
 IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
 	IOleClientSite *clientSite;
 	HRESULT result = GetClientSite(&clientSite);
-	if (!SUCCEEDED(result)) {
+	if (!SUCCEEDED(result) || clientSite == NULL) {
 		goto end;
 	}
 
 	IOleContainer *container;
 	result = clientSite->GetContainer(&container);
-	if (!SUCCEEDED(result)) {
+	if (!SUCCEEDED(result) || container == NULL) {
 		goto end;
 	}
 
 	IHTMLDocument2 *document;
 	result = container->QueryInterface(IID_IHTMLDocument2, (void **)&document);
-	if (!SUCCEEDED(result)) {
+	if (!SUCCEEDED(result) || document == NULL) {
 		goto end;
 	}
 
@@ -56,10 +51,38 @@ end:
 	return NULL;
 }
 
+HWND CLegacyUpdateCtrl::GetIEWindowHWND() {
+	IOleWindow *oleWindow;
+	HRESULT hresult = QueryInterface(IID_IOleWindow, (void**)&oleWindow);
+	if (!SUCCEEDED(hresult)) {
+		goto end;
+	}
+
+	HWND hwnd;
+	hresult = oleWindow->GetWindow(&hwnd);
+	if (!SUCCEEDED(hresult)) {
+		goto end;
+	}
+
+	return hwnd;
+
+end:
+	if (!SUCCEEDED(hresult)) {
+		TRACE("GetIEWindowHWND() failed: %ls\n", GetMessageForHresult(hresult));
+	}
+	return 0;
+}
+
 BOOL CLegacyUpdateCtrl::IsPermitted(void) {
 	IHTMLDocument2 *document = GetHTMLDocument();
 	if (document == NULL) {
+#ifdef _DEBUG
+		// Allow debugging outside of IE (e.g. via PowerShell)
+		TRACE("GetHTMLDocument() failed - allowing anyway due to debug build\n");
+		return TRUE;
+#else
 		return FALSE;
+#endif
 	}
 
 	IHTMLLocation *location;
@@ -222,48 +245,75 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	return S_OK;
 }
 
+STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
+	DoIsPermittedCheck();
+
+	if (m_elevatedHelper != NULL || GetVersionInfo()->dwMajorVersion < 6) {
+		return S_OK;
+	}
+
+	// https://learn.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker
+	HRESULT result = CoCreateInstanceAsAdmin(GetIEWindowHWND(), CLSID_ElevationHelper, IID_IElevationHelper, (void**)&m_elevatedHelper);
+	if (!SUCCEEDED(result)) {
+		TRACE("RequestElevation() failed: %ls\n", GetMessageForHresult(result));
+	}
+	return result;
+}
+
 STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 	DoIsPermittedCheck();
 
+	HRESULT result = S_OK;
 	if (progID == NULL) {
-		return E_INVALIDARG;
+		result = E_INVALIDARG;
+		goto end;
 	}
 
-	BOOL isPermitted = FALSE;
-	if (!isPermitted) {
-		for (int i = 0; i < permittedProgIDsMax; i++) {
-			if (wcsncmp(progID, permittedProgIDs[i], wcslen(permittedProgIDs[i])) == 0) {
-				isPermitted = TRUE;
-				break;
-			}
+	if (!ProgIDIsPermitted(progID)) {
+		result = E_ACCESSDENIED;
+		goto end;
+	}
+
+	BOOL usesElevation = GetVersionInfo()->dwMajorVersion >= 6;
+	IElevationHelper *elevatedHelper = usesElevation ? m_elevatedHelper : m_nonElevatedHelper;
+	if (elevatedHelper == NULL) {
+		if (usesElevation && ProgIDNeedsElevation(progID)) {
+			// Vista+: Launch elevation helper elevated. Shows UAC prompt when IE is non-elevated.
+			result = RequestElevation();
+			elevatedHelper = m_elevatedHelper;
+		} else {
+			// 2k/XP: Use elevation helper directly. It's the responsibility of the caller to ensure it is
+			// running as admin on these versions.
+			result = CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER, IID_IElevationHelper, (void **)&m_nonElevatedHelper);
+			elevatedHelper = m_nonElevatedHelper;
 		}
 	}
-	if (!isPermitted) {
-		TRACE("CreateObject(%ls) failed: not permitted\n", progID);
-		return E_ACCESSDENIED;
-	}
 
-	CLSID clsid;
-	HRESULT result = CLSIDFromProgID(progID, &clsid);
+	if (!SUCCEEDED(result)) {
+		goto end;
+	}
+	return elevatedHelper->CreateObject(progID, retval);
+
+end:
 	if (!SUCCEEDED(result)) {
 		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(result));
-		return result;
 	}
-
-	IDispatch *object;
-	result = CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, IID_IDispatch, (void **)&object);
-	if (!SUCCEEDED(result)) {
-		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(result));
-		return result;
-	}
-
-	*retval = object;
-	return S_OK;
+	return result;
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 	DoIsPermittedCheck();
-	*retval = IsUserAnAdmin() ? e_admin : e_nonAdmin;
+
+	if (IsUserAnAdmin()) {
+		// Entire process is elevated.
+		*retval = e_admin;
+	} else if (m_elevatedHelper != NULL) {
+		// Our control has successfully received elevation.
+		*retval = e_elevated;
+	} else {
+		// The control has no admin rights (although it may not have requested them yet).
+		*retval = e_nonAdmin;
+	}
 	return S_OK;
 }
 

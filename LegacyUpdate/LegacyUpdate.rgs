@@ -3,6 +3,9 @@ HKCR
 	NoRemove AppID
 	{
 		'%APPID%' = s 'Legacy Update Control'
+		{
+			val DllSurrogate = s ''
+		}
 		'LegacyUpdate.dll'
 		{
 			val AppID = s '%APPID%'

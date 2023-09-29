@@ -6,7 +6,6 @@ HKCR
 	}
 	LegacyUpdate.ProgressBar = s 'ProgressBarControl Class'
 	{
-		CLSID = s '{7B875A2F-2DFB-4D38-91F5-5C0BFB74C377}'
 		CurVer = s 'LegacyUpdate.ProgressBar.1'
 	}
 	NoRemove CLSID
@@ -21,7 +20,7 @@ HKCR
 			ForceRemove Control
 			MiscStatus = s '0'
 			{
-			    '1' = s '%OLEMISC%'
+				'1' = s '%OLEMISC%'
 			}
 			TypeLib = s '{05D22F33-C7C3-4C90-BDD9-CEDC86EA8FBE}'
 			Version = s '1.0'

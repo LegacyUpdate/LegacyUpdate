@@ -29,10 +29,10 @@ typedef enum {
 
 typedef enum {
 	e_nonAdmin = 0,
-	e_admin = 2
+	e_admin = 2,
+	e_elevated = 3
 } UserType;
 
-// Primary dispatch interface for CLegacyUpdateCtrl
 [
 	object,
 	uuid(C33085BB-C3E1-4D27-A214-AF01953DF5E5),
@@ -45,6 +45,7 @@ interface ILegacyUpdateCtrl : IDispatch {
 	[id(1)]  HRESULT CheckControl([out, retval] VARIANT_BOOL *retval);
 	[id(2)]  HRESULT MessageForHresult(LONG inHresult, [out, retval] BSTR *retval);
 	[id(3)]  HRESULT GetOSVersionInfo(OSVersionField osField, LONG systemMetric, [out, retval] VARIANT *retval);
+	[id(14)] HRESULT RequestElevation(void);
 	[id(4)]  HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
 	[id(5)]  HRESULT GetUserType([out, retval] UserType *retval);
 	[id(8)]  HRESULT RebootIfRequired(void);
@@ -72,6 +73,19 @@ interface IProgressBarControl : IDispatch
 };
 
 [
+	object,
+	uuid(3236E684-0E4B-4780-9F31-F1983F5AB78D),
+	dual,
+	nonextensible,
+	pointer_default(unique),
+	oleautomation
+]
+interface IElevationHelper : IDispatch
+{
+	[id(1)] HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
+};
+
+[
 	uuid(05D22F33-C7C3-4C90-BDD9-CEDC86EA8FBE),
 	version(1.0),
 	helpstring("Legacy Update Control")
@@ -79,7 +93,6 @@ interface IProgressBarControl : IDispatch
 library LegacyUpdateLib {
 	importlib(STDOLE_TLB);
 
-	// Class information for CLegacyUpdateCtrl
 	[
 		uuid(AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F),
 		control,
@@ -97,5 +110,14 @@ library LegacyUpdateLib {
 	coclass ProgressBarControl
 	{
 		[default] interface IProgressBarControl;
+	};
+
+	[
+		uuid(84F517AD-6438-478F-BEA8-F0B808DC257F),
+		helpstring("ElevationHelper Class")
+	]
+	coclass ElevationHelper
+	{
+		[default] interface IElevationHelper;
 	};
 };

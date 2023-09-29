@@ -28,12 +28,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#ifndef APSTUDIO_INVOKED\r\n"
     "#include ""targetver.h""\r\n"
@@ -42,7 +42,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "1 TYPELIB ""LegacyUpdate.tlb""\r\n"
     "\0"
@@ -57,8 +57,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,7,1,0
- PRODUCTVERSION 1,7,1,0
+ FILEVERSION 1,8,0,0
+ PRODUCTVERSION 1,8,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -75,12 +75,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Hashbang Productions"
             VALUE "FileDescription", "Legacy Update"
-            VALUE "FileVersion", "1.7.1.0"
+            VALUE "FileVersion", "1.8.0.0"
             VALUE "InternalName", "LegacyUpdate.dll"
-            VALUE "LegalCopyright", "© Hashbang Productions. All rights reserved."
+            VALUE "LegalCopyright", "ï¿½ Hashbang Productions. All rights reserved."
             VALUE "OriginalFilename", "LegacyUpdate.dll"
             VALUE "ProductName", "Legacy Update"
-            VALUE "ProductVersion", "1.7.1.0"
+            VALUE "ProductVersion", "1.8.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -110,6 +110,8 @@ IDR_LEGACYUPDATEOCX     REGISTRY                "LegacyUpdate.rgs"
 IDR_LEGACYUPDATECTRL    REGISTRY                "LegacyUpdateCtrl.rgs"
 
 IDR_PROGRESSBARCONTROL  REGISTRY                "ProgressBarControl.rgs"
+
+IDR_ELEVATIONHELPER     REGISTRY                "ElevationHelper.rgs"
 
 
 /////////////////////////////////////////////////////////////////////////////

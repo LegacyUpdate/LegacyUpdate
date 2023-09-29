@@ -40,8 +40,8 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 		goto end;
 	}
 
-	// Make sure we're elevated. If not, show UAC prompt (Vista+) or Run As prompt (XP/2k).
-	if (!IsUserAnAdmin()) {
+	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
+	if (GetVersionInfo()->dwMajorVersion < 6 && !IsUserAnAdmin()) {
 		LPWSTR filename;
 		DWORD filenameSize;
 		GetOwnFileName(&filename, &filenameSize);
@@ -70,7 +70,7 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 	if (result == REGDB_E_CLASSNOTREG) {
 		// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
 		WCHAR message[4096];
-		LoadString(hInstance, IDS_IENOTINSTALLED, message, 4096);
+		LoadString(hInstance, IDS_IENOTINSTALLED, message, sizeof(message) / sizeof(WCHAR));
 		MessageBox(hwnd, message, L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
 		ShellExecute(NULL, L"open", L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT);
 		result = S_OK;

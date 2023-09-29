@@ -26,10 +26,24 @@ class ATL_NO_VTABLE CLegacyUpdateCtrl :
 	public IProvideClassInfo2Impl<&CLSID_LegacyUpdateCtrl, NULL, &LIBID_LegacyUpdateLib>,
 	public CComCoClass<CLegacyUpdateCtrl, &CLSID_LegacyUpdateCtrl>,
 	public CComControl<CLegacyUpdateCtrl> {
+private:
+	IElevationHelper *m_elevatedHelper;
+	IElevationHelper *m_nonElevatedHelper;
 
 public:
 	CLegacyUpdateCtrl() {
 		m_bWindowOnly = TRUE;
+		m_elevatedHelper = NULL;
+		m_nonElevatedHelper = NULL;
+	}
+
+	~CLegacyUpdateCtrl() {
+		if (m_elevatedHelper != NULL) {
+			m_elevatedHelper->Release();
+		}
+		if (m_nonElevatedHelper != NULL) {
+			m_nonElevatedHelper->Release();
+		}
 	}
 
 	DECLARE_OLEMISC_STATUS(
@@ -88,12 +102,14 @@ public:
 
 private:
 	IHTMLDocument2 *GetHTMLDocument();
+	HWND GetIEWindowHWND();
 	BOOL IsPermitted();
 
 public:
 	STDMETHODIMP CheckControl(VARIANT_BOOL *retval);
 	STDMETHODIMP MessageForHresult(LONG inHresult, BSTR *retval);
 	STDMETHODIMP GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
+	STDMETHODIMP RequestElevation();
 	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
 	STDMETHODIMP GetUserType(UserType *retval);
 	STDMETHODIMP get_IsRebootRequired(VARIANT_BOOL *retval);

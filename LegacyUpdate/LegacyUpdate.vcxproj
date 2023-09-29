@@ -129,6 +129,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <CompileAs />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -168,6 +170,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <CompileAs />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -205,6 +209,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <CompileAs />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -244,6 +250,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <CompileAs />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -283,6 +291,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <CompileAs />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -312,6 +322,9 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>cmd /c start "" taskkill /im iexplore.exe</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -321,6 +334,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <CompileAs />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -351,6 +366,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="CplTasks.xml" />
+    <None Include="ElevationHelper.rgs" />
     <None Include="icon.ico" />
     <None Include="LegacyUpdate.def" />
     <None Include="LegacyUpdate.rgs" />
@@ -361,6 +377,7 @@
     <None Include="ProgressBarControl.rgs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ElevationHelper.cpp" />
     <ClCompile Include="LaunchUpdateSite.cpp" />
     <ClCompile Include="LegacyUpdateCtrl.cpp" />
     <ClCompile Include="Compat.cpp" />
@@ -437,9 +454,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Compat.h" />
+    <ClInclude Include="ElevationHelper.h" />
     <ClInclude Include="LaunchUpdateSite.h" />
     <ClInclude Include="LegacyUpdateCtrl.h" />
-    <ClInclude Include="LegacyUpdate.h" />
     <ClInclude Include="ProgressBarControl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />

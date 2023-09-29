@@ -6,7 +6,6 @@ HKCR
 	}
 	LegacyUpdate.Control = s 'LegacyUpdateCtrl Class'
 	{
-		CLSID = s '{AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F}'
 		CurVer = s 'LegacyUpdate.Control.1'
 	}
 	NoRemove CLSID
@@ -33,6 +32,13 @@ HKCR
 				'{7DD95801-9882-11CF-9FA9-00AA006C42C4}'
 				'{7DD95802-9882-11CF-9FA9-00AA006C42C4}'
 			}
+			val LocalizedString = s '@%MODULE%,2'
+			Elevation
+			{
+				val Enabled = d '1'
+				val IconReference = s '@%MODULE%,0'
+			}
+			'DllSurrogate' = s ''
 		}
 	}
 }
