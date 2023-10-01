@@ -20,7 +20,7 @@ static BOOL _loadedVersionInfo = FALSE;
 static OSVERSIONINFOEX _versionInfo;
 
 static BOOL _loadedProductName = FALSE;
-static VARIANT _productName;
+static CComVariant _productName;
 
 static BOOL _loadedOwnVersion = FALSE;
 static LPWSTR _version;
@@ -70,8 +70,8 @@ HRESULT GetOwnVersion(LPWSTR *version, LPDWORD size) {
 
 HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWORD type, LPWSTR *data, LPDWORD size) {
 	HKEY subkey;
-	HRESULT result = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, KEY_READ, &subkey));
-	if (!SUCCEEDED(result)) {
+	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, KEY_READ, &subkey));
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
@@ -85,7 +85,7 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWO
 				length += 256 * sizeof(WCHAR);
 				buffer = (LPWSTR)realloc(buffer, length);
 			} else if (status != ERROR_SUCCESS) {
-				result = HRESULT_FROM_WIN32(status);
+				hr = HRESULT_FROM_WIN32(status);
 				goto end;
 			}
 		} while (status == ERROR_MORE_DATA);
@@ -98,7 +98,7 @@ end:
 	if (subkey != NULL) {
 		RegCloseKey(subkey);
 	}
-	if (!SUCCEEDED(result)) {
+	if (!SUCCEEDED(hr)) {
 		if (data != NULL) {
 			*data = NULL;
 		}
@@ -106,20 +106,20 @@ end:
 			*size = 0;
 		}
 	}
-	return result;
+	return hr;
 }
 
 HRESULT GetRegistryDword(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, LPDWORD type, LPDWORD data) {
 	HKEY subkey;
-	HRESULT result = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, KEY_READ, &subkey));
-	if (!SUCCEEDED(result)) {
+	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, KEY_READ, &subkey));
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
 	if (data != NULL) {
 		DWORD length = sizeof(DWORD);
-		result = HRESULT_FROM_WIN32(RegQueryValueEx(subkey, valueName, NULL, type, (LPBYTE)data, &length));
-		if (!SUCCEEDED(result)) {
+		hr = HRESULT_FROM_WIN32(RegQueryValueEx(subkey, valueName, NULL, type, (LPBYTE)data, &length));
+		if (!SUCCEEDED(hr)) {
 			goto end;
 		}
 	}
@@ -128,11 +128,11 @@ end:
 	if (subkey != NULL) {
 		RegCloseKey(subkey);
 	}
-	return result;
+	return hr;
 }
 
-LPWSTR GetMessageForHresult(HRESULT result) {
-	_com_error *error = new _com_error(result);
+LPWSTR GetMessageForHresult(HRESULT hr) {
+	_com_error *error = new _com_error(hr);
 	CString message = error->ErrorMessage();
 	BSTR outMessage = message.AllocSysString();
 	return outMessage;
@@ -147,65 +147,47 @@ HRESULT GetOSProductName(VARIANT *pProductName) {
 	VariantInit(&_productName);
 	_loadedProductName = true;
 
-	IWbemLocator *locator;
-	IWbemServices *services;
-	IEnumWbemClassObject *enumerator;
-	IWbemClassObject *object;
-
-	HRESULT hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&locator);
+	CComPtr<IWbemLocator> locator;
+	HRESULT hr = locator.CoCreateInstance(CLSID_WbemLocator);
 	if (!SUCCEEDED(hr)) {
-		goto end;
+		return hr;
 	}
 
+	CComPtr<IWbemServices> services;
 	hr = locator->ConnectServer(L"ROOT\\CIMV2", NULL, NULL, 0, NULL, 0, 0, &services);
 	if (!SUCCEEDED(hr)) {
-		goto end;
+		return hr;
 	}
 
 	hr = CoSetProxyBlanket(services, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
 	if (!SUCCEEDED(hr)) {
-		goto end;
+		return hr;
 	}
 
+	CComPtr<IEnumWbemClassObject> enumerator;
 	hr = services->ExecQuery(L"WQL", L"SELECT Caption FROM Win32_OperatingSystem", WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &enumerator);
 	if (!SUCCEEDED(hr)) {
-		goto end;
+		return hr;
 	}
 
-	while (enumerator) {
-		ULONG uReturn = 0;
-		hr = enumerator->Next(WBEM_INFINITE, 1, &object, &uReturn);
-		if (!SUCCEEDED(hr)) {
-			goto end;
-		}
-		if (uReturn == 0) {
-			break;
-		}
-
-		hr = object->Get(L"Caption", 0, &_productName, NULL, NULL);
-		object->Release();
-		if (!SUCCEEDED(hr)) {
-			goto end;
-		}
-
-		VariantCopy(pProductName, &_productName);
+	CComPtr<IWbemClassObject> object;
+	ULONG uReturn = 0;
+	hr = enumerator->Next(WBEM_INFINITE, 1, &object, &uReturn);
+	if (!SUCCEEDED(hr)) {
+		return hr;
 	}
 
-end:
-	if (locator != NULL) {
-		locator->Release();
+	hr = object->Get(L"Caption", 0, &_productName, NULL, NULL);
+	if (!SUCCEEDED(hr)) {
+		return hr;
 	}
-	if (services != NULL) {
-		services->Release();
-	}
-	if (enumerator != NULL) {
-		enumerator->Release();
-	}
-	return hr;
+
+	VariantCopy(pProductName, &_productName);
+	return S_OK;
 }
 
 HRESULT Reboot() {
-	HRESULT result = E_FAIL;
+	HRESULT hr = E_FAIL;
 
 	// Make sure we have permission to shut down.
 	HANDLE token;
@@ -218,27 +200,29 @@ HRESULT Reboot() {
 			privileges.Privileges[0].Luid = shutdownLuid;
 			privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 			if (!AdjustTokenPrivileges(token, FALSE, &privileges, 0, NULL, NULL)) {
-				result = HRESULT_FROM_WIN32(GetLastError());
-				TRACE("AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(result));
+				hr = HRESULT_FROM_WIN32(GetLastError());
+				TRACE("AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(hr));
 			}
 		}
 	} else {
-		result = HRESULT_FROM_WIN32(GetLastError());
-		TRACE("OpenProcessToken() failed: %ls\n", GetMessageForHresult(result));
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		TRACE("OpenProcessToken() failed: %ls\n", GetMessageForHresult(hr));
 	}
 
 	// Reboot with reason "Operating System: Security fix (Unplanned)"
 	if (!InitiateSystemShutdownEx(NULL, NULL, 0, FALSE, TRUE, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
-		result = HRESULT_FROM_WIN32(GetLastError());
-		TRACE("InitiateSystemShutdownExW() failed: %ls\n", GetMessageForHresult(result));
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		TRACE("InitiateSystemShutdownExW() failed: %ls\n", GetMessageForHresult(hr));
 
 		// Try ExitWindowsEx instead
 		// Win2k: Use ExitWindowsEx, which is only guaranteed to work for the current logged in user
 		if (!ExitWindowsEx(EWX_REBOOT | EWX_RESTARTAPPS | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
-			result = HRESULT_FROM_WIN32(GetLastError());
-			TRACE("ExitWindowsEx() failed: %ls\n", GetMessageForHresult(result));
+			hr = HRESULT_FROM_WIN32(GetLastError());
+			TRACE("ExitWindowsEx() failed: %ls\n", GetMessageForHresult(hr));
 		}
+	} else {
+		hr = S_OK;
 	}
 
-	return result;
+	return hr;
 }

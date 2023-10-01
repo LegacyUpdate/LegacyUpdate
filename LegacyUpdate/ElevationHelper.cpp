@@ -48,9 +48,9 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, __in REFCLSID rclsid, __in REFII
 	StringFromGUID2(rclsid, clsidString, ARRAYSIZE(clsidString));
 
 	WCHAR monikerName[75];
-	HRESULT hresult = StringCchPrintf(monikerName, ARRAYSIZE(monikerName), L"Elevation:Administrator!new:%s", clsidString);
-	if (!SUCCEEDED(hresult)) {
-		return hresult;
+	HRESULT hr = StringCchPrintf(monikerName, ARRAYSIZE(monikerName), L"Elevation:Administrator!new:%s", clsidString);
+	if (!SUCCEEDED(hr)) {
+		return hr;
 	}
 
 	BIND_OPTS3 bindOpts;
@@ -66,29 +66,29 @@ HRESULT CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
 		return E_INVALIDARG;
 	}
 
-	HRESULT result = S_OK;
+	HRESULT hr = S_OK;
+	CComPtr<IDispatch> object;
 	if (!ProgIDIsPermitted(progID)) {
-		result = E_ACCESSDENIED;
+		hr = E_ACCESSDENIED;
 		goto end;
 	}
 
 	CLSID clsid;
-	result = CLSIDFromProgID(progID, &clsid);
-	if (!SUCCEEDED(result)) {
+	hr = CLSIDFromProgID(progID, &clsid);
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
-	IDispatch *object;
-	result = CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, IID_IDispatch, (void**)&object);
-	if (!SUCCEEDED(result)) {
+	hr = object.CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER);
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
-	*retval = object;
+	*retval = object.Detach();
 
 end:
-	if (!SUCCEEDED(result)) {
-		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(result));
+	if (!SUCCEEDED(hr)) {
+		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(hr));
 	}
-	return result;
+	return hr;
 }

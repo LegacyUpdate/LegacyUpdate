@@ -27,23 +27,12 @@ class ATL_NO_VTABLE CLegacyUpdateCtrl :
 	public CComCoClass<CLegacyUpdateCtrl, &CLSID_LegacyUpdateCtrl>,
 	public CComControl<CLegacyUpdateCtrl> {
 private:
-	IElevationHelper *m_elevatedHelper;
-	IElevationHelper *m_nonElevatedHelper;
+	CComPtr<IElevationHelper> m_elevatedHelper;
+	CComPtr<IElevationHelper> m_nonElevatedHelper;
 
 public:
 	CLegacyUpdateCtrl() {
 		m_bWindowOnly = TRUE;
-		m_elevatedHelper = NULL;
-		m_nonElevatedHelper = NULL;
-	}
-
-	~CLegacyUpdateCtrl() {
-		if (m_elevatedHelper != NULL) {
-			m_elevatedHelper->Release();
-		}
-		if (m_nonElevatedHelper != NULL) {
-			m_nonElevatedHelper->Release();
-		}
 	}
 
 	DECLARE_OLEMISC_STATUS(

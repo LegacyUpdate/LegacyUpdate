@@ -15,8 +15,8 @@ static BOOL CanUseSSLConnection() {
 	// Get the Windows Update website URL set by Legacy Update setup
 	LPWSTR data;
 	DWORD size;
-	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate", L"URL", NULL, &data, &size);
-	if (!SUCCEEDED(result)) {
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate", L"URL", NULL, &data, &size);
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
@@ -35,8 +35,12 @@ end:
 
 // Function signature required by Rundll32.exe.
 void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow) {
-	HRESULT result = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-	if (!SUCCEEDED(result)) {
+	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+	CComPtr<IWebBrowser2> browser;
+	CComVariant url;
+	CComVariant flags(0);
+	CComVariant nullVariant;
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
@@ -55,7 +59,7 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 
 		// Access denied happens when the user clicks No/Cancel.
 		if (execResult <= 32 && execResult != SE_ERR_ACCESSDENIED) {
-			result = E_FAIL;
+			hr = E_FAIL;
 		}
 		goto end;
 	}
@@ -64,31 +68,32 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 	// default browser), and avoids hardcoding a path to iexplore.exe. Also conveniently allows testing
 	// on Windows 11 (iexplore.exe redirects to Edge, but COM still works). Same strategy as used by
 	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
-	IWebBrowser2 *browser;
-	result = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, IID_IWebBrowser2, (void **)&browser);
-
-	if (result == REGDB_E_CLASSNOTREG) {
+	hr = browser.CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER);
+	if (hr == REGDB_E_CLASSNOTREG) {
 		// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
 		OSVERSIONINFOEX *versionInfo = GetVersionInfo();
-		if (versionInfo->dwMajorVersion > 6 || (versionInfo->dwMajorVersion == 6 && versionInfo->dwMinorVersion > 1)) {
-			// Directly prompt to reinstall IE using Fondue.exe.
-			SYSTEM_INFO systemInfo;
-			GetSystemInfo(&systemInfo);
-			LPWSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";
 
-			WCHAR fondueArgs[256];
-			StringCchPrintfW(fondueArgs, 256, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
-			ShellExecute(NULL, L"open", L"fondue.exe", fondueArgs, NULL, SW_SHOWDEFAULT);
-		} else {
+		// Windows 8+: Directly prompt to reinstall IE using Fondue.exe.
+		SYSTEM_INFO systemInfo;
+		GetSystemInfo(&systemInfo);
+		LPWSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";
+
+		WCHAR fondueArgs[256];
+		StringCchPrintfW(fondueArgs, 256, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
+		#pragma warning(disable: 4311 4302)
+		int execResult = (int)ShellExecute(NULL, L"open", L"fondue.exe", fondueArgs, NULL, SW_SHOWDEFAULT);
+		#pragma warning(default: 4311 4302)
+
+		if (execResult <= 32) {
 			// Tell the user what they need to do, then open the Optional Features dialog.
 			WCHAR message[4096];
-			LoadString(hInstance, IDS_IENOTINSTALLED, message, sizeof(message) / sizeof(WCHAR));
+			LoadString(hInstance, IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
 			MessageBox(hwnd, message, L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
 			ShellExecute(NULL, L"open", L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT);
 		}
-		result = S_OK;
+		hr = S_OK;
 		goto end;
-	} else if (!SUCCEEDED(result)) {
+	} else if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
@@ -102,27 +107,15 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 		siteURL = newSiteURL;
 	}
 
-	VARIANT url;
-	VariantInit(&url);
-	url.vt = VT_BSTR;
-	url.bstrVal = SysAllocString(siteURL);
-
-	VARIANT flags;
-	VariantInit(&flags);
-	flags.vt = VT_I4;
-	flags.lVal = 0;
-
-	VARIANT nullVariant;
-	VariantInit(&nullVariant);
-
-	result = browser->Navigate2(&url, &flags, &nullVariant, &nullVariant, &nullVariant);
-	if (!SUCCEEDED(result)) {
+	url = siteURL;
+	hr = browser->Navigate2(&url, &flags, &nullVariant, &nullVariant, &nullVariant);
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
 	HWND ieHwnd;
-	result = browser->get_HWND((SHANDLE_PTR *)&ieHwnd);
-	if (!SUCCEEDED(result)) {
+	hr = browser->get_HWND((SHANDLE_PTR *)&ieHwnd);
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
@@ -165,14 +158,13 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 	}
 
 	browser->put_Visible(TRUE);
-	browser->Release();
 
 	// Focus the window, since it seems to not always get focus as it should.
 	SetForegroundWindow(ieHwnd);
 
 end:
-	if (!SUCCEEDED(result)) {
-		MessageBox(NULL, GetMessageForHresult(result), L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
+	if (!SUCCEEDED(hr)) {
+		MessageBox(NULL, GetMessageForHresult(hr), L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
 	}
 
 	CoUninitialize();

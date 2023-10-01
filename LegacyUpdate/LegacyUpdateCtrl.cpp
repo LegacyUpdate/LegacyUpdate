@@ -4,6 +4,7 @@
 #include "LegacyUpdateCtrl.h"
 #include "Utils.h"
 #include "Compat.h"
+#include "ElevationHelper.h"
 #include <atlbase.h>
 #include <atlcom.h>
 #include <ShellAPI.h>
@@ -12,7 +13,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-#include "ElevationHelper.h"
 
 const BSTR permittedHosts[] = {
 	L"legacyupdate.net",
@@ -24,57 +24,54 @@ const int permittedHostsMax = 2;
 // CLegacyUpdateCtrl message handlers
 
 IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
-	IOleClientSite *clientSite;
-	HRESULT result = GetClientSite(&clientSite);
-	if (!SUCCEEDED(result) || clientSite == NULL) {
-		goto end;
+	CComPtr<IOleClientSite> clientSite;
+	HRESULT hr = GetClientSite(&clientSite);
+	if (!SUCCEEDED(hr) || clientSite == NULL) {
+		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(hr));
+		return NULL;
 	}
 
-	IOleContainer *container;
-	result = clientSite->GetContainer(&container);
-	if (!SUCCEEDED(result) || container == NULL) {
-		goto end;
+	CComPtr<IOleContainer> container;
+	hr = clientSite->GetContainer(&container);
+	if (!SUCCEEDED(hr) || container == NULL) {
+		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(hr));
+		return NULL;
 	}
 
-	IHTMLDocument2 *document;
-	result = container->QueryInterface(IID_IHTMLDocument2, (void **)&document);
-	if (!SUCCEEDED(result) || document == NULL) {
-		goto end;
+	CComPtr<IHTMLDocument2> document;
+	hr = container->QueryInterface(IID_IHTMLDocument2, (void**)&document);
+	if (!SUCCEEDED(hr) || document == NULL) {
+		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(hr));
+		return NULL;
 	}
 
-	return document;
-
-end:
-	if (!SUCCEEDED(result)) {
-		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(result));
-	}
-	return NULL;
+	return document.Detach();
 }
 
 HWND CLegacyUpdateCtrl::GetIEWindowHWND() {
-	IOleWindow *oleWindow;
-	HRESULT hresult = QueryInterface(IID_IOleWindow, (void**)&oleWindow);
-	if (!SUCCEEDED(hresult)) {
+	CComPtr<IOleWindow> oleWindow;
+	HRESULT hr = QueryInterface(IID_IOleWindow, (void**)&oleWindow);
+	if (!SUCCEEDED(hr) || !oleWindow) {
 		goto end;
 	}
 
 	HWND hwnd;
-	hresult = oleWindow->GetWindow(&hwnd);
-	if (!SUCCEEDED(hresult)) {
+	hr = oleWindow->GetWindow(&hwnd);
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
 	return hwnd;
 
 end:
-	if (!SUCCEEDED(hresult)) {
-		TRACE("GetIEWindowHWND() failed: %ls\n", GetMessageForHresult(hresult));
+	if (!SUCCEEDED(hr)) {
+		TRACE("GetIEWindowHWND() failed: %ls\n", GetMessageForHresult(hr));
 	}
 	return 0;
 }
 
 BOOL CLegacyUpdateCtrl::IsPermitted(void) {
-	IHTMLDocument2 *document = GetHTMLDocument();
+	CComPtr<IHTMLDocument2> document = GetHTMLDocument();
 	if (document == NULL) {
 #ifdef _DEBUG
 		// Allow debugging outside of IE (e.g. via PowerShell)
@@ -85,30 +82,27 @@ BOOL CLegacyUpdateCtrl::IsPermitted(void) {
 #endif
 	}
 
-	IHTMLLocation *location;
-	HRESULT result = document->get_location(&location);
-	if (!SUCCEEDED(result)) {
+	CComPtr<IHTMLLocation> location;
+	CComBSTR host;
+	HRESULT hr = document->get_location(&location);
+	if (!SUCCEEDED(hr) || location == NULL) {
 		goto end;
 	}
 
-	BSTR host;
-	result = location->get_host(&host);
-	if (!SUCCEEDED(result)) {
+	hr = location->get_host(&host);
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
 	for (int i = 0; i < permittedHostsMax; i++) {
 		if (wcscmp(host, permittedHosts[i]) == 0) {
-			SysFreeString(host);
 			return TRUE;
 		}
 	}
 
-	SysFreeString(host);
-
 end:
-	if (result != S_OK) {
-		TRACE("IsPermitted() failed: %ls\n", GetMessageForHresult(result));
+	if (!SUCCEEDED(hr)) {
+		TRACE("IsPermitted() failed: %ls\n", GetMessageForHresult(hr));
 	}
 	return FALSE;
 }
@@ -180,8 +174,8 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_SPVersionString: {
 		LPWSTR data;
 		DWORD size;
-		HRESULT regResult = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", NULL, &data, &size);
-		if (SUCCEEDED(regResult)) {
+		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", NULL, &data, &size);
+		if (SUCCEEDED(hr)) {
 			retval->vt = VT_BSTR;
 			retval->bstrVal = SysAllocStringLen(data, size - 1);
 		} else {
@@ -195,9 +189,9 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_controlVersionString: {
 		LPWSTR data;
 		DWORD size;
-		HRESULT verResult = GetOwnVersion(&data, &size);
-		if (!SUCCEEDED(verResult)) {
-			return verResult;
+		HRESULT hr = GetOwnVersion(&data, &size);
+		if (!SUCCEEDED(hr)) {
+			return hr;
 		}
 		retval->vt = VT_BSTR;
 		retval->bstrVal = SysAllocStringLen(data, size - 1);
@@ -217,8 +211,8 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		if (!SUCCEEDED(hr)) {
 			LPWSTR data;
 			DWORD size;
-			HRESULT regResult = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", NULL, &data, &size);
-			if (SUCCEEDED(regResult)) {
+			hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", NULL, &data, &size);
+			if (SUCCEEDED(hr)) {
 				retval->vt = VT_BSTR;
 				retval->bstrVal = SysAllocStringLen(data, size - 1);
 			} else {
@@ -231,8 +225,8 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_displayVersion: {
 		LPWSTR data;
 		DWORD size;
-		HRESULT regResult = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", NULL, &data, &size);
-		if (SUCCEEDED(regResult)) {
+		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", NULL, &data, &size);
+		if (SUCCEEDED(hr)) {
 			retval->vt = VT_BSTR;
 			retval->bstrVal = SysAllocStringLen(data, size - 1);
 		} else {
@@ -253,52 +247,54 @@ STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
 	}
 
 	// https://learn.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker
-	HRESULT result = CoCreateInstanceAsAdmin(GetIEWindowHWND(), CLSID_ElevationHelper, IID_IElevationHelper, (void**)&m_elevatedHelper);
-	if (!SUCCEEDED(result)) {
-		TRACE("RequestElevation() failed: %ls\n", GetMessageForHresult(result));
+	HRESULT hr = CoCreateInstanceAsAdmin(GetIEWindowHWND(), CLSID_ElevationHelper, IID_IElevationHelper, (void**)&m_elevatedHelper);
+	if (!SUCCEEDED(hr)) {
+		TRACE("RequestElevation() failed: %ls\n", GetMessageForHresult(hr));
 	}
-	return result;
+	return hr;
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 	DoIsPermittedCheck();
 
-	HRESULT result = S_OK;
+	HRESULT hr = S_OK;
+	CComPtr<IElevationHelper> elevatedHelper;
 	if (progID == NULL) {
-		result = E_INVALIDARG;
+		hr = E_INVALIDARG;
 		goto end;
 	}
 
 	if (!ProgIDIsPermitted(progID)) {
-		result = E_ACCESSDENIED;
+		hr = E_ACCESSDENIED;
 		goto end;
 	}
 
 	BOOL usesElevation = GetVersionInfo()->dwMajorVersion >= 6;
-	IElevationHelper *elevatedHelper = usesElevation ? m_elevatedHelper : m_nonElevatedHelper;
+	elevatedHelper = usesElevation ? m_elevatedHelper : m_nonElevatedHelper;
 	if (elevatedHelper == NULL) {
 		if (usesElevation && ProgIDNeedsElevation(progID)) {
 			// Vista+: Launch elevation helper elevated. Shows UAC prompt when IE is non-elevated.
-			result = RequestElevation();
+			hr = RequestElevation();
 			elevatedHelper = m_elevatedHelper;
 		} else {
 			// 2k/XP: Use elevation helper directly. It's the responsibility of the caller to ensure it is
 			// running as admin on these versions.
-			result = CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER, IID_IElevationHelper, (void **)&m_nonElevatedHelper);
+			hr = CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER, IID_IElevationHelper, (void **)&m_nonElevatedHelper);
 			elevatedHelper = m_nonElevatedHelper;
 		}
 	}
 
-	if (!SUCCEEDED(result)) {
+	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
+
 	return elevatedHelper->CreateObject(progID, retval);
 
 end:
-	if (!SUCCEEDED(result)) {
-		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(result));
+	if (!SUCCEEDED(hr)) {
+		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(hr));
 	}
-	return result;
+	return hr;
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
@@ -321,7 +317,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	HKEY subkey;
-	HRESULT result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, KEY_READ, &subkey);
+	HRESULT hr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, KEY_READ, &subkey);
 	*retval = subkey != NULL;
 	if (subkey != NULL) {
 		RegCloseKey(subkey);
@@ -333,15 +329,15 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval
 	DoIsPermittedCheck();
 
 	DWORD noWU;
-	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", NULL, &noWU);
-	if (SUCCEEDED(result) && noWU == 1) {
+	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", NULL, &noWU);
+	if (SUCCEEDED(hr) && noWU == 1) {
 		*retval = TRUE;
 		return S_OK;
 	}
 
 	DWORD disableWUAccess;
-	result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", NULL, &disableWUAccess);
-	if (SUCCEEDED(result) && disableWUAccess == 1) {
+	hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", NULL, &disableWUAccess);
+	if (SUCCEEDED(hr) && disableWUAccess == 1) {
 		*retval = TRUE;
 		return S_OK;
 	}
@@ -364,10 +360,10 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	DoIsPermittedCheck();
 
 	WCHAR windir[MAX_PATH];
-	HRESULT result = SHGetFolderPath(0, CSIDL_WINDOWS, NULL, 0, windir);
-	if (!SUCCEEDED(result)) {
-		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(result));
-		return result;
+	HRESULT hr = SHGetFolderPath(0, CSIDL_WINDOWS, NULL, 0, windir);
+	if (!SUCCEEDED(hr)) {
+		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(hr));
+		return hr;
 	}
 
 	// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
@@ -392,10 +388,10 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	BOOL isRedirected = DisableWow64FsRedirection(&oldValue);
 
 	WCHAR systemDir[MAX_PATH];
-	HRESULT result = SHGetFolderPath(0, CSIDL_SYSTEM, NULL, 0, systemDir);
-	if (!SUCCEEDED(result)) {
-		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(result));
-		return result;
+	HRESULT hr = SHGetFolderPath(0, CSIDL_SYSTEM, NULL, 0, systemDir);
+	if (!SUCCEEDED(hr)) {
+		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(hr));
+		return hr;
 	}
 
 	DWORD majorVersion = GetVersionInfo()->dwMajorVersion;
@@ -421,8 +417,8 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	DWORD useWUServer;
-	HRESULT result = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", NULL, &useWUServer);
-	*retval = SUCCEEDED(result) && useWUServer == 1;
+	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", NULL, &useWUServer);
+	*retval = SUCCEEDED(hr) && useWUServer == 1;
 	return S_OK;
 }
 
@@ -431,8 +427,8 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 
 	LPWSTR data;
 	DWORD size;
-	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", NULL, &data, &size);
-	*retval = SUCCEEDED(result) ? SysAllocStringLen(data, size - 1) : NULL;
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", NULL, &data, &size);
+	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	return S_OK;
 }
 
@@ -441,7 +437,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 
 	LPWSTR data;
 	DWORD size;
-	HRESULT result = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", NULL, &data, &size);
-	*retval = SUCCEEDED(result) ? SysAllocStringLen(data, size - 1) : NULL;
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", NULL, &data, &size);
+	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	return S_OK;
 }
