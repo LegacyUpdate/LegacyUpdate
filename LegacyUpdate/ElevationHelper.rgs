@@ -25,7 +25,7 @@ HKCR
 			Elevation
 			{
 				val Enabled = d '1'
-				val IconReference = s '@%MODULE%,0'
+				val IconReference = s '@%MODULE%,-201'
 			}
 		}
 	}
