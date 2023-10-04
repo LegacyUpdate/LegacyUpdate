@@ -607,7 +607,7 @@ Function .onInit
 	${Else}
 		!insertmacro RemoveSection ${WIN7SP1}
 		!insertmacro RemoveSection ${WIN7SSU}
-		; !insertmacro RemoveSection ${WIN7MU}
+		!insertmacro RemoveSection ${WIN7MU}
 	${EndIf}
 
 	${If} ${IsWin8}

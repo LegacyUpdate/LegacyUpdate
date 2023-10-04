@@ -31,6 +31,10 @@
 !define CoCreateInstance         'ole32::CoCreateInstance(g, p, i, g, *p) i'
 !define CoTaskMemFree            'ole32::CoTaskMemFree(p)'
 
+; oleaut32
+!define SysAllocString           'oleaut32::SysAllocString(t) p'
+!define SysFreeString            'oleaut32::SysFreeString(p)'
+
 ; shell32
 !define RestartDialog            'shell32::RestartDialog(p, t, i) i'
 
@@ -59,12 +63,11 @@
 
 ; wuapi
 !define CLSID_UpdateServiceManager "{F8D253D9-89A4-4DAA-87B6-1168369F0B21}"
-!define IID_IUpdateServiceManager2 "{B596CC9F-56E5-419E-A622-E01BB457431E}"
-!define METHOD_AddService2         0x60030003
+!define IID_IUpdateServiceManager2 "{0BB8531D-7E8D-424F-986C-A0B8F60A3E7B}"
 
 !define WU_S_ALREADY_INSTALLED 2359302     ; 0x00240006
 !define WU_E_NOT_APPLICABLE    -2145124329 ; 0x80240017
 
 !define WU_MU_SERVICE_ID       "7971f918-a847-4430-9279-4a52d1efe18d"
 
-!define IUpdateServiceManager2_AddService2 '${METHOD_AddService2}(t, i, t)'
+!define IUpdateServiceManager2::AddService2 '(w, i, w, *p) i'
