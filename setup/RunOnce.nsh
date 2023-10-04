@@ -8,9 +8,9 @@
 	${If} ${NoRestart}
 		; Prompt for reboot
 		${IfNot} ${Silent}
-			System::Call 'shell32::RestartDialog(p 0, \
-				t "Windows will be restarted to complete installation of prerequisite components. Setup will resume after the restart.", \
-				i ${EWX_REBOOT})'
+			System::Call '${RestartDialog}($HWNDPARENT, \
+				"Windows will be restarted to complete installation of prerequisite components. Setup will resume after the restart.", \
+				${EWX_REBOOT})'
 		${EndIf}
 	${Else}
 		; Reboot immediately
@@ -66,10 +66,10 @@ FunctionEnd
 			; Get the localised name of the Administrators group from its SID
 			System::Call '*(&i1 0, &i4 0, &i1 5) i .r0'
 			; S-1-5-32-544
-			System::Call 'advapi32::AllocateAndInitializeSid(i r0, i 2, i 32, i 544, i 0, i 0, i 0, i 0, i 0, i 0, *i .r1)'
+			System::Call '${AllocateAndInitializeSid}(r0, 2, ${SECURITY_BUILTIN_DOMAIN_RID}, ${DOMAIN_ALIAS_RID_ADMINS}, 0, 0, 0, 0, 0, 0, .r1)'
 			System::Free $0
-			System::Call 'advapi32::LookupAccountSid(i 0, i r1, t .r0, *i ${NSIS_MAX_STRLEN}, t .r2, *i ${NSIS_MAX_STRLEN}, *i 0)'
-			System::Call 'advapi32::FreeSid(i r1)'
+			System::Call '${LookupAccountSid}(0, r1, .r0, ${NSIS_MAX_STRLEN}, .r2, ${NSIS_MAX_STRLEN}, 0)'
+			System::Call '${FreeSid}(r1)'
 
 			; Create the admin user
 			ExecShellWait "" "$WINDIR\system32\net.exe" "user /add ${RUNONCE_USERNAME} ${RUNONCE_PASSWORD}" SW_HIDE
@@ -85,7 +85,7 @@ FunctionEnd
 			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
 
 			; Remove mark of the web to prevent "Open File - Security Warning" dialog
-			System::Call 'kernel32::DeleteFile(t "$RunOnceDir\LegacyUpdateSetup.exe:Zone.Identifier") i .r0'
+			System::Call '${DeleteFile}("$RunOnceDir\LegacyUpdateSetup.exe:Zone.Identifier")'
 		${EndIf}
 
 		Call ${un}RegisterRunOnce
@@ -113,10 +113,10 @@ Function OnRunOnceLogon
 		StrCpy $0 "msgina: ShellReadyEvent"
 	${EndIf}
 
-	System::Call 'kernel32::OpenEvent(i ${EVENT_MODIFY_STATE}, i 0, t "$0") i .r0'
+	System::Call '${OpenEvent}(${EVENT_MODIFY_STATE}, 0, "$0") .r0'
 	${If} $0 != 0
-		System::Call 'kernel32::SetEvent(i r0)'
-		System::Call 'kernel32::CloseHandle(i r0)'
+		System::Call '${SetEvent}(r0)'
+		System::Call '${CloseHandle}(r0)'
 	${EndIf}
 
 	; Handle Safe Mode case. RunOnce can still be processed in Safe Mode in some edge cases. If that
@@ -152,7 +152,7 @@ Function CleanUpRunOnce
 		${EndIf}
 
 		; Be really really sure this is the right user before we nuke their profile and log out
-		System::Call 'advapi32::GetUserName(t .r0, *i ${NSIS_MAX_STRLEN}) i .r1'
+		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
 		${If} $0 == "${RUNONCE_USERNAME}"
 			; Register postinstall runonce for the next admin user logon, and log out of the temporary user
 			${IfNot} ${Abort}
@@ -160,7 +160,7 @@ Function CleanUpRunOnce
 			${EndIf}
 
 			RMDir /r /REBOOTOK "$PROFILE"
-			System::Call "user32::ExitWindowsEx(i ${EWX_FORCE} , i 0) i .r0"
+			System::Call "${ExitWindowsEx}(${EWX_FORCE}, 0) .r0"
 		${EndIf}
 	${EndIf}
 FunctionEnd

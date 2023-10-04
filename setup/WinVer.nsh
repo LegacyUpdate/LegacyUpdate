@@ -71,7 +71,7 @@
 		System::Alloc ${OSVERSIONINFOEXW_SIZE}
 		Pop $0
 		System::Call '*$0(i ${OSVERSIONINFOEXW_SIZE})'
-		System::Call 'kernel32::GetVersionEx(pr .r0) i'
+		System::Call '${GetVersionEx}(.r0)'
 		System::Call '*$0(i, i, i, i, i, &t128, h, h, h .r1, b, b)'
 		System::Free $0
 		StrCpy $__WINVERSUITE $1
@@ -106,7 +106,7 @@
 !macro __WinVer_TestSystemMetric op metric _t _f
 	!insertmacro _LOGICLIB_TEMP
 	${CallArtificialFunction} __WinVer_Init
-	System::Call 'user32::GetSystemMetrics(i ${metric}) i .s'
+	System::Call '${GetSystemMetrics}(${metric}) .s'
 	Pop $_LOGICLIB_TEMP
 	!insertmacro _${op} $_LOGICLIB_TEMP 0 `${_t}` `${_f}`
 !macroend

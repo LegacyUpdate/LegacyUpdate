@@ -166,9 +166,9 @@ FunctionEnd
 
 !macro InhibitSleep state
 	${If} ${state} == 1
-		System::Call 'kernel32::SetThreadExecutionState(i ${ES_CONTINUOUS}|${ES_SYSTEM_REQUIRED}) i'
+		System::Call '${SetThreadExecutionState}(${ES_CONTINUOUS}|${ES_SYSTEM_REQUIRED})'
 	${Else}
-		System::Call 'kernel32::SetThreadExecutionState(i ${ES_CONTINUOUS}) i'
+		System::Call '${SetThreadExecutionState}(${ES_CONTINUOUS})'
 	${EndIf}
 !macroend
 

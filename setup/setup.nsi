@@ -61,6 +61,7 @@ Var /GLOBAL RunOnceDir
 !include WordFunc.nsh
 !include x64.nsh
 
+!include Win32.nsh
 !include Common.nsh
 !include AeroWizard.nsh
 !include Download2KXP.nsh

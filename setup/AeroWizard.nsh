@@ -1,12 +1,12 @@
 !macro TaskDialog title mainInstruction content buttons icon
-	System::Call "comctl32::TaskDialog(p $HWNDPARENT, \
-		p 0, \
-		w ${title}, \
-		w ${mainInstruction}, \
-		w ${content}, \
-		i ${buttons}, \
-		i ${icon}, \
-		*i .r0)"
+	System::Call "${TaskDialog}($HWNDPARENT, \
+		0, \
+		${title}, \
+		${mainInstruction}, \
+		${content}, \
+		${buttons}, \
+		${icon}, \
+		.r0)"
 !macroend
 
 !macro SetFont font parent control
