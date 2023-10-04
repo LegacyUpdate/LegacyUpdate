@@ -7,16 +7,6 @@
 !define FreeSid                  'advapi32::FreeSid(i)'
 !define GetUserName              'advapi32::GetUserName(t, *i) i'
 
-; comctl32
-!define TDCBF_YES_BUTTON 0x2
-!define TDCBF_NO_BUTTON  0x4
-
-!define TD_WARNING_ICON  65535
-
-!define IDYES            6
-
-!define TaskDialog               'comctl32::TaskDialog(p, p, w, w, w, i, i, *i) i'
-
 ; kernel32
 !define PF_XMMI64_INSTRUCTIONS_AVAILABLE    10
 

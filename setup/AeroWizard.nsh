@@ -1,14 +1,3 @@
-!macro TaskDialog title mainInstruction content buttons icon
-	System::Call "${TaskDialog}($HWNDPARENT, \
-		0, \
-		${title}, \
-		${mainInstruction}, \
-		${content}, \
-		${buttons}, \
-		${icon}, \
-		.r0)"
-!macroend
-
 !macro SetFont font parent control
 	Push $0
 	GetDlgItem $0 ${parent} ${control}
