@@ -20,7 +20,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(1252)
+#pragma code_page(65001)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ BEGIN
             VALUE "FileDescription", "Legacy Update"
             VALUE "FileVersion", "1.8.0.0"
             VALUE "InternalName", "LegacyUpdate.dll"
-            VALUE "LegalCopyright", "� Hashbang Productions. All rights reserved."
+            VALUE "LegalCopyright", "© Hashbang Productions. All rights reserved."
             VALUE "OriginalFilename", "LegacyUpdate.dll"
             VALUE "ProductName", "Legacy Update"
             VALUE "ProductVersion", "1.8.0.0"
