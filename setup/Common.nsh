@@ -1,5 +1,10 @@
 !addplugindir /x86-unicode x86-unicode
 
+!if ${SIGN} == 1
+	!finalize       '../build/sign.sh "%1"'
+	!uninstfinalize '../build/sign.sh "%1"'
+!endif
+
 SetCompressor /SOLID lzma
 
 !define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'

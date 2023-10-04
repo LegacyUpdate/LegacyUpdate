@@ -1,3 +1,5 @@
+export SIGN ?= 0
+
 SUBPROJECTS = LegacyUpdate setup
 
 all:

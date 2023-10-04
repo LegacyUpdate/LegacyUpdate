@@ -1,4 +1,6 @@
+SIGN ?= 0
+
 all:
-	makensis setup.nsi
+	makensis -DSIGN=$(SIGN) setup.nsi
 
 .PHONY: all
