@@ -262,7 +262,7 @@ ${MementoSectionEnd}
 ; Main installation
 ${MementoSection} "Legacy Update" LEGACYUPDATE
 	SetOutPath $InstallDir
-	WriteUninstaller "Uninstall.exe"
+	WriteUninstaller "$OUTDIR\Uninstall.exe"
 
 	; Add uninstall entry
 	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayName" "${NAME}"
