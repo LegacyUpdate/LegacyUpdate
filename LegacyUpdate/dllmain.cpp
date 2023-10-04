@@ -7,6 +7,7 @@
 #include "dlldatax.h"
 
 CLegacyUpdateModule _AtlModule;
+HINSTANCE g_hInstance;
 
 // DLL Entry Point
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
@@ -14,7 +15,17 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpRes
 	if (!PrxDllMain(hInstance, dwReason, lpReserved))
 		return FALSE;
 #endif
-	hInstance;
+
+	switch (dwReason) {
+		case DLL_PROCESS_ATTACH:
+			g_hInstance = hInstance;
+			break;
+
+		case DLL_PROCESS_DETACH:
+			g_hInstance = NULL;
+			break;
+	}
+
 	return _AtlModule.DllMain(dwReason, lpReserved);
 }
 

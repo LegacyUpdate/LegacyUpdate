@@ -7,3 +7,4 @@ public:
 };
 
 extern class CLegacyUpdateModule _AtlModule;
+extern HINSTANCE g_hInstance;

@@ -5,6 +5,8 @@
 #include <ExDisp.h>
 #include <strsafe.h>
 #include "Utils.h"
+#include "LegacyUpdate_i.h"
+#include "dllmain.h"
 
 const LPCSTR UpdateSiteHostname     = "legacyupdate.net";
 const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
@@ -87,7 +89,7 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 		if (execResult <= 32) {
 			// Tell the user what they need to do, then open the Optional Features dialog.
 			WCHAR message[4096];
-			LoadString(hInstance, IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
+			LoadString(g_hInstance, IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
 			MessageBox(hwnd, message, L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
 			ShellExecute(NULL, L"open", L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT);
 		}
