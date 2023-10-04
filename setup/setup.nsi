@@ -604,6 +604,12 @@ Function .onInit
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN7SSU}
 		${EndIf}
+
+		ClearErrors
+		EnumRegKey $0 HKLM "${REGPATH_WU_SERVICES}\${WU_MU_SERVICE_ID}" 0
+		${IfNot} ${Errors}
+			!insertmacro RemoveSection ${WIN7MU}
+		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN7SP1}
 		!insertmacro RemoveSection ${WIN7SSU}

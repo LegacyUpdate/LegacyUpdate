@@ -34,6 +34,7 @@
 !define REGPATH_WUPOLICY           "Software\Policies\Microsoft\Windows\WindowsUpdate"
 !define REGPATH_WUAUPOLICY         "${REGPATH_WUPOLICY}\AU"
 !define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"
+!define REGPATH_WU_SERVICES        "${REGPATH_WU}\Services"
 !define REGPATH_INETSETTINGS       "Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 !define REGPATH_ZONEDOMAINS        "${REGPATH_INETSETTINGS}\ZoneMap\Domains"
 !define REGPATH_ZONEESCDOMAINS     "${REGPATH_INETSETTINGS}\ZoneMap\EscDomains"
