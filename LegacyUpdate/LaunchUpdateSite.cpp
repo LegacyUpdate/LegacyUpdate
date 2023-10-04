@@ -169,5 +169,6 @@ end:
 		MessageBox(NULL, GetMessageForHresult(hr), L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
 	}
 
+	browser = NULL;
 	CoUninitialize();
 }
