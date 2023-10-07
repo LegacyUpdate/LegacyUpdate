@@ -19,9 +19,6 @@ You will need to install:
 * [Visual Studio](https://visualstudio.microsoft.com/vs/) - select the following individual components:
 	* C++ Windows XP Support for VS 2017 (v141) tools
 	* C++ ATL for v141 build tools (x86 & x64)
-	* C++ MFC for v141 build tools (x86 & x64)
-
-	If building on XP, use [Visual Studio 2010](https://my.visualstudio.com/Downloads?q=Visual%20Studio%202010&pgroup=) instead (the last version that runs on XP). The solution is compatible with 2010 and up.
 * [Visual Studio 2008](https://my.visualstudio.com/Downloads?q=Visual%20Studio%20Express%202008%20with%20Service%20Pack%201&pgroup=) for compiling a build that works on XP RTM and 2000 SP4 - not required if you only want to build for XP SP2 and later
 * [NSIS](https://nsis.sourceforge.io/)
 
