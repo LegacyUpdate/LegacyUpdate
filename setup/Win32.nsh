@@ -36,6 +36,7 @@
 !define SysFreeString            'oleaut32::SysFreeString(p)'
 
 ; shell32
+!define IsUserAnAdmin            'shell32::IsUserAnAdmin() i'
 !define RestartDialog            'shell32::RestartDialog(p, t, i) i'
 
 ; user32

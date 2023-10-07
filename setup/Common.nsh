@@ -5,8 +5,6 @@
 	!uninstfinalize '../build/sign.sh "%1"'
 !endif
 
-SetCompressor /SOLID lzma
-
 !define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'
 
 Function GetArch
@@ -160,11 +158,16 @@ FunctionEnd
 !macroend
 
 !macro EnsureAdminRights
-	UserInfo::GetAccountType
-	Pop $0
-	${If} $0 != "admin" ; Require admin rights on NT4+
+	${IfNot} ${AtLeastWin2000}
+		MessageBox MB_USERICON "Legacy Update requires at least Windows 2000." /SD IDOK
+		SetErrorLevel ${ERROR_OLD_WIN_VERSION}
+		Quit
+	${EndIf}
+
+	System::Call '${IsUserAnAdmin}() .r0'
+	${If} $0 != 1
 		MessageBox MB_USERICON "Log on as an administrator to install Legacy Update." /SD IDOK
-		SetErrorLevel ERROR_ELEVATION_REQUIRED
+		SetErrorLevel ${ERROR_ELEVATION_REQUIRED}
 		Quit
 	${EndIf}
 !macroend
