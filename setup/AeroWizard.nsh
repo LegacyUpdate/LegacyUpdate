@@ -23,10 +23,15 @@
 	; Set font
 	${If} ${AtLeastWinVista}
 		; Aero wizard style
+		${If} ${AtLeastWin11}
+			; Semi-Fluent style
+			CreateFont $3 "Segoe UI Variable Display Semibold" 14 600
+		${Else}
+			CreateFont $3 "Segoe UI" 12 400
+			!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
+		${EndIf}
 		CreateFont $2 "Segoe UI" 8 400
-		CreateFont $3 "Segoe UI" 12 400
 		!insertmacro SetFont $3 $HWNDPARENT 1037
-		!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
 		!insertmacro SetFont $2 $HWNDPARENT 1
 		!insertmacro SetFont $2 $HWNDPARENT 2
 		!insertmacro SetFont $2 $HWNDPARENT 3

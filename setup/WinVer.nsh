@@ -27,6 +27,8 @@
 !define WINVER_SERVER_2012R2     ${WINVER_8.1}
 !define WINVER_SERVER_2016       ${WINVER_10}
 
+!define WINVER_BUILD_11          22000
+
 !define /ifndef VER_NT_WORKSTATION 1
 
 !define VER_SUITE_BACKOFFICE     0x00000004 ; Microsoft BackOffice
@@ -53,6 +55,7 @@
 		!define __WINVER_VARS_DECLARED
 
 		Var /GLOBAL __WINVEROS
+		Var /GLOBAL __WINVERBUILD
 		Var /GLOBAL __WINVERSP
 		Var /GLOBAL __WINVERPROD
 		Var /GLOBAL __WINVERSUITE
@@ -63,6 +66,7 @@
 
 	_winver_noveryet:
 		GetWinVer $__WINVEROS    NTDDIMajMin
+		GetWinVer $__WINVERBUILD Build
 		GetWinVer $__WINVERSP    ServicePack
 		GetWinVer $__WINVERPROD  Product
 
@@ -84,6 +88,11 @@
 !macro __WinVer_TestOS op num _t _f
 	${CallArtificialFunction} __WinVer_Init
 	!insertmacro _${op} $__WINVEROS ${num} `${_t}` `${_f}`
+!macroend
+
+!macro __WinVer_TestBuild op num _t _f
+	${CallArtificialFunction} __WinVer_Init
+	!insertmacro _${op} $__WINVERBUILD ${num} `${_t}` `${_f}`
 !macroend
 
 !macro __WinVer_TestSP op num _t _f
@@ -136,6 +145,12 @@
 	!define AtMostWin${os}   `<= _WinVer_TestOS ${WINVER_SERVER_${os}}`
 !macroend
 
+!macro __WinVer_DefineBuild os
+	!define IsWin${os}       `=  _WinVer_TestBuild ${WINVER_BUILD_${os}}`
+	!define AtLeastWin${os}  `>= _WinVer_TestBuild ${WINVER_BUILD_${os}}`
+	!define AtMostWin${os}   `<= _WinVer_TestBuild ${WINVER_BUILD_${os}}`
+!macroend
+
 !insertmacro __WinVer_DefineClient 2000
 !insertmacro __WinVer_DefineClient XP2002
 !insertmacro __WinVer_DefineClient XP2003
@@ -152,3 +167,5 @@
 !insertmacro __WinVer_DefineServer 2012
 !insertmacro __WinVer_DefineServer 2012R2
 !insertmacro __WinVer_DefineServer 2016
+
+!insertmacro __WinVer_DefineBuild  11
