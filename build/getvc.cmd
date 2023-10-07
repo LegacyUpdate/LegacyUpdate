@@ -1,4 +1,4 @@
-@echo off
+@REM @echo off
 setlocal enabledelayedexpansion
 
 set ProgramFiles32=%ProgramFiles%
@@ -7,7 +7,7 @@ if "%ProgramFiles(x86)%" neq "" set ProgramFiles32=%ProgramFiles(x86)%
 :: Find Visual Studio installation
 if exist "%ProgramFiles32%\Microsoft Visual Studio\Installer\vswhere.exe" (
 	:: Get modern Visual Studio install path
-	for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set VSPath=%%i
+	for /f "usebackq tokens=*" %%i in (`"%ProgramFiles32%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set VSPath=%%i
 	set "vcvarsall=!VSPath!\VC\Auxiliary\Build\vcvarsall.bat"
 	if "%errorlevel%" neq "0" exit /b %errorlevel%
 ) else if exist "%VS100COMNTOOLS%\..\..\VC\vcvarsall.bat" (
