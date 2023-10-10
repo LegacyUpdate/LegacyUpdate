@@ -390,6 +390,15 @@ ${MementoSection} "Activate Windows" ACTIVATE
 	ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
 ${MementoSectionEnd}
 
+${MementoSection} "Reset Windows Update" RESETWU
+	!insertmacro DetailPrint "Resetting Windows Update..."
+	SetDetailsPrint none
+	ExecShellWait "" "$WINDIR\system32\net.exe" "stop wuauserv" SW_HIDE
+	RMDir /r "$WINDIR\SoftwareDistribution"
+	ExecShellWait "" "$WINDIR\system32\net.exe" "start wuauserv" SW_HIDE
+	SetDetailsPrint listonly
+${MementoSectionEnd}
+
 ${MementoSectionDone}
 
 Section -Uninstall
@@ -472,6 +481,7 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7MU}       "Configures Windows to install updates for Microsoft Office and other Microsoft software."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
+	!insertmacro MUI_DESCRIPTION_TEXT ${RESETWU}			"Resets Windows Update. This is reccommended to prevent issues with the configuration. Datas like last update check and last update installation will be lost."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function OnMouseOverSection
@@ -669,6 +679,14 @@ Function .onInit
 	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
 	${If} ${AtLeastWin10}
 		!insertmacro RemoveSection ${ROOTCERTS}
+	${EndIf}
+
+	;Reset Windows Update feature
+	${If}{FileExists} `$WINDIR\SoftwareDitribution\*.*`
+		;Ask the user to reset Windows Update
+	${Else}
+		;Directory does not exist or is empty, no need to clean it up
+		!insertmacro RemoveSection ${RESETWU}
 	${EndIf}
 FunctionEnd
 
