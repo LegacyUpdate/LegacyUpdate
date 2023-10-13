@@ -49,7 +49,7 @@
 	${Else}
 		; Wizard97 style
 		${If} ${FileExists} "$FONTS\framd.ttf"
-			CreateFont $2 "Franklin Gothic Medium" 12 400
+			CreateFont $2 "Franklin Gothic Medium" 13 400
 			!insertmacro SetFont $2 $HWNDPARENT 1037
 			!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
 		${Else}
