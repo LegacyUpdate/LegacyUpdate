@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "components": [
+    "Microsoft.Component.VC.Runtime.UCRTSDK",
+    "Microsoft.VisualStudio.Component.WinXP",
+    "Microsoft.VisualStudio.Component.VC.v141.ATL"
+  ]
+}

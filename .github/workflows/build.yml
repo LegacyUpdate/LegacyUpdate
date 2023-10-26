@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: wsl-bash {0}
+    env:
+      WSLENV: GITHUB_OUTPUT
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install WSL
+      uses: Vampire/setup-wsl@v2
+      with:
+        distribution: Ubuntu-22.04
+
+    - name: Set up Visual Studio
+      run: |
+        PATH='/mnt/c/Program Files (x86)/Microsoft Visual Studio/Installer':$PATH
+        vs="$(vswhere.exe -latest -property installationPath | tr -d '\r')"
+        vs_installer.exe modify \
+          --quiet --norestart --noUpdateInstaller \
+          --installPath "$vs" \
+          --add Microsoft.VisualStudio.Component.WinXP
+
+    - name: Set up WSL
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -qy make nsis nsis-pluginapi mingw-w64-i686-dev cabextract
+
+    - name: Extract updroots.exe
+      run: |
+        curl -fsSL http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe -o /tmp/rvkroots.exe
+        cabextract -d setup -F updroots.exe /tmp/rvkroots.exe
+        rm /tmp/rvkroots.exe
+
+    - name: Build
+      id: build
+      run: |
+        make CI=1 SIGN=0
+        echo "out=$(echo setup/LegacyUpdate-*.exe)" >> "$(wslpath -u "$GITHUB_OUTPUT")"
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        path: '${{ steps.build.outputs.out }}'
