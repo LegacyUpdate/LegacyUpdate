@@ -269,23 +269,15 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 		goto end;
 	}
 
-	BOOL usesElevation = GetVersionInfo()->dwMajorVersion >= 6;
-	elevatedHelper = usesElevation ? m_elevatedHelper : m_nonElevatedHelper;
+	elevatedHelper = m_elevatedHelper ? m_elevatedHelper : m_nonElevatedHelper;
 	if (elevatedHelper == NULL) {
-		if (usesElevation && ProgIDNeedsElevation(progID)) {
-			// Vista+: Launch elevation helper elevated. Shows UAC prompt when IE is non-elevated.
-			hr = RequestElevation();
-			elevatedHelper = m_elevatedHelper;
-		} else {
-			// 2k/XP: Use elevation helper directly. It's the responsibility of the caller to ensure it is
-			// running as admin on these versions.
-			hr = CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER, IID_IElevationHelper, (void **)&m_nonElevatedHelper);
-			elevatedHelper = m_nonElevatedHelper;
+		// Use the helper directly, without elevation. It's the responsibility of the caller to ensure it
+		// is already running as admin on 2k/XP, or that it has requested elevation on Vista+.
+		m_nonElevatedHelper.CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER);
+		if (!SUCCEEDED(hr)) {
+				goto end;
 		}
-	}
-
-	if (!SUCCEEDED(hr)) {
-		goto end;
+		elevatedHelper = m_nonElevatedHelper;
 	}
 
 	return elevatedHelper->CreateObject(progID, retval);

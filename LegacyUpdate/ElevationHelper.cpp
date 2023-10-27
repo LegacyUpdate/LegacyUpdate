@@ -10,13 +10,6 @@ const BSTR permittedProgIDs[] = {
 };
 const int permittedProgIDsMax = 1;
 
-const BSTR nonElevatedProgIDs[] = {
-	L"Microsoft.Update.AgentInfo",
-	L"Microsoft.Update.SystemInfo",
-	NULL
-};
-const int nonElevatedProgIDsMax = 2;
-
 BOOL ProgIDIsPermitted(PWSTR progID) {
 	if (progID == NULL) {
 		return FALSE;
@@ -28,19 +21,6 @@ BOOL ProgIDIsPermitted(PWSTR progID) {
 		}
 	}
 	return FALSE;
-}
-
-BOOL ProgIDNeedsElevation(PWSTR progID) {
-	if (progID == NULL) {
-		return FALSE;
-	}
-
-	for (int i = 0; i < nonElevatedProgIDsMax; i++) {
-		if (wcsncmp(progID, nonElevatedProgIDs[i], wcslen(nonElevatedProgIDs[i])) == 0) {
-			return FALSE;
-		}
-	}
-	return TRUE;
 }
 
 STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, __in REFCLSID rclsid, __in REFIID riid, __deref_out void **ppv) {

@@ -7,7 +7,6 @@
 #include "LegacyUpdate_i.h"
 
 BOOL ProgIDIsPermitted(PWSTR progID);
-BOOL ProgIDNeedsElevation(PWSTR progID);
 STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, __in REFCLSID rclsid, __in REFIID riid, __deref_out void **ppv);
 
 // CElevationHelper
