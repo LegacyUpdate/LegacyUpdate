@@ -33,7 +33,7 @@ FunctionEnd
 Function DownloadWUA
 	Call DetermineWUAVersion
 	${If} $0 != ""
-		!insertmacro Download "Windows Update Agent" "$0" "WindowsUpdateAgent.exe"
+		!insertmacro Download "Windows Update Agent" "$0" "WindowsUpdateAgent.exe" 1
 	${EndIf}
 FunctionEnd
 

@@ -361,7 +361,7 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 		!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
 			`/TIMEOUTCONNECT 0 /TIMEOUTRECONNECT 0`
 		Pop $0
-		!insertmacro DownloadWait $0 SILENT
+		Call DownloadWaitSilent
 		Pop $0
 		Pop $0
 

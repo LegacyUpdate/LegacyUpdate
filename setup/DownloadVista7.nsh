@@ -1,13 +1,17 @@
 Function GetComponentArch
-	${If} ${IsNativeIA32}
-		Push "x86"
-	${ElseIf} ${IsNativeAMD64}
-		Push "amd64"
-	${ElseIf} ${IsNativeIA64}
-		Push "ia64"
-	${Else}
-		Push ""
+	Var /GLOBAL ComponentArch
+	${If} $ComponentArch == ""
+		${If} ${IsNativeIA32}
+			StrCpy $ComponentArch "x86"
+		${ElseIf} ${IsNativeAMD64}
+			StrCpy $ComponentArch "amd64"
+		${ElseIf} ${IsNativeIA64}
+			StrCpy $ComponentArch "ia64"
+		${Else}
+			StrCpy $ComponentArch ""
+		${EndIf}
 	${EndIf}
+	Push $ComponentArch
 FunctionEnd
 
 !macro SPHandler kbid title os sp
@@ -20,7 +24,7 @@ FunctionEnd
 			Call GetArch
 			Pop $0
 			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
-			!insertmacro Download "${title}" "$0" "${kbid}.exe"
+			!insertmacro Download "${title}" "$0" "${kbid}.exe" 1
 		${EndIf}
 	FunctionEnd
 
@@ -84,7 +88,7 @@ FunctionEnd
 !insertmacro MSUHandler "KB2117917" "Platform Update Supplement for Windows Vista"           "Package_for_KB2117917"
 
 !insertmacro NeedsFileVersionHandler "IE9" "mshtml.dll" "9.0.8112.16421"
-!insertmacro PatchHandlerNeutral     "IE9" "Internet Explorer 9 for Windows Vista" "/passive /norestart /update-no /closeprograms"
+!insertmacro PatchHandler "IE9" "Internet Explorer 9 for Windows Vista" "/passive /norestart /update-no /closeprograms"
 
 ; Windows Vista Servicing Stack Update
 !insertmacro MSUHandler "KB4493730" "2019-04 Servicing Stack Update for Windows Server 2008" "Package_1_for_KB4493730"

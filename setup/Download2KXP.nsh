@@ -1,12 +1,15 @@
 Function GetUpdateLanguage
-	ReadRegStr $0 HKLM "Hardware\Description\System" "Identifier"
-	${If} $0 == "NEC PC-98"
-		Push "NEC98"
-	${Else}
-		ReadRegStr $0 HKLM "System\CurrentControlSet\Control\Nls\Language" "InstallLanguage"
-		ReadINIStr $0 $PLUGINSDIR\Patches.ini Language $0
-		Push $0
+	Var /GLOBAL UpdateLanguage
+	${If} $UpdateLanguage == ""
+		ReadRegStr $UpdateLanguage HKLM "Hardware\Description\System" "Identifier"
+		${If} $UpdateLanguage == "NEC PC-98"
+			StrCpy $UpdateLanguage "NEC98"
+		${Else}
+			ReadRegStr $UpdateLanguage HKLM "System\CurrentControlSet\Control\Nls\Language" "InstallLanguage"
+			ReadINIStr $UpdateLanguage $PLUGINSDIR\Patches.ini Language $UpdateLanguage
+		${EndIf}
 	${EndIf}
+	Push $UpdateLanguage
 FunctionEnd
 
 !macro NeedsSPHandler name os sp
@@ -32,39 +35,39 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
+Var /GLOBAL Patch.Key
+Var /GLOBAL Patch.File
+Var /GLOBAL Patch.Title
+
+Function -PatchHandler
+	Call GetUpdateLanguage
+	Call GetArch
+	Pop $1
+	Pop $0
+	ClearErrors
+	ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" $0-$1
+	${If} ${Errors}
+		; Language neutral
+		ClearErrors
+		ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" $1
+		${If} ${Errors}
+			MessageBox MB_USERICON "$Patch.Title could not be installed.$\r$\n$\r$\nThe installed Windows language and/or architecture is not supported." /SD IDOK
+			SetErrorLevel 1
+			Abort
+		${EndIf}
+	${EndIf}
+	!insertmacro Download "$Patch.Title" "$0" "$Patch.File" 1
+FunctionEnd
+
 !macro PatchHandler kbid title params
 	Function Download${kbid}
 		Call Needs${kbid}
 		Pop $0
 		${If} $0 == 1
-			Call GetUpdateLanguage
-			Call GetArch
-			Pop $1
-			Pop $0
-			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0-$1
-			!insertmacro Download "${title}" "$0" "${kbid}.exe"
-		${EndIf}
-	FunctionEnd
-
-	Function Install${kbid}
-		Call Needs${kbid}
-		Pop $0
-		${If} $0 == 1
-			Call Download${kbid}
-			!insertmacro Install "${title}" "${kbid}.exe" "${params}"
-		${EndIf}
-	FunctionEnd
-!macroend
-
-!macro PatchHandlerNeutral kbid title params
-	Function Download${kbid}
-		Call Needs${kbid}
-		Pop $0
-		${If} $0 == 1
-			Call GetArch
-			Pop $0
-			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
-			!insertmacro Download "${title}" "$0" "${kbid}.exe"
+			StrCpy $Patch.Key   "${kbid}"
+			StrCpy $Patch.File  "${kbid}.exe"
+			StrCpy $Patch.Title "${title}"
+			Call -PatchHandler
 		${EndIf}
 	FunctionEnd
 
@@ -96,12 +99,10 @@ Function DownloadIE6
 	Call NeedsIE6
 	Pop $0
 	${If} $0 == 1
-		Call GetUpdateLanguage
-		Call GetArch
-		Pop $1
-		Pop $0
-		ReadINIStr $0 $PLUGINSDIR\Patches.ini "W2KIE6" $0-$1
-		!insertmacro Download "Internet Explorer 6 SP1" "$0" "ie6sp1.cab"
+		StrCpy $Patch.Key   "W2KIE6"
+		StrCpy $Patch.File  "ie6sp1.cab"
+		StrCpy $Patch.Title "Internet Explorer 6 SP1"
+		Call -PatchHandler
 	${EndIf}
 FunctionEnd
 

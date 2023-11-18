@@ -59,18 +59,7 @@ Function ConfigureCrypto
 FunctionEnd
 
 !macro _DownloadSST name
-	!insertmacro DownloadRequest "${TRUSTEDR}/${name}.sst" "${name}.sst" ""
-	Pop $0
-	!insertmacro DownloadWait $0 SILENT
-	Pop $1
-	Pop $0
-	${If} $0 != "OK"
-		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
-			MessageBox MB_USERICON "Certificate Trust List failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
-		${EndIf}
-		SetErrorLevel 1
-		Abort
-	${EndIf}
+	!insertmacro Download "Certificate Trust List" "${TRUSTEDR}/${name}.sst" "${name}.sst" 0
 !macroend
 
 Function DownloadRoots
