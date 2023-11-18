@@ -45,6 +45,7 @@ VIFileVersion    ${LONGVERSION}
 
 Var /GLOBAL InstallDir
 Var /GLOBAL RunOnceDir
+Var /GLOBAL HasAllPrereqs
 
 !include FileFunc.nsh
 !include Integration.nsh
@@ -107,14 +108,6 @@ Var /GLOBAL RunOnceDir
 	ExecShellWait "" "$WINDIR\system32\net.exe" "stop wuauserv" SW_HIDE
 	SetDetailsPrint listonly
 !macroend
-
-Function ComponentsPageCheck
-	; Skip the page if we're being launched via RunOnce
-	${If} ${IsRunOnce}
-	${OrIf} ${IsPostInstall}
-		Abort
-	${EndIf}
-FunctionEnd
 
 Function OnShow
 	Call AeroWizardOnShow
@@ -507,6 +500,18 @@ FunctionEnd
 !macroend
 
 Function .onInit
+	${If} ${IsHelp}
+		MessageBox MB_USERICON \
+			"Usage: setup.exe [/S] [/norestart]$\r$\n\
+			$\r$\n\
+			/S$\tExecutes Legacy Update setup silently.$\r$\n\
+			/norestart$\tDisables automatic restart during installation.$\r$\n\
+			$\r$\n\
+			If no flags are passed, Legacy Update will launch its full user interface.$\r$\n\
+			For more information on these flags, visit legacyupdate.net."
+		Quit
+	${EndIf}
+
 	!insertmacro Init
 
 	${If} ${IsRunOnce}
@@ -519,6 +524,8 @@ Function .onInit
 
 	SetOutPath $RunOnceDir
 
+	StrCpy $HasAllPrereqs 1
+
 	${MementoSectionRestore}
 
 	${If} ${IsWin2000}
@@ -530,12 +537,14 @@ Function .onInit
 		${If} $0 == 0
 		${AndIf} $1 == 0
 			!insertmacro RemoveSection ${W2KSP4}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsIE6
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${IE6SP1}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${W2KSP4}
@@ -548,6 +557,7 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${XPSP3}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		ReadRegDword $0 HKLM "${REGPATH_POSREADY}" "Installed"
@@ -565,6 +575,7 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${2003SP2}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${2003SP2}
@@ -576,12 +587,14 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${VISTASP2}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsVistaPostSP2
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${VISTASSU}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsIE9
@@ -601,12 +614,14 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN7SP1}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsWin7SHA2
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN7SSU}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		ClearErrors
@@ -630,6 +645,7 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN8SSU}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN81UPGRADE}
@@ -642,12 +658,14 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN81UPDATE1}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsKB3021910
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN81SSU}
+			StrCpy $HasAllPrereqs 0
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN81UPDATE1}
@@ -753,6 +771,7 @@ FunctionEnd
 Function PostInstall
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
+	${AndIfNot} ${IsActiveXInstall}
 		${If} ${FileExists} "$InstallDir\LegacyUpdate.dll"
 			Exec '$SYSDIR\rundll32.exe "$InstallDir\LegacyUpdate.dll",LaunchUpdateSite firstrun'
 		${ElseIf} ${AtLeastWinVista}
@@ -763,6 +782,21 @@ Function PostInstall
 		${If} ${SectionIsSelected} ${WIN81UPGRADE}
 			ExecShell "" "${WIN81UPGRADE_URL}"
 		${EndIf}
+	${EndIf}
+FunctionEnd
+
+Function ComponentsPageCheck
+	; Skip the page if we're being launched via RunOnce
+	${If} ${IsRunOnce}
+	${OrIf} ${IsPostInstall}
+		Abort
+	${EndIf}
+
+	; Skip if installer was invoked by IE, and all prereqs are installed
+	${If} ${IsActiveXInstall}
+	${AndIf} $HasAllPrereqs == 1
+	${AndIf} ${SectionIsSelected} ${LEGACYUPDATE}
+		Abort
 	${EndIf}
 FunctionEnd
 

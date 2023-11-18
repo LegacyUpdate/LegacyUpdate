@@ -27,6 +27,9 @@ FunctionEnd
 	IfErrors `${_f}` `${_t}`
 !macroend
 
+!define IsActiveXInstall `"" HasFlag "/activex"`
+!define IsHelp           `"" HasFlag "/?"`
+
 !macro DetailPrint text
 	SetDetailsPrint both
 	DetailPrint "${text}"

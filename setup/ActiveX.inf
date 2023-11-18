@@ -1,0 +1,9 @@
+[Version]
+Signature="$CHICAGO$"
+AdvancedINF=2.0
+
+[Setup Hooks]
+setup=setup
+
+[setup]
+run="%EXTRACT_DIR%\setup.exe"
