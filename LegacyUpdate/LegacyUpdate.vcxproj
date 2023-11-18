@@ -102,26 +102,32 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.dll</TargetExt>
+    <IncludePath>$(SolutionDir)\shared;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.dll</TargetExt>
+    <IncludePath>$(SolutionDir)\shared;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.dll</TargetExt>
+    <IncludePath>$(SolutionDir)\shared;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.dll</TargetExt>
+    <IncludePath>$(SolutionDir)\shared;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.dll</TargetExt>
+    <IncludePath>$(SolutionDir)\shared;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.dll</TargetExt>
+    <IncludePath>$(SolutionDir)\shared;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">
     <ClCompile>
@@ -377,6 +383,8 @@
     <None Include="ProgressBarControl.rgs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\shared\VersionInfo.cpp" />
+    <ClCompile Include="..\shared\WMI.cpp" />
     <ClCompile Include="ElevationHelper.cpp" />
     <ClCompile Include="LaunchUpdateSite.cpp" />
     <ClCompile Include="LegacyUpdateCtrl.cpp" />
@@ -453,6 +461,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\shared\VersionInfo.h" />
+    <ClInclude Include="..\shared\WMI.h" />
     <ClInclude Include="Compat.h" />
     <ClInclude Include="ElevationHelper.h" />
     <ClInclude Include="LaunchUpdateSite.h" />

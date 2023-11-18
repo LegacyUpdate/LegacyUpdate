@@ -1,10 +1,9 @@
 #include "stdafx.h"
 #include <comdef.h>
 #include <atlstr.h>
-#include <Wbemidl.h>
+#include "WMI.h"
 
 #pragma comment(lib, "version.lib")
-#pragma comment(lib, "wbemuuid.lib")
 #pragma comment(lib, "advapi32.lib")
 
 // Defined as being Vista+, older versions ignore the flag.
@@ -16,25 +15,12 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 #define OwnModule ((HMODULE)&__ImageBase)
 
-static BOOL _loadedVersionInfo = FALSE;
-static OSVERSIONINFOEX _versionInfo;
-
 static BOOL _loadedProductName = FALSE;
 static CComVariant _productName;
 
 static BOOL _loadedOwnVersion = FALSE;
 static LPWSTR _version;
 static UINT _versionSize;
-
-OSVERSIONINFOEX *GetVersionInfo() {
-	if (!_loadedVersionInfo) {
-		_loadedVersionInfo = true;
-		ZeroMemory(&_versionInfo, sizeof(OSVERSIONINFOEX));
-		_versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-		GetVersionEx((LPOSVERSIONINFO)&_versionInfo);
-	}
-	return &_versionInfo;
-}
 
 void GetOwnFileName(LPWSTR *filename, LPDWORD size) {
 	*filename = (LPWSTR)malloc(MAX_PATH);
@@ -50,16 +36,16 @@ HRESULT GetOwnVersion(LPWSTR *version, LPDWORD size) {
 		DWORD verHandle;
 		DWORD verInfoSize = GetFileVersionInfoSize(filename, &verHandle);
 		if (verInfoSize == 0) {
-			return HRESULT_FROM_WIN32(GetLastError());
+			return AtlHresultFromLastError();
 		}
 
 		LPVOID verInfo = new BYTE[verInfoSize];
 		if (!GetFileVersionInfo(filename, verHandle, verInfoSize, verInfo)) {
-			return HRESULT_FROM_WIN32(GetLastError());
+			return AtlHresultFromLastError();
 		}
 
 		if (!VerQueryValue(verInfo, L"\\StringFileInfo\\040904B0\\ProductVersion", (LPVOID *)&_version, &_versionSize)) {
-			return HRESULT_FROM_WIN32(GetLastError());
+			return AtlHresultFromLastError();
 		}
 	}
 
@@ -146,44 +132,7 @@ HRESULT GetOSProductName(VARIANT *pProductName) {
 
 	VariantInit(&_productName);
 	_loadedProductName = true;
-
-	CComPtr<IWbemLocator> locator;
-	HRESULT hr = locator.CoCreateInstance(CLSID_WbemLocator);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	CComPtr<IWbemServices> services;
-	hr = locator->ConnectServer(L"ROOT\\CIMV2", NULL, NULL, 0, NULL, 0, 0, &services);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	hr = CoSetProxyBlanket(services, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	CComPtr<IEnumWbemClassObject> enumerator;
-	hr = services->ExecQuery(L"WQL", L"SELECT Caption FROM Win32_OperatingSystem", WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &enumerator);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	CComPtr<IWbemClassObject> object;
-	ULONG uReturn = 0;
-	hr = enumerator->Next(WBEM_INFINITE, 1, &object, &uReturn);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	hr = object->Get(L"Caption", 0, &_productName, NULL, NULL);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	VariantCopy(pProductName, &_productName);
-	return S_OK;
+	return QueryWMIProperty(L"SELECT Caption FROM Win32_OperatingSystem", L"Caption", &_productName);
 }
 
 HRESULT Reboot() {
@@ -200,24 +149,24 @@ HRESULT Reboot() {
 			privileges.Privileges[0].Luid = shutdownLuid;
 			privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 			if (!AdjustTokenPrivileges(token, FALSE, &privileges, 0, NULL, NULL)) {
-				hr = HRESULT_FROM_WIN32(GetLastError());
+				hr = AtlHresultFromLastError();
 				TRACE("AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(hr));
 			}
 		}
 	} else {
-		hr = HRESULT_FROM_WIN32(GetLastError());
+		hr = AtlHresultFromLastError();
 		TRACE("OpenProcessToken() failed: %ls\n", GetMessageForHresult(hr));
 	}
 
 	// Reboot with reason "Operating System: Security fix (Unplanned)"
 	if (!InitiateSystemShutdownEx(NULL, NULL, 0, FALSE, TRUE, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
-		hr = HRESULT_FROM_WIN32(GetLastError());
+		hr = AtlHresultFromLastError();
 		TRACE("InitiateSystemShutdownExW() failed: %ls\n", GetMessageForHresult(hr));
 
 		// Try ExitWindowsEx instead
 		// Win2k: Use ExitWindowsEx, which is only guaranteed to work for the current logged in user
 		if (!ExitWindowsEx(EWX_REBOOT | EWX_RESTARTAPPS | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
-			hr = HRESULT_FROM_WIN32(GetLastError());
+			hr = AtlHresultFromLastError();
 			TRACE("ExitWindowsEx() failed: %ls\n", GetMessageForHresult(hr));
 		}
 	} else {

@@ -101,7 +101,9 @@ FunctionEnd
 		DetailPrint "Installation skipped - not applicable"
 		Return
 	${ElseIf} $0 != 0
-		MessageBox MB_USERICON "${name} failed to install.$\r$\n$\r$\nError code: $0" /SD IDOK
+		LegacyUpdateNSIS::MessageForHresult $0
+		Pop $1
+		MessageBox MB_USERICON "${name} failed to install.$\r$\n$\r$\n$1 ($0)" /SD IDOK
 		SetErrorLevel $0
 		Abort
 	${EndIf}

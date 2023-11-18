@@ -8,7 +8,7 @@ InstallDir   "$PROGRAMFILES\${NAME}"
 InstallDirRegKey HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "InstallDir"
 
 Unicode               true
-RequestExecutionLevel Admin
+RequestExecutionLevel admin
 AutoCloseWindow       true
 ManifestSupportedOS   all
 ManifestDPIAware      true
@@ -55,8 +55,8 @@ Var /GLOBAL RunOnceDir
 !include Win\COM.nsh
 !include Win\WinError.nsh
 !include Win\WinNT.nsh
-!include WinMessages.nsh
 !include WinCore.nsh
+!include WinMessages.nsh
 !include WinVer.nsh
 !include WordFunc.nsh
 !include x64.nsh
@@ -68,7 +68,6 @@ Var /GLOBAL RunOnceDir
 !include DownloadVista7.nsh
 !include Download8.nsh
 !include DownloadWUA.nsh
-!include EnableMU.nsh
 !include RunOnce.nsh
 !include UpdateRoots.nsh
 
@@ -106,7 +105,6 @@ Var /GLOBAL RunOnceDir
 	!insertmacro DetailPrint "Restarting Windows Update service..."
 	SetDetailsPrint none
 	ExecShellWait "" "$WINDIR\system32\net.exe" "stop wuauserv" SW_HIDE
-	ExecShellWait "" "$WINDIR\system32\net.exe" "start wuauserv" SW_HIDE
 	SetDetailsPrint listonly
 !macroend
 
@@ -255,7 +253,13 @@ ${MementoSection} "Update root certificates store" ROOTCERTS
 ${MementoSectionEnd}
 
 ${MementoSection} "Enable Microsoft Update" WIN7MU
-	Call EnableMicrosoftUpdate
+	LegacyUpdateNSIS::EnableMicrosoftUpdate
+	Pop $0
+	${If} $0 != 0
+		LegacyUpdateNSIS::MessageForHresult $0
+		Pop $0
+		MessageBox MB_USERICON "Failed to enable Microsoft Update.$\r$\n$\r$\n$0" /SD IDOK
+	${EndIf}
 	!insertmacro RestartWUAUService
 ${MementoSectionEnd}
 
@@ -653,13 +657,15 @@ Function .onInit
 	Call DetermineWUAVersion
 	${If} $0 == ""
 		!insertmacro RemoveSection ${WUA}
+		StrCpy $HasAllPrereqs 0
 	${EndIf}
 
 	${If} ${IsWinXP2002}
 	${OrIf} ${IsWinXP2003}
-		; Assume not activated if the activation tray icon process is running
-		FindProc::FindProc "wpabaln.exe"
-		${If} $R0 != 1
+		; Check if the OS needs activation
+		LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
+		Pop $0
+		${If} $0 == 1
 			!insertmacro RemoveSection ${ACTIVATE}
 		${EndIf}
 	${Else}
