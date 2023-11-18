@@ -6,4 +6,4 @@ struct HResultMessage {
 	const LPWSTR message;
 };
 
-extern HResultMessage WUErrorMessages[];
+EXTERN_C HResultMessage WUErrorMessages[];

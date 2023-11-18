@@ -1,4 +1,4 @@
 #include <windows.h>
 
-extern HMODULE g_hInstance;
-extern HWND g_hwndParent;
+EXTERN_C HMODULE g_hInstance;
+EXTERN_C HWND g_hwndParent;

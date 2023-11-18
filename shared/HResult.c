@@ -2,7 +2,7 @@
 #include <strsafe.h>
 #include "WUErrors.h"
 
-LPWSTR GetMessageForHresult(HRESULT hr) {
+EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
 	LPWSTR message;
 	for (int i = 0; WUErrorMessages[i].hr != 0; i++) {
 		if (WUErrorMessages[i].hr == hr) {

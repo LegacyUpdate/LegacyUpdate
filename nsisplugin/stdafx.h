@@ -13,4 +13,4 @@
 
 #include <windows.h>
 
-extern HWND g_hwndParent;
+EXTERN_C HWND g_hwndParent;

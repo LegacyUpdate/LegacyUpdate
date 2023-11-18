@@ -1,10 +1,9 @@
 FILES   = \
+	$(wildcard *.c) \
 	$(wildcard *.cpp) \
 	../include/nsis/pluginapi.c \
-	../Shared/HResult.cpp \
-	../Shared/WMI.cpp \
-	../Shared/WUErrors.cpp \
-	../Shared/VersionInfo.cpp
+	../Shared/HResult.c \
+	../Shared/WUErrors.c
 RCFILES = resource.rc
 
 BIN     = obj/LegacyUpdateNSIS.dll
@@ -71,7 +70,13 @@ after-all:
 $(BIN): $(OBJ) $(RES)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
 
+obj/%.o: %.c
+	$(CC) $< $(CFLAGS) -c -o $@
+
 obj/%.o: %.cpp
+	$(CC) $< $(CFLAGS) -c -o $@
+
+obj/%.o: ../shared/%.c
 	$(CC) $< $(CFLAGS) -c -o $@
 
 obj/%.o: ../shared/%.cpp
