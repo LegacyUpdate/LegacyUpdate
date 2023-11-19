@@ -45,7 +45,6 @@ VIFileVersion    ${LONGVERSION}
 
 Var /GLOBAL InstallDir
 Var /GLOBAL RunOnceDir
-Var /GLOBAL HasAllPrereqs
 
 !include FileFunc.nsh
 !include Integration.nsh
@@ -125,6 +124,9 @@ Section -PreDownload
 	${IfNot} ${IsPostInstall}
 		Call PreDownload
 	${EndIf}
+SectionEnd
+
+Section - PREREQS_START
 SectionEnd
 
 ; Win2k prerequisities
@@ -261,6 +263,13 @@ ${MementoSection} "Enable Microsoft Update" WIN7MU
 	!insertmacro RestartWUAUService
 ${MementoSectionEnd}
 
+${MementoSection} "Activate Windows" ACTIVATE
+	; No-op; we'll launch the activation wizard in post-install.
+${MementoSectionEnd}
+
+Section - PREREQS_END
+SectionEnd
+
 ; Main installation
 ${MementoSection} "Legacy Update" LEGACYUPDATE
 	SetOutPath $InstallDir
@@ -385,14 +394,6 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 
 		; Restart service
 		!insertmacro RestartWUAUService
-	${EndIf}
-${MementoSectionEnd}
-
-${MementoSection} "Activate Windows" ACTIVATE
-	LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
-	Pop $0
-	${If} $0 == 1
-		ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
 	${EndIf}
 ${MementoSectionEnd}
 
@@ -540,8 +541,6 @@ Function .onInit
 
 	SetOutPath $RunOnceDir
 
-	StrCpy $HasAllPrereqs 1
-
 	${MementoSectionRestore}
 
 	${If} ${IsWin2000}
@@ -553,14 +552,12 @@ Function .onInit
 		${If} $0 == 0
 		${AndIf} $1 == 0
 			!insertmacro RemoveSection ${W2KSP4}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsIE6
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${IE6SP1}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${W2KSP4}
@@ -577,7 +574,6 @@ Function .onInit
 			Pop $0
 			${If} $0 == 0
 				!insertmacro RemoveSection ${XPESP3}
-				StrCpy $HasAllPrereqs 0
 			${EndIf}
 		${EndIf}
 
@@ -589,7 +585,6 @@ Function .onInit
 			Pop $0
 			${If} $0 == 0
 				!insertmacro RemoveSection ${XPSP3}
-				StrCpy $HasAllPrereqs 0
 			${EndIf}
 		${EndIf}
 
@@ -609,7 +604,6 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${2003SP2}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${2003SP2}
@@ -621,14 +615,12 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${VISTASP2}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsVistaPostSP2
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${VISTASSU}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsIE9
@@ -648,14 +640,12 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN7SP1}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsWin7SHA2
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN7SSU}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		ClearErrors
@@ -679,7 +669,6 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN8SSU}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN81UPGRADE}
@@ -692,14 +681,12 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN81UPDATE1}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 
 		Call NeedsKB3021910
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN81SSU}
-			StrCpy $HasAllPrereqs 0
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN81UPDATE1}
@@ -709,7 +696,6 @@ Function .onInit
 	Call DetermineWUAVersion
 	${If} $0 == ""
 		!insertmacro RemoveSection ${WUA}
-		StrCpy $HasAllPrereqs 0
 	${EndIf}
 
 	${If} ${IsWinXP2002}
@@ -727,6 +713,34 @@ Function .onInit
 	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
 	${If} ${AtLeastWin10}
 		!insertmacro RemoveSection ${ROOTCERTS}
+	${EndIf}
+FunctionEnd
+
+Function ComponentsPageCheck
+	; Skip the page if we're being launched via RunOnce
+	${If} ${IsRunOnce}
+	${OrIf} ${IsPostInstall}
+		Abort
+	${EndIf}
+
+	; Skip if installer was invoked by IE, and all prerequisites are installed
+	${If} ${IsActiveXInstall}
+	${AndIf} ${SectionIsSelected} ${LEGACYUPDATE}
+		StrCpy $1 0
+		${For} $0 ${PREREQS_START} ${PREREQS_END}
+			${If} ${SectionIsSelected} $0
+			${AndIf} $0 != ${PREREQS_START}
+			${AndIf} $0 != ${PREREQS_END}
+			${AndIf} $0 != ${LEGACYUPDATE}
+			${AndIf} $0 != ${ROOTCERTS}
+				StrCpy $1 1
+				${Break}
+			${EndIf}
+		${Next}
+
+		${If} $1 == 0
+			Abort
+		${EndIf}
 	${EndIf}
 FunctionEnd
 
@@ -810,32 +824,27 @@ FunctionEnd
 Function PostInstall
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
-	${AndIfNot} ${IsActiveXInstall}
-		${If} ${FileExists} "$InstallDir\LegacyUpdate.dll"
-			Exec '$SYSDIR\rundll32.exe "$InstallDir\LegacyUpdate.dll",LaunchUpdateSite firstrun'
-		${ElseIf} ${AtLeastWinVista}
-			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
+		${IfNot} ${IsActiveXInstall}
+			${If} ${FileExists} "$InstallDir\LegacyUpdate.dll"
+				Exec '$SYSDIR\rundll32.exe "$InstallDir\LegacyUpdate.dll",LaunchUpdateSite firstrun'
+			${ElseIf} ${AtLeastWinVista}
+				Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
+			${EndIf}
+		${EndIf}
+
+		; Launch XP activation wizard if requested by the user
+		${If} ${SectionIsSelected} ${ACTIVATE}
+			LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
+			Pop $0
+			${If} $0 == 1
+				ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
+			${EndIf}
 		${EndIf}
 
 		; Launch Windows 8.1 upgrade site if requested by the user
 		${If} ${SectionIsSelected} ${WIN81UPGRADE}
 			ExecShell "" "${WIN81UPGRADE_URL}"
 		${EndIf}
-	${EndIf}
-FunctionEnd
-
-Function ComponentsPageCheck
-	; Skip the page if we're being launched via RunOnce
-	${If} ${IsRunOnce}
-	${OrIf} ${IsPostInstall}
-		Abort
-	${EndIf}
-
-	; Skip if installer was invoked by IE, and all prereqs are installed
-	${If} ${IsActiveXInstall}
-	${AndIf} $HasAllPrereqs == 1
-	${AndIf} ${SectionIsSelected} ${LEGACYUPDATE}
-		Abort
 	${EndIf}
 FunctionEnd
 
