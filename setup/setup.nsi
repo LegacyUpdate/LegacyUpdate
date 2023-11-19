@@ -389,7 +389,11 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 ${MementoSectionEnd}
 
 ${MementoSection} "Activate Windows" ACTIVATE
-	ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
+	LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
+	Pop $0
+	${If} $0 == 1
+		ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
+	${EndIf}
 ${MementoSectionEnd}
 
 ${MementoSectionDone}
@@ -505,6 +509,10 @@ FunctionEnd
 	StrCpy $RunOnceDir "$COMMONPROGRAMDATA\Legacy Update"
 	!insertmacro EnsureAdminRights
 	SetDetailsPrint listonly
+
+!if ${SIGN} != 1
+	Debug::Watcher
+!endif
 !macroend
 
 Function .onInit
@@ -709,7 +717,7 @@ Function .onInit
 		; Check if the OS needs activation
 		LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
 		Pop $0
-		${If} $0 == 1
+		${If} $0 == 0
 			!insertmacro RemoveSection ${ACTIVATE}
 		${EndIf}
 	${Else}
