@@ -1,5 +1,7 @@
 !addplugindir /x86-unicode x86-unicode
 
+SetPluginUnload alwaysoff
+
 !if ${SIGN} == 1
 	!finalize       '../build/sign.sh "%1"'
 	!uninstfinalize '../build/sign.sh "%1"'

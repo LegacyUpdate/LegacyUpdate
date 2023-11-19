@@ -17,6 +17,12 @@ PREFIX  = i686-w64-mingw32-
 CC = $(PREFIX)g++
 RC = $(PREFIX)windres
 
+ifeq ($(DEBUG),1)
+	DEBUG := 1
+else
+	DEBUG :=
+endif
+
 CFLAGS = \
 	-std=c++11 \
 	-march=i486 \
@@ -52,8 +58,7 @@ LDFLAGS = \
 	-lkernel32 \
 	-luser32 \
 	-lole32 \
-	-loleaut32 \
-	-lwbemuuid
+	-loleaut32
 
 RCFLAGS = \
 	-F pe-i386 \

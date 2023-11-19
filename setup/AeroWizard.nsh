@@ -72,7 +72,9 @@
 	!insertmacro SetBackground $0 1043
 
 	; Activate taskbar progress bar plugin
-	w7tbp::Start
+	${If} ${AtLeastWin7}
+		LegacyUpdateNSIS::InitTaskbarProgress
+	${EndIf}
 !macroend
 
 Function AeroWizardOnShow

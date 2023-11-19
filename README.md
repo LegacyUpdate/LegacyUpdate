@@ -32,7 +32,7 @@ In `setup/` you will need to download the following additional files:
 
 * A copy of updroots.exe, which you can extract from [this update](http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe) using 7-Zip or extract.exe.
 
-I’ve already bundled copies of the NSIS plugins [w7tbp](https://nsis.sourceforge.io/TaskbarProgress_plug-in) (Windows 7+ taskbar progress bar feature - zlib license), [FindProc](https://nsis.sourceforge.io/FindProcDLL_plug-in) (checks if a process is running - ? license), and my fork of [NSxfer](https://github.com/kirb/nsis-nsxfer) (file downloader - zlib license).
+The build includes a compiled copy of my fork of [NSxfer](https://github.com/kirb/nsis-nsxfer) (zlib licensed).
 
 ### Testing
 For debugging, if running on XP with IE8, install [Utilu IE Collection](https://www.utilu.com/iecollection/). IE6/IE7 is much more useful for debugging the native code, because of its simplistic single-process model. Visual Studio is able to launch it and directly attach to the process the code is running in.
