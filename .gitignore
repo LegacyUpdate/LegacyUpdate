@@ -17,8 +17,12 @@ Debug-VC08/
 Debug-VC17/
 Release/
 *.exe
+*.dll
 !setup/modern_aerowizard.exe
+!setup/x86-unicode/*.dll
+setup/x86-unicode/LegacyUpdateNSIS.dll
 obj/
+*_layout.inf
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
