@@ -1,6 +1,5 @@
 FILES   = \
 	$(wildcard *.c) \
-	$(wildcard *.cpp) \
 	../include/nsis/pluginapi.c \
 	../Shared/HResult.c \
 	../Shared/WUErrors.c
@@ -17,11 +16,7 @@ PREFIX  = i686-w64-mingw32-
 CC = $(PREFIX)g++
 RC = $(PREFIX)windres
 
-ifeq ($(DEBUG),1)
-	DEBUG := 1
-else
-	DEBUG :=
-endif
+override DEBUG := $(or $(DEBUG),1)
 
 CFLAGS = \
 	-std=c++11 \
@@ -30,7 +25,7 @@ CFLAGS = \
 	-municode \
 	-DUNICODE \
 	-D_UNICODE \
-	$(if $(DEBUG),-D_DEBUG -g,-DNDEBUG -Os) \
+	$(if $(filter 1,$(DEBUG)),-D_DEBUG -g,-DNDEBUG -Os) \
 	-D__USE_MINGW_ANSI_STDIO=0 \
 	-D_USRDLL \
 	-s \
@@ -39,13 +34,18 @@ CFLAGS = \
 	-fdata-sections \
 	-fno-unwind-tables \
 	-fno-asynchronous-unwind-tables \
+	-fno-exceptions \
+	-fno-rtti \
+	-flto \
 	-Wno-write-strings \
 	-I../include \
 	-I../shared \
 	-include stdafx.h
 
 LDFLAGS = \
-	-static \
+	-nodefaultlibs \
+	-nostartfiles \
+	-nostdlib \
 	-Wl,--gc-sections \
 	-Wl,--no-seh \
 	-Wl,--nxcompat \
@@ -53,7 +53,10 @@ LDFLAGS = \
 	-Wl,--enable-stdcall-fixup \
 	-Wl,--output-def,$(DEF) \
 	-Wl,--out-implib,$(STATIC) \
+	-Wl,--strip-all \
 	-Wl,-e_DllMain \
+	-lmsvcrt \
+	-lgcc \
 	-lpsapi \
 	-lkernel32 \
 	-luser32 \
@@ -97,7 +100,7 @@ clean:
 	rm -rf obj
 
 test:
-	$(MAKE) DEBUG=$(or $(DEBUG),1)
+	$(MAKE) DEBUG=$(DEBUG)
 	cd ../setup && makensis test.nsi
 	cd ../setup && explorer.exe test.exe
 
