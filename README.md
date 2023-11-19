@@ -18,21 +18,31 @@ You can also download the [latest nightly build](https://nightly.link/kirb/Legac
 This repo hosts an ActiveX control used as a replica of the original one developed by Microsoft for the official Windows Update website. The original version of Legacy Update required using a proxy autoconfiguration file (.pac) and some additional configuration of IE security settings to intercept requests to the **update.microsoft.com** site, because the Microsoft Wuweb.dll control validates that it is being used on the official update.microsoft.com domain. With the custom Legacy Update ActiveX control, proxying is no longer required, because we have full control over the validation logic. This also allows adding additional convenient features not possible with JavaScript alone.
 
 ### Building
-The project can be built on any version of Windows from XP to 11, though if you run a later OS you’ll ideally want to set up an XP VM for testing.
+The project can be built on Windows 10/11 with [WSL 2](https://aka.ms/wslinstall) installed. You’ll ideally want to also set up an XP VM for testing.
 
 You will need to install:
 
 * [Visual Studio](https://visualstudio.microsoft.com/vs/) - select the following individual components:
+	* Desktop development with C++
 	* C++ Windows XP Support for VS 2017 (v141) tools
 	* C++ ATL for v141 build tools (x86 & x64)
 * [Visual Studio 2008](https://my.visualstudio.com/Downloads?q=Visual%20Studio%20Express%202008%20with%20Service%20Pack%201&pgroup=) for compiling a build that works on XP RTM and 2000 SP4 - not required if you only want to build for XP SP2 and later
 * [NSIS](https://nsis.sourceforge.io/)
 
-In `setup/` you will need to download the following additional files:
+In the WSL environment, run the following command to install build dependencies. This command is for Ubuntu - if you use a different distro, you will need to find and install the equivalent packages from your package manager.
 
-* A copy of updroots.exe, which you can extract from [this update](http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe) using 7-Zip or extract.exe.
+```bash
+sudo apt install make nsis nsis-pluginapi mingw-w64-i686-dev
+```
 
-The build includes a compiled copy of my fork of [NSxfer](https://github.com/kirb/nsis-nsxfer) (zlib licensed).
+You will also need to extract a copy of updroots.exe from [this update](http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe). You can do this manually using 7-Zip, placing the exe at `setup/updroots.exe`, or run the following in WSL:
+
+```bash
+sudo apt install cabextract
+curl -L http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe -o /tmp/rvkroots.exe
+cabextract -d setup -F updroots.exe /tmp/rvkroots.exe
+rm /tmp/rvkroots.exe
+```
 
 ### Testing
 For debugging, if running on XP with IE8, install [Utilu IE Collection](https://www.utilu.com/iecollection/). IE6/IE7 is much more useful for debugging the native code, because of its simplistic single-process model. Visual Studio is able to launch it and directly attach to the process the code is running in.
@@ -61,3 +71,5 @@ This project is not affiliated with or endorsed by Microsoft. This software is p
 
 ## License
 Licensed under the Apache License, version 2.0. Refer to [LICENSE.md](https://github.com/kirb/LegacyUpdate/blob/main/LICENSE.md).
+
+The repository includes a compiled copy of my fork of [NSxfer](https://github.com/kirb/nsis-nsxfer), licensed under the [zlib/libpng license](https://github.com/kirb/nsis-nsxfer/blob/master/LICENSE).
