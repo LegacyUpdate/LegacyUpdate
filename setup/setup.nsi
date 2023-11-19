@@ -483,6 +483,8 @@ Function OnMouseOverSection
 			StrCpy $0 "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website. Windows Update will be configured to use the Legacy Update proxy server."
 		${ElseIf} ${AtMostWinVista}
 			StrCpy $0 "Installs Legacy Update, enabling access to the full Windows Update interface via the legacyupdate.net website, and Windows Update Control Panel. Windows Update will be configured to use the Legacy Update proxy server."
+		${ElseIf} ${AtMostWin8.1}
+			StrCpy $0 "Installs the Legacy Update ActiveX control, enabling access to the classic Windows Update interface via the legacyupdate.net website. This is optional on Windows 7, 8, and 8.1."
 		${Else}
 			StrCpy $0 "Installs the Legacy Update ActiveX control, enabling access to the classic Windows Update interface via the legacyupdate.net website."
 		${EndIf}
