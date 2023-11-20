@@ -121,7 +121,8 @@ Section -BeforeInstall
 SectionEnd
 
 Section -PreDownload
-	${IfNot} ${IsPostInstall}
+	${IfNot} ${IsRunOnce}
+	${AndIfNot} ${IsPostInstall}
 		Call PreDownload
 	${EndIf}
 SectionEnd
