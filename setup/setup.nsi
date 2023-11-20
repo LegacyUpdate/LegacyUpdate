@@ -844,23 +844,28 @@ Function PreDownload
 FunctionEnd
 
 Function PostInstall
+	; Handle first run flag if needed
+	${If} ${FileExists} "$InstallDir\LegacyUpdate.dll"
+		ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "ActiveXInstalled"
+		${If} ${Errors}
+			StrCpy $0 "firstrun"
+		${Else}
+			StrCpy $0 ""
+		${EndIf}
+		WriteRegDword HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "ActiveXInstalled" 1
+	${EndIf}
+
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
 		${IfNot} ${IsActiveXInstall}
-			${If} ${FileExists} "$InstallDir\LegacyUpdate.dll"
-				Exec '$SYSDIR\rundll32.exe "$InstallDir\LegacyUpdate.dll",LaunchUpdateSite firstrun'
-			${ElseIf} ${AtLeastWinVista}
-				Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
-			${EndIf}
+			Exec '$SYSDIR\rundll32.exe "$InstallDir\LegacyUpdate.dll",LaunchUpdateSite $0'
+		${ElseIf} ${AtLeastWinVista}
+			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
 		${EndIf}
 
 		; Launch XP activation wizard if requested by the user
 		${If} ${SectionIsSelected} ${ACTIVATE}
-			LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
-			Pop $0
-			${If} $0 == 1
-				ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
-			${EndIf}
+			ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
 		${EndIf}
 
 		; Launch Windows 8.1 upgrade site if requested by the user
