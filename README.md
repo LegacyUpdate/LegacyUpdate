@@ -44,6 +44,8 @@ cabextract -d setup -F updroots.exe /tmp/rvkroots.exe
 rm /tmp/rvkroots.exe
 ```
 
+When opening the solution for the first time, Visual Studio will ask if you want to retarget it against the latest Windows SDK. Select No Upgrade.
+
 ### Testing
 For debugging, if running on XP with IE8, install [Utilu IE Collection](https://www.utilu.com/iecollection/). IE6/IE7 is much more useful for debugging the native code, because of its simplistic single-process model. Visual Studio is able to launch it and directly attach to the process the code is running in.
 
