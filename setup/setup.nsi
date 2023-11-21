@@ -649,7 +649,9 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN7SP1}
-		${ElseIf} ${IsHomeServer}
+		${EndIf}
+
+		${If} ${IsHomeServer}
 			Call NeedsKB2757011
 			Pop $0
 			${If} $0 == 0
