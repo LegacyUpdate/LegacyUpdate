@@ -8,4 +8,10 @@ all:
 		$(MAKE) -C $$i; \
 	done
 
-.PHONY: all
+clean:
+	set -e; \
+	for i in $(SUBPROJECTS); do \
+		$(MAKE) -C $$i clean; \
+	done
+
+.PHONY: all clean

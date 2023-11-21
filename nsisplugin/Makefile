@@ -73,6 +73,9 @@ before-all:
 	mkdir -p obj
 
 after-all:
+ifeq ($(SIGN),1)
+	../build/sign.sh $(BIN)
+endif
 	cp $(BIN) ../setup/x86-unicode/
 
 $(BIN): $(OBJ) $(RES)

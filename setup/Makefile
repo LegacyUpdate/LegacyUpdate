@@ -1,6 +1,8 @@
 SIGN ?= 0
 
-all:
+all: setup activex
+
+setup:
 	makensis -DSIGN=$(SIGN) setup.nsi
 
 activex:
@@ -11,4 +13,7 @@ ifeq ($(SIGN),1)
 endif
 	rm codebase/setup.exe codebase/setup.rpt
 
-.PHONY: all activex
+clean:
+	@# Not needed
+
+.PHONY: all setup activex

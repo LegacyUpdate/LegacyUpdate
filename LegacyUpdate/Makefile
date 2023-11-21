@@ -11,4 +11,7 @@ ifeq ($(SIGN),1)
 		../x64/Release/LegacyUpdate.dll
 endif
 
-.PHONY: all
+clean:
+	@# Not needed, build.cmd cleans before it builds
+
+.PHONY: all clean
