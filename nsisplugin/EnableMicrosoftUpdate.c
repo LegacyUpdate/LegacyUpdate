@@ -23,7 +23,7 @@ void __cdecl EnableMicrosoftUpdate(HWND hwndParent, int string_size, TCHAR *vari
 		goto end;
 	}
 
-	hr = IUpdateServiceManager2_AddService2(serviceManager, SysAllocString(MicrosoftUpdateServiceID), 0, SysAllocString(L""), &registration);
+	hr = IUpdateServiceManager2_AddService2(serviceManager, SysAllocString(MicrosoftUpdateServiceID), asfAllowPendingRegistration | asfAllowOnlineRegistration | asfRegisterServiceWithAU, SysAllocString(L""), &registration);
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
