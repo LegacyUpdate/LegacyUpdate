@@ -96,7 +96,7 @@ FunctionEnd
 ; Windows 7 Servicing Stack Update
 !insertmacro MSUHandler "KB3138612" "2016-03 Servicing Stack Update for Windows 7"           "Package_for_KB3138612"
 !insertmacro MSUHandler "KB4474419" "SHA-2 Code Signing Support Update for Windows 7"        "Package_for_KB4474419"
-!insertmacro MSUHandler "KB4490628" "2019-03 Servicing Stack Update for Windows 7"           "Package_for_KB3138612"
+!insertmacro MSUHandler "KB4490628" "2019-03 Servicing Stack Update for Windows 7"           "Package_for_KB4490628"
 
 ; Windows Home Server 2011 Update Rollup 4
 !insertmacro MSUHandler "KB2757011" "Windows Home Server 2011 Update Rollup 4"               "Package_for_KB2757011"
