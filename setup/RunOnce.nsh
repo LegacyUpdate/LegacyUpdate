@@ -160,7 +160,15 @@ Function CleanUpRunOnce
 			${EndIf}
 
 			RMDir /r /REBOOTOK "$PROFILE"
-			System::Call "${ExitWindowsEx}(${EWX_FORCE}, 0) .r0"
+			${If} ${IsWin2000}
+				; If we are on Windows 2000, we need to restart to prevent
+				; the following error:
+				; "No mapping between account names and security IDs was done."
+				; See Issue #159
+				Reboot
+			${Else}
+				System::Call "${ExitWindowsEx}(${EWX_FORCE}, 0) .r0"
+			${EndIf}
 		${EndIf}
 	${EndIf}
 FunctionEnd
