@@ -41,7 +41,7 @@ jobs:
 
     - name: Install MinGW toolchain
       run: |
-        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-13.2-binutils-2.41-mingw-v11.0.1-i686.tar.xz -o /tmp/mingw.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-13.2-binutils-2.41-mingw-v11.0.1-i686-v2.tar.xz -o /tmp/mingw.tar.xz
         sudo tar -xf /tmp/mingw.tar.xz -C /opt
 
     - name: Extract updroots.exe
