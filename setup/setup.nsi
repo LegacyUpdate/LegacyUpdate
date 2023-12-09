@@ -188,6 +188,8 @@ ${MementoSection} "Internet Explorer 9" VISTAIE9
 	Call RebootIfRequired
 	Call InstallIE9
 	Call RebootIfRequired
+	call InstallKB4014661
+	call RebootIfRequired
 ${MementoSectionEnd}
 
 ; 7 prerequisities
@@ -804,6 +806,7 @@ Function PreDownload
 			Call DownloadKB971512
 			Call DownloadKB2117917
 			Call DownloadIE9
+			call DownloadKB4014661
 		${EndIf}
 	${EndIf}
 

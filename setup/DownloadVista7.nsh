@@ -90,6 +90,8 @@ FunctionEnd
 !insertmacro NeedsFileVersionHandler "IE9" "mshtml.dll" "9.0.8112.16421"
 !insertmacro PatchHandler "IE9" "Internet Explorer 9 for Windows Vista" "/passive /norestart /update-no /closeprograms"
 
+!insertmacro MSUHandler "KB4014661" "Cumulative Security Update for Internet Explorer 9 for Windows Vista" "Package_for_KB4014661_RTM"
+
 ; Windows Vista Servicing Stack Update
 !insertmacro MSUHandler "KB4493730" "2019-04 Servicing Stack Update for Windows Server 2008" "Package_1_for_KB4493730"
 
