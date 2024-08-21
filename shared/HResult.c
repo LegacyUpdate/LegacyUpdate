@@ -16,5 +16,11 @@ EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
 		wsprintf(message, L"Error 0x%08x", hr);
 	}
 
+	// Truncate trailing \r\n if any
+	int len = lstrlen(message);
+	if (len >= 2 && message[len - 2] == '\r' && message[len - 1] == '\n') {
+		message[len - 2] = 0;
+	}
+
 	return message;
 }
