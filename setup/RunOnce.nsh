@@ -3,6 +3,7 @@
 !define NoRestart     `"" HasFlag "/norestart"`
 
 !macro -PromptReboot
+	!insertmacro InhibitSleep 0
 	SetErrorLevel ${ERROR_SUCCESS_REBOOT_REQUIRED}
 
 	${If} ${NoRestart}
@@ -14,72 +15,41 @@
 		${EndIf}
 	${Else}
 		; Reboot immediately
-		Reboot
+		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
+		${If} ${IsRunOnce}
+		${AndIf} $0 == "SYSTEM"
+			; Running in setup mode. Quit with success, which will cause winlogon to reboot.
+			SetErrorLevel ${ERROR_SUCCESS}
+			Quit
+		${Else}
+			; Regular reboot.
+			Reboot
+		${EndIf}
 	${EndIf}
 !macroend
 
-!macro -RegisterRunOnce flags
-	WriteRegStr HKLM "${REGPATH_RUNONCE}" "Legacy Update" '"$RunOnceDir\LegacyUpdateSetup.exe" ${flags}'
+!macro -CleanUpRunOnce
+	; Restore setup keys
+	; Be careful here. Doing this wrong can cause SYSTEM_LICENSE_VIOLATION bootloops!
+	WriteRegStr    HKLM "${REGPATH_SYSSETUP}" "CmdLine" ""
+	WriteRegDword  HKLM "${REGPATH_SYSSETUP}" "SetupType" 0
+	DeleteRegValue HKLM "${REGPATH_SYSSETUP}" "SetupShutdownRequired"
 !macroend
 
-Function RegisterRunOnce
-	!insertmacro -RegisterRunOnce "/runonce"
+Function CleanUpRunOnce
+	!insertmacro -CleanUpRunOnce
 FunctionEnd
 
-Function un.RegisterRunOnce
-	; Unused, just needs to exist to make the compiler happy
+Function un.CleanUpRunOnce
+	; Empty
 FunctionEnd
-
-Function RegisterRunOncePostInstall
-	!insertmacro -RegisterRunOnce "/postinstall"
-FunctionEnd
-
-!macro -WriteRegStrWithBackup root key name value
-	; Backup the key if it exists
-	ClearErrors
-	ReadRegStr $0 ${root} "${key}" "${name}"
-	${IfNot} ${Errors}
-		WriteRegStr ${root} "${key}" "LegacyUpdate_${name}" $0
-	${EndIf}
-
-	WriteRegStr ${root} "${key}" "${name}" "${value}"
-!macroend
-
-!macro -RestoreRegStr root key name
-	; Restore the key if it exists
-	ClearErrors
-	ReadRegStr $0 ${root} "${key}" "LegacyUpdate_${name}"
-	${If} ${Errors}
-		DeleteRegValue ${root} "${key}" "${name}"
-	${Else}
-		WriteRegStr ${root} "${key}" "${name}" $0
-		DeleteRegValue ${root} "${key}" "LegacyUpdate_${name}"
-	${EndIf}
-!macroend
 
 !macro -RebootIfRequired un
 	${If} ${RebootFlag}
+		!insertmacro DetailPrint "Preparing to restart..."
+
 		${IfNot} ${IsRunOnce}
 		${AndIfNot} ${NoRestart}
-			!insertmacro DetailPrint "Preparing to restart..."
-
-			; Get the localised name of the Administrators group from its SID
-			System::Call '*(&i1 0, &i4 0, &i1 5) i .r0'
-			; S-1-5-32-544
-			System::Call '${AllocateAndInitializeSid}(r0, 2, ${SECURITY_BUILTIN_DOMAIN_RID}, ${DOMAIN_ALIAS_RID_ADMINS}, 0, 0, 0, 0, 0, 0, .r1)'
-			System::Free $0
-			System::Call '${LookupAccountSid}(0, r1, .r0, ${NSIS_MAX_STRLEN}, .r2, ${NSIS_MAX_STRLEN}, 0)'
-			System::Call '${FreeSid}(r1)'
-
-			; Create the admin user
-			ExecShellWait "" "$WINDIR\system32\net.exe" "user /add ${RUNONCE_USERNAME} ${RUNONCE_PASSWORD}" SW_HIDE
-			ExecShellWait "" "$WINDIR\system32\net.exe" 'localgroup /add "$0" ${RUNONCE_USERNAME}' SW_HIDE
-
-			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "AutoAdminLogon" "1"
-			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "DefaultDomainName" "."
-			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "DefaultUserName" "${RUNONCE_USERNAME}"
-			!insertmacro -WriteRegStrWithBackup HKLM "${REGPATH_WINLOGON}" "DefaultPassword" "${RUNONCE_PASSWORD}"
-
 			; Copy to runonce path to ensure installer is accessible by the temp user
 			CreateDirectory "$RunOnceDir"
 			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
@@ -88,9 +58,17 @@ FunctionEnd
 			System::Call '${DeleteFile}("$RunOnceDir\LegacyUpdateSetup.exe:Zone.Identifier")'
 		${EndIf}
 
-		Call ${un}RegisterRunOnce
+		; Somewhat documented in KB939857:
+		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
+		; See also Wine winternl.h
+		WriteRegStr   HKLM "${REGPATH_SYSSETUP}" "CmdLine" '"$RunOnceDir\LegacyUpdateSetup.exe" /runonce'
+		WriteRegDword HKLM "${REGPATH_SYSSETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
+		WriteRegDword HKLM "${REGPATH_SYSSETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
 		!insertmacro -PromptReboot
 		Quit
+	${Else}
+		; Restore setup keys
+		Call ${un}CleanUpRunOnce
 	${EndIf}
 !macroend
 
@@ -104,63 +82,21 @@ Function un.RebootIfRequired
 FunctionEnd
 
 Function OnRunOnceLogon
-	; Trick winlogon into thinking the shell has started, so it doesn't appear to be stuck at
-	; "Welcome" (XP) or "Preparing your desktop..." (Vista+)
-	; https://social.msdn.microsoft.com/Forums/WINDOWS/en-US/ca253e22-1ef8-4582-8710-9cd9c89b15c3
-	${If} ${AtLeastWinVista}
-		StrCpy $0 "ShellDesktopSwitchEvent"
-	${Else}
-		StrCpy $0 "msgina: ShellReadyEvent"
-	${EndIf}
-
-	System::Call '${OpenEvent}(${EVENT_MODIFY_STATE}, 0, "$0") .r0'
-	${If} $0 != 0
-		System::Call '${SetEvent}(r0)'
-		System::Call '${CloseHandle}(r0)'
-	${EndIf}
-
-	; Handle Safe Mode case. RunOnce can still be processed in Safe Mode in some edge cases. If that
-	; happens, just silently register runonce again and quit.
-	${If} ${IsSafeMode}
-		Call RegisterRunOnce
-		Quit
-	${EndIf}
-
-	; Allow the themes component to be registered if necessary. This sets the theme to Aero Basic
-	; rather than Classic in Vista/7.
-	ClearErrors
-	ReadRegStr $0 HKLM "${REGPATH_COMPONENT_THEMES}" "StubPath"
-	${IfNot} ${Errors}
-		ExecShellWait "" "$WINDIR\system32\cmd.exe" "/c $0" SW_HIDE
-	${EndIf}
+	; To be safe in case we crash, immediately restore setup keys. We'll set them again if needed.
+	Call CleanUpRunOnce
 FunctionEnd
 
-Function CleanUpRunOnce
-	; Restore autologon keys
-	!insertmacro -RestoreRegStr HKLM "${REGPATH_WINLOGON}" "AutoAdminLogon"
-	!insertmacro -RestoreRegStr HKLM "${REGPATH_WINLOGON}" "DefaultDomainName"
-	!insertmacro -RestoreRegStr HKLM "${REGPATH_WINLOGON}" "DefaultUserName"
-	!insertmacro -RestoreRegStr HKLM "${REGPATH_WINLOGON}" "DefaultPassword"
-
-	; Delete the temp user
-	ExecShellWait "" "$WINDIR\system32\net.exe" "user /delete ${RUNONCE_USERNAME}" SW_HIDE
-
+Function OnRunOnceDone
 	${If} ${IsRunOnce}
-		; Clean up temporary setup exe if we created it (likely on next reboot)
-		${If} ${FileExists} "$RunOnceDir"
-			RMDir /r /REBOOTOK "$RunOnceDir"
-		${EndIf}
+	${AndIfNot} ${Abort}
+		; Set up postinstall runonce
+		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"$RunOnceDir\LegacyUpdateSetup.exe" /postinstall'
 
-		; Be really really sure this is the right user before we nuke their profile and log out
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
-		${If} $0 == "${RUNONCE_USERNAME}"
-			; Register postinstall runonce for the next admin user logon, and log out of the temporary user
-			${IfNot} ${Abort}
-				Call RegisterRunOncePostInstall
-			${EndIf}
-
-			RMDir /r /REBOOTOK "$PROFILE"
-			System::Call "${ExitWindowsEx}(${EWX_FORCE}, 0) .r0"
+		${If} $0 == "SYSTEM"
+			; Configure winlogon to proceed to the logon dialog
+			Call CleanUpRunOnce
 		${EndIf}
+		Quit
 	${EndIf}
 FunctionEnd

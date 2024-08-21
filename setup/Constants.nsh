@@ -24,10 +24,6 @@
 !define CPL_GUID           "{FFBE8D44-E9CF-4DD8-9FD6-976802C94D9C}"
 !define CPL_APPNAME        "LegacyUpdate"
 
-; RunOnce
-!define RUNONCE_USERNAME   "LegacyUpdateTemp"
-!define RUNONCE_PASSWORD   "Legacy_Update0"
-
 ; Registry keys
 !define REGPATH_LEGACYUPDATE_SETUP "Software\Hashbang Productions\Legacy Update\Setup"
 !define REGPATH_UNINSTSUBKEY       "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
@@ -40,7 +36,6 @@
 !define REGPATH_ZONEESCDOMAINS     "${REGPATH_INETSETTINGS}\ZoneMap\EscDomains"
 !define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
 !define REGPATH_CPLCLSID           "CLSID\${CPL_GUID}"
-!define REGPATH_WINLOGON           "Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 !define REGPATH_POSREADY           "System\WPA\PosReady"
 !define REGPATH_SCHANNEL_PROTOCOLS "System\CurrentControlSet\Control\SecurityProviders\SChannel\Protocols"
 !define REGPATH_DOTNET_V2          "Software\Microsoft\.NETFramework\v2.0.50727"
@@ -48,4 +43,4 @@
 !define REGPATH_RUNONCE            "Software\Microsoft\Windows\CurrentVersion\RunOnce"
 !define REGPATH_PACKAGEINDEX       "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\PackageIndex"
 !define REGPATH_SERVICING_SHA2     "Software\Microsoft\Windows\CurrentVersion\Servicing\Codesigning\SHA2"
-!define REGPATH_COMPONENT_THEMES   "Software\Microsoft\Active Setup\Installed Components\{2C7339CF-2B09-4501-B3F3-F3508C9228ED}"
+!define REGPATH_SYSSETUP           "System\Setup"

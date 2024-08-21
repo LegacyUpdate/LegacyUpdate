@@ -879,8 +879,13 @@ Function PostInstall
 FunctionEnd
 
 Function CleanUp
+	; Called only after all tasks have completed
 	Call CleanUpRunOnce
 	!insertmacro InhibitSleep 0
+
+	${If} ${IsRunOnce}
+		Call OnRunOnceDone
+	${EndIf}
 
 	${If} ${IsPostInstall}
 	${OrIfNot} ${RebootFlag}
