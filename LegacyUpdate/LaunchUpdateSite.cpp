@@ -5,6 +5,8 @@
 #include <ExDisp.h>
 #include <strsafe.h>
 #include "Utils.h"
+#include "HResult.h"
+#include "VersionInfo.h"
 #include "LegacyUpdate_i.h"
 #include "dllmain.h"
 
@@ -32,7 +34,7 @@ static BOOL CanUseSSLConnection() {
 end:
 	// Fallback: Use SSL only on Vista and up
 	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
-	return versionInfo->dwMajorVersion > 5;
+	return IsOSVersionOrLater(6, 0);
 }
 
 // Function signature required by Rundll32.exe.
@@ -47,7 +49,7 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 	}
 
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
-	if (GetVersionInfo()->dwMajorVersion < 6 && !IsUserAnAdmin()) {
+	if (!IsOSVersionOrLater(6, 0) && !IsUserAnAdmin()) {
 		LPWSTR filename;
 		DWORD filenameSize;
 		GetOwnFileName(&filename, &filenameSize);

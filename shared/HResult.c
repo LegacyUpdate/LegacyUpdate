@@ -1,7 +1,8 @@
+#include "stdafx.h"
 #include <windows.h>
 #include "WUErrors.h"
 
-EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
+LPWSTR GetMessageForHresult(HRESULT hr) {
 	LPWSTR message;
 	for (int i = 0; WUErrorMessages[i].hr != 0; i++) {
 		if (WUErrorMessages[i].hr == hr) {

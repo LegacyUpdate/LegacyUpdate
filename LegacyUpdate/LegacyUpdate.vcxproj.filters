@@ -122,6 +122,9 @@
     <ClInclude Include="..\shared\VersionInfo.h">
       <Filter>Shared</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\HResult.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LegacyUpdate.rc">

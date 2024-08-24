@@ -1,9 +1,10 @@
 #pragma once
+
 #include <windows.h>
 
-struct HResultMessage {
+EXTERN_C struct HResultMessage {
 	HRESULT hr;
-	const LPWSTR message;
+	LPWSTR message;
 };
 
 EXTERN_C HResultMessage WUErrorMessages[];

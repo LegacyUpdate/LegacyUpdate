@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include <comdef.h>
 #include <atlstr.h>
+#include "HResult.h"
 #include "WMI.h"
 
 #pragma comment(lib, "version.lib")
@@ -115,13 +116,6 @@ end:
 		RegCloseKey(subkey);
 	}
 	return hr;
-}
-
-LPWSTR GetMessageForHresult(HRESULT hr) {
-	_com_error *error = new _com_error(hr);
-	CString message = error->ErrorMessage();
-	BSTR outMessage = message.AllocSysString();
-	return outMessage;
 }
 
 HRESULT GetOSProductName(VARIANT *pProductName) {

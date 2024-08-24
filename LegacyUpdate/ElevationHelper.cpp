@@ -1,6 +1,7 @@
 // ElevationHelper.cpp : Implementation of CElevationHelper
 #include "stdafx.h"
 #include "ElevationHelper.h"
+#include "HResult.h"
 #include "Utils.h"
 #include <strsafe.h>
 

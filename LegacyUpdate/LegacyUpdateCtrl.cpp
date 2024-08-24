@@ -4,6 +4,8 @@
 #include "LegacyUpdateCtrl.h"
 #include "Utils.h"
 #include "Compat.h"
+#include "HResult.h"
+#include "VersionInfo.h"
 #include "ElevationHelper.h"
 #include <atlbase.h>
 #include <atlcom.h>
@@ -242,7 +244,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
 	DoIsPermittedCheck();
 
-	if (m_elevatedHelper != NULL || GetVersionInfo()->dwMajorVersion < 6) {
+	if (m_elevatedHelper != NULL || !IsOSVersionOrLater(6, 0)) {
 		return S_OK;
 	}
 
@@ -386,11 +388,10 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 		return hr;
 	}
 
-	DWORD majorVersion = GetVersionInfo()->dwMajorVersion;
-	if (majorVersion >= 10) {
+	if (IsOSVersionOrLater(10, 0)) {
 		// Windows 10+: Open Settings app
 		ShellExecute(NULL, NULL, L"ms-settings:windowsupdate-options", NULL, systemDir, SW_SHOWDEFAULT);
-	} else if (majorVersion >= 6) {
+	} else if (IsOSVersionOrLater(6, 0)) {
 		// Windows Vista, 7, 8: Open Windows Update control panel
 		ShellExecute(NULL, NULL, L"wuauclt.exe", L"/ShowOptions", systemDir, SW_SHOWDEFAULT);
 	} else {
