@@ -84,6 +84,27 @@ FunctionEnd
 Function OnRunOnceLogon
 	; To be safe in case we crash, immediately restore setup keys. We'll set them again if needed.
 	Call CleanUpRunOnce
+
+!if ${SIGN} != 1
+	ExecShell "" "cmd.exe" "" SW_SHOWMINIMIZED
+!endif
+
+	; Find and hide the FirstUxWnd window, if it exists (Windows 7+)
+	FindWindow $0 "FirstUxWndClass"
+	${If} $0 != 0
+		ShowWindow $0 ${SW_HIDE}
+	${EndIf}
+
+	; Initialise Aero Basic (Windows Vista+). Note we need to use the 64-bit dll on 64-bit Windows.
+	${If} ${AtLeastWinVista}
+		${If} ${RunningX64}
+			File "/ONAME=$PLUGINSDIR\LegacyUpdateNSIS64.dll" "..\nsisplugin\obj\LegacyUpdateNSIS64.dll"
+			Exec '$SYSDIR\rundll32.exe "$PLUGINSDIR\LegacyUpdateNSIS64.dll",InitRunOnce'
+		${Else}
+			File "/ONAME=$PLUGINSDIR\LegacyUpdateNSIS.dll" "..\nsisplugin\obj\LegacyUpdateNSIS.dll"
+			Exec '$SYSDIR\rundll32.exe "$PLUGINSDIR\LegacyUpdateNSIS.dll",InitRunOnce'
+		${EndIf}
+	${EndIf}
 FunctionEnd
 
 Function OnRunOnceDone
