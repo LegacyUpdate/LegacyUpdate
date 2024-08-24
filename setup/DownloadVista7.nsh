@@ -124,22 +124,17 @@ Function NeedsVistaPostSP2
 FunctionEnd
 
 Function NeedsWin7SHA2
-	ReadRegDWORD $0 HKLM "${REGPATH_SERVICING_SHA2}" "SHA2-Codesigning-Support"
+	Call NeedsKB3138612
+	Call NeedsKB4474419
+	Call NeedsKB4490628
+	Pop $0
+	Pop $1
+	Pop $2
 	${If} $0 == 1
-		Push 0
+	${OrIf} $1 == 1
+	${OrIf} $2 == 1
+		Push 1
 	${Else}
-		Call NeedsKB3138612
-		Call NeedsKB4474419
-		Call NeedsKB4490628
-		Pop $0
-		Pop $1
-		Pop $2
-		${If} $0 == 1
-		${OrIf} $1 == 1
-		${OrIf} $2 == 1
-			Push 1
-		${Else}
-			Push 0
-		${EndIf}
+		Push 0
 	${EndIf}
 FunctionEnd

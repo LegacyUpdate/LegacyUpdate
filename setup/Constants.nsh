@@ -42,5 +42,4 @@
 !define REGPATH_DOTNET_V4          "Software\Microsoft\.NETFramework\v4.0.30319"
 !define REGPATH_RUNONCE            "Software\Microsoft\Windows\CurrentVersion\RunOnce"
 !define REGPATH_PACKAGEINDEX       "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\PackageIndex"
-!define REGPATH_SERVICING_SHA2     "Software\Microsoft\Windows\CurrentVersion\Servicing\Codesigning\SHA2"
 !define REGPATH_SYSSETUP           "System\Setup"
