@@ -76,7 +76,9 @@ Function DownloadWait
 FunctionEnd
 
 !macro -Download name url filename verbose
+	${If} ${verbose} == 1
 	!insertmacro DetailPrint "Downloading ${name}..."
+	${EndIf}
 	!insertmacro DownloadRequest "${url}" "${filename}" ""
 	${If} ${verbose} == 1
 		Call DownloadWait
@@ -128,11 +130,9 @@ Function ExecWithErrorHandling
 	${AndIf} $0 == 1
 		; wusa exits with 1 if the patch is already installed. Treat this as success.
 		DetailPrint "Installation skipped - already installed"
-	${ElseIf} $Exec.IsWusa == 1
-	${AndIf} $0 == ${WU_S_ALREADY_INSTALLED}
+	${OrIf} $0 == ${WU_S_ALREADY_INSTALLED}
 		DetailPrint "Installation skipped - already installed"
-	${ElseIf} $Exec.IsWusa == 1
-	${AndIf} $0 == ${WU_E_NOT_APPLICABLE}
+	${OrIf} $0 == ${WU_E_NOT_APPLICABLE}
 		DetailPrint "Installation skipped - not applicable"
 	${ElseIf} $0 != 0
 		LegacyUpdateNSIS::MessageForHresult $0
@@ -144,24 +144,23 @@ Function ExecWithErrorHandling
 	Pop $0
 FunctionEnd
 
-!macro ExecWithErrorHandling name command iswusa
+!macro ExecWithErrorHandling name command
 	StrCpy $Exec.Command '${command}'
 	StrCpy $Exec.Name '${name}'
-	StrCpy $Exec.IsWusa '${iswusa}'
 	Call ExecWithErrorHandling
 !macroend
 
 !macro Install name filename args
 	!insertmacro DetailPrint "Installing ${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '"$0" ${args}' 0
+	!insertmacro ExecWithErrorHandling '${name}' '"$0" ${args}'
 !macroend
 
 !macro InstallSP name filename
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
 	!insertmacro DetailPrint "Extracting ${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"' 0
+	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"'
 	!insertmacro DetailPrint "Installing ${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '"$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600' 0
+	!insertmacro ExecWithErrorHandling '${name}' '"$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600'
 
 	; If we successfully abort a shutdown, we'll get exit code 0, so we know a reboot is required.
 	ExecWait "$WINDIR\system32\shutdown.exe /a" $0
@@ -181,7 +180,9 @@ FunctionEnd
 	SetDetailsPrint none
 	ExecShellWait "" "$WINDIR\system32\net.exe" "stop wuauserv" SW_HIDE
 	SetDetailsPrint listonly
-	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '$WINDIR\system32\wusa.exe /quiet /norestart "$0"' 1
+	StrCpy $Exec.IsWusa 1
+	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '$WINDIR\system32\wusa.exe /quiet /norestart "$0"'
+	StrCpy $Exec.IsWusa 0
 !macroend
 
 !macro EnsureAdminRights

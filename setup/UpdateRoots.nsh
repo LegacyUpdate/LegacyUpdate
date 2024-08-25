@@ -59,7 +59,7 @@ Function ConfigureCrypto
 FunctionEnd
 
 !macro _DownloadSST name
-	!insertmacro Download "Certificate Trust List" "${TRUSTEDR}/${name}.sst" "${name}.sst" 0
+	!insertmacro Download "Certificate Trust List (${name})" "${TRUSTEDR}/${name}.sst" "${name}.sst" 0
 !macroend
 
 Function DownloadRoots
@@ -74,9 +74,9 @@ FunctionEnd
 Function UpdateRoots
 	File "updroots.exe"
 	!insertmacro DetailPrint "Installing Certificate Trust List..."
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" authroots.sst' 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" updroots.sst' 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l roots.sst' 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -d delroots.sst' 0
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l -u disallowedcert.sst' 0
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" authroots.sst'
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" updroots.sst'
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l roots.sst'
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -d delroots.sst'
+	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l -u disallowedcert.sst'
 FunctionEnd
