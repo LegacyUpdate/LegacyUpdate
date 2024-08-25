@@ -5,7 +5,7 @@ SUBPROJECTS = LegacyUpdate nsisplugin setup
 all:
 	set -e; \
 	for i in $(SUBPROJECTS); do \
-		$(MAKE) -C $$i; \
+		$(MAKE) -j$(shell nproc) -C $$i; \
 	done
 
 clean:
