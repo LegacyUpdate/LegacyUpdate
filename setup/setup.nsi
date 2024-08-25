@@ -942,6 +942,23 @@ Function .onSelChange
 				/SD IDOK
 			!insertmacro UnselectSection ${WES09}
 		${EndIf}
+	${ElseIf} ${SectionIsSelected} ${ACTIVATE}
+		; Make sure the service pack prerequisite is selected
+		${If} ${IsWinXP2002}
+		${AndIfNot} ${AtLeastServicePack} 3
+		${AndIfNot} ${SectionIsSelected} ${XPSP3}
+			MessageBox MB_USERICON \
+				"Windows XP must be updated to Service Pack 3 to activate over the internet. The Service Pack 3 update action will be enabled." \
+				/SD IDOK
+			!insertmacro SelectSection ${XPSP3}
+		${ElseIf} ${IsWinXP2003}
+		${AndIfNot} ${AtLeastServicePack} 2
+		${AndIfNot} ${SectionIsSelected} ${2003SP2}
+			MessageBox MB_USERICON \
+				"Windows XP x64 Edition or Windows Server 2003 must be updated to Service Pack 2 to activate over the internet. The Service Pack 2 update action will be enabled." \
+				/SD IDOK
+			!insertmacro SelectSection ${2003SP2}
+		${EndIf}
 	${ElseIf} ${SectionIsSelected} ${WIN10UPGRADE}
 	${AndIf} $Win10UpgradeWarned != 1
 		; Explain how the upgrade works
