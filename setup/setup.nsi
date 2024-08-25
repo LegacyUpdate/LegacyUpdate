@@ -902,6 +902,7 @@ FunctionEnd
 Function CleanUp
 	; Called only after all tasks have completed
 	Call CleanUpRunOnce
+	Call CleanUpRunOnceFinal
 	!insertmacro InhibitSleep 0
 
 	${If} ${IsRunOnce}

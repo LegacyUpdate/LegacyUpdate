@@ -13,6 +13,7 @@
 				"Windows will be restarted to complete installation of prerequisite components. Setup will resume after the restart.", \
 				${EWX_REBOOT})'
 		${EndIf}
+		Quit
 	${Else}
 		; Reboot immediately
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
@@ -44,12 +45,24 @@ Function un.CleanUpRunOnce
 	; Empty
 FunctionEnd
 
+Function CleanUpRunOnceFinal
+	; Enable logon animation again if needed
+	${If} ${AtLeastWin8}
+		ClearErrors
+		ReadRegDword $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation_LegacyUpdateTemp"
+		${If} ${Errors}
+			DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation"
+		${Else}
+			WriteRegDword HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation" $0
+		${EndIf}
+	${EndIf}
+FunctionEnd
+
 !macro -RebootIfRequired un
 	${If} ${RebootFlag}
 		!insertmacro DetailPrint "Preparing to restart..."
 
 		${IfNot} ${IsRunOnce}
-		${AndIfNot} ${NoRestart}
 			; Copy to runonce path to ensure installer is accessible by the temp user
 			CreateDirectory "$RunOnceDir"
 			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
@@ -64,8 +77,19 @@ FunctionEnd
 		WriteRegStr   HKLM "${REGPATH_SYSSETUP}" "CmdLine" '"$RunOnceDir\LegacyUpdateSetup.exe" /runonce'
 		WriteRegDword HKLM "${REGPATH_SYSSETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 		WriteRegDword HKLM "${REGPATH_SYSSETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
+
+		; Temporarily disable logon animation if needed
+		${If} ${AtLeastWin8}
+			ClearErrors
+			ReadRegDword $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation"
+			${IfNot} ${Errors}
+				WriteRegDword HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation_LegacyUpdateTemp" $0
+			${EndIf}
+			WriteRegDword HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation" 0
+		${EndIf}
+
+		; Reboot now
 		!insertmacro -PromptReboot
-		Quit
 	${Else}
 		; Restore setup keys
 		Call ${un}CleanUpRunOnce
@@ -98,12 +122,13 @@ Function OnRunOnceLogon
 	; Initialise Aero Basic (Windows Vista+). Note we need to use the 64-bit dll on 64-bit Windows.
 	${If} ${AtLeastWinVista}
 		${If} ${RunningX64}
+			StrCpy $0 "64"
 			File "/ONAME=$PLUGINSDIR\LegacyUpdateNSIS64.dll" "..\nsisplugin\obj\LegacyUpdateNSIS64.dll"
-			Exec '$SYSDIR\rundll32.exe "$PLUGINSDIR\LegacyUpdateNSIS64.dll",InitRunOnce'
 		${Else}
+			StrCpy $0 ""
 			File "/ONAME=$PLUGINSDIR\LegacyUpdateNSIS.dll" "..\nsisplugin\obj\LegacyUpdateNSIS.dll"
-			Exec '$SYSDIR\rundll32.exe "$PLUGINSDIR\LegacyUpdateNSIS.dll",InitRunOnce'
 		${EndIf}
+		Exec '$SYSDIR\rundll32.exe "$PLUGINSDIR\LegacyUpdateNSIS$0.dll",InitRunOnce'
 	${EndIf}
 FunctionEnd
 
@@ -118,6 +143,5 @@ Function OnRunOnceDone
 			; Configure winlogon to proceed to the logon dialog
 			Call CleanUpRunOnce
 		${EndIf}
-		Quit
 	${EndIf}
 FunctionEnd
