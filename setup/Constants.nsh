@@ -18,7 +18,6 @@
 !define WSUS_SERVER        "http://legacyupdate.net/v6"
 !define WSUS_SERVER_HTTPS  "https://legacyupdate.net/v6"
 !define TRUSTEDR           "http://download.windowsupdate.com/msdownload/update/v3/static/trustedr/en"
-!define WIN81UPGRADE_URL   "https://go.microsoft.com/fwlink/?LinkId=798437"
 
 ; Control Panel entry
 !define CPL_GUID           "{FFBE8D44-E9CF-4DD8-9FD6-976802C94D9C}"
@@ -31,6 +30,7 @@
 !define REGPATH_WUAUPOLICY         "${REGPATH_WUPOLICY}\AU"
 !define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"
 !define REGPATH_WU_SERVICES        "${REGPATH_WU}\Services"
+!define REGPATH_WU_OSUPGRADE       "${REGPATH_WU}\OSUpgrade"
 !define REGPATH_INETSETTINGS       "Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 !define REGPATH_ZONEDOMAINS        "${REGPATH_INETSETTINGS}\ZoneMap\Domains"
 !define REGPATH_ZONEESCDOMAINS     "${REGPATH_INETSETTINGS}\ZoneMap\EscDomains"

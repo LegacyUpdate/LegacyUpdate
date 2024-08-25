@@ -46,6 +46,8 @@ VIFileVersion    ${LONGVERSION}
 Var /GLOBAL InstallDir
 Var /GLOBAL RunOnceDir
 
+Var /GLOBAL Win10UpgradeWarned
+
 !include FileFunc.nsh
 !include Integration.nsh
 !include LogicLib.nsh
@@ -219,10 +221,6 @@ Section "Windows Servicing Stack update" WIN8SSU
 	Call RebootIfRequired
 SectionEnd
 
-Section "Windows 8.1" WIN81UPGRADE
-	; No-op; we'll launch the support site in post-install.
-SectionEnd
-
 ; 8.1 prerequisities
 Section "Windows 8.1 Update 1" WIN81UPDATE1
 	SectionIn Ro
@@ -250,6 +248,12 @@ SectionEnd
 
 ${MementoUnselectedSection} "Enable Windows Embedded 2009 updates" WES09
 	WriteRegDword HKLM "${REGPATH_POSREADY}" "Installed" 1
+${MementoSectionEnd}
+
+${MementoUnselectedSection} "Enable upgrade to Windows 10" WIN10UPGRADE
+	WriteRegDword HKLM "${REGPATH_WU_OSUPGRADE}" "AllowOSUpgrade" 1
+	WriteRegDword HKLM "${REGPATH_WU_OSUPGRADE}" "OSUpgradeInteractive" 1
+	WriteRegDword HKLM "${REGPATH_WU_OSUPGRADE}" "OSUpgradeRunOnceCount" 1
 ${MementoSectionEnd}
 
 ${MementoSection} "Update root certificates store" ROOTCERTS
@@ -481,10 +485,10 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SP1}      "Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7SSU}      "Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN8SSU}      "Updates Windows 8 or Windows Server 2012 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
-	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPGRADE} "Windows 8 can be updated to Windows 8.1. This process involves a manual download. After Legacy Update setup completes, a Microsoft website will be opened with more information."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81UPDATE1} "Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN81SSU}     "Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WHS2011U4}	  "Updates Windows Home Server 2011 to Update Rollup 4 to resolve issues with the Windows Update Agent. Also fixes data corruption problems.$\r$\n${DESCRIPTION_REBOOTS}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${WIN10UPGRADE} "Configures Windows 7 and 8.1 to allow updating to Windows 10."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WUA}          "Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7MU}       "Configures Windows to install updates for Microsoft Office and other Microsoft software."
@@ -702,17 +706,12 @@ Function .onInit
 
 	${If} ${IsWin8}
 		; Determine whether 8 prereqs need to be installed
-		${IfNot} ${IsWin8}
-			!insertmacro RemoveSection ${WIN81UPGRADE}
-		${EndIf}
-
 		Call NeedsKB4598297
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN8SSU}
 		${EndIf}
 	${Else}
-		!insertmacro RemoveSection ${WIN81UPGRADE}
 		!insertmacro RemoveSection ${WIN8SSU}
 	${EndIf}
 
@@ -732,6 +731,12 @@ Function .onInit
 	${Else}
 		!insertmacro RemoveSection ${WIN81UPDATE1}
 		!insertmacro RemoveSection ${WIN81SSU}
+	${EndIf}
+
+	${If} ${AtLeastWin7}
+	${AndIf} ${AtMostWin8.1}
+	${Else}
+		!insertmacro RemoveSection ${WIN10UPGRADE}
 	${EndIf}
 
 	Call DetermineWUAVersion
@@ -891,11 +896,6 @@ Function PostInstall
 		${If} ${SectionIsSelected} ${ACTIVATE}
 			ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
 		${EndIf}
-
-		; Launch Windows 8.1 upgrade site if requested by the user
-		${If} ${SectionIsSelected} ${WIN81UPGRADE}
-			ExecShell "" "${WIN81UPGRADE_URL}"
-		${EndIf}
 	${EndIf}
 FunctionEnd
 
@@ -935,9 +935,27 @@ Function .onSelChange
 		; Check for SSE2.
 		System::Call 'kernel32::IsProcessorFeaturePresent(i ${PF_XMMI64_INSTRUCTIONS_AVAILABLE}) i .r0'
 		${If} $0 == 0
-			MessageBox MB_USERICON "Your processor does not support the Streaming SIMD Extensions 2 (SSE2) instruction set, which is required to install Windows Embedded 2009 updates released after May 2018. Processors that initially implemented SSE2 instructions include the Intel Pentium 4, Pentium M, and AMD Athlon 64.$\r$\n$\r$\nTo protect your Windows installation from becoming corrupted by incompatible updates, this option will be disabled." /SD IDOK
+			MessageBox MB_USERICON \
+				"Your processor does not support the Streaming SIMD Extensions 2 (SSE2) instruction set, which is required to install Windows Embedded 2009 updates released after May 2018. Processors that initially implemented SSE2 instructions include the Intel Pentium 4, Pentium M, and AMD Athlon 64.$\r$\n\
+				$\r$\n\
+				To protect your Windows installation from becoming corrupted by incompatible updates, this option will be disabled." \
+				/SD IDOK
 			!insertmacro UnselectSection ${WES09}
 		${EndIf}
+	${ElseIf} ${SectionIsSelected} ${WIN10UPGRADE}
+	${AndIf} $Win10UpgradeWarned != 1
+		; Explain how the upgrade works
+		StrCpy $Win10UpgradeWarned 1
+		${If} ${IsWin8}
+			StrCpy $0 "To upgrade this computer to Windows 10, you will first need to install Windows 8.1. Unfortunately, Windows 8.1 is no longer available for download from Microsoft. The computer will be configured to enable the update, but you will need to manually upgrade to Windows 8.1 first."
+		${Else}
+			StrCpy $0 "After Legacy Update setup completes, Windows Update will offer the upgrade to Windows 10."
+		${EndIf}
+		MessageBox MB_USERICON \
+			"$0$\r$\n\
+			$\r$\n\
+			Microsoft no longer provides free Windows 10 upgrade licenses for Windows 7 and 8.1 users. If Windows 10 has not been activated on this computer in the past, you will need to purchase a license." \
+			/SD IDOK
 	${EndIf}
 FunctionEnd
 
