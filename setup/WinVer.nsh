@@ -27,6 +27,18 @@
 !define WINVER_SERVER_2012R2     ${WINVER_8.1}
 !define WINVER_SERVER_2016       ${WINVER_10}
 
+!define WINVER_BUILD_2000        2195
+!define WINVER_BUILD_XP2002      2600
+!define WINVER_BUILD_XP2003      3790
+!define WINVER_BUILD_VISTA       6000
+!define WINVER_BUILD_VISTA_SP1   6001
+!define WINVER_BUILD_VISTA_SP2   6002
+!define WINVER_BUILD_VISTA_ESU   6003
+!define WINVER_BUILD_7           7600
+!define WINVER_BUILD_7_SP1       7601
+!define WINVER_BUILD_8           9200
+!define WINVER_BUILD_8.1         9600
+!define WINVER_BUILD_10          10240
 !define WINVER_BUILD_11          22000
 
 !define /ifndef VER_NT_WORKSTATION 1

@@ -543,6 +543,27 @@ Function .onInit
 	${If} ${IsRunOnce}
 	${OrIf} ${IsPostInstall}
 		Call OnRunOnceLogon
+	${ElseIfNot} ${AtLeastWin10}
+		GetWinVer $0 Build
+		${If} $0 != ${WINVER_BUILD_2000}
+		${AndIf} $0 != ${WINVER_BUILD_XP2002}
+		${AndIf} $0 != ${WINVER_BUILD_XP2003}
+		${AndIf} $0 != ${WINVER_BUILD_VISTA}
+		${AndIf} $0 != ${WINVER_BUILD_VISTA_SP1}
+		${AndIf} $0 != ${WINVER_BUILD_VISTA_SP2}
+		${AndIf} $0 != ${WINVER_BUILD_VISTA_ESU}
+		${AndIf} $0 != ${WINVER_BUILD_7}
+		${AndIf} $0 != ${WINVER_BUILD_7_SP1}
+		${AndIf} $0 != ${WINVER_BUILD_8}
+		${AndIf} $0 != ${WINVER_BUILD_8.1}
+			MessageBox MB_USERICON|MB_OKCANCEL \
+				"The current version of Windows is a beta build. Legacy Update may not work correctly on this version of Windows.$\r$\n\
+				$\r$\n\
+				Continue anyway?" \
+				/SD IDOK \
+				IDOK +2
+			Quit
+		${EndIf}
 	${EndIf}
 
 	SetOutPath $PLUGINSDIR
