@@ -1,4 +1,6 @@
-!macro -SetSecureProtocolsBitmask
+!macro -SetSecureProtocolsBitmask root path key
+	ReadRegDword $0 ${root} "${path}" "${key}"
+
 	; If the value isn't yet set, ReadRegDword will return 0. This means TLSv1.1 and v1.2 will be the
 	; only enabled protocols. This is intentional behavior, because SSLv2 and SSLv3 are not secure,
 	; and TLSv1.0 is deprecated. The user can manually enable them in Internet Settings if needed.
@@ -10,6 +12,8 @@
 	${EndIf}
 	IntOp $0 $0 | ${WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_1}
 	IntOp $0 $0 | ${WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2}
+
+	WriteRegDword ${root} "${path}" "${key}" $0
 !macroend
 
 Function _ConfigureCrypto
@@ -24,22 +28,12 @@ Function _ConfigureCrypto
 	WriteRegDword HKLM "${REGPATH_SCHANNEL_PROTOCOLS}\TLS 1.2\Server" "DisabledByDefault" 0
 
 	; Enable IE TLSv1.1 and v1.2
-	ReadRegDword $0 HKLM "${REGPATH_INETSETTINGS}" "SecureProtocols"
-	!insertmacro -SetSecureProtocolsBitmask
-	WriteRegDword HKLM "${REGPATH_INETSETTINGS}" "SecureProtocols" $0
-
-	ReadRegDword $0 HKCU "${REGPATH_INETSETTINGS}" "SecureProtocols"
-	!insertmacro -SetSecureProtocolsBitmask
-	WriteRegDword HKCU "${REGPATH_INETSETTINGS}" "SecureProtocols" $0
+	!insertmacro -SetSecureProtocolsBitmask HKLM "${REGPATH_INETSETTINGS}" "SecureProtocols"
+	!insertmacro -SetSecureProtocolsBitmask HKCU "${REGPATH_INETSETTINGS}" "SecureProtocols"
 
 	; Enable WinHTTP TLSv1.1 and v1.2
-	ReadRegDword $0 HKLM "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols"
-	!insertmacro -SetSecureProtocolsBitmask
-	WriteRegDword HKLM "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols" $0
-
-	ReadRegDword $0 HKCU "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols"
-	!insertmacro -SetSecureProtocolsBitmask
-	WriteRegDword HKCU "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols" $0
+	!insertmacro -SetSecureProtocolsBitmask HKLM "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols"
+	!insertmacro -SetSecureProtocolsBitmask HKCU "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols"
 
 	; Enable .NET inheriting SChannel protocol config
 	; .NET 3 uses the same registry keys as .NET 2.
