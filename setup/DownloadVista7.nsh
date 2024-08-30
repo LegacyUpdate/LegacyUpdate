@@ -43,7 +43,7 @@ FunctionEnd
 		Call GetComponentArch
 		Pop $0
 		ClearErrors
-		EnumRegKey $1 HKLM "${REGPATH_PACKAGEINDEX}\${packagename}~31bf3856ad364e35~$0~~0.0.0.0" 0
+		EnumRegKey $1 HKLM "${REGPATH_CBS_PACKAGEINDEX}\${packagename}~31bf3856ad364e35~$0~~0.0.0.0" 0
 		${If} ${Errors}
 			Push 1
 		${Else}

@@ -113,6 +113,15 @@ Function OnRunOnceLogon
 	ExecShell "" "cmd.exe" "" SW_SHOWMINIMIZED
 !endif
 
+	; If we're in the middle of installing a service pack, let it keep doing its thing. We'll register
+	; for setup again, and try again on next boot.
+	ClearErrors
+	EnumRegKey $0 HKLM "${REGPATH_CBS_PKGSPENDING}" 0
+	${IfNot} ${Errors}
+		SetRebootFlag true
+		Call RebootIfRequired
+	${EndIf}
+
 	; Find and hide the FirstUxWnd window, if it exists (Windows 7+)
 	FindWindow $0 "FirstUxWndClass"
 	${If} $0 != 0
