@@ -301,16 +301,16 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	; Add Control Panel entry
 	; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
 	; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
-	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "" "${NAME}"
-	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.dll",-2'
-	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.dll",-4'
-	WriteRegStr   HKCR "${REGPATH_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.dll",-201'
-	WriteRegStr   HKCR "${REGPATH_CPLCLSID}\Shell\Open\Command" "" 'rundll32.exe "$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite'
-	WriteRegDword HKCR "${REGPATH_CPLCLSID}\ShellFolder" "Attributes" 0
-	WriteRegDword HKCR "${REGPATH_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
-	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
-	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "System.ControlPanelCategory" "5,10"
-	WriteRegStr   HKCR "${REGPATH_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-202"
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "" "${NAME}"
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.dll",-2'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.dll",-4'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.dll",-201'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" "" 'rundll32.exe "$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite'
+	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder" "Attributes" 0
+	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory" "5,10"
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-202"
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 	; Install DLL, with detection for it being in use by IE

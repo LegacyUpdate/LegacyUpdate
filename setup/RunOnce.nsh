@@ -32,9 +32,9 @@
 !macro -CleanUpRunOnce
 	; Restore setup keys
 	; Be careful here. Doing this wrong can cause SYSTEM_LICENSE_VIOLATION bootloops!
-	WriteRegStr    HKLM "${REGPATH_SYSSETUP}" "CmdLine" ""
-	WriteRegDword  HKLM "${REGPATH_SYSSETUP}" "SetupType" 0
-	DeleteRegValue HKLM "${REGPATH_SYSSETUP}" "SetupShutdownRequired"
+	WriteRegStr    HKLM "${REGPATH_SETUP}" "CmdLine" ""
+	WriteRegDword  HKLM "${REGPATH_SETUP}" "SetupType" 0
+	DeleteRegValue HKLM "${REGPATH_SETUP}" "SetupShutdownRequired"
 !macroend
 
 Function CleanUpRunOnce
@@ -74,9 +74,9 @@ FunctionEnd
 		; Somewhat documented in KB939857:
 		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
 		; See also Wine winternl.h
-		WriteRegStr   HKLM "${REGPATH_SYSSETUP}" "CmdLine" '"$RunOnceDir\LegacyUpdateSetup.exe" /runonce'
-		WriteRegDword HKLM "${REGPATH_SYSSETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
-		WriteRegDword HKLM "${REGPATH_SYSSETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
+		WriteRegStr   HKLM "${REGPATH_SETUP}" "CmdLine" '"$RunOnceDir\LegacyUpdateSetup.exe" /runonce'
+		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
+		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
 
 		; Temporarily disable logon animation if needed
 		${If} ${AtLeastWin8}

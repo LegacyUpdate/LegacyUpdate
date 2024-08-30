@@ -23,26 +23,41 @@
 !define CPL_GUID           "{FFBE8D44-E9CF-4DD8-9FD6-976802C94D9C}"
 !define CPL_APPNAME        "LegacyUpdate"
 
-; Registry keys
+; Legacy Update keys
 !define REGPATH_LEGACYUPDATE_SETUP "Software\Hashbang Productions\Legacy Update\Setup"
 !define REGPATH_UNINSTSUBKEY       "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
-!define REGPATH_WUPOLICY           "Software\Policies\Microsoft\Windows\WindowsUpdate"
-!define REGPATH_WUAUPOLICY         "${REGPATH_WUPOLICY}\AU"
+
+; Control Panel entry
+!define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
+!define REGPATH_HKCR_CPLCLSID      "CLSID\${CPL_GUID}"
+
+; XP POSReady hack
+!define REGPATH_POSREADY           "System\WPA\PosReady"
+
+; RunOnce
+!define REGPATH_SETUP              "System\Setup"
+
+; Windows Update keys
 !define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"
 !define REGPATH_WU_SERVICES        "${REGPATH_WU}\Services"
 !define REGPATH_WU_OSUPGRADE       "${REGPATH_WU}\OSUpgrade"
+
+; Windows Update policies
+!define REGPATH_WUPOLICY           "Software\Policies\Microsoft\Windows\WindowsUpdate"
+!define REGPATH_WUAUPOLICY         "${REGPATH_WUPOLICY}\AU"
+
+; Component keys
+!define REGPATH_CBS                "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing"
+!define REGPATH_CBS_PKGSPENDING    "${REGPATH_CBS}\PackagesPending"
+!define REGPATH_CBS_PACKAGEINDEX   "${REGPATH_CBS}\PackageIndex"
+
+; IE zone keys
 !define REGPATH_INETSETTINGS       "Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 !define REGPATH_ZONEDOMAINS        "${REGPATH_INETSETTINGS}\ZoneMap\Domains"
 !define REGPATH_ZONEESCDOMAINS     "${REGPATH_INETSETTINGS}\ZoneMap\EscDomains"
-!define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
-!define REGPATH_CPLCLSID           "CLSID\${CPL_GUID}"
-!define REGPATH_POSREADY           "System\WPA\PosReady"
+
+; SChannel protocol keys
 !define REGPATH_SCHANNEL_PROTOCOLS "System\CurrentControlSet\Control\SecurityProviders\SChannel\Protocols"
 !define REGPATH_DOTNET             "Software\Microsoft\.NETFramework"
 !define REGPATH_DOTNET_V2          "${REGPATH_DOTNET}\v2.0.50727"
 !define REGPATH_DOTNET_V4          "${REGPATH_DOTNET}\v4.0.30319"
-!define REGPATH_RUNONCE            "Software\Microsoft\Windows\CurrentVersion\RunOnce"
-!define REGPATH_CBS                "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing"
-!define REGPATH_CBS_PKGSPENDING    "${REGPATH_CBS}\PackagesPending"
-!define REGPATH_CBS_PACKAGEINDEX   "${REGPATH_CBS}\PackageIndex"
-!define REGPATH_SYSSETUP           "System\Setup"
