@@ -36,6 +36,7 @@
 
 ; RunOnce
 !define REGPATH_SETUP              "System\Setup"
+!define REGPATH_RUNONCE            "Software\Microsoft\Windows\CurrentVersion\RunOnce"
 
 ; Windows Update keys
 !define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"

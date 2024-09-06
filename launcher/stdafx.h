@@ -17,5 +17,3 @@
 
 #include "resource.h"
 #include <windows.h>
-
-EXTERN_C HWND g_hwndParent;

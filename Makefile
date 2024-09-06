@@ -1,6 +1,6 @@
 export SIGN ?= 0
 
-SUBPROJECTS = LegacyUpdate nsisplugin setup
+SUBPROJECTS = LegacyUpdate launcher nsisplugin setup
 
 all:
 	set -e; \

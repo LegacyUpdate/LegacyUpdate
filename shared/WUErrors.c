@@ -6,7 +6,7 @@
 HResultMessage WUErrorMessages[] = {
 	{ WU_S_SERVICE_STOP, L"Windows Update Agent was stopped successfully." },
 	{ WU_S_SELFUPDATE, L"Windows Update Agent updated itself." },
-	{ WU_S_UPDATE_ERROR, L"Operation completed successfully but there were errors applying the updates.." },
+	{ WU_S_UPDATE_ERROR, L"Operation completed successfully but there were errors applying the updates." },
 	{ WU_S_MARKED_FOR_DISCONNECT, L"A callback was marked to be disconnected later because the request to disconnect the operation came while a callback was executing." },
 	{ WU_S_REBOOT_REQUIRED, L"The system must be restarted to complete installation of the update." },
 	{ WU_S_ALREADY_INSTALLED, L"The update to be installed is already installed on the system." },

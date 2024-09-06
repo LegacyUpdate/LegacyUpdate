@@ -1,14 +1,23 @@
 FILES   = \
-	main.c \
-	InitRunOnce.c \
+	$(wildcard *.c) \
 	../shared/GetPidForName.c \
+	../shared/HResult.c \
+	../shared/Registry.c \
+	../shared/WUErrors.c \
 	../shared/VersionInfo.c
 RCFILES = resource.rc
 
-TAG     = x86_64
-PREFIX  = x86_64-w64-mingw32-
+ARCH   ?= i686
 
-BIN     = obj/LegacyUpdateNSIS64.dll
+ifeq ($(ARCH),64)
+TAG     = x86_64
+else
+TAG     = i686
+endif
+
+PREFIX  = $(TAG)-w64-mingw32-
+
+BIN     = obj/LegacyUpdate$(ARCH).exe
 DEF     = $(patsubst %.dll,%.def,$(BIN))
 STATIC  = $(patsubst %.dll,%.a,$(BIN))
 OBJ     = $(foreach file,$(FILES),obj/$(notdir $(basename $(file)).$(TAG).o))
@@ -21,7 +30,7 @@ override DEBUG := $(or $(DEBUG),1)
 
 CFLAGS = \
 	-std=c++11 \
-	-mdll \
+	-mwindows \
 	-municode \
 	-DUNICODE \
 	-D_UNICODE \
@@ -54,7 +63,6 @@ LDFLAGS = \
 	-Wl,--output-def,$(DEF) \
 	-Wl,--out-implib,$(STATIC) \
 	-Wl,--strip-all \
-	-Wl,-eDllMain \
 	-lmsvcrt \
 	-lgcc \
 	-lpsapi \
@@ -62,21 +70,30 @@ LDFLAGS = \
 	-luser32 \
 	-lole32 \
 	-loleaut32 \
-	-ladvapi32
+	-ladvapi32 \
+	-lcomctl32 \
+	-lshell32 \
+	-lversion
 
 RCFLAGS = \
-	-F pe-x86-64 \
 	-O coff
 
-all: before-all $(BIN) after-all
+ifeq ($(ARCH),64)
+	LDFLAGS += -Wl,-eWinMain
+	RCFLAGS += -F pe-x86-64
+else
+	CFLAGS  += -march=i486
+	LDFLAGS += -Wl,-e_WinMain
+	RCFLAGS += -F pe-i386
+endif
 
-before-all:
-	mkdir -p obj
-
-after-all:
+all: before-all $(BIN)
 ifeq ($(SIGN),1)
 	../build/sign.sh $(BIN)
 endif
+
+before-all:
+	mkdir -p obj
 
 $(BIN): $(OBJ) $(RES)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
@@ -84,7 +101,16 @@ $(BIN): $(OBJ) $(RES)
 obj/%.$(TAG).o: %.c
 	$(CC) $< $(CFLAGS) -c -o $@
 
+obj/%.$(TAG).o: %.cpp
+	$(CC) $< $(CFLAGS) -c -o $@
+
 obj/%.$(TAG).o: ../shared/%.c
+	$(CC) $< $(CFLAGS) -c -o $@
+
+obj/%.$(TAG).o: ../shared/%.cpp
+	$(CC) $< $(CFLAGS) -c -o $@
+
+obj/%.$(TAG).o: ../include/nsis/%.c
 	$(CC) $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).res: %.rc
@@ -95,7 +121,6 @@ clean:
 
 test:
 	$(MAKE) DEBUG=$(DEBUG)
-	cd ../setup && makensis test.nsi
-	cd ../setup && explorer.exe test.exe
+	./obj/LegacyUpdate.exe
 
-.PHONY: all before-all after-all clean test
+.PHONY: all before-all clean test

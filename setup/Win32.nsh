@@ -27,14 +27,6 @@
 !define NetUserAdd               'netapi32::NetUserAdd(t, i, t, i, *i) i'
 !define NetLocalGroupAddMembers  'netapi32::NetLocalGroupAddMembers(t, t, i, *i, i) i'
 
-; ole32
-!define CoCreateInstance         'ole32::CoCreateInstance(g, p, i, g, *p) i'
-!define CoTaskMemFree            'ole32::CoTaskMemFree(p)'
-
-; oleaut32
-!define SysAllocString           'oleaut32::SysAllocString(t) p'
-!define SysFreeString            'oleaut32::SysFreeString(p)'
-
 ; shell32
 !define IsUserAnAdmin            'shell32::IsUserAnAdmin() i'
 !define RestartDialog            'shell32::RestartDialog(p, t, i) i'

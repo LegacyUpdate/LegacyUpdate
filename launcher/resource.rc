@@ -1,0 +1,94 @@
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+#include <windows.h>
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(65001)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,10,0,0
+ PRODUCTVERSION 1,10,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Hashbang Productions"
+            VALUE "FileDescription", "Legacy Update"
+            VALUE "FileVersion", "1.10.0.0"
+            VALUE "InternalName", "LegacyUpdate.exe"
+            VALUE "LegalCopyright", "© Hashbang Productions. All rights reserved."
+            VALUE "OriginalFilename", "LegacyUpdate.exe"
+            VALUE "ProductName", "Legacy Update"
+            VALUE "ProductVersion", "1.10.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_APPICON             ICON                    "../LegacyUpdate/icon.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// XML
+//
+
+IDR_CPLTASKS            XML                     "CplTasks.xml"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_LEGACYUPDATEOCX     "Legacy Update Control"
+    IDS_LEGACYUPDATE        "Legacy Update"
+    IDS_CHECKFORUPDATES     "Check for updates"
+    IDS_CHECKFORUPDATES_ALT "Check for software and driver updates via Legacy Update."
+    IDS_IENOTINSTALLED      "Internet Explorer is not installed. Use Optional Features in Control Panel to install it before using Legacy Update."
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Manifest
+//
+
+ID_MANIFEST             RT_MANIFEST             "manifest.xml"
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////

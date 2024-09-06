@@ -127,18 +127,6 @@ Function OnRunOnceLogon
 	${If} $0 != 0
 		ShowWindow $0 ${SW_HIDE}
 	${EndIf}
-
-	; Initialise Aero Basic (Windows Vista+). Note we need to use the 64-bit dll on 64-bit Windows.
-	${If} ${AtLeastWinVista}
-		${If} ${RunningX64}
-			StrCpy $0 "64"
-			File "/ONAME=$PLUGINSDIR\LegacyUpdateNSIS64.dll" "..\nsisplugin\obj\LegacyUpdateNSIS64.dll"
-		${Else}
-			StrCpy $0 ""
-			File "/ONAME=$PLUGINSDIR\LegacyUpdateNSIS.dll" "..\nsisplugin\obj\LegacyUpdateNSIS.dll"
-		${EndIf}
-		Exec '$SYSDIR\rundll32.exe "$PLUGINSDIR\LegacyUpdateNSIS$0.dll",InitRunOnce'
-	${EndIf}
 FunctionEnd
 
 Function OnRunOnceDone

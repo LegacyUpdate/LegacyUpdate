@@ -34,9 +34,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="ProgressBarControl.html" />
-    <None Include="CplTasks.xml">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="ElevationHelper.rgs">
       <Filter>Resource Files</Filter>
     </None>
@@ -72,10 +69,19 @@
     <ClCompile Include="ElevationHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\VersionInfo.cpp">
+    <ClCompile Include="..\shared\WMI.cpp">
       <Filter>Shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\WMI.cpp">
+    <ClCompile Include="..\shared\Registry.c">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\WUErrors.c">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\VersionInfo.c">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\HResult.c">
       <Filter>Shared</Filter>
     </ClCompile>
   </ItemGroup>
@@ -123,7 +129,13 @@
       <Filter>Shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\HResult.h">
-      <Filter>Header Files</Filter>
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\WUErrors.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\wuerror.h">
+      <Filter>Shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

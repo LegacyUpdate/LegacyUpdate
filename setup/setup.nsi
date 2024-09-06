@@ -289,7 +289,7 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 
 	; Add uninstall entry
 	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayName" "${NAME}"
-	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" '"$OUTDIR\LegacyUpdate.dll",-201'
+	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" '"$OUTDIR\LegacyUpdate.exe",-100'
 	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayVersion" "${VERSION}"
 	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "Publisher" "${NAME}"
 	WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "URLInfoAbout" "${WEBSITE}"
@@ -302,15 +302,15 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 	; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
 	; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "" "${NAME}"
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.dll",-2'
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.dll",-4'
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.dll",-201'
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" "" 'rundll32.exe "$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-2'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.exe",-4'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.exe",-100'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" "" '"$OUTDIR\LegacyUpdate.exe"'
 	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder" "Attributes" 0
 	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory" "5,10"
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.dll,-202"
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.exe,-202"
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 	; Install DLL, with detection for it being in use by IE
@@ -324,6 +324,9 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 		${EndIf}
 		!insertmacro TryRename "$OUTDIR\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate32.dll"
 		!insertmacro TryFile "..\x64\Release\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
+		!insertmacro TryFile "..\launcher\obj\LegacyUpdate64.exe" "$OUTDIR\LegacyUpdate.exe"
+	${Else}
+		!insertmacro TryFile "..\launcher\obj\LegacyUpdate32.exe" "$OUTDIR\LegacyUpdate.exe"
 	${EndIf}
 	SetOverwrite on
 
@@ -337,10 +340,10 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 
 	; Create shortcut
 	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
-		"$SYSDIR\rundll32.exe" '"$OUTDIR\LegacyUpdate.dll",LaunchUpdateSite' \
-		"$OUTDIR\LegacyUpdate.dll" 0 \
+		'"$OUTDIR\LegacyUpdate.exe"' '' \
+		"$OUTDIR\LegacyUpdate.exe" 0 \
 		SW_SHOWNORMAL "" \
-		'@"$OUTDIR\LegacyUpdate.dll",-4'
+		'@"$OUTDIR\LegacyUpdate.exe",-4'
 
 	; Hide WU shortcuts
 	; TODO: How can we consistently find the shortcuts for non-English installs?
@@ -420,7 +423,7 @@ Section -Uninstall
 
 	; Delete Control Panel entry
 	DeleteRegKey HKLM "${REGPATH_CPLNAMESPACE}"
-	DeleteRegKey HKCR "${REGPATH_CPLCLSID}"
+	DeleteRegKey HKCR "${REGPATH_HKCR_CPLCLSID}"
 
 	; Restore shortcuts
 	${If} ${FileExists} "$OUTDIR\Backup\Windows Update.lnk"
@@ -441,6 +444,7 @@ Section -Uninstall
 
 	; Delete DLLs
 	SetOverwrite try
+	!insertmacro TryDelete "$OUTDIR\LegacyUpdate.exe"
 	!insertmacro TryDelete "$OUTDIR\LegacyUpdate.dll"
 	!insertmacro TryDelete "$OUTDIR\LegacyUpdate32.dll"
 	SetOverwrite on
@@ -887,7 +891,7 @@ Function PostInstall
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
 		${IfNot} ${IsActiveXInstall}
-			Exec '$SYSDIR\rundll32.exe "$InstallDir\LegacyUpdate.dll",LaunchUpdateSite $0'
+			Exec '"$InstallDir\LegacyUpdate.dll" launch $0'
 		${ElseIf} ${AtLeastWinVista}
 			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
 		${EndIf}

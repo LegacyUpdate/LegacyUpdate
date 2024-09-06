@@ -1,0 +1,1 @@
+EXTERN_C HINSTANCE g_hInstance;

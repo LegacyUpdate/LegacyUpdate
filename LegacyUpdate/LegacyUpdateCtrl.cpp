@@ -7,8 +7,8 @@
 #include "HResult.h"
 #include "VersionInfo.h"
 #include "ElevationHelper.h"
+#include "Registry.h"
 #include <atlbase.h>
-#include <atlcom.h>
 #include <ShellAPI.h>
 #include <ShlObj.h>
 
@@ -176,7 +176,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_SPVersionString: {
 		LPWSTR data;
 		DWORD size;
-		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", NULL, &data, &size);
+		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", 0, &data, &size);
 		if (SUCCEEDED(hr)) {
 			retval->vt = VT_BSTR;
 			retval->bstrVal = SysAllocStringLen(data, size - 1);
@@ -213,7 +213,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		if (!SUCCEEDED(hr)) {
 			LPWSTR data;
 			DWORD size;
-			hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", NULL, &data, &size);
+			hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", 0, &data, &size);
 			if (SUCCEEDED(hr)) {
 				retval->vt = VT_BSTR;
 				retval->bstrVal = SysAllocStringLen(data, size - 1);
@@ -227,7 +227,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_displayVersion: {
 		LPWSTR data;
 		DWORD size;
-		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", NULL, &data, &size);
+		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", 0, &data, &size);
 		if (SUCCEEDED(hr)) {
 			retval->vt = VT_BSTR;
 			retval->bstrVal = SysAllocStringLen(data, size - 1);
@@ -311,7 +311,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	HKEY subkey;
-	HRESULT hr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, KEY_READ, &subkey);
+	HRESULT hr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", KEY_WOW64_64KEY, KEY_READ, &subkey);
 	*retval = subkey != NULL;
 	if (subkey != NULL) {
 		RegCloseKey(subkey);
@@ -323,14 +323,14 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval
 	DoIsPermittedCheck();
 
 	DWORD noWU;
-	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", NULL, &noWU);
+	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", KEY_WOW64_64KEY, &noWU);
 	if (SUCCEEDED(hr) && noWU == 1) {
 		*retval = TRUE;
 		return S_OK;
 	}
 
 	DWORD disableWUAccess;
-	hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", NULL, &disableWUAccess);
+	hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", KEY_WOW64_64KEY, &disableWUAccess);
 	if (SUCCEEDED(hr) && disableWUAccess == 1) {
 		*retval = TRUE;
 		return S_OK;
@@ -362,13 +362,10 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 
 	// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
 	// opening the file (most likely in Notepad).
-	// Ignore C4311 and C4302, which is for typecasts. It is due to ShellExec and should be safe to bypass.
-	#pragma warning(disable: 4311 4302)
-	if ((int)ShellExecute(NULL, L"open", L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT) > 32) {
+	if ((INT_PTR)ShellExecute(NULL, L"open", L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT) > 32) {
 		return S_OK;
 	}
 	ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT);
-	#pragma warning(default: 4311 4302)
 	return S_OK;
 }
 
@@ -410,7 +407,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	DWORD useWUServer;
-	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", NULL, &useWUServer);
+	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", 0, &useWUServer);
 	*retval = SUCCEEDED(hr) && useWUServer == 1;
 	return S_OK;
 }
@@ -420,7 +417,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 
 	LPWSTR data;
 	DWORD size;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", NULL, &data, &size);
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", 0, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	return S_OK;
 }
@@ -430,7 +427,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 
 	LPWSTR data;
 	DWORD size;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", NULL, &data, &size);
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", 0, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	return S_OK;
 }

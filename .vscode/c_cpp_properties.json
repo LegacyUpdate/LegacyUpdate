@@ -1,0 +1,38 @@
+{
+    "configurations": [
+        {
+            "name": "MinGW",
+            "includePath": [
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/shared"
+            ],
+            "compilerPath": "/usr/bin/i686-w64-mingw32-g++",
+            "cStandard": "c17",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "windows-gcc-x86",
+            "compilerArgs": [
+                "-std=c++11",
+                "-mwindows",
+                "-municode",
+                "-s",
+                "-fPIE",
+                "-ffunction-sections",
+                "-fdata-sections",
+                "-fno-unwind-tables",
+                "-fno-asynchronous-unwind-tables",
+                "-fno-exceptions",
+                "-fno-rtti",
+                "-flto",
+                "-Wno-write-strings",
+                "-include stdafx.h"
+            ],
+            "defines": [
+                "UNICODE",
+                "_UNICODE",
+                "__USE_MINGW_ANSI_STDIO=0",
+                "_USRDLL"
+            ]
+        }
+    ],
+    "version": 4
+}

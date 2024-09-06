@@ -5,18 +5,13 @@
 
 typedef int (__fastcall *_ThemesOnCreateSessionWithPID)(unsigned int pid);
 
-// This is only used by setup in RunOnce mode. This is here because it needs to be executed with the
-// native architecture, and the setup process is always 32-bit. Most likely UxInit.dll uses structs
-// that don't match between 32-bit and 64-bit.
-// Function signature required by Rundll32.exe.
-EXTERN_C __declspec(dllexport)
-void __cdecl InitRunOnce(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow) {
-	// Only run if we're Vista or later
+static void StartThemes() {
+	// Only relevant to Vista or later
 	if (!IsOSVersionOrLater(6, 0)) {
 		return;
 	}
 
-	// Only run if we're SYSTEM
+	// Only relevant if we're SYSTEM
 	DWORD usernameLen = 256;
 	LPWSTR username = (LPWSTR)LocalAlloc(LPTR, usernameLen * sizeof(WCHAR));
 	GetUserName(username, &usernameLen);
@@ -48,4 +43,35 @@ void __cdecl InitRunOnce(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int 
 	}
 
 	FreeLibrary(uxInit);
+}
+
+void RunOnce() {
+	StartThemes();
+
+	// Construct path to LegacyUpdateSetup.exe
+	WCHAR setupPath[MAX_PATH];
+	GetModuleFileName(NULL, setupPath, ARRAYSIZE(setupPath));
+	wcsrchr(setupPath, L'\\')[1] = L'\0';
+	wcsncat(setupPath, L"LegacyUpdateSetup.exe", ARRAYSIZE(setupPath) - wcslen(setupPath) - 1);
+
+	// Execute and wait for completion
+	STARTUPINFOW startupInfo = {0};
+	startupInfo.cb = sizeof(startupInfo);
+
+	PROCESS_INFORMATION processInfo = {0};
+	if (!CreateProcess(setupPath, L"/runonce", NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {
+		return;
+	}
+
+	CloseHandle(processInfo.hThread);
+
+	// Wait for it to finish, ensuring we still pump WM_PAINT messages in the meantime
+	while (WaitForSingleObject(processInfo.hProcess, 100) == WAIT_TIMEOUT) {
+		MSG msg;
+		while (PeekMessage(&msg, NULL, WM_PAINT, WM_PAINT, PM_REMOVE)) {
+			DispatchMessage(&msg);
+		}
+	}
+
+	CloseHandle(processInfo.hProcess);
 }
