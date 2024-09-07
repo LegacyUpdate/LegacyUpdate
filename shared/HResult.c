@@ -1,8 +1,9 @@
 #include "stdafx.h"
-#include <windows.h>
+#include "HResult.h"
 #include "WUErrors.h"
+#include <windows.h>
 
-LPWSTR GetMessageForHresult(HRESULT hr) {
+STDAPI_(LPWSTR) GetMessageForHresult(HRESULT hr) {
 	LPWSTR message;
 	for (int i = 0; WUErrorMessages[i].hr != 0; i++) {
 		if (WUErrorMessages[i].hr == hr) {

@@ -1,8 +1,14 @@
 ; LegacyUpdate.def : Declares the module parameters.
 
 EXPORTS
-	DllCanUnloadNow     PRIVATE
-	DllGetClassObject   PRIVATE
-	DllRegisterServer   PRIVATE
-	DllUnregisterServer PRIVATE
-	LaunchUpdateSite    PRIVATE
+	; Registration
+	DllCanUnloadNow      PRIVATE
+	DllGetClassObject    PRIVATE
+	DllRegisterServer    PRIVATE
+	DllUnregisterServer  PRIVATE
+
+	; Rundll32
+	LaunchUpdateSite     PRIVATE
+
+	; Internal use
+	GetMessageForHresult

@@ -1,13 +1,12 @@
-FILES   = \
+FILES    = \
 	$(wildcard *.c) \
 	../shared/GetPidForName.c \
-	../shared/HResult.c \
 	../shared/Registry.c \
-	../shared/WUErrors.c \
 	../shared/VersionInfo.c
-RCFILES = resource.rc
+RCFILES  = resource.rc
+DEFFILES = ../LegacyUpdate/LegacyUpdate.def
 
-ARCH   ?= i686
+ARCH   ?= 32
 
 ifeq ($(ARCH),64)
 TAG     = x86_64
@@ -22,9 +21,11 @@ DEF     = $(patsubst %.dll,%.def,$(BIN))
 STATIC  = $(patsubst %.dll,%.a,$(BIN))
 OBJ     = $(foreach file,$(FILES),obj/$(notdir $(basename $(file)).$(TAG).o))
 RES     = $(foreach file,$(RCFILES),obj/$(notdir $(basename $(file)).$(TAG).res))
+DEF     = $(foreach file,$(DEFFILES),obj/lib$(notdir $(basename $(file)).$(TAG).a))
 
-CC = $(PREFIX)g++
-RC = $(PREFIX)windres
+CC      = $(PREFIX)g++
+RC      = $(PREFIX)windres
+DLLTOOL = $(PREFIX)dlltool
 
 override DEBUG := $(or $(DEBUG),1)
 
@@ -63,6 +64,7 @@ LDFLAGS = \
 	-Wl,--output-def,$(DEF) \
 	-Wl,--out-implib,$(STATIC) \
 	-Wl,--strip-all \
+	-Lobj \
 	-lmsvcrt \
 	-lgcc \
 	-lpsapi \
@@ -73,7 +75,8 @@ LDFLAGS = \
 	-ladvapi32 \
 	-lcomctl32 \
 	-lshell32 \
-	-lversion
+	-lversion \
+	-lLegacyUpdate.$(TAG)
 
 RCFLAGS = \
 	-O coff
@@ -87,7 +90,7 @@ else
 	RCFLAGS += -F pe-i386
 endif
 
-all: before-all $(BIN)
+all: before-all $(DEF) $(BIN)
 ifeq ($(SIGN),1)
 	../build/sign.sh $(BIN)
 endif
@@ -115,6 +118,9 @@ obj/%.$(TAG).o: ../include/nsis/%.c
 
 obj/%.$(TAG).res: %.rc
 	$(RC) $< $(RCFLAGS) -o $@
+
+obj/lib%.$(TAG).a: ../LegacyUpdate/%.def
+	$(DLLTOOL) -v -d $< -l $@ -D $(notdir $(basename $<).dll)
 
 clean:
 	rm -rf obj
