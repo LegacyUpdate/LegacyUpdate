@@ -187,7 +187,14 @@ FunctionEnd
 
 !macro EnsureAdminRights
 	${IfNot} ${AtLeastWin2000}
-		MessageBox MB_USERICON "Legacy Update requires at least Windows 2000." /SD IDOK
+		MessageBox MB_USERICON|MB_OKCANCEL \
+			"Legacy Update supports Windows 2000 and later.$\r$\n\
+			$\r$\n\
+			You might be interested in Windows Update Restored instead.$\r$\n\
+			Would you like to go to http://windowsupdaterestored.com/ now?" \
+			/SD IDCANCEL \
+			IDCANCEL +2
+		ExecShell "" "http://windowsupdaterestored.com/"
 		SetErrorLevel ${ERROR_OLD_WIN_VERSION}
 		Quit
 	${EndIf}
