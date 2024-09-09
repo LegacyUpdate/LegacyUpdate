@@ -551,9 +551,6 @@ FunctionEnd
 	!insertmacro EnsureAdminRights
 	SetDetailsPrint listonly
 
-!if ${SIGN} != 1
-	Debug::Watcher
-!endif
 !macroend
 
 Function .onInit
