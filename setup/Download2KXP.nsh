@@ -56,7 +56,9 @@ Function -PatchHandler
 			Abort
 		${EndIf}
 	${EndIf}
-	!insertmacro Download "$Patch.Title" "$0" "$Patch.File" 1
+	ReadINIStr $1 $PLUGINSDIR\Patches.ini "$Patch.Key" Prefix
+	ReadINIStr $1 $PLUGINSDIR\Patches.ini Prefix $1
+	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" 1
 FunctionEnd
 
 !macro PatchHandler kbid title params

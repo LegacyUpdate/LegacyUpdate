@@ -38,12 +38,12 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
-!macro MSUHandler kbid title packagename
+!macro MSUHandler kbid title
 	Function Needs${kbid}
 		Call GetComponentArch
 		Pop $0
 		ClearErrors
-		EnumRegKey $1 HKLM "${REGPATH_CBS_PACKAGEINDEX}\${packagename}~31bf3856ad364e35~$0~~0.0.0.0" 0
+		EnumRegKey $1 HKLM "${REGPATH_CBS_PACKAGEINDEX}\Package_1_for_${kbid}~31bf3856ad364e35~$0~~0.0.0.0" 0
 		${If} ${Errors}
 			Push 1
 		${Else}
@@ -78,28 +78,28 @@ FunctionEnd
 !insertmacro SPHandler  "Win7SP1"   "Windows 7 Service Pack 1"     "Win7"     0
 
 ; Windows Vista post-SP2 update combination that fixes WU indefinitely checking for updates
-!insertmacro MSUHandler "KB3205638" "Security Update for Windows Vista"                      "Package_for_KB3205638"
-!insertmacro MSUHandler "KB4012583" "Security Update for Windows Vista"                      "Package_for_KB4012583"
-!insertmacro MSUHandler "KB4015195" "Security Update for Windows Vista"                      "Package_for_KB4015195"
-!insertmacro MSUHandler "KB4015380" "Security Update for Windows Vista"                      "Package_for_KB4015380"
+!insertmacro MSUHandler "KB3205638" "Security Update for Windows Vista"
+!insertmacro MSUHandler "KB4012583" "Security Update for Windows Vista"
+!insertmacro MSUHandler "KB4015195" "Security Update for Windows Vista"
+!insertmacro MSUHandler "KB4015380" "Security Update for Windows Vista"
 
-; Vista IE9
-!insertmacro MSUHandler "KB971512"  "Update for Windows Vista"                               "Package_for_KB971512"
-!insertmacro MSUHandler "KB2117917" "Platform Update Supplement for Windows Vista"           "Package_for_KB2117917"
+; Internet Explorer 9 for Windows Vista
+!insertmacro MSUHandler "KB971512"  "Update for Windows Vista"
+!insertmacro MSUHandler "KB2117917" "Platform Update Supplement for Windows Vista"
 
 !insertmacro NeedsFileVersionHandler "IE9" "mshtml.dll" "9.0.8112.16421"
 !insertmacro PatchHandler "IE9" "Internet Explorer 9 for Windows Vista" "/passive /norestart /update-no /closeprograms"
 
 ; Windows Vista Servicing Stack Update
-!insertmacro MSUHandler "KB4493730" "2019-04 Servicing Stack Update for Windows Server 2008" "Package_1_for_KB4493730"
+!insertmacro MSUHandler "KB4493730" "2019-04 Servicing Stack Update for Windows Server 2008"
 
 ; Windows 7 Servicing Stack Update
-!insertmacro MSUHandler "KB3138612" "2016-03 Servicing Stack Update for Windows 7"           "Package_for_KB3138612"
-!insertmacro MSUHandler "KB4474419" "SHA-2 Code Signing Support Update for Windows 7"        "Package_for_KB4474419"
-!insertmacro MSUHandler "KB4490628" "2019-03 Servicing Stack Update for Windows 7"           "Package_for_KB4490628"
+!insertmacro MSUHandler "KB3138612" "2016-03 Servicing Stack Update for Windows 7"
+!insertmacro MSUHandler "KB4474419" "SHA-2 Code Signing Support Update for Windows 7"
+!insertmacro MSUHandler "KB4490628" "2019-03 Servicing Stack Update for Windows 7"
 
 ; Windows Home Server 2011 Update Rollup 4
-!insertmacro MSUHandler "KB2757011" "Windows Home Server 2011 Update Rollup 4"               "Package_for_KB2757011"
+!insertmacro MSUHandler "KB2757011" "Windows Home Server 2011 Update Rollup 4"
 
 Function NeedsVistaPostSP2
 	Call NeedsKB3205638
