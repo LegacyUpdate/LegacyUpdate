@@ -14,7 +14,7 @@ void __cdecl IsProcessRunning(HWND hwndParent, int string_size, TCHAR *variables
 
 	int pid = GetPidForName(process);
 	WCHAR buffer[SHRT_MAX];
-	_itow_s(pid, buffer, 10);
+	wsprintf(buffer, L"%d", pid);
 	pushstring(buffer);
 
 	free(process);

@@ -3,7 +3,7 @@
 #include "resource.h"
 
 #undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600
+#define _WIN32_WINNT _WIN32_WINNT_VISTA
 #include <commctrl.h>
 
 typedef HRESULT (WINAPI *_TaskDialogIndirect)(const TASKDIALOGCONFIG *pTaskConfig, int *pnButton, int *pnRadioButton, BOOL *pfVerificationFlagChecked);
@@ -11,11 +11,7 @@ typedef HRESULT (WINAPI *_TaskDialogIndirect)(const TASKDIALOGCONFIG *pTaskConfi
 static BOOL _loadedTaskDialog = FALSE;
 static _TaskDialogIndirect $TaskDialogIndirect;
 
-int MsgBox(HWND hWnd, HINSTANCE hInstance, LPCTSTR instruction, LPCTSTR body, UINT type) {
-	if (hInstance == NULL) {
-		hInstance = g_hInstance;
-	}
-
+int MsgBox(HWND hWnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 	if (!_loadedTaskDialog) {
 		_loadedTaskDialog = TRUE;
 		$TaskDialogIndirect = (_TaskDialogIndirect)GetProcAddress(LoadLibrary(L"comctl32.dll"), "TaskDialogIndirect");
@@ -32,7 +28,7 @@ int MsgBox(HWND hWnd, HINSTANCE hInstance, LPCTSTR instruction, LPCTSTR body, UI
 		MSGBOXPARAMS params = { 0 };
 		params.cbSize = sizeof(MSGBOXPARAMS);
 		params.hwndOwner = hWnd;
-		params.hInstance = hInstance;
+		params.hInstance = g_hInstance;
 		params.lpszText = finalBody;
 		params.lpszCaption = L"Legacy Update";
 		params.dwStyle = type | MB_USERICON;
@@ -49,17 +45,17 @@ int MsgBox(HWND hWnd, HINSTANCE hInstance, LPCTSTR instruction, LPCTSTR body, UI
 	TASKDIALOG_COMMON_BUTTON_FLAGS buttons;
 
 	switch (type & 0x0000000F) {
-		case MB_OK:
-			buttons = TDCBF_OK_BUTTON;
-			break;
-		case MB_OKCANCEL:
-			buttons = TDCBF_OK_BUTTON | TDCBF_CANCEL_BUTTON;
-			break;
-		case MB_YESNO:
-			buttons = TDCBF_YES_BUTTON | TDCBF_NO_BUTTON;
-			break;
-		default:
-			break;
+	case MB_OK:
+		buttons = TDCBF_OK_BUTTON;
+		break;
+	case MB_OKCANCEL:
+		buttons = TDCBF_OK_BUTTON | TDCBF_CANCEL_BUTTON;
+		break;
+	case MB_YESNO:
+		buttons = TDCBF_YES_BUTTON | TDCBF_NO_BUTTON;
+		break;
+	default:
+		break;
 	}
 
 	TASKDIALOGCONFIG config = { 0 };

@@ -17,11 +17,9 @@ endif
 PREFIX  = $(TAG)-w64-mingw32-
 
 BIN     = obj/LegacyUpdate$(ARCH).exe
-DEF     = $(patsubst %.dll,%.def,$(BIN))
-STATIC  = $(patsubst %.dll,%.a,$(BIN))
 OBJ     = $(foreach file,$(FILES),obj/$(notdir $(basename $(file)).$(TAG).o))
 RES     = $(foreach file,$(RCFILES),obj/$(notdir $(basename $(file)).$(TAG).res))
-DEF     = $(foreach file,$(DEFFILES),obj/lib$(notdir $(basename $(file)).$(TAG).a))
+DEFDLL  = $(foreach file,$(DEFFILES),obj/lib$(notdir $(basename $(file)).$(TAG).a))
 
 CC      = $(PREFIX)g++
 RC      = $(PREFIX)windres
@@ -30,14 +28,12 @@ DLLTOOL = $(PREFIX)dlltool
 override DEBUG := $(or $(DEBUG),1)
 
 CFLAGS = \
-	-std=c++11 \
 	-mwindows \
 	-municode \
 	-DUNICODE \
 	-D_UNICODE \
 	$(if $(filter 1,$(DEBUG)),-D_DEBUG -g,-DNDEBUG -Os) \
 	-D__USE_MINGW_ANSI_STDIO=0 \
-	-D_USRDLL \
 	-s \
 	-fPIE \
 	-ffunction-sections \
@@ -45,12 +41,16 @@ CFLAGS = \
 	-fno-unwind-tables \
 	-fno-asynchronous-unwind-tables \
 	-fno-exceptions \
-	-fno-rtti \
 	-flto \
 	-Wno-write-strings \
 	-I../include \
 	-I../shared \
 	-include stdafx.h
+
+CXXFLAGS = \
+	$(CFLAGS) \
+	-std=c++11 \
+	-fno-rtti
 
 LDFLAGS = \
 	-nodefaultlibs \
@@ -61,8 +61,6 @@ LDFLAGS = \
 	-Wl,--nxcompat \
 	-Wl,--enable-auto-image-base \
 	-Wl,--enable-stdcall-fixup \
-	-Wl,--output-def,$(DEF) \
-	-Wl,--out-implib,$(STATIC) \
 	-Wl,--strip-all \
 	-Lobj \
 	-lmsvcrt \
@@ -82,15 +80,15 @@ RCFLAGS = \
 	-O coff
 
 ifeq ($(ARCH),64)
-	LDFLAGS += -Wl,-eWinMain
+	LDFLAGS += -Wl,-ewWinMain
 	RCFLAGS += -F pe-x86-64
 else
 	CFLAGS  += -march=i486
-	LDFLAGS += -Wl,-e_WinMain
+	LDFLAGS += -Wl,-e_wWinMain
 	RCFLAGS += -F pe-i386
 endif
 
-all: before-all $(DEF) $(BIN)
+all: before-all $(DEFDLL) $(BIN)
 ifeq ($(SIGN),1)
 	../build/sign.sh $(BIN)
 endif
@@ -102,25 +100,16 @@ $(BIN): $(OBJ) $(RES)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
 
 obj/%.$(TAG).o: %.c
-	$(CC) $< $(CFLAGS) -c -o $@
-
-obj/%.$(TAG).o: %.cpp
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.c
-	$(CC) $< $(CFLAGS) -c -o $@
-
-obj/%.$(TAG).o: ../shared/%.cpp
-	$(CC) $< $(CFLAGS) -c -o $@
-
-obj/%.$(TAG).o: ../include/nsis/%.c
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).res: %.rc
 	$(RC) $< $(RCFLAGS) -o $@
 
 obj/lib%.$(TAG).a: ../LegacyUpdate/%.def
-	$(DLLTOOL) -v -d $< -l $@ -D $(notdir $(basename $<).dll)
+	$(DLLTOOL) -d $< -l $@ -D $(notdir $(basename $<).dll)
 
 clean:
 	rm -rf obj

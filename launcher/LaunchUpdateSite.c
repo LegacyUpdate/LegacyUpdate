@@ -7,7 +7,9 @@
 #include <wchar.h>
 #include "HResult.h"
 #include "Registry.h"
+#include "User.h"
 #include "VersionInfo.h"
+#include "MsgBox.h"
 
 const LPTSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
 const LPTSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
@@ -35,7 +37,7 @@ end:
 	return IsOSVersionOrLater(6, 0);
 }
 
-void LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow) {
+void LaunchUpdateSite(HWND hwnd, int nCmdShow) {
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	IWebBrowser2 *browser;
 	VARIANT url;
@@ -54,12 +56,7 @@ void LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCm
 		DWORD filenameSize;
 		GetOwnFileName(&filename, &filenameSize);
 
-		// lpszcmdline to LPWSTR
-		size_t length = strlen(lpszCmdLine) + 1;
-		LPWSTR cmdline = (LPWSTR)malloc(length * sizeof(WCHAR));
-		wsprintf(cmdline, L"%hs", lpszCmdLine);
-
-		INT_PTR execResult = (INT_PTR)ShellExecute(NULL, L"runas", filename, cmdline, NULL, nCmdShow);
+		INT_PTR execResult = (INT_PTR)ShellExecute(NULL, L"runas", filename, GetCommandLineW(), NULL, nCmdShow);
 
 		// Access denied happens when the user clicks No/Cancel.
 		if (execResult <= 32 && execResult != SE_ERR_ACCESSDENIED) {
@@ -72,7 +69,7 @@ void LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCm
 	// default browser), and avoids hardcoding a path to iexplore.exe. Also conveniently allows testing
 	// on Windows 11 (iexplore.exe redirects to Edge, but COM still works). Same strategy as used by
 	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
-	hr = CoCreateInstance(CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, IID_IWebBrowser2, (void **)&browser);
+	hr = CoCreateInstance(&CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, &IID_IWebBrowser2, (void **)&browser);
 	if (hr == REGDB_E_CLASSNOTREG) {
 		// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
 		OSVERSIONINFOEX *versionInfo = GetVersionInfo();
@@ -103,10 +100,14 @@ void LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCm
 	siteURL = CanUseSSLConnection() ? UpdateSiteURLHttps : UpdateSiteURLHttp;
 
 	// Is this a first run launch? Append first run flag if so.
-	if (strcmp(lpszCmdLine, "firstrun") == 0) {
-		WCHAR newSiteURL[256];
-		wsprintf(newSiteURL, L"%s%s", siteURL, UpdateSiteFirstRunFlag);
-		siteURL = newSiteURL;
+	{
+		int argc;
+		LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+		if (argc > 2 && wcscmp(argv[2], L"/firstrun") == 0) {
+			WCHAR newSiteURL[256];
+			wsprintf(siteURL, L"%s%s", siteURL, UpdateSiteFirstRunFlag);
+			siteURL = newSiteURL;
+		}
 	}
 
 	VariantInit(&url);
@@ -175,9 +176,11 @@ void LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCm
 
 end:
 	if (!SUCCEEDED(hr)) {
-		MessageBox(NULL, GetMessageForHresult(hr), L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
+		MsgBox(NULL, NULL, GetMessageForHresult(hr), MB_ICONEXCLAMATION);
 	}
 
 	browser = NULL;
 	CoUninitialize();
+
+	exit(0);
 }

@@ -13,7 +13,7 @@ void __cdecl EnableMicrosoftUpdate(HWND hwndParent, int string_size, TCHAR *vari
 	IUpdateServiceManager2 *serviceManager;
 	IUpdateServiceRegistration *registration;
 
-	HRESULT hr = CoCreateInstance(CLSID_UpdateServiceManager, NULL, CLSCTX_INPROC_SERVER, IID_IUpdateServiceManager2, (void **)&serviceManager);
+	HRESULT hr = CoCreateInstance(&CLSID_UpdateServiceManager, NULL, CLSCTX_INPROC_SERVER, &IID_IUpdateServiceManager2, (void **)&serviceManager);
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}

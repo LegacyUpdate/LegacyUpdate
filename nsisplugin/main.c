@@ -1,10 +1,20 @@
 #include <windows.h>
 #include <nsis/pluginapi.h>
 
-HMODULE g_hInstance;
+HINSTANCE g_hInstance;
 HWND g_hwndParent;
 
-EXTERN_C BOOL WINAPI DllMain(HMODULE hInstance, UINT iReason, LPVOID lpReserved) {
-	g_hInstance = hInstance;
+EXTERN_C __declspec(dllexport)
+BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
+	switch (dwReason) {
+	case DLL_PROCESS_ATTACH:
+		g_hInstance = hInstance;
+		break;
+
+	case DLL_PROCESS_DETACH:
+		g_hInstance = NULL;
+		break;
+	}
+
 	return TRUE;
 }

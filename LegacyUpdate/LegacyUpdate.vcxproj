@@ -167,7 +167,7 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>cmd /c start "" taskkill /im iexplore.exe</Command>
+      <Command>cmd /c start /min "" taskkill /im iexplore.exe</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">
@@ -206,7 +206,7 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>cmd /c start "" taskkill /im iexplore.exe</Command>
+      <Command>cmd /c start /min "" taskkill /im iexplore.exe</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">
@@ -247,7 +247,7 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>cmd /c start "" taskkill /im iexplore.exe</Command>
+      <Command>cmd /c start /min "" taskkill /im iexplore.exe</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">
@@ -286,7 +286,7 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>cmd /c start "" taskkill /im iexplore.exe</Command>
+      <Command>cmd /c start /min "" taskkill /im iexplore.exe</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -329,7 +329,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PreBuildEvent>
-      <Command>cmd /c start "" taskkill /im iexplore.exe</Command>
+      <Command>cmd /c start /min "" taskkill /im iexplore.exe</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

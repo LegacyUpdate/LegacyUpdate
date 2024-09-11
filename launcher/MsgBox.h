@@ -2,4 +2,4 @@
 
 #include <windows.h>
 
-int MsgBox(HWND hWnd, HINSTANCE hInstance, LPCTSTR instruction, LPCTSTR body, UINT type);
+int MsgBox(HWND hWnd, LPCTSTR instruction, LPCTSTR body, UINT type);

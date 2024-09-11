@@ -1,7 +1,5 @@
 // Based on https://nsis.sourceforge.io/TaskbarProgress_plug-in - zlib licensed
 // Cleaned up and refactored into C by Legacy Update
-#define CINTERFACE
-#define COBJMACROS
 #include <windows.h>
 #include <nsis/pluginapi.h>
 #include <commctrl.h>
@@ -9,14 +7,14 @@
 #include <shobjidl.h>
 #include "main.h"
 
-static const GUID our_CLSID_ITaskbarList = { 0x56fdf344, 0xfd6d, 0x11d0, { 0x95, 0x8a, 0x00, 0x60, 0x97, 0xc9, 0xa0, 0x90 } };
-static const GUID our_IID_ITaskbarList3  = { 0xea1afb91, 0x9e28, 0x4b86, { 0x90, 0xe9, 0x9e, 0x9f, 0x8a, 0x5e, 0xef, 0xaf } };
+// DEFINE_GUID(our_CLSID_ITaskbarList, 0x56fdf344, 0xfd6d, 0x11d0, 0x95, 0x8a, 0x00, 0x60, 0x97, 0xc9, 0xa0, 0x90);
+// DEFINE_GUID(our_IID_ITaskbarList3,  0xea1afb91, 0x9e28, 0x4b86, 0x90, 0xe9, 0x9e, 0x9f, 0x8a, 0x5e, 0xef, 0xaf);
 
-ITaskbarList3 *g_taskbarList;
-UINT g_totalRange;
-WNDPROC g_origWndProc;
+static ITaskbarList3 *g_taskbarList;
+static UINT g_totalRange;
+static WNDPROC g_origWndProc;
 
-LRESULT ProgressBarWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK ProgressBarWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	if (g_origWndProc == NULL) {
 		return 0;
 	}
@@ -52,7 +50,7 @@ LRESULT ProgressBarWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return CallWindowProc(g_origWndProc, hwnd, uMsg, wParam, lParam);
 }
 
-UINT_PTR NSISPluginCallback(enum NSPIM event) {
+static UINT_PTR NSISPluginCallback(enum NSPIM event) {
 	// Does nothing, but keeping a callback registered prevents NSIS from unloading the plugin
 	return 0;
 }
@@ -78,7 +76,7 @@ void __cdecl InitTaskbarProgress(HWND hwndParent, int string_size, TCHAR *variab
 		goto fail;
 	}
 
-	hr = CoCreateInstance(our_CLSID_ITaskbarList, NULL, CLSCTX_INPROC_SERVER, our_IID_ITaskbarList3, (void**)&g_taskbarList);
+	hr = CoCreateInstance(&CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, &IID_ITaskbarList3, (void**)&g_taskbarList);
 	if (!SUCCEEDED(hr)) {
 		goto fail;
 	}

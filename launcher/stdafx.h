@@ -4,8 +4,8 @@
 #define STRICT
 #endif
 
-#define WINVER       0x0500
-#define _WIN32_WINNT 0x0500
+#define WINVER       _WIN32_WINNT_WIN2K
+#define _WIN32_WINNT _WIN32_WINNT_WIN2K
 
 // Enable comctl 6.0 (visual styles)
 #define ISOLATION_AWARE_ENABLED 1

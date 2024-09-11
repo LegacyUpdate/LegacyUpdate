@@ -21,7 +21,6 @@ RC = $(PREFIX)windres
 override DEBUG := $(or $(DEBUG),1)
 
 CFLAGS = \
-	-std=c++11 \
 	-march=i486 \
 	-mdll \
 	-municode \
@@ -37,12 +36,16 @@ CFLAGS = \
 	-fno-unwind-tables \
 	-fno-asynchronous-unwind-tables \
 	-fno-exceptions \
-	-fno-rtti \
 	-flto \
 	-Wno-write-strings \
 	-I../include \
 	-I../shared \
 	-include stdafx.h
+
+CXXFLAGS = \
+	$(CFLAGS) \
+	-std=c++11 \
+	-fno-rtti
 
 LDFLAGS = \
 	-nodefaultlibs \
@@ -83,19 +86,20 @@ $(BIN): $(OBJ) $(RES)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
 
 obj/%.$(TAG).o: %.c
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: %.cpp
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
+# TODO: Change to C, WUErrors.c requires C++ for now
 obj/%.$(TAG).o: ../shared/%.c
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.cpp
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../include/nsis/%.c
-	$(CC) $< $(CFLAGS) -c -o $@
+	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).res: %.rc
 	$(RC) $< $(RCFLAGS) -o $@

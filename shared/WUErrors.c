@@ -3,7 +3,7 @@
 #include <wuerror.h>
 
 // TODO: There needs to be a better way to do this other than hardcoding all these English strings...
-HResultMessage WUErrorMessages[] = {
+struct HResultMessage WUErrorMessages[] = {
 	{ WU_S_SERVICE_STOP, L"Windows Update Agent was stopped successfully." },
 	{ WU_S_SELFUPDATE, L"Windows Update Agent updated itself." },
 	{ WU_S_UPDATE_ERROR, L"Operation completed successfully but there were errors applying the updates." },

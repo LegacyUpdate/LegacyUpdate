@@ -17,13 +17,13 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpRes
 #endif
 
 	switch (dwReason) {
-		case DLL_PROCESS_ATTACH:
-			g_hInstance = hInstance;
-			break;
+	case DLL_PROCESS_ATTACH:
+		g_hInstance = hInstance;
+		break;
 
-		case DLL_PROCESS_DETACH:
-			g_hInstance = NULL;
-			break;
+	case DLL_PROCESS_DETACH:
+		g_hInstance = NULL;
+		break;
 	}
 
 	return _AtlModule.DllMain(dwReason, lpReserved);

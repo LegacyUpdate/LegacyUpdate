@@ -7,14 +7,17 @@
 
 HINSTANCE g_hInstance;
 
-extern void LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow);
+extern void LaunchUpdateSite(HWND hwnd, int nCmdShow);
 extern void RunOnce();
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+EXTERN_C __declspec(dllexport)
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 	g_hInstance = hInstance;
 
+	MsgBox(NULL, L"LegacyUpdate.exe", L"Legacy Update", MB_OK | MB_ICONINFORMATION);
+
 	int argc;
-	LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	LPWSTR *argv = CommandLineToArgvW(pCmdLine, &argc);
 
 	LPWSTR action = L"launch";
 	if (argc > 1) {
@@ -22,11 +25,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	if (wcscmp(action, L"launch") == 0) {
-		LaunchUpdateSite(NULL, hInstance, lpCmdLine, nCmdShow);
+		LaunchUpdateSite(NULL, nCmdShow);
 	} else if (wcscmp(action, L"/runonce") == 0) {
 		RunOnce();
 	} else {
-		MsgBox(NULL, hInstance, L"Unknown LegacyUpdate.exe usage", NULL, MB_OK);
+		MsgBox(NULL, L"Unknown LegacyUpdate.exe usage", NULL, MB_OK);
 		return 1;
 	}
 
