@@ -37,7 +37,7 @@ end:
 	return IsOSVersionOrLater(6, 0);
 }
 
-void LaunchUpdateSite(HWND hwnd, int nCmdShow) {
+void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	IWebBrowser2 *browser;
 	VARIANT url;
@@ -87,7 +87,7 @@ void LaunchUpdateSite(HWND hwnd, int nCmdShow) {
 			// Tell the user what they need to do, then open the Optional Features dialog.
 			WCHAR message[4096];
 			LoadString(g_hInstance, IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
-			MessageBox(hwnd, message, L"Legacy Update", MB_OK | MB_ICONEXCLAMATION);
+			MsgBox(NULL, message, NULL, MB_OK | MB_ICONEXCLAMATION);
 			ShellExecute(NULL, L"open", L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT);
 		}
 		hr = S_OK;
@@ -100,14 +100,10 @@ void LaunchUpdateSite(HWND hwnd, int nCmdShow) {
 	siteURL = CanUseSSLConnection() ? UpdateSiteURLHttps : UpdateSiteURLHttp;
 
 	// Is this a first run launch? Append first run flag if so.
-	{
-		int argc;
-		LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-		if (argc > 2 && wcscmp(argv[2], L"/firstrun") == 0) {
-			WCHAR newSiteURL[256];
-			wsprintf(siteURL, L"%s%s", siteURL, UpdateSiteFirstRunFlag);
-			siteURL = newSiteURL;
-		}
+	if (argc > 0 && lstrcmpi(argv[0], L"/firstrun") == 0) {
+		WCHAR newSiteURL[256];
+		wsprintf(newSiteURL, L"%s%s", siteURL, UpdateSiteFirstRunFlag);
+		siteURL = newSiteURL;
 	}
 
 	VariantInit(&url);
@@ -176,11 +172,10 @@ void LaunchUpdateSite(HWND hwnd, int nCmdShow) {
 
 end:
 	if (!SUCCEEDED(hr)) {
-		MsgBox(NULL, NULL, GetMessageForHresult(hr), MB_ICONEXCLAMATION);
+		MsgBox(NULL, NULL, L"", MB_ICONEXCLAMATION);
 	}
 
 	browser = NULL;
 	CoUninitialize();
-
-	exit(0);
+	PostQuitMessage(0);
 }

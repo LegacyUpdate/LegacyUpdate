@@ -115,7 +115,7 @@ clean:
 	rm -rf obj
 
 test:
-	$(MAKE) DEBUG=$(DEBUG)
+	+$(MAKE) DEBUG=$(DEBUG)
 	./obj/LegacyUpdate.exe
 
 .PHONY: all before-all clean test

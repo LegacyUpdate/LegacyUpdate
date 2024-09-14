@@ -17,9 +17,13 @@ int MsgBox(HWND hWnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 		$TaskDialogIndirect = (_TaskDialogIndirect)GetProcAddress(LoadLibrary(L"comctl32.dll"), "TaskDialogIndirect");
 	}
 
+	// Play the sound matching the icon, because MB_USERICON doesn't play a sound
+	MessageBeep(type & 0x000000F0);
+	type = (type & ~0x000000F0) | MB_USERICON;
+
 	if (!$TaskDialogIndirect) {
-		LPCTSTR finalBody = body;
-		if (instruction) {
+		LPCTSTR finalBody = instruction;
+		if (body && lstrlen(body) > 0) {
 			size_t length = lstrlen(instruction) + lstrlen(body) + 3;
 			finalBody = (LPCTSTR)LocalAlloc(LPTR, length * sizeof(TCHAR));
 			wsprintf((LPTSTR)finalBody, L"%s\n\n%s", instruction, body);
@@ -28,10 +32,10 @@ int MsgBox(HWND hWnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 		MSGBOXPARAMS params = { 0 };
 		params.cbSize = sizeof(MSGBOXPARAMS);
 		params.hwndOwner = hWnd;
-		params.hInstance = g_hInstance;
+		params.hInstance = GetModuleHandle(NULL);
 		params.lpszText = finalBody;
 		params.lpszCaption = L"Legacy Update";
-		params.dwStyle = type | MB_USERICON;
+		params.dwStyle = type;
 		params.lpszIcon = MAKEINTRESOURCE(IDI_APPICON);
 		int result = MessageBoxIndirect(&params);
 

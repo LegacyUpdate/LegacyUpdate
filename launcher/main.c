@@ -7,31 +7,50 @@
 
 HINSTANCE g_hInstance;
 
-extern void LaunchUpdateSite(HWND hwnd, int nCmdShow);
+extern void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow);
 extern void RunOnce();
 
 EXTERN_C __declspec(dllexport)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 	g_hInstance = hInstance;
 
-	MsgBox(NULL, L"LegacyUpdate.exe", L"Legacy Update", MB_OK | MB_ICONINFORMATION);
-
 	int argc;
-	LPWSTR *argv = CommandLineToArgvW(pCmdLine, &argc);
+	LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
 	LPWSTR action = L"launch";
 	if (argc > 1) {
 		action = argv[1];
 	}
 
+	// All remaining args past the action
+	LPWSTR *flags = {0};
+	int flagsCount = 0;
+	if (argc > 2) {
+		flags = &argv[2];
+		flagsCount = argc - 2;
+	}
+
 	if (wcscmp(action, L"launch") == 0) {
-		LaunchUpdateSite(NULL, nCmdShow);
+		LaunchUpdateSite(flagsCount, flags, nCmdShow);
 	} else if (wcscmp(action, L"/runonce") == 0) {
 		RunOnce();
 	} else {
 		MsgBox(NULL, L"Unknown LegacyUpdate.exe usage", NULL, MB_OK);
-		return 1;
+		PostQuitMessage(1);
 	}
 
-	return 0;
+	MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0) == 1) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+
+		switch (msg.message) {
+		case WM_QUIT:
+		case WM_DESTROY:
+			break;
+		}
+	}
+
+	ExitProcess(msg.wParam);
+	return msg.wParam;
 }
