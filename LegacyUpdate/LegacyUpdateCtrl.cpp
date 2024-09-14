@@ -385,6 +385,34 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 		return hr;
 	}
 
+	if (IsOSVersionOrLater(10, 0)) {
+		// Windows 10 moves WU/USO logs to ETW. The ETW logs can be converted back to a plain-text .log
+		// using a cmdlet.
+		SHELLEXECUTEINFO execInfo = {0};
+		execInfo.cbSize = sizeof(execInfo);
+		execInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+		execInfo.lpFile = L"powershell.exe";
+		execInfo.lpParameters = L"-Command Get-WindowsUpdateLog";
+		execInfo.lpDirectory = windir;
+		execInfo.nShow = SW_SHOWDEFAULT;
+		if (!ShellExecuteEx(&execInfo)) {
+			return HRESULT_FROM_WIN32(GetLastError());
+		}
+
+		WaitForSingleObject(execInfo.hProcess, INFINITE);
+		CloseHandle(execInfo.hProcess);
+
+		// On success, the log is written to Desktop\WindowsUpdate.log.
+		WCHAR desktop[MAX_PATH];
+		hr = SHGetFolderPath(0, CSIDL_DESKTOP, NULL, 0, desktop);
+		if (!SUCCEEDED(hr)) {
+			TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(hr));
+			return hr;
+		}
+
+		ShellExecute(NULL, L"open", L"notepad.exe", L"WindowsUpdate.log", desktop, SW_SHOWDEFAULT);
+		return S_OK;
+	} else {
 	// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
 	// opening the file (most likely in Notepad).
 	if ((INT_PTR)ShellExecute(NULL, L"open", L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT) > 32) {
@@ -392,6 +420,7 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	}
 	ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT);
 	return S_OK;
+	}
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
