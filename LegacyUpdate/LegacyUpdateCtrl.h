@@ -6,6 +6,7 @@
 
 #include <atlctl.h>
 #include <MsHTML.h>
+#include <wuapi.h>
 #include "resource.h"
 #include "LegacyUpdate_i.h"
 
@@ -102,6 +103,7 @@ public:
 	STDMETHODIMP GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
 	STDMETHODIMP RequestElevation();
 	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
+	STDMETHODIMP RunWizard(IUpdateInstaller *installer, BSTR dialogTitle, IInstallationResult **retval);
 	STDMETHODIMP GetUserType(UserType *retval);
 	STDMETHODIMP get_IsRebootRequired(VARIANT_BOOL *retval);
 	STDMETHODIMP get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);

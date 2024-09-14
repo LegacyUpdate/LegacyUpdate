@@ -303,6 +303,16 @@ end:
 	return hr;
 }
 
+STDMETHODIMP CLegacyUpdateCtrl::RunWizard(IUpdateInstaller *installer, BSTR dialogTitle, IInstallationResult **retval) {
+	DoIsPermittedCheck();
+
+	// Handle preparing to run the wizard. When running through the elevation helper,
+	// put_ParentWindow() doesn't work. Set the parent hwnd from here and run the wizard.
+	installer->put_ParentHwnd(GetIEWindowHWND());
+
+	return installer->RunWizard(dialogTitle, retval);
+}
+
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 	DoIsPermittedCheck();
 
@@ -430,13 +440,13 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 		ShellExecute(NULL, L"open", L"notepad.exe", L"WindowsUpdate.log", desktop, SW_SHOWDEFAULT);
 		return S_OK;
 	} else {
-	// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
-	// opening the file (most likely in Notepad).
-	if ((INT_PTR)ShellExecute(NULL, L"open", L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT) > 32) {
+		// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
+		// opening the file (most likely in Notepad).
+		if ((INT_PTR)ShellExecute(NULL, L"open", L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT) > 32) {
+			return S_OK;
+		}
+		ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT);
 		return S_OK;
-	}
-	ShellExecute(NULL, L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT);
-	return S_OK;
 	}
 }
 
