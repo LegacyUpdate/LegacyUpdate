@@ -1,17 +1,13 @@
 export SIGN ?= 0
 
-SUBPROJECTS = LegacyUpdate launcher nsisplugin setup
-
 all:
-	set -e; \
-	for i in $(SUBPROJECTS); do \
-		$(MAKE) -j$(shell nproc) -C $$i; \
-	done
+	+$(MAKE) -C LegacyUpdate
+	+$(MAKE) -C launcher
+	+$(MAKE) -C setup
 
 clean:
-	set -e; \
-	for i in $(SUBPROJECTS); do \
-		$(MAKE) -C $$i clean; \
-	done
+	+$(MAKE) -C LegacyUpdate clean
+	+$(MAKE) -C launcher clean
+	+$(MAKE) -C setup clean
 
 .PHONY: all clean

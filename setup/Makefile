@@ -1,19 +1,22 @@
 SIGN ?= 0
 
-all: setup activex
+all:
+	+$(MAKE) -C ../nsisplugin
+	+$(MAKE) setup activex
 
 setup:
 	makensis -DSIGN=$(SIGN) setup.nsi
 
 activex:
+ifeq ($(SIGN),1)
 	cp LegacyUpdate-*.exe codebase/setup.exe
 	cd codebase && makecab.exe /f lucontrl.ddf
-ifeq ($(SIGN),1)
 	../build/sign.sh codebase/lucontrl.cab
-endif
 	rm codebase/setup.exe codebase/setup.rpt
+endif
 
 clean:
-	@# Not needed
+	+$(MAKE) -C ../nsisplugin clean
+	rm -f LegacyUpdate-*.exe codebase/{lucontrl.cab,setup.exe,setup.rpt}
 
-.PHONY: all setup activex
+.PHONY: all nsisplugin setup activex clean
