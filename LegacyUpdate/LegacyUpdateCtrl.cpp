@@ -345,16 +345,18 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
-	DWORD noWU;
-	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", KEY_WOW64_64KEY, &noWU);
-	if (SUCCEEDED(hr) && noWU == 1) {
+	// Future note: These are in HKCU on NT; HKLM on 9x.
+	// Remove links and access to Windows Update
+	DWORD value;
+	HRESULT hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", KEY_WOW64_64KEY, &value);
+	if (SUCCEEDED(hr) && value == 1) {
 		*retval = TRUE;
 		return S_OK;
 	}
 
-	DWORD disableWUAccess;
-	hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", KEY_WOW64_64KEY, &disableWUAccess);
-	if (SUCCEEDED(hr) && disableWUAccess == 1) {
+	// Remove access to use all Windows Update features
+	hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", KEY_WOW64_64KEY, &value);
+	if (SUCCEEDED(hr) && value == 1) {
 		*retval = TRUE;
 		return S_OK;
 	}
