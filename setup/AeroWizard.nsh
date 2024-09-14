@@ -12,6 +12,8 @@
 	!insertmacro SetControlColor ${parent} ${control} SYSCLR:WINDOWTEXT
 !macroend
 
+PEAddResource "banner-wordmark-aero.png" "PNG" "#1337"
+
 Var /GLOBAL ChildHwnd
 
 !macro -AeroWizardOnShow
@@ -75,6 +77,10 @@ Var /GLOBAL ChildHwnd
 	${If} ${AtLeastWin7}
 		LegacyUpdateNSIS::InitTaskbarProgress
 	${EndIf}
+
+	; Set up banner and glass
+	File /ONAME=$PLUGINSDIR\banner.bmp banner-wordmark-classic.bmp
+	LegacyUpdateNSIS::DialogInit
 !macroend
 
 Function AeroWizardOnShow

@@ -27,7 +27,6 @@ VIFileVersion    ${LONGVERSION}
 !define MUI_UI                       "modern_aerowizard.exe"
 !define MUI_UI_HEADERIMAGE           "modern_aerowizard.exe"
 
-!define MUI_CUSTOMFUNCTION_GUIINIT   OnShow
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
 !define MUI_CUSTOMFUNCTION_ABORT     CleanUp
 
@@ -35,8 +34,8 @@ VIFileVersion    ${LONGVERSION}
 !define MUI_UNICON                   "..\LegacyUpdate\icon.ico"
 
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP       "setupbanner.bmp"
-!define MUI_HEADERIMAGE_UNBITMAP     "setupbanner.bmp"
+!define MUI_HEADERIMAGE_BITMAP       "banner-wordmark-classic.bmp"
+!define MUI_HEADERIMAGE_UNBITMAP     "banner-wordmark-classic.bmp"
 
 !define MUI_TEXT_ABORT_TITLE         "Installation Failed"
 

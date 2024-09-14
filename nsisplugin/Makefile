@@ -67,7 +67,9 @@ LDFLAGS = \
 	-luser32 \
 	-lole32 \
 	-loleaut32 \
-	-ladvapi32
+	-ladvapi32 \
+	-lgdi32 \
+	-lmsimg32
 
 RCFLAGS = \
 	-F pe-i386 \
@@ -108,7 +110,7 @@ clean:
 	rm -rf obj
 
 test:
-	$(MAKE) DEBUG=$(DEBUG)
+	+$(MAKE) DEBUG=$(DEBUG)
 	cd ../setup && makensis test.nsi
 	cd ../setup && explorer.exe test.exe
 

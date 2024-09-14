@@ -143,6 +143,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -184,6 +185,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -223,6 +225,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -264,6 +267,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -293,12 +297,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>
+      </Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>
+      </IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CompileAs />
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -309,6 +316,7 @@
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalDependencies>
       </AdditionalDependencies>
+      <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -336,12 +344,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>
+      </Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>
+      </IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;_MERGE_PROXYSTUB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CompileAs />
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -352,6 +363,7 @@
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalDependencies>
       </AdditionalDependencies>
+      <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
