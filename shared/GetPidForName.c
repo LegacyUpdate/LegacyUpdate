@@ -17,7 +17,7 @@ int GetPidForName(const LPTSTR process) {
 		HANDLE handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ, FALSE, pids[i]);
 		if (handle) {
 			WCHAR path[MAX_PATH];
-			if (GetProcessImageFileName(handle, path, ARRAYSIZE(path))) {
+			if (GetModuleBaseName(handle, NULL, path, ARRAYSIZE(path))) {
 				LPWSTR basename = wcsrchr(path, L'\\');
 				if (basename != NULL) {
 					basename += 1;
