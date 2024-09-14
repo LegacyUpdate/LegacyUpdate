@@ -19,13 +19,12 @@ HKCR
 				val ThreadingModel = s 'Apartment'
 			}
 			val AppID = s '%APPID%'
-			val LocalizedString = s '@%MODULE%,-2'
+			val LocalizedString = s '@%MODULE%,-1'
 			TypeLib = s '{05D22F33-C7C3-4C90-BDD9-CEDC86EA8FBE}'
 			Version = s '1.0'
 			Elevation
 			{
 				val Enabled = d '1'
-				val IconReference = s '@%MODULE%,-201'
 			}
 		}
 	}

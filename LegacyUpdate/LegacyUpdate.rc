@@ -103,6 +103,17 @@ IDR_PROGRESSBARCONTROL  REGISTRY                "ProgressBarControl.rgs"
 
 IDR_ELEVATIONHELPER     REGISTRY                "ElevationHelper.rgs"
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_LEGACYUPDATE        "Legacy Update"
+END
+
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 

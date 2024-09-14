@@ -2,6 +2,7 @@
 // Microsoft Visual C++ generated include file.
 // Used by LegacyUpdate.rc
 //
+#define IDS_LEGACYUPDATE                1
 #define IDR_LEGACYUPDATEOCX             101
 #define IDR_LEGACYUPDATECTRL            102
 #define IDR_PROGRESSBARCONTROL          103
