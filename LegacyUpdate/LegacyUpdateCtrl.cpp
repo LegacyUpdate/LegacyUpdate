@@ -11,6 +11,7 @@
 #include <atlbase.h>
 #include <ShellAPI.h>
 #include <ShlObj.h>
+#include <wuapi.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -122,7 +123,7 @@ STDMETHODIMP CLegacyUpdateCtrl::SetClientSite(IOleClientSite *pClientSite) {
 
 	DoIsPermittedCheck();
 	return S_OK;
-	}
+}
 
 STDMETHODIMP CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
@@ -320,12 +321,24 @@ STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
+	// Ask WU itself whether a reboot is required
+	CComPtr<ISystemInformation> systemInfo;
+	if (SUCCEEDED(systemInfo.CoCreateInstance(CLSID_SystemInformation, NULL, CLSCTX_INPROC_SERVER))) {
+		if (SUCCEEDED(systemInfo->get_RebootRequired(retval)) && *retval) {
+			return S_OK;
+		}
+	}
+
+	// Check reboot flag in registry
 	HKEY subkey;
 	HRESULT hr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", KEY_WOW64_64KEY, KEY_READ, &subkey);
-	*retval = subkey != NULL;
-	if (subkey != NULL) {
+	if (SUCCEEDED(hr)) {
 		RegCloseKey(subkey);
+		*retval = TRUE;
+		return S_OK;
 	}
+
+	*retval = FALSE;
 	return S_OK;
 }
 
