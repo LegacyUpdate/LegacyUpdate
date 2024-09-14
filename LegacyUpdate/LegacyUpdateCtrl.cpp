@@ -114,6 +114,16 @@ end:
 		return E_ACCESSDENIED; \
 	}
 
+STDMETHODIMP CLegacyUpdateCtrl::SetClientSite(IOleClientSite *pClientSite) {
+	HRESULT hr = IOleObjectImpl::SetClientSite(pClientSite);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	DoIsPermittedCheck();
+	return S_OK;
+	}
+
 STDMETHODIMP CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 

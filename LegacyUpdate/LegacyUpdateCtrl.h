@@ -95,6 +95,8 @@ private:
 	BOOL IsPermitted();
 
 public:
+	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite);
+
 	STDMETHODIMP CheckControl(VARIANT_BOOL *retval);
 	STDMETHODIMP MessageForHresult(LONG inHresult, BSTR *retval);
 	STDMETHODIMP GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
