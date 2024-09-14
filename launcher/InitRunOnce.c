@@ -1,16 +1,12 @@
 #include <windows.h>
 #include "GetPidForName.h"
-#include "HResult.h"
+#include "MsgBox.h"
 #include "VersionInfo.h"
 
-typedef int (__fastcall *_ThemesOnCreateSessionWithPID)(unsigned int pid);
+typedef DWORD (__fastcall *_ThemeWaitForServiceReady)(DWORD timeout);
+typedef DWORD (__fastcall *_ThemeWatchForStart)();
 
 static void StartThemes() {
-	// Only relevant to Vista or later
-	if (!IsOSVersionOrLater(6, 0)) {
-		return;
-	}
-
 	// Only relevant if we're SYSTEM
 	DWORD usernameLen = 256;
 	LPWSTR username = (LPWSTR)LocalAlloc(LPTR, usernameLen * sizeof(WCHAR));
@@ -26,23 +22,31 @@ static void StartThemes() {
 	// Ask UxInit.dll to ask the Themes service to start a session for this desktop. Themes doesn't
 	// automatically start a session for the SYSTEM desktop, so we need to ask it to. This matches
 	// what msoobe.exe does, e.g., on first boot.
-	int winlogonPid = GetPidForName(L"winlogon.exe");
-	if (!winlogonPid) {
-		return;
+
+	// Windows 7 moves this to UxInit.dll
+	HMODULE shsvcs = LoadLibrary(L"UxInit.dll");
+	if (!shsvcs) {
+		shsvcs = LoadLibrary(L"shsvcs.dll");
+		if (!shsvcs) {
+			return;
+		}
 	}
 
-	HMODULE uxInit = LoadLibrary(IsOSVersionEqual(6, 0) ? L"shsvcs.dll" : L"UxInit.dll");
-	if (!uxInit) {
-		return;
+	// Get functions by ordinals
+	_ThemeWaitForServiceReady $ThemeWaitForServiceReady = (_ThemeWaitForServiceReady)GetProcAddress(shsvcs, MAKEINTRESOURCEA(2));
+	_ThemeWatchForStart $ThemeWatchForStart = (_ThemeWatchForStart)GetProcAddress(shsvcs, MAKEINTRESOURCEA(1));
+
+	// 1. Wait up to 1000ms for Themes to start
+	if ($ThemeWaitForServiceReady) {
+		$ThemeWaitForServiceReady(1000);
 	}
 
-	// Call function with ordinal 13
-	_ThemesOnCreateSessionWithPID $ThemesOnCreateSessionWithPID = (_ThemesOnCreateSessionWithPID)GetProcAddress(uxInit, MAKEINTRESOURCEA(13));
-	if ($ThemesOnCreateSessionWithPID) {
-		$ThemesOnCreateSessionWithPID(winlogonPid);
+	// 2. Prompt Themes to start a session for the SYSTEM desktop
+	if ($ThemeWatchForStart) {
+		$ThemeWatchForStart();
 	}
 
-	FreeLibrary(uxInit);
+	FreeLibrary(shsvcs);
 }
 
 void RunOnce() {
@@ -60,18 +64,26 @@ void RunOnce() {
 
 	PROCESS_INFORMATION processInfo = {0};
 	if (!CreateProcess(setupPath, L"/runonce", NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {
+#ifdef _DEBUG
+		// Run cmd.exe instead
+		if (!CreateProcess(L"C:\\Windows\\System32\\cmd.exe", NULL, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {
+			PostQuitMessage(0);
+			return;
+		}
+#endif
+
+		MsgBox(NULL, L"Continuing Legacy Update setup failed", NULL, MB_OK | MB_ICONERROR);
+
+#ifndef _DEBUG
+		PostQuitMessage(0);
 		return;
+#endif
 	}
 
 	CloseHandle(processInfo.hThread);
 
-	// Wait for it to finish, ensuring we still pump WM_PAINT messages in the meantime
-	while (WaitForSingleObject(processInfo.hProcess, 100) == WAIT_TIMEOUT) {
-		MSG msg;
-		while (PeekMessage(&msg, NULL, WM_PAINT, WM_PAINT, PM_REMOVE)) {
-			DispatchMessage(&msg);
-		}
-	}
-
+	// Wait for it to finish
+	WaitForSingleObject(processInfo.hProcess, INFINITE);
 	CloseHandle(processInfo.hProcess);
+	PostQuitMessage(0);
 }
