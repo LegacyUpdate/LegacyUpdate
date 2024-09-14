@@ -10,7 +10,7 @@
 		; Prompt for reboot
 		${IfNot} ${Silent}
 			System::Call '${RestartDialog}($HWNDPARENT, \
-				"Windows will be restarted to complete installation of prerequisite components. Setup will resume after the restart.", \
+				"Windows will restart to complete installation of prerequisite components. Setup will resume after the restart.", \
 				${EWX_REBOOT})'
 		${EndIf}
 		Quit
@@ -67,6 +67,12 @@ FunctionEnd
 			CreateDirectory "$RunOnceDir"
 			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
 
+			${If} ${IsNativeAMD64}
+				File "/ONAME=$RunOnceDir\LegacyUpdate.exe" "..\launcher\obj\LegacyUpdate64.exe"
+			${Else}
+				File "/ONAME=$RunOnceDir\LegacyUpdate.exe" "..\launcher\obj\LegacyUpdate32.exe"
+			${EndIf}
+
 			; Remove mark of the web to prevent "Open File - Security Warning" dialog
 			System::Call '${DeleteFile}("$RunOnceDir\LegacyUpdateSetup.exe:Zone.Identifier")'
 		${EndIf}
@@ -74,7 +80,7 @@ FunctionEnd
 		; Somewhat documented in KB939857:
 		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
 		; See also Wine winternl.h
-		WriteRegStr   HKLM "${REGPATH_SETUP}" "CmdLine" '"$RunOnceDir\LegacyUpdateSetup.exe" /runonce'
+		WriteRegStr   HKLM "${REGPATH_SETUP}" "CmdLine" '"$RunOnceDir\LegacyUpdate.exe" /runonce'
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
 
