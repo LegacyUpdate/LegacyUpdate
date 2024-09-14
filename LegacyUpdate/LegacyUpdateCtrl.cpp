@@ -12,6 +12,7 @@
 #include <ShellAPI.h>
 #include <ShlObj.h>
 #include <wuapi.h>
+#include "IUpdateInstaller4.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -369,10 +370,26 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	DoIsPermittedCheck();
 
 	VARIANT_BOOL isRebootRequired;
+	HRESULT hr = S_OK;
 	if (SUCCEEDED(get_IsRebootRequired(&isRebootRequired)) && isRebootRequired) {
-		Reboot();
+		// Calling Commit() is recommended on Windows 10, to ensure feature updates are properly prepared
+		// prior to the reboot.
+		CComPtr<IUpdateInstaller4> installer;
+		hr = installer.CoCreateInstance(CLSID_UpdateInstaller, NULL, CLSCTX_INPROC_SERVER);
+		if (hr == REGDB_E_CLASSNOTREG) {
+			// Ignore
+			hr = S_OK;
+		} else if (SUCCEEDED(hr)) {
+			hr = installer->Commit(0);
+			if (!SUCCEEDED(hr)) {
+				return hr;
+			}
+		}
+
+		hr = Reboot();
 	}
-	return S_OK;
+
+	return hr;
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {

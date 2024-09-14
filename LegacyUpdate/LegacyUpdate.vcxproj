@@ -516,6 +516,7 @@
     <ClInclude Include="..\shared\WUErrors.h" />
     <ClInclude Include="Compat.h" />
     <ClInclude Include="ElevationHelper.h" />
+    <ClInclude Include="IUpdateInstaller4.h" />
     <ClInclude Include="LaunchUpdateSite.h" />
     <ClInclude Include="LegacyUpdateCtrl.h" />
     <ClInclude Include="ProgressBarControl.h" />
