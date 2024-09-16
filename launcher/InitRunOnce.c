@@ -59,7 +59,7 @@ void RunOnce() {
 	wcsncat(setupPath, L"LegacyUpdateSetup.exe", ARRAYSIZE(setupPath) - wcslen(setupPath) - 1);
 
 	// Execute and wait for completion
-	STARTUPINFOW startupInfo = {0};
+	STARTUPINFO startupInfo = {0};
 	startupInfo.cb = sizeof(startupInfo);
 
 	PROCESS_INFORMATION processInfo = {0};

@@ -53,9 +53,6 @@ HRESULT GetRegistryDword(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, DWORD 
 	if (data != NULL) {
 		DWORD length = sizeof(DWORD);
 		hr = HRESULT_FROM_WIN32(RegQueryValueEx(subkey, valueName, NULL, NULL, (LPBYTE)data, &length));
-		if (!SUCCEEDED(hr)) {
-			goto end;
-		}
 	}
 
 end:
