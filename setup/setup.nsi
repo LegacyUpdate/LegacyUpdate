@@ -124,14 +124,17 @@ Function MakeUninstallEntry
 
 		; Add uninstall entry
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayName" "${NAME}"
-		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" '"$InstallDir\LegacyUpdate.exe",-100'
+		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" '"$InstallDir\Uninstall.exe",-103'
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayVersion" "${VERSION}"
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "Publisher" "${NAME}"
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "URLInfoAbout" "${WEBSITE}"
+		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "InstallLocation" "$InstallDir"
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "UninstallString" '"$InstallDir\Uninstall.exe"'
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "QuietUninstallString" '"$InstallDir\Uninstall.exe" /S'
 		WriteRegDword HKLM "${REGPATH_UNINSTSUBKEY}" "NoModify" 1
 		WriteRegDword HKLM "${REGPATH_UNINSTSUBKEY}" "NoRepair" 1
+		${MakeARPInstallDate} $0
+		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "InstallDate" $0
 	${EndIf}
 FunctionEnd
 
