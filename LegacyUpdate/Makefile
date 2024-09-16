@@ -10,6 +10,9 @@ PATH := $(VSPATH)/MSBuild/Current/Bin:$(PATH)
 MSBUILD = msbuild.exe
 
 all:
+	@# Unfortunately always needs to be a clean build because of "dlldatax.obj: error LNK2001:
+	@# unresolved external symbol _LegacyUpdate_ProxyFileInfo"
+	+$(MAKE) clean
 	cd ..; $(MSBUILD) LegacyUpdate.sln /v:minimal /m /p:Configuration=$(MSBUILDCONFIG) /p:Platform=Win32
 	cd ..; $(MSBUILD) LegacyUpdate.sln /v:minimal /m /p:Configuration=$(MSBUILDCONFIG) /p:Platform=x64
 
