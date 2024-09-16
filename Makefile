@@ -1,4 +1,5 @@
 export SIGN ?= 0
+export DEBUG ?= 1
 
 all:
 	+$(MAKE) -C LegacyUpdate
