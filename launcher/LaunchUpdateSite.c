@@ -51,7 +51,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	}
 
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
-	if (!IsOSVersionOrLater(6, 0) && !IsUserAnAdmin()) {
+	if (!IsOSVersionOrLater(6, 0) && !IsUserAdmin()) {
 		LPWSTR filename;
 		DWORD filenameSize;
 		GetOwnFileName(&filename, &filenameSize);

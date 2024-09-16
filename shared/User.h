@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-static inline BOOL IsUserAnAdmin() {
+static inline BOOL IsUserAdmin() {
 	SID_IDENTIFIER_AUTHORITY authority = SECURITY_NT_AUTHORITY;
 	PSID adminsSid;
 	BOOL result = FALSE;

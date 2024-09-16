@@ -316,7 +316,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RunWizard(IUpdateInstaller *installer, BSTR dial
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 	DoIsPermittedCheck();
 
-	if (IsUserAnAdmin()) {
+	if (IsUserAdmin()) {
 		// Entire process is elevated.
 		*retval = e_admin;
 	} else if (m_elevatedHelper != NULL) {
