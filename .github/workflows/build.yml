@@ -38,6 +38,7 @@ jobs:
       run: |
         sudo apt-get update -q
         sudo apt-get install -qy make nsis nsis-pluginapi mingw-w64-i686-dev cabextract
+        ./build/fix-nsis.sh
 
     - name: Install MinGW toolchain
       run: |
