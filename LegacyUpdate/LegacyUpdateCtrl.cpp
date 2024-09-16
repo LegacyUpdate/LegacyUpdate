@@ -427,6 +427,13 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 		}
 
 		WaitForSingleObject(execInfo.hProcess, INFINITE);
+
+		DWORD result;
+		if (GetExitCodeProcess(execInfo.hProcess, &result) == 0 || result != 0) {
+			CloseHandle(execInfo.hProcess);
+			return E_FAIL;
+		}
+
 		CloseHandle(execInfo.hProcess);
 
 		// On success, the log is written to Desktop\WindowsUpdate.log.
