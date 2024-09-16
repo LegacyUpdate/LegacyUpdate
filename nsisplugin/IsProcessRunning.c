@@ -8,7 +8,7 @@ void __cdecl IsProcessRunning(HWND hwndParent, int string_size, TCHAR *variables
 	EXDLL_INIT();
 	g_hwndParent = hwndParent;
 
-	LPTSTR process = (LPTSTR)malloc(string_size * sizeof(TCHAR));
+	LPTSTR process = (LPTSTR)LocalAlloc(LPTR, string_size * sizeof(TCHAR));
 	popstring(process);
 	CharLowerBuffW(process, wcslen(process));
 
@@ -17,5 +17,5 @@ void __cdecl IsProcessRunning(HWND hwndParent, int string_size, TCHAR *variables
 	wsprintf(buffer, L"%d", pid);
 	pushstring(buffer);
 
-	free(process);
+	LocalFree(process);
 }

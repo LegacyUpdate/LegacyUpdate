@@ -35,6 +35,6 @@ static inline BOOL IsOSVersionOrEarlier(DWORD major, DWORD minor) {
 HRESULT GetOwnVersion(LPWSTR *version, LPDWORD size);
 
 static inline void GetOwnFileName(LPWSTR *filename, LPDWORD size) {
-	*filename = (LPWSTR)malloc(MAX_PATH);
+	*filename = (LPWSTR)LocalAlloc(LPTR, MAX_PATH);
 	*size = GetModuleFileName((HMODULE)&__ImageBase, *filename, MAX_PATH);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <windows.h>
+#include "Registry.h"
 
 static LPWSTR _installPath;
 

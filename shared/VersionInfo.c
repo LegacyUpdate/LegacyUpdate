@@ -17,7 +17,7 @@ HRESULT GetOwnVersion(LPWSTR *version, LPDWORD size) {
 			return HRESULT_FROM_WIN32(GetLastError());
 		}
 
-		LPVOID verInfo = malloc(verInfoSize);
+		LPVOID verInfo = LocalAlloc(LPTR, verInfoSize);
 		if (!GetFileVersionInfo(filename, verHandle, verInfoSize, verInfo)) {
 			return HRESULT_FROM_WIN32(GetLastError());
 		}

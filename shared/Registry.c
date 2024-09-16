@@ -11,13 +11,13 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, DWORD
 
 	if (data != NULL && size != NULL) {
 		DWORD length = 512 * sizeof(WCHAR);
-		LPWSTR buffer = (LPWSTR)malloc(length);
+		LPWSTR buffer = (LPWSTR)LocalAlloc(LPTR, length);
 		LSTATUS status;
 		do {
 			status = RegQueryValueEx(subkey, valueName, NULL, NULL, (BYTE *)buffer, &length);
 			if (status == ERROR_MORE_DATA) {
 				length += 256 * sizeof(WCHAR);
-				buffer = (LPWSTR)realloc(buffer, length);
+				buffer = (LPWSTR)LocalReAlloc(buffer, length, LMEM_MOVEABLE);
 			} else if (status != ERROR_SUCCESS) {
 				hr = HRESULT_FROM_WIN32(status);
 				goto end;
