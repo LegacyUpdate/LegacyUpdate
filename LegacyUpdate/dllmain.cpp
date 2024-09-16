@@ -8,6 +8,7 @@
 
 #include "dlldatax.h"
 #include "Registry.h"
+#include "LegacyUpdate.h"
 
 CLegacyUpdateModule _AtlModule;
 HINSTANCE g_hInstance;
@@ -71,15 +72,14 @@ STDAPI DllRegisterServer(void) {
 		return hr;
 	}
 
-	LPWSTR path;
-	DWORD pathSize;
-	hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows\\CurrentVersion", L"ProgramFilesDir", KEY_WOW64_64KEY, &path, &pathSize);
+	LPWSTR installPath;
+	hr = GetInstallPath(&installPath);
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
 
 	LPWSTR iconRef = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-	hr = StringCchPrintf(iconRef, MAX_PATH * sizeof(WCHAR), L"@\"%ls\\Legacy Update\\LegacyUpdate.exe\",-100", path);
+	hr = StringCchPrintf(iconRef, MAX_PATH * sizeof(WCHAR), L"@\"%ls\\LegacyUpdate.exe\",-100", installPath);
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
