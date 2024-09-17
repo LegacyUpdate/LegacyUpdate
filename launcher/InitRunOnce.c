@@ -63,7 +63,9 @@ void RunOnce() {
 	startupInfo.cb = sizeof(startupInfo);
 
 	PROCESS_INFORMATION processInfo = {0};
-	if (!CreateProcess(setupPath, L"/runonce", NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {
+	LPWSTR cmdLine = (LPWSTR)LocalAlloc(LPTR, 4096 * sizeof(WCHAR));
+	wsprintf(cmdLine, L"\"%ls\" /runonce", setupPath);
+	if (!CreateProcess(setupPath, cmdLine, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {
 #ifdef _DEBUG
 		// Run cmd.exe instead
 		if (!CreateProcess(L"C:\\Windows\\System32\\cmd.exe", NULL, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {

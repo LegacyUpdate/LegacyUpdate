@@ -364,11 +364,9 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 		SetOverwrite on
 
 		; Register DLL
-		${If} ${IsNativeAMD64}
-			!insertmacro RegisterDLL "" x64 "$OUTDIR\LegacyUpdate.dll"
-			!insertmacro RegisterDLL "" x86 "$OUTDIR\LegacyUpdate32.dll"
-		${Else}
-			!insertmacro RegisterDLL "" x86 "$OUTDIR\LegacyUpdate.dll"
+		ExecWait "$OUTDIR\LegacyUpdate.exe /regserver" $0
+		${If} $0 != 0
+			Abort
 		${EndIf}
 
 		; Create shortcut
@@ -464,12 +462,10 @@ Section "un.Legacy Update website" un.ACTIVEX
 		Rename "$OUTDIR\Backup\Microsoft Update.lnk" "$COMMONSTARTMENU\Microsoft Update.lnk"
 	${EndIf}
 
-	; Unregister DLLS
-	${If} ${IsNativeAMD64}
-		!insertmacro RegisterDLL Un x64 "$OUTDIR\LegacyUpdate.dll"
-		!insertmacro RegisterDLL Un x86 "$OUTDIR\LegacyUpdate32.dll"
-	${Else}
-		!insertmacro RegisterDLL Un x86 "$OUTDIR\LegacyUpdate.dll"
+	; Unregister DLLs
+	ExecWait "$OUTDIR\LegacyUpdate.exe /unregserver" $0
+	${If} $0 != 0
+		Abort
 	${EndIf}
 
 	; Delete DLLs

@@ -2,12 +2,14 @@
 
 #include "stdafx.h"
 #include "LegacyUpdateCtrl.h"
-#include "Utils.h"
 #include "Compat.h"
-#include "HResult.h"
-#include "VersionInfo.h"
 #include "ElevationHelper.h"
+#include "HResult.h"
 #include "Registry.h"
+#include "User.h"
+#include "Utils.h"
+#include "VersionInfo.h"
+#include "Wow64.h"
 #include <atlbase.h>
 #include <ShellAPI.h>
 #include <ShlObj.h>

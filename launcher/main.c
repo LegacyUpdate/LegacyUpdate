@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <commctrl.h>
 #include "MsgBox.h"
+#include "RegisterServer.h"
 
 HINSTANCE g_hInstance;
 
@@ -17,7 +18,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	int argc;
 	LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
-	LPWSTR action = L"launch";
+	LPWSTR action = L"/launch";
 	if (argc > 1) {
 		action = argv[1];
 	}
@@ -30,12 +31,29 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		flagsCount = argc - 2;
 	}
 
-	if (wcscmp(action, L"launch") == 0) {
+	if (wcscmp(action, L"/launch") == 0) {
 		LaunchUpdateSite(flagsCount, flags, nCmdShow);
 	} else if (wcscmp(action, L"/runonce") == 0) {
 		RunOnce();
+	} else if (wcscmp(action, L"/regserver") == 0) {
+		RegisterServer(TRUE, FALSE);
+	} else if (wcscmp(action, L"/unregserver") == 0) {
+		RegisterServer(FALSE, FALSE);
 	} else {
-		MsgBox(NULL, L"Unknown LegacyUpdate.exe usage", NULL, MB_OK);
+		const LPWSTR usage = L""
+			L"LegacyUpdate.exe [/launch|/regserver|/unregserver]\n"
+			L"\n"
+			L"/launch\n"
+			L"    Launch Legacy Update website in Internet Explorer\n"
+			L"\n"
+			L"/regserver\n"
+			L"    Register ActiveX control\n"
+			L"\n"
+			L"/unregserver\n"
+			L"    Unregister ActiveX control\n"
+			L"\n"
+			L"If no parameters are provided, /launch is assumed.";
+		MsgBox(NULL, L"LegacyUpdate.exe usage", usage, MB_OK);
 		PostQuitMessage(1);
 	}
 

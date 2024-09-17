@@ -84,6 +84,9 @@
     <ClCompile Include="..\shared\HResult.c">
       <Filter>Shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\shared\Wow64.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -138,6 +141,9 @@
       <Filter>Shared</Filter>
     </ClInclude>
     <ClInclude Include="IUpdateInstaller4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\Wow64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

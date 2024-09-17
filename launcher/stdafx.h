@@ -17,3 +17,4 @@
 
 #include "resource.h"
 #include <windows.h>
+#include "Trace.h"

@@ -17,5 +17,6 @@
 
 #include "resource.h"
 #include <windows.h>
+#include "Trace.h"
 
 EXTERN_C HWND g_hwndParent;

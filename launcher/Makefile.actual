@@ -1,8 +1,10 @@
 FILES    = \
 	$(wildcard *.c) \
+	../shared/Exec.c \
 	../shared/GetPidForName.c \
 	../shared/Registry.c \
-	../shared/VersionInfo.c
+	../shared/VersionInfo.c \
+	../shared/Wow64.c
 RCFILES  = resource.rc
 DEFFILES = ../LegacyUpdate/LegacyUpdate.def
 

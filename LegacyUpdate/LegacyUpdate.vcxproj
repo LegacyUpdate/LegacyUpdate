@@ -418,6 +418,14 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
     </ClCompile>
+    <ClCompile Include="..\shared\Wow64.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
     <ClCompile Include="..\shared\WUErrors.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
@@ -513,6 +521,7 @@
     <ClInclude Include="..\shared\VersionInfo.h" />
     <ClInclude Include="..\shared\WMI.h" />
     <ClInclude Include="..\shared\HResult.h" />
+    <ClInclude Include="..\shared\Wow64.h" />
     <ClInclude Include="..\shared\WUErrors.h" />
     <ClInclude Include="Compat.h" />
     <ClInclude Include="ElevationHelper.h" />

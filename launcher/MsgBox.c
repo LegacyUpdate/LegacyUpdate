@@ -66,6 +66,7 @@ int MsgBox(HWND hWnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 	config.cbSize = sizeof(TASKDIALOGCONFIG);
 	config.hwndParent = hWnd;
 	config.hInstance = GetModuleHandle(NULL);
+	config.dwFlags = TDF_POSITION_RELATIVE_TO_WINDOW;
 	config.dwCommonButtons = buttons;
 	config.pszWindowTitle = L"Legacy Update";
 	config.pszMainInstruction = instruction;
