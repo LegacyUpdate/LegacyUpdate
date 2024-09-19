@@ -45,7 +45,7 @@ IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
 	}
 
 	CComPtr<IHTMLDocument2> document;
-	hr = container->QueryInterface(IID_IHTMLDocument2, (void**)&document);
+	hr = container->QueryInterface(IID_IHTMLDocument2, (void **)&document);
 	if (!SUCCEEDED(hr) || document == NULL) {
 		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(hr));
 		return NULL;
@@ -56,7 +56,7 @@ IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
 
 HWND CLegacyUpdateCtrl::GetIEWindowHWND() {
 	CComPtr<IOleWindow> oleWindow;
-	HRESULT hr = QueryInterface(IID_IOleWindow, (void**)&oleWindow);
+	HRESULT hr = QueryInterface(IID_IOleWindow, (void **)&oleWindow);
 	if (!SUCCEEDED(hr) || !oleWindow) {
 		goto end;
 	}
@@ -132,7 +132,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	// Just return true so the site can confirm the control is working.
-	*retval = TRUE;
+	*retval = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -146,44 +146,52 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	DoIsPermittedCheck();
 
 	VariantInit(retval);
-	retval->vt = VT_I4;
 
 	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
 
 	switch (osField) {
 	case e_majorVer:
-		retval->lVal = versionInfo->dwMajorVersion;
+		retval->vt = VT_UI4;
+		retval->ulVal = versionInfo->dwMajorVersion;
 		break;
 
 	case e_minorVer:
-		retval->lVal = versionInfo->dwMinorVersion;
+		retval->vt = VT_UI4;
+		retval->ulVal = versionInfo->dwMinorVersion;
 		break;
 
 	case e_buildNumber:
-		retval->lVal = versionInfo->dwBuildNumber;
+		retval->vt = VT_UI4;
+		retval->ulVal = versionInfo->dwBuildNumber;
 		break;
 
 	case e_platform:
-		retval->lVal = versionInfo->dwPlatformId;
+		retval->vt = VT_UI4;
+		retval->ulVal = versionInfo->dwPlatformId;
 		break;
 
 	case e_SPMajor:
+		retval->vt = VT_I4;
 		retval->lVal = versionInfo->wServicePackMajor;
 		break;
 
 	case e_SPMinor:
+		retval->vt = VT_I4;
 		retval->lVal = versionInfo->wServicePackMinor;
 		break;
 
 	case e_productSuite:
+		retval->vt = VT_I4;
 		retval->lVal = versionInfo->wSuiteMask;
 		break;
 
 	case e_productType:
+		retval->vt = VT_I4;
 		retval->lVal = versionInfo->wProductType;
 		break;
 
 	case e_systemMetric:
+		retval->vt = VT_I4;
 		retval->lVal = GetSystemMetrics(systemMetric);
 		break;
 
@@ -191,14 +199,11 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		LPWSTR data;
 		DWORD size;
 		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", 0, &data, &size);
-		if (SUCCEEDED(hr)) {
-			retval->vt = VT_BSTR;
-			retval->bstrVal = SysAllocStringLen(data, size - 1);
-		} else {
+		retval->vt = VT_BSTR;
+		retval->bstrVal = SUCCEEDED(hr)
+			? SysAllocStringLen(data, size - 1)
 			// BuildLab doesn't exist on Windows 2000.
-			retval->vt = VT_BSTR;
-			retval->bstrVal = SysAllocString(versionInfo->szCSDVersion);
-		}
+			: SysAllocString(versionInfo->szCSDVersion);
 		break;
 	}
 
@@ -363,35 +368,32 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval
 	DWORD value;
 	HRESULT hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", KEY_WOW64_64KEY, &value);
 	if (SUCCEEDED(hr) && value == 1) {
-		*retval = TRUE;
+		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 
 	// Remove access to use all Windows Update features
 	hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", KEY_WOW64_64KEY, &value);
 	if (SUCCEEDED(hr) && value == 1) {
-		*retval = TRUE;
+		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 
-	*retval = FALSE;
+	*retval = VARIANT_FALSE;
 	return S_OK;
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	DoIsPermittedCheck();
 
-	VARIANT_BOOL isRebootRequired;
 	HRESULT hr = S_OK;
-	if (SUCCEEDED(get_IsRebootRequired(&isRebootRequired)) && isRebootRequired) {
+	VARIANT_BOOL isRebootRequired;
+	if (SUCCEEDED(get_IsRebootRequired(&isRebootRequired)) && isRebootRequired == VARIANT_TRUE) {
 		// Calling Commit() is recommended on Windows 10, to ensure feature updates are properly prepared
-		// prior to the reboot.
+		// prior to the reboot. If IUpdateInstaller4 doesn't exist, we can skip this.
 		CComPtr<IUpdateInstaller4> installer;
 		hr = installer.CoCreateInstance(CLSID_UpdateInstaller, NULL, CLSCTX_INPROC_SERVER);
-		if (hr == REGDB_E_CLASSNOTREG) {
-			// Ignore
-			hr = S_OK;
-		} else if (SUCCEEDED(hr)) {
+		if (SUCCEEDED(hr) && hr != REGDB_E_CLASSNOTREG) {
 			hr = installer->Commit(0);
 			if (!SUCCEEDED(hr)) {
 				return hr;
