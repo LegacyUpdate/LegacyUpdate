@@ -37,7 +37,7 @@ HRESULT RegisterDll(LPWSTR path, BOOL state) {
 	return status == 0 ? S_OK : E_FAIL;
 }
 
-void RegisterServer(BOOL state) {
+HRESULT RegisterServer(BOOL state, BOOL forLaunch) {
 	// Ensure elevation
 	HRESULT hr = S_OK;
 	LPWSTR installPath;
@@ -96,5 +96,9 @@ end:
 		MsgBox(NULL, title, /*GetMessageForHresult(hr)*/ text, MB_OK | MB_ICONERROR);
 	}
 
-	PostQuitMessage(hr);
+	if (!forLaunch) {
+		PostQuitMessage(hr);
+	}
+
+	return hr;
 }

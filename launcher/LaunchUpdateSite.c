@@ -7,14 +7,18 @@
 #include <wchar.h>
 #include "Exec.h"
 #include "HResult.h"
+#include "MsgBox.h"
 #include "Registry.h"
+#include "RegisterServer.h"
 #include "User.h"
 #include "VersionInfo.h"
-#include "MsgBox.h"
 
 const LPTSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
 const LPTSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
 const LPTSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
+
+DEFINE_GUID(IID_ILegacyUpdateCtrl,  0xC33085BB, 0xC3E1, 0x4D27, 0xA2, 0x14, 0xAF, 0x01, 0x95, 0x3D, 0xF5, 0xE5);
+DEFINE_GUID(CLSID_LegacyUpdateCtrl, 0xAD28E0DF, 0x5F5A, 0x40B5, 0x94, 0x32, 0x85, 0xEF, 0xD9, 0x7D, 0x1F, 0x9F);
 
 static BOOL CanUseSSLConnection() {
 	// Get the Windows Update website URL set by Legacy Update setup
@@ -54,15 +58,33 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
 	if (!IsOSVersionOrLater(6, 0) && !IsUserAdmin()) {
 		LPWSTR filename;
-		DWORD filenameSize;
-		GetOwnFileName(&filename, &filenameSize);
-
-		INT_PTR execResult = (INT_PTR)ShellExecute(NULL, L"runas", filename, GetCommandLineW(), NULL, nCmdShow);
+		GetOwnFileName(&filename);
+		hr = Exec(L"runas", filename, GetCommandLineW(), NULL, nCmdShow, FALSE, NULL);
+		LocalFree(filename);
 
 		// Access denied happens when the user clicks No/Cancel.
-		if (execResult <= 32 && execResult != SE_ERR_ACCESSDENIED) {
-			hr = HRESULT_FROM_WIN32(GetLastError());
+		if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
+			hr = S_OK;
 		}
+
+		goto end;
+	}
+
+	// Can we instantiate our own ActiveX control? If not, try to register it.
+	hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_LOCAL_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
+	if (hr == REGDB_E_CLASSNOTREG) {
+		hr = RegisterServer(TRUE, TRUE);
+		if (!SUCCEEDED(hr)) {
+			goto end;
+		}
+
+		hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_LOCAL_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
+		if (!SUCCEEDED(hr)) {
+			goto end;
+		}
+
+		IUnknown_Release(browser);
+	} else if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
