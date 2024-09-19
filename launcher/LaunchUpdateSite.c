@@ -5,6 +5,7 @@
 #include <shellapi.h>
 #include <shlobj.h>
 #include <wchar.h>
+#include "Exec.h"
 #include "HResult.h"
 #include "Registry.h"
 #include "User.h"
@@ -81,14 +82,13 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 
 		WCHAR fondueArgs[256];
 		wsprintf(fondueArgs, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
-		INT_PTR execResult = (INT_PTR)ShellExecute(NULL, L"open", L"fondue.exe", fondueArgs, NULL, SW_SHOWDEFAULT);
-
-		if (execResult <= 32) {
+		hr = Exec(NULL, L"fondue.exe", fondueArgs, NULL, SW_SHOWDEFAULT, FALSE, NULL);
+		if (!SUCCEEDED(hr)) {
 			// Tell the user what they need to do, then open the Optional Features dialog.
 			WCHAR message[4096];
 			LoadString(g_hInstance, IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
 			MsgBox(NULL, message, NULL, MB_OK | MB_ICONEXCLAMATION);
-			ShellExecute(NULL, L"open", L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT);
+			Exec(NULL, L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
 		}
 		hr = S_OK;
 		goto end;

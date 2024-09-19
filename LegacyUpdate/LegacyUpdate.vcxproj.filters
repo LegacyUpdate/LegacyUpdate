@@ -85,7 +85,10 @@
       <Filter>Shared</Filter>
     </ClCompile>
     <ClCompile Include="..\shared\Wow64.c">
-      <Filter>Source Files</Filter>
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\Exec.c">
+      <Filter>Shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,8 +146,11 @@
     <ClInclude Include="IUpdateInstaller4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\Exec.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
     <ClInclude Include="..\shared\Wow64.h">
-      <Filter>Header Files</Filter>
+      <Filter>Shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

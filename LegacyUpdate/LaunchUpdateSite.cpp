@@ -1,6 +1,6 @@
 #include "stdafx.h"
+#include "Exec.h"
 #include "HResult.h"
-#include "Registry.h"
 #include "LegacyUpdate.h"
 #include <shellapi.h>
 
@@ -14,7 +14,7 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 		goto end;
 	}
 
-	// Run LegacyUpdate.exe from native Program Files directory.
+	// This just calls LegacyUpdate.exe now for backwards compatibility.
 	hr = GetInstallPath(&path);
 	if (!SUCCEEDED(hr)) {
 		goto end;
@@ -22,21 +22,10 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 
 	PathAppend(path, L"LegacyUpdate.exe");
 
-	execInfo.cbSize = sizeof(execInfo);
-	execInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-	execInfo.hwnd = hwnd;
-	execInfo.lpFile = path;
-	execInfo.nShow = nCmdShow;
-	if (!ShellExecuteEx(&execInfo)) {
-		hr = HRESULT_FROM_WIN32(GetLastError());
-		goto end;
-	}
-
-	// Wait for it to finish and return its exit code
-	WaitForSingleObject(execInfo.hProcess, INFINITE);
-
-	if (GetExitCodeProcess(execInfo.hProcess, (DWORD *)&hr) == 0) {
-		hr = HRESULT_FROM_WIN32(GetLastError());
+	DWORD code;
+	hr = Exec(L"open", path, NULL, NULL, nCmdShow, TRUE, &code);
+	if (SUCCEEDED(hr)) {
+		hr = HRESULT_FROM_WIN32(code);
 	}
 
 end:

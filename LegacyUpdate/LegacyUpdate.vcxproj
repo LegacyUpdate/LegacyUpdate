@@ -396,6 +396,14 @@
     <None Include="ProgressBarControl.rgs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\shared\Exec.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
     <ClCompile Include="..\shared\Registry.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
@@ -520,6 +528,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\wuerror.h" />
+    <ClInclude Include="..\shared\Exec.h" />
     <ClInclude Include="..\shared\VersionInfo.h" />
     <ClInclude Include="..\shared\WMI.h" />
     <ClInclude Include="..\shared\HResult.h" />
