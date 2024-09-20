@@ -102,12 +102,20 @@ Var /GLOBAL UninstallInstalled
 
 !insertmacro MUI_LANGUAGE "English"
 
-!macro RestartWUAUService
+!macro -RestartWUAUService
 	!insertmacro DetailPrint "Restarting Windows Update service..."
 	SetDetailsPrint none
-	ExecShellWait "" "$WINDIR\system32\net.exe" "stop wuauserv" SW_HIDE
+	LegacyUpdateNSIS::Exec '"$WINDIR\system32\net.exe" stop wuauserv'
 	SetDetailsPrint listonly
 !macroend
+
+Function RestartWUAUService
+	!insertmacro -RestartWUAUService
+FunctionEnd
+
+Function un.RestartWUAUService
+	!insertmacro -RestartWUAUService
+FunctionEnd
 
 Function OnShow
 	Call AeroWizardOnShow
@@ -286,7 +294,7 @@ ${MementoSection} "Enable Microsoft Update" WIN7MU
 		Pop $0
 		MessageBox MB_USERICON "Failed to enable Microsoft Update.$\r$\n$\r$\n$0" /SD IDOK
 	${EndIf}
-	!insertmacro RestartWUAUService
+	Call RestartWUAUService
 ${MementoSectionEnd}
 
 ${MementoSection} "Activate Windows" ACTIVATE
@@ -298,7 +306,7 @@ SectionEnd
 
 ; Main installation
 SectionGroup "Legacy Update" LEGACYUPDATE
-	${MementoSection} "Configure Legacy Update server" WUSERVER
+	${MementoSection} "-Configure Legacy Update server" WUSERVER
 		Call MakeUninstallEntry
 
 		; Check if Schannel is going to work with modern TLS
@@ -324,10 +332,11 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 		WriteRegDword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
 
 		; Restart service
-		!insertmacro RestartWUAUService
+		Call RestartWUAUService
 	${MementoSectionEnd}
 
-	${MementoSection} "Legacy Update website" ACTIVEX
+	${MementoSection} "-Legacy Update ActiveX control" ACTIVEX
+		!insertmacro DetailPrint "Installing ActiveX control..."
 		SetOutPath $InstallDir
 		Call MakeUninstallEntry
 
@@ -442,7 +451,7 @@ Section "un.Legacy Update Server" un.WUSERVER
 	${EndIf}
 SectionEnd
 
-Section "un.Legacy Update website" un.ACTIVEX
+Section "-un.Legacy Update website" un.ACTIVEX
 	SetOutPath $InstallDir
 
 	; Delete shortcut
@@ -480,7 +489,7 @@ Section "un.Legacy Update website" un.ACTIVEX
 	DeleteRegKey HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
 
 	; Restart service
-	!insertmacro RestartWUAUService
+	Call un.RestartWUAUService
 SectionEnd
 
 Section -Uninstall

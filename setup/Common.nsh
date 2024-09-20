@@ -44,20 +44,41 @@ FunctionEnd
 
 Var /GLOBAL Download.ID
 
-!macro DownloadRequest url local extra
+Function DownloadRequest
+	Var /GLOBAL Download.UserAgent
+	${If} $Download.UserAgent == ""
+		GetWinVer $8 Major
+		GetWinVer $9 Minor
+		StrCpy $Download.UserAgent "User-Agent: Mozilla/4.0 (${NAME} ${VERSION}; Windows NT $8.$9)"
+	${EndIf}
+
 	NSxfer::Request \
 		/TIMEOUTCONNECT 60000 \
 		/TIMEOUTRECONNECT 60000 \
 		/OPTCONNECTTIMEOUT 60000 \
 		/OPTRECEIVETIMEOUT 60000 \
 		/OPTSENDTIMEOUT 60000 \
-		/URL "${url}" \
-		/LOCAL "${local}" \
+		/URL "$0" \
+		/LOCAL "$1" \
 		/INTERNETFLAGS ${INTERNET_FLAG_RELOAD}|${INTERNET_FLAG_NO_CACHE_WRITE}|${INTERNET_FLAG_KEEP_CONNECTION}|${INTERNET_FLAG_NO_COOKIES}|${INTERNET_FLAG_NO_UI} \
 		/SECURITYFLAGS ${SECURITY_FLAG_STRENGTH_STRONG} \
-		${extra} \
+		/HEADERS "$Download.UserAgent" \
+		$2 \
 		/END
 	Pop $Download.ID
+FunctionEnd
+
+!macro DownloadRequest url local extra
+	Push $0
+	Push $1
+	Push $2
+	StrCpy $0 "${url}"
+	StrCpy $1 "${local}"
+	StrCpy $2 "${extra}"
+	Call DownloadRequest
+	Pop $2
+	Pop $1
+	Pop $0
 !macroend
 
 Function DownloadWaitSilent
@@ -77,7 +98,7 @@ FunctionEnd
 
 !macro -Download name url filename verbose
 	${If} ${verbose} == 1
-	!insertmacro DetailPrint "Downloading ${name}..."
+		!insertmacro DetailPrint "Downloading ${name}..."
 	${EndIf}
 	!insertmacro DownloadRequest "${url}" "${filename}" ""
 	${If} ${verbose} == 1
@@ -116,23 +137,25 @@ FunctionEnd
 
 Var /GLOBAL Exec.Command
 Var /GLOBAL Exec.Name
-Var /GLOBAL Exec.IsWusa
+Var /GLOBAL Exec.InConsole
 
 Function ExecWithErrorHandling
 	Push $0
-	ExecWait '$Exec.Command' $0
+	${If} $Exec.InConsole == 1
+		LegacyUpdateNSIS::ExecToLog '$Exec.Command'
+		Pop $0
+	${Else}
+		ExecWait '$Exec.Command' $0
+	${EndIf}
+
 	${If} $0 == ${ERROR_SUCCESS_REBOOT_REQUIRED}
 		SetRebootFlag true
 	${ElseIf} $0 == ${ERROR_INSTALL_USEREXIT}
 		SetErrorLevel ${ERROR_INSTALL_USEREXIT}
 		Abort
-	${ElseIf} $Exec.IsWusa == 1
-	${AndIf} $0 == 1
-		; wusa exits with 1 if the patch is already installed. Treat this as success.
+	${ElseIf} $0 == ${WU_S_ALREADY_INSTALLED}
 		DetailPrint "Installation skipped - already installed"
-	${OrIf} $0 == ${WU_S_ALREADY_INSTALLED}
-		DetailPrint "Installation skipped - already installed"
-	${OrIf} $0 == ${WU_E_NOT_APPLICABLE}
+	${ElseIf} $0 == ${WU_E_NOT_APPLICABLE}
 		DetailPrint "Installation skipped - not applicable"
 	${ElseIf} $0 != 0
 		LegacyUpdateNSIS::MessageForHresult $0
@@ -176,19 +199,39 @@ FunctionEnd
 !macro InstallMSU kbid name
 	; Stop AU service before running wusa so it doesn't try checking for updates online first (which
 	; may never complete before we install our patches).
-	!insertmacro DetailPrint "Installing ${name} (${kbid})..."
+	!insertmacro DetailPrint "Extracting ${name} (${kbid})..."
 	SetDetailsPrint none
-	ExecShellWait "" "$WINDIR\system32\net.exe" "stop wuauserv" SW_HIDE
-	SetDetailsPrint listonly
-	StrCpy $Exec.IsWusa 1
-	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '$WINDIR\system32\wusa.exe /quiet /norestart "$0"'
-	StrCpy $Exec.IsWusa 0
+	CreateDirectory "$PLUGINSDIR\${kbid}"
+	StrCpy $Exec.InConsole 1
+	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\expand.exe" -F:* "$0" "$PLUGINSDIR\${kbid}"'
+	SetDetailsPrint lastused
+
+	!insertmacro DetailPrint "Installing ${name} (${kbid})..."
+	${DisableX64FSRedirection}
+	FindFirst $0 $1 "$PLUGINSDIR\${kbid}\*.xml"
+	${Do}
+		${If} $1 == ""
+			FindClose $0
+			${Break}
+		${EndIf}
+
+		; We prefer Dism, but need to fall back to Pkgmgr for Vista.
+		${If} ${IsWinVista}
+			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\pkgmgr.exe" /n:"$PLUGINSDIR\${kbid}\$1" /quiet /norestart'
+		${Else}
+			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\dism.exe" /Online /Apply-Unattend:"$PLUGINSDIR\${kbid}\$1" /Quiet /NoRestart'
+		${EndIf}
+
+		FindNext $0 $1
+	${Loop}
+	StrCpy $Exec.InConsole 0
+	${EnableX64FSRedirection}
 !macroend
 
 !macro EnsureAdminRights
 	${IfNot} ${AtLeastWin2000}
 		MessageBox MB_USERICON|MB_OKCANCEL \
-			"Legacy Update supports Windows 2000 and later.$\r$\n\
+			"Legacy Update requires Windows 2000 or later.$\r$\n\
 			$\r$\n\
 			You might be interested in Windows Update Restored instead.$\r$\n\
 			Would you like to go to http://windowsupdaterestored.com/ now?" \
