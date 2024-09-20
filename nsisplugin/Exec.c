@@ -54,8 +54,7 @@ void __declspec(dllexport) Exec(HWND hwndParent, int string_size, TCHAR *variabl
 void __declspec(dllexport) ExecToLog(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {
   g_hwndParent = hwndParent;
   EXDLL_INIT();
-	TRACE(L"exec with %i %ls", extra->exec_flags->status_update, (extra->exec_flags->status_update % 4) == 4 ? L"ignore" : L"lines");
-  ExecScript((extra->exec_flags->status_update % 4) == 4 ? MODE_IGNOREOUTPUT : MODE_LINES);
+  ExecScript((extra->exec_flags->status_update % 4) ? MODE_LINES : MODE_IGNOREOUTPUT);
 }
 
 void __declspec(dllexport) ExecToStack(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {

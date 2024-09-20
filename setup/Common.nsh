@@ -137,16 +137,11 @@ FunctionEnd
 
 Var /GLOBAL Exec.Command
 Var /GLOBAL Exec.Name
-Var /GLOBAL Exec.InConsole
 
 Function ExecWithErrorHandling
 	Push $0
-	${If} $Exec.InConsole == 1
-		LegacyUpdateNSIS::ExecToLog '$Exec.Command'
-		Pop $0
-	${Else}
-		ExecWait '$Exec.Command' $0
-	${EndIf}
+	LegacyUpdateNSIS::ExecToLog '$Exec.Command'
+	Pop $0
 
 	${If} $0 == ${ERROR_SUCCESS_REBOOT_REQUIRED}
 		SetRebootFlag true
@@ -186,7 +181,7 @@ FunctionEnd
 	!insertmacro ExecWithErrorHandling '${name}' '"$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600'
 
 	; If we successfully abort a shutdown, we'll get exit code 0, so we know a reboot is required.
-	ExecWait "$WINDIR\system32\shutdown.exe /a" $0
+	ExecWait '"$WINDIR\system32\shutdown.exe" /a' $0
 	${If} $0 == 0
 		SetRebootFlag true
 	${EndIf}
@@ -202,7 +197,6 @@ FunctionEnd
 	!insertmacro DetailPrint "Extracting ${name} (${kbid})..."
 	SetDetailsPrint none
 	CreateDirectory "$PLUGINSDIR\${kbid}"
-	StrCpy $Exec.InConsole 1
 	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\expand.exe" -F:* "$0" "$PLUGINSDIR\${kbid}"'
 	SetDetailsPrint lastused
 
@@ -224,7 +218,6 @@ FunctionEnd
 
 		FindNext $0 $1
 	${Loop}
-	StrCpy $Exec.InConsole 0
 	${EnableX64FSRedirection}
 !macroend
 
