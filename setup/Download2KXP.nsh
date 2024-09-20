@@ -57,7 +57,6 @@ Function -PatchHandler
 		${EndIf}
 	${EndIf}
 	ReadINIStr $1 $PLUGINSDIR\Patches.ini "$Patch.Key" Prefix
-	ReadINIStr $1 $PLUGINSDIR\Patches.ini Prefix $1
 	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" 1
 FunctionEnd
 

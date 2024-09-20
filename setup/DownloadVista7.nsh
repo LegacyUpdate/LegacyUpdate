@@ -1,17 +1,9 @@
 Function GetComponentArch
-	Var /GLOBAL ComponentArch
-	${If} $ComponentArch == ""
-		${If} ${IsNativeIA32}
-			StrCpy $ComponentArch "x86"
-		${ElseIf} ${IsNativeAMD64}
-			StrCpy $ComponentArch "amd64"
-		${ElseIf} ${IsNativeIA64}
-			StrCpy $ComponentArch "ia64"
-		${Else}
-			StrCpy $ComponentArch ""
-		${EndIf}
+	Call GetArch
+	Pop $0
+	${If} $0 == "x64"
+		StrCpy $0 "amd64"
 	${EndIf}
-	Push $ComponentArch
 FunctionEnd
 
 !macro SPHandler kbid title os sp
@@ -24,7 +16,8 @@ FunctionEnd
 			Call GetArch
 			Pop $0
 			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
-			!insertmacro Download "${title}" "$0" "${kbid}.exe" 1
+			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" Prefix
+			!insertmacro Download "${title}" "$1$0" "${kbid}.exe" 1
 		${EndIf}
 	FunctionEnd
 
@@ -58,7 +51,8 @@ FunctionEnd
 			Call GetArch
 			Pop $0
 			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" $0
-			!insertmacro DownloadMSU "${kbid}" "${title}" "$1"
+			ReadINIStr $2 $PLUGINSDIR\Patches.ini "${kbid}" Prefix
+			!insertmacro DownloadMSU "${kbid}" "${title}" "$2$1"
 		${EndIf}
 	FunctionEnd
 

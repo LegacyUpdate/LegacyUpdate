@@ -28,6 +28,8 @@ Function DetermineWUAVersion
 		Call GetArch
 		Pop $0
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini WUA $2-$0
+		ReadINIStr $1 $PLUGINSDIR\Patches.ini WUA Prefix
+		StrCpy $0 "$1$0"
 	${EndIf}
 FunctionEnd
 
