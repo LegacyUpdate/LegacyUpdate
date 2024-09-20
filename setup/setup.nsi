@@ -108,9 +108,7 @@ Page custom ActiveXPage
 
 !macro -RestartWUAUService
 	!insertmacro DetailPrint "Restarting Windows Update service..."
-	SetDetailsPrint none
 	LegacyUpdateNSIS::Exec '"$WINDIR\system32\net.exe" stop wuauserv'
-	SetDetailsPrint listonly
 !macroend
 
 Function RestartWUAUService
@@ -775,10 +773,12 @@ Function .onInit
 		!insertmacro RemoveSection ${WUA}
 	${EndIf}
 
-	${If} ${IsWinXP2002}
-	${OrIf} ${IsWinXP2003}
+	${If} ${AtLeastWinXP2002}
+	${AndIf} ${AtMostWin8.1}
 		; Check if the OS needs activation
-		LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
+		; TODO: Switch this to WMI
+		; LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
+		StrCpy $0 0
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${ACTIVATE}
@@ -924,12 +924,16 @@ Function PostInstall
 		${IfNot} ${IsActiveXInstall}
 			Exec '"$InstallDir\LegacyUpdate.exe" /launch $0'
 		${ElseIf} ${AtLeastWinVista}
-			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
+			Exec '"$WINDIR\system32\wuauclt.exe" /ShowWUAutoScan'
 		${EndIf}
 
-		; Launch XP activation wizard if requested by the user
+		; Launch activation wizard if requested by the user
 		${If} ${SectionIsSelected} ${ACTIVATE}
-			ExecShell "" "$WINDIR\system32\oobe\msoobe.exe" "/a"
+			${If} ${AtLeastWinVista}
+				Exec '"$WINDIR\system32\slui.exe"'
+			${Else}
+				Exec '"$WINDIR\system32\oobe\msoobe.exe" /a'
+			${EndIf}
 		${EndIf}
 	${EndIf}
 FunctionEnd
