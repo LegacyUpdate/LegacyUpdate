@@ -1,4 +1,5 @@
-MSBUILDCONFIG = $(if $(DEBUG),Debug-VC08,Release)
+override DEBUG := $(or $(DEBUG),1)
+MSBUILDCONFIG = $(if $(filter 1,$(DEBUG)),Debug-VC08,Release)
 
 ifeq ($(CI)$(DEBUG),11)
 	MSBUILDCONFIG = Debug-VC17

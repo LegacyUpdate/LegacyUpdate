@@ -2,8 +2,19 @@
 !define NAME               "Legacy Update"
 !define DOMAIN             "legacyupdate.net"
 
+; Build
+!if ${DEBUG} == 1
+	!define VSBUILD          "Debug-VC08"
+!else
+	!if ${CI} == 1
+		!define VSBUILD        "Debug-VC17"
+	!else
+		!define VSBUILD        "Release"
+	!endif
+!endif
+
 ; Version
-!getdllversion "..\Release\LegacyUpdate.dll" DLLVersion_
+!getdllversion "..\${VSBUILD}\LegacyUpdate.dll" DLLVersion_
 !define LONGVERSION        "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}.${DLLVersion_4}"
 !define VERSION            "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}"
 
