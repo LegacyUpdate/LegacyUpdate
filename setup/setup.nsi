@@ -52,6 +52,7 @@ Var /GLOBAL UninstallInstalled
 !include LogicLib.nsh
 !include Memento.nsh
 !include MUI2.nsh
+!include nsDialogs.nsh
 !include Sections.nsh
 !include Win\COM.nsh
 !include Win\WinError.nsh
@@ -71,6 +72,7 @@ Var /GLOBAL UninstallInstalled
 !include DownloadWUA.nsh
 !include RunOnce.nsh
 !include UpdateRoots.nsh
+!include ActiveXPage.nsh
 
 !insertmacro GetParameters
 !insertmacro GetOptions
@@ -83,6 +85,8 @@ Var /GLOBAL UninstallInstalled
 !define MUI_CUSTOMFUNCTION_ONMOUSEOVERSECTION OnMouseOverSection
 
 !insertmacro MUI_PAGE_COMPONENTS
+
+Page custom ActiveXPage
 
 !define MUI_PAGE_HEADER_TEXT         "Performing Actions"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
@@ -426,18 +430,20 @@ SectionGroupEnd
 ${MementoSectionDone}
 
 ; Uninstaller
-Section "un.Legacy Update Server" un.WUSERVER
+Section "-un.Legacy Update Server" un.WUSERVER
 	; Clear WSUS server
 	${If} ${AtMostWinVista}
 		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUServer"
 		${If} $0 == "${WSUS_SERVER}"
-			DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUServer"
+		${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
+			DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUServer"
 			DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
 		${EndIf}
 
 		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
 		${If} $0 == "${WSUS_SERVER}"
-			DeleteRegValue HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
+		${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
+			DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer"
 			DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
 		${EndIf}
 
@@ -511,7 +517,7 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${XPSP3}        "Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${XPESP3}       "Updates Windows XP Embedded to Service Pack 3. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${WES09}        "Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this."
-	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
+	!insertmacro MUI_DESCRIPTION_TEXT ${2003SP2}      "Updates Windows XP Professional x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_SUPEULA}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASP2}     "Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. ${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTASSU}     "Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n${DESCRIPTION_REBOOTS}"
 	!insertmacro MUI_DESCRIPTION_TEXT ${VISTAIE9}     "Updates Internet Explorer to 9.0.$\r$\n${DESCRIPTION_REBOOTS} ${DESCRIPTION_MSLT}"
@@ -985,7 +991,7 @@ Function .onSelChange
 		${AndIfNot} ${AtLeastServicePack} 2
 		${AndIfNot} ${SectionIsSelected} ${2003SP2}
 			MessageBox MB_USERICON \
-				"Windows XP x64 Edition or Windows Server 2003 must be updated to Service Pack 2 to activate over the internet. The Service Pack 2 update action will be enabled." \
+				"Windows XP Professional x64 Edition or Windows Server 2003 must be updated to Service Pack 2 to activate over the internet. The Service Pack 2 update action will be enabled." \
 				/SD IDOK
 			!insertmacro SelectSection ${2003SP2}
 		${EndIf}
