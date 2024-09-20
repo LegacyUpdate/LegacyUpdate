@@ -4,7 +4,7 @@
 
 #pragma comment(lib, "psapi.lib")
 
-int GetPidForName(const LPTSTR process) {
+DWORD GetPidForName(const LPTSTR process) {
 	// Yes, eat all of our SHRTs!
 	DWORD pids[SHRT_MAX];
 	DWORD bytesReturned;

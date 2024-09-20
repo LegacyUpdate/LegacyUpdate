@@ -2,4 +2,4 @@
 
 #include <windows.h>
 
-EXTERN_C int GetPidForName(LPTSTR process);
+EXTERN_C DWORD GetPidForName(LPTSTR process);

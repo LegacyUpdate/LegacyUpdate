@@ -32,9 +32,9 @@ static inline BOOL IsOSVersionOrEarlier(DWORD major, DWORD minor) {
 	return versionInfo->dwMajorVersion < major || (versionInfo->dwMajorVersion == major && versionInfo->dwMinorVersion <= minor);
 }
 
-HRESULT GetOwnVersion(LPWSTR *version, LPDWORD size);
+EXTERN_C HRESULT GetOwnVersion(LPWSTR *version);
 
-static inline void GetOwnFileName(LPWSTR *filename, LPDWORD size) {
-	*filename = (LPWSTR)LocalAlloc(LPTR, MAX_PATH);
-	*size = GetModuleFileName((HMODULE)&__ImageBase, *filename, MAX_PATH);
+static inline void GetOwnFileName(LPWSTR *filename) {
+	*filename = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
+	GetModuleFileName((HMODULE)&__ImageBase, *filename, MAX_PATH);
 }

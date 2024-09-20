@@ -210,13 +210,12 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 
 	case e_controlVersionString: {
 		LPWSTR data;
-		DWORD size;
-		HRESULT hr = GetOwnVersion(&data, &size);
+		HRESULT hr = GetOwnVersion(&data);
 		if (!SUCCEEDED(hr)) {
 			return hr;
 		}
 		retval->vt = VT_BSTR;
-		retval->bstrVal = SysAllocStringLen(data, size - 1);
+		retval->bstrVal = SysAllocString(data);
 		break;
 	}
 

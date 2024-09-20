@@ -5,8 +5,8 @@ typedef BOOL (WINAPI *_Wow64DisableWow64FsRedirection)(PVOID *OldValue);
 typedef BOOL (WINAPI *_Wow64RevertWow64FsRedirection)(PVOID OldValue);
 
 static BOOL _loadedWow64;
-_Wow64DisableWow64FsRedirection $Wow64DisableWow64FsRedirection;
-_Wow64RevertWow64FsRedirection $Wow64RevertWow64FsRedirection;
+static _Wow64DisableWow64FsRedirection $Wow64DisableWow64FsRedirection;
+static _Wow64RevertWow64FsRedirection $Wow64RevertWow64FsRedirection;
 
 static void LoadWow64Symbols() {
 	if (!_loadedWow64) {

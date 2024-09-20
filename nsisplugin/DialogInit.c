@@ -111,11 +111,11 @@ static void ConfigureWindow() {
 			g_bannerWordmark = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK_AERO), L"PNG");
 		} else {
 			LPWSTR logoPath;
-			DWORD logoPathSize;
-			GetOwnFileName(&logoPath, &logoPathSize);
+			GetOwnFileName(&logoPath);
 			wcsrchr(logoPath, L'\\')[1] = L'\0';
 			wcsncat(logoPath, L"banner.bmp", ARRAYSIZE(logoPath) - wcslen(logoPath) - 1);
 			g_bannerWordmark = LoadBitmapFromPath(logoPath);
+			LocalFree(logoPath);
 		}
 	}
 }

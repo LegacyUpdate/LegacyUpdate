@@ -78,8 +78,9 @@ STDAPI DllRegisterServer(void) {
 		return hr;
 	}
 
-	LPWSTR iconRef = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-	hr = StringCchPrintf(iconRef, MAX_PATH * sizeof(WCHAR), L"@\"%ls\\LegacyUpdate.exe\",-100", installPath);
+	WCHAR iconRef[MAX_PATH];
+	hr = StringCchPrintf((LPWSTR)&iconRef, MAX_PATH * sizeof(WCHAR), L"@\"%ls\\LegacyUpdate.exe\",-100", installPath);
+	LocalFree(installPath);
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
