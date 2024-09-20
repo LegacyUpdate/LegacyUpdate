@@ -356,7 +356,7 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
 		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
 		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory" "5,10"
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl" "$OUTDIR\LegacyUpdate.exe,-202"
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl" '"$OUTDIR\LegacyUpdate.exe",-202'
 		WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 		; Install DLL, with detection for it being in use by IE
@@ -375,7 +375,7 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 		SetOverwrite on
 
 		; Register DLL
-		ExecWait "$OUTDIR\LegacyUpdate.exe /regserver" $0
+		ExecWait '"$OUTDIR\LegacyUpdate.exe" /regserver' $0
 		${If} $0 != 0
 			Abort
 		${EndIf}
@@ -475,7 +475,7 @@ Section "-un.Legacy Update website" un.ACTIVEX
 	${EndIf}
 
 	; Unregister DLLs
-	ExecWait "$OUTDIR\LegacyUpdate.exe /unregserver" $0
+	ExecWait '"$OUTDIR\LegacyUpdate.exe" /unregserver' $0
 	${If} $0 != 0
 		Abort
 	${EndIf}
@@ -909,7 +909,7 @@ FunctionEnd
 
 Function PostInstall
 	; Handle first run flag if needed
-	${If} ${FileExists} "$InstallDir\LegacyUpdate.dll"
+	${If} ${FileExists} "$InstallDir\LegacyUpdate.exe"
 		ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "ActiveXInstalled"
 		${If} ${Errors}
 			StrCpy $0 "firstrun"
@@ -922,7 +922,7 @@ Function PostInstall
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
 		${IfNot} ${IsActiveXInstall}
-			Exec '"$InstallDir\LegacyUpdate.dll" launch $0'
+			Exec '"$InstallDir\LegacyUpdate.exe" /launch $0'
 		${ElseIf} ${AtLeastWinVista}
 			Exec '$SYSDIR\wuauclt.exe /ShowWUAutoScan'
 		${EndIf}
