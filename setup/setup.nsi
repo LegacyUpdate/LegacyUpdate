@@ -363,13 +363,13 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 		; NOTE: Here we specifically check for amd64, because the DLL is amd64.
 		; We still install to native Program Files on IA64, but with x86 binaries.
 		SetOverwrite try
-		!insertmacro TryFile "..\${VSBUILD}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
+		!insertmacro TryFile "..\${VSBUILD32}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
 		${If} ${IsNativeAMD64}
 			${If} ${FileExists} "$OUTDIR\LegacyUpdate32.dll"
 				!insertmacro TryDelete "$OUTDIR\LegacyUpdate32.dll"
 			${EndIf}
 			!insertmacro TryRename "$OUTDIR\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate32.dll"
-			!insertmacro TryFile "..\x64\${VSBUILD}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
+			!insertmacro TryFile "..\x64\${VSBUILD64}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
 		${EndIf}
 		Call CopyLauncher
 		SetOverwrite on

@@ -4,17 +4,20 @@
 
 ; Build
 !if ${DEBUG} == 1
-	!define VSBUILD          "Debug-VC08"
+	!define VSBUILD32          "Debug-VC08"
+	!define VSBUILD64          "Debug-VC17"
 !else
 	!if ${CI} == 1
-		!define VSBUILD        "Debug-VC17"
+		!define VSBUILD32        "Debug-VC17"
+		!define VSBUILD64        "Debug-VC17"
 	!else
-		!define VSBUILD        "Release"
+		!define VSBUILD32        "Release"
+		!define VSBUILD64        "Release"
 	!endif
 !endif
 
 ; Version
-!getdllversion "..\${VSBUILD}\LegacyUpdate.dll" DLLVersion_
+!getdllversion "..\${VSBUILD32}\LegacyUpdate.dll" DLLVersion_
 !define LONGVERSION        "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}.${DLLVersion_4}"
 !define VERSION            "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}"
 
