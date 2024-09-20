@@ -12,6 +12,7 @@
 	!insertmacro SetControlColor ${parent} ${control} SYSCLR:WINDOWTEXT
 !macroend
 
+; This is a PE resource because there's no benefit to LZMA compressing it
 PEAddResource "banner-wordmark-aero.png" "PNG" "#1337"
 
 Var /GLOBAL ChildHwnd
@@ -79,7 +80,6 @@ Var /GLOBAL ChildHwnd
 	${EndIf}
 
 	; Set up banner and glass
-	File /ONAME=$PLUGINSDIR\banner.bmp banner-wordmark-classic.bmp
 	LegacyUpdateNSIS::DialogInit
 !macroend
 

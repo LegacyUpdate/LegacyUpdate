@@ -41,28 +41,8 @@ static Theme g_theme = ThemeUnknown;
 static WNDPROC g_dialogOrigWndProc;
 static WNDPROC g_bannerOrigWndProc;
 
-static void DrawGradient(HDC hdc, RECT rect, COLORREF startColor, COLORREF endColor) {
-	TRIVERTEX vertex[2];
-
-	vertex[0].x     = rect.left;
-	vertex[0].y     = rect.top;
-	vertex[0].Red   = GetRValue(startColor) << 8;
-	vertex[0].Green = GetGValue(startColor) << 8;
-	vertex[0].Blue  = GetBValue(startColor) << 8;
-	vertex[0].Alpha = 0;
-
-	vertex[1].x     = rect.right;
-	vertex[1].y     = rect.bottom;
-	vertex[1].Red   = GetRValue(endColor) << 8;
-	vertex[1].Green = GetGValue(endColor) << 8;
-	vertex[1].Blue  = GetBValue(endColor) << 8;
-	vertex[1].Alpha = 0;
-
-	GRADIENT_RECT gradientRect = {0, 1};
-	GdiGradientFill(hdc, vertex, 2, &gradientRect, 1, GRADIENT_FILL_RECT_H);
-}
-
 static Theme GetTheme() {
+	// return ThemeClassic;
 	BOOL enabled;
 	if (!$DwmIsCompositionEnabled || !$IsThemeActive || !SUCCEEDED($DwmIsCompositionEnabled(&enabled))) {
 		return ThemeClassic;
@@ -110,39 +90,27 @@ static void ConfigureWindow() {
 		if (g_theme == ThemeAero) {
 			g_bannerWordmark = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK_AERO), L"PNG");
 		} else {
-			LPWSTR logoPath;
-			GetOwnFileName(&logoPath);
-			wcsrchr(logoPath, L'\\')[1] = L'\0';
-			wcsncat(logoPath, L"banner.bmp", ARRAYSIZE(logoPath) - wcslen(logoPath) - 1);
-			g_bannerWordmark = LoadBitmapFromPath(logoPath);
-			LocalFree(logoPath);
+			DeleteObject(g_bannerWordmark);
+			g_bannerWordmark = NULL;
 		}
 	}
 }
 
 static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	if (g_bannerOrigWndProc == NULL) {
+		return 0;
+	}
+
+	if (g_theme != ThemeAero) {
+		return CallWindowProc(g_bannerOrigWndProc, hwnd, uMsg, wParam, lParam);
+	}
+
 	switch (uMsg) {
 	case WM_PAINT: {
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hwnd, &ps);
 		RECT rect;
 		GetClientRect(hwnd, &rect);
-
-		// Draw background
-		if (g_theme != ThemeAero) {
-			HIGHCONTRAST highContrast;
-			highContrast.cbSize = sizeof(highContrast);
-			SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(highContrast), &highContrast, 0);
-
-			if (GetDeviceCaps(hdc, BITSPIXEL) <= 4 || (highContrast.dwFlags & HCF_HIGHCONTRASTON) != 0) {
-				// Fallback for low color and high contrast modes
-				HBRUSH brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-				FillRect(hdc, &ps.rcPaint, brush);
-				DeleteBrush(brush);
-			} else {
-				DrawGradient(hdc, rect, RGB(255, 255, 255), RGB(182, 197, 238));
-			}
-		}
 
 		// Draw wordmark with alpha blending
 		if (g_bannerWordmark) {
@@ -193,9 +161,11 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		return 0;
 	}
 
-	LRESULT lRet = 0;
-	if ($DwmDefWindowProc && $DwmDefWindowProc(hwnd, uMsg, wParam, lParam, &lRet)) {
-		return lRet;
+	if (g_theme == ThemeAero && $DwmDefWindowProc) {
+		LRESULT lRet = 0;
+		if ($DwmDefWindowProc(hwnd, uMsg, wParam, lParam, &lRet)) {
+			return lRet;
+		}
 	}
 
 	switch (uMsg) {
