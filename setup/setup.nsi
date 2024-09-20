@@ -388,7 +388,6 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 			'@"$OUTDIR\LegacyUpdate.exe",-4'
 
 		; Hide WU shortcuts
-		; TODO: How can we consistently find the shortcuts for non-English installs?
 		${If} ${AtMostWinXP2003}
 			${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
 				CreateDirectory "$OUTDIR\Backup"
