@@ -366,10 +366,8 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 			${EndIf}
 			!insertmacro TryRename "$OUTDIR\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate32.dll"
 			!insertmacro TryFile "..\x64\${VSBUILD}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
-			!insertmacro TryFile "..\launcher\obj\LegacyUpdate64.exe" "$OUTDIR\LegacyUpdate.exe"
-		${Else}
-			!insertmacro TryFile "..\launcher\obj\LegacyUpdate32.exe" "$OUTDIR\LegacyUpdate.exe"
 		${EndIf}
+		Call CopyLauncher
 		SetOverwrite on
 
 		; Register DLL

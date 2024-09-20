@@ -58,6 +58,18 @@ Function CleanUpRunOnceFinal
 	${EndIf}
 FunctionEnd
 
+Function CopyLauncher
+	${If} ${IsNativeAMD64}
+		!insertmacro TryFile "..\launcher\obj\LegacyUpdate64.exe" "$OUTDIR\LegacyUpdate.exe"
+	${Else}
+		!insertmacro TryFile "..\launcher\obj\LegacyUpdate32.exe" "$OUTDIR\LegacyUpdate.exe"
+	${EndIf}
+FunctionEnd
+
+Function un.CopyLauncher
+	; Empty
+FunctionEnd
+
 !macro -RebootIfRequired un
 	${If} ${RebootFlag}
 		!insertmacro DetailPrint "Preparing to restart..."
@@ -65,13 +77,9 @@ FunctionEnd
 		${IfNot} ${IsRunOnce}
 			; Copy to runonce path to ensure installer is accessible by the temp user
 			CreateDirectory "$RunOnceDir"
+			SetOutPath "$RunOnceDir"
 			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
-
-			${If} ${IsNativeAMD64}
-				File "/ONAME=$RunOnceDir\LegacyUpdate.exe" "..\launcher\obj\LegacyUpdate64.exe"
-			${Else}
-				File "/ONAME=$RunOnceDir\LegacyUpdate.exe" "..\launcher\obj\LegacyUpdate32.exe"
-			${EndIf}
+			Call ${un}CopyLauncher
 
 			; Remove mark of the web to prevent "Open File - Security Warning" dialog
 			System::Call '${DeleteFile}("$RunOnceDir\LegacyUpdateSetup.exe:Zone.Identifier")'
