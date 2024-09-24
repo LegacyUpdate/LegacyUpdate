@@ -83,7 +83,7 @@ FunctionEnd
 !macroend
 
 !insertmacro NeedsSPHandler "W2KSP4"  "Win2000"   2
-!insertmacro NeedsSPHandler "XPSP2"   "WinXP2002" 0
+!insertmacro NeedsSPHandler "XPSP1a"  "WinXP2002" 0
 !insertmacro NeedsSPHandler "XPSP3"   "WinXP2002" 2
 !insertmacro NeedsSPHandler "XPESP3"  "WinXP2002" 2
 !insertmacro NeedsSPHandler "2003SP2" "WinXP2003" 1
@@ -93,7 +93,7 @@ FunctionEnd
 
 !insertmacro PatchHandler "W2KSP4"   "Windows 2000 Service Pack 4"                       "-u -z"
 !insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 Update"                      "/passive /norestart"
-!insertmacro PatchHandler "XPSP2"    "Windows XP Service Pack 2"                         "/passive /norestart"
+!insertmacro PatchHandler "XPSP1a"   "Windows XP Service Pack 1a"                        "-u -z"
 !insertmacro PatchHandler "XPSP3"    "Windows XP Service Pack 3"                         "/passive /norestart"
 !insertmacro PatchHandler "2003SP2"  "Windows XP x64 Edition/Server 2003 Service Pack 2" "/passive /norestart"
 !insertmacro PatchHandler "XPESP3"   "Windows XP Embedded Service Pack 3"                "/passive /norestart"

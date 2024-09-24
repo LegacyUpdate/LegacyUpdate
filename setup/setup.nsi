@@ -178,7 +178,7 @@ SectionEnd
 
 ; XP 2002 prerequisities
 ${MementoSection} "Windows XP Service Pack 3" XPSP3
-	Call InstallXPSP2
+	Call InstallXPSP1a
 	Call RebootIfRequired
 	Call InstallXPSP3
 	Call RebootIfRequired
@@ -836,7 +836,7 @@ Function PreDownload
 	; XP 2002
 	${If} ${IsWinXP2002}
 	${AndIf} ${SectionIsSelected} ${XPSP3}
-		Call DownloadXPSP2
+		Call DownloadXPSP1a
 		Call DownloadXPSP3
 	${EndIf}
 
