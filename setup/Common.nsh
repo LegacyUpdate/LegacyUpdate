@@ -45,12 +45,14 @@ FunctionEnd
 Var /GLOBAL Download.ID
 
 Function DownloadRequest
-	Var /GLOBAL Download.UserAgent
-	${If} $Download.UserAgent == ""
-		GetWinVer $8 Major
-		GetWinVer $9 Minor
-		StrCpy $Download.UserAgent "User-Agent: Mozilla/4.0 (${NAME} ${VERSION}; Windows NT $8.$9)"
-	${EndIf}
+	; TODO: This is broken on XP for some reason
+	; Var /GLOBAL Download.UserAgent
+	; ${If} $Download.UserAgent == ""
+	; 	GetWinVer $8 Major
+	; 	GetWinVer $9 Minor
+	; 	StrCpy $Download.UserAgent "Mozilla/4.0 (${NAME} ${VERSION}; Windows NT $8.$9)"
+	; ${EndIf}
+	; /HEADER "User-Agent: $Download.UserAgent" \
 
 	NSxfer::Request \
 		/TIMEOUTCONNECT 60000 \
@@ -62,7 +64,6 @@ Function DownloadRequest
 		/LOCAL "$1" \
 		/INTERNETFLAGS ${INTERNET_FLAG_RELOAD}|${INTERNET_FLAG_NO_CACHE_WRITE}|${INTERNET_FLAG_KEEP_CONNECTION}|${INTERNET_FLAG_NO_COOKIES}|${INTERNET_FLAG_NO_UI} \
 		/SECURITYFLAGS ${SECURITY_FLAG_STRENGTH_STRONG} \
-		/HEADERS "$Download.UserAgent" \
 		$2 \
 		/END
 	Pop $Download.ID
