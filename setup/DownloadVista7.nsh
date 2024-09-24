@@ -4,6 +4,7 @@ Function GetComponentArch
 	${If} $0 == "x64"
 		StrCpy $0 "amd64"
 	${EndIf}
+	Push $0
 FunctionEnd
 
 !macro SPHandler kbid title os sp
@@ -36,7 +37,7 @@ FunctionEnd
 		Call GetComponentArch
 		Pop $0
 		ClearErrors
-		EnumRegKey $1 HKLM "${REGPATH_CBS_PACKAGEINDEX}\Package_1_for_${kbid}~31bf3856ad364e35~$0~~0.0.0.0" 0
+		EnumRegKey $1 HKLM "${REGPATH_CBS_PACKAGEINDEX}\Package_for_${kbid}~31bf3856ad364e35~$0~~0.0.0.0" 0
 		${If} ${Errors}
 			Push 1
 		${Else}
