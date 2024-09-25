@@ -11,6 +11,10 @@
 !insertmacro MSUHandler "KB2937592" "Windows 8.1 Update 1"
 !insertmacro MSUHandler "KB2934018" "Windows 8.1 Update 1"
 
+; Windows 8.1 Update 3
+; TODO
+; !insertmacro MSUHandler "KB2934018" "Windows 8.1 Update 3"
+
 Function NeedsWin81Update1
 	Call NeedsKB2919355
 	Call NeedsKB2932046
@@ -31,6 +35,20 @@ Function NeedsWin81Update1
 		Push 0
 	${EndIf}
 FunctionEnd
+
+; TODO
+; Function NeedsWin81Update3
+; 	Call GetArch
+; 	Call NeedsKB2934018
+; 	Pop $0
+; 	Pop $1
+; 	${If} $0 == 1
+; 	${AndIf} $1 == "arm"
+; 		Push 1
+; 	${Else}
+; 		Push 0
+; 	${EndIf}
+; FunctionEnd
 
 ; Weird prerequisite to Update 1 that fixes the main KB2919355 update failing to install
 Function DownloadClearCompressionFlag
