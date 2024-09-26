@@ -1,5 +1,5 @@
 #pragma once
 
-HRESULT GetOSProductName(VARIANT* pProductName);
+HRESULT GetOSProductName(LPVARIANT productName);
 
 HRESULT Reboot();

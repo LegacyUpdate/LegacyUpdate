@@ -15,15 +15,17 @@
 static BOOL _loadedProductName = FALSE;
 static CComVariant _productName;
 
-HRESULT GetOSProductName(VARIANT *pProductName) {
-	if (_loadedProductName) {
-		VariantCopy(pProductName, &_productName);
-		return S_OK;
+HRESULT GetOSProductName(LPVARIANT productName) {
+	if (!_loadedProductName) {
+		VariantInit(&_productName);
+		HRESULT hr = QueryWMIProperty(L"SELECT Caption FROM Win32_OperatingSystem", L"Caption", &_productName);
+		if (!SUCCEEDED(hr)) {
+			return hr;
+		}
 	}
-
-	VariantInit(&_productName);
-	_loadedProductName = true;
-	return QueryWMIProperty(L"SELECT Caption FROM Win32_OperatingSystem", L"Caption", &_productName);
+	
+	VariantCopy(productName, &_productName);
+	return S_OK;
 }
 
 HRESULT Reboot() {
