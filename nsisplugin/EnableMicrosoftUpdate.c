@@ -18,17 +18,18 @@ void __cdecl EnableMicrosoftUpdate(HWND hwndParent, int string_size, TCHAR *vari
 		goto end;
 	}
 
-	hr = IUpdateServiceManager2_AddService2(serviceManager, SysAllocString(MicrosoftUpdateServiceID), asfAllowPendingRegistration | asfAllowOnlineRegistration | asfRegisterServiceWithAU, SysAllocString(L""), &registration);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	BSTR serviceID = SysAllocString(MicrosoftUpdateServiceID);
+	BSTR serviceCab = SysAllocString(L"");
+	hr = IUpdateServiceManager2_AddService2(serviceManager, serviceID, asfAllowPendingRegistration | asfAllowOnlineRegistration | asfRegisterServiceWithAU, serviceCab, &registration);
+	SysFreeString(serviceID);
+	SysFreeString(serviceCab);
 
 end:
-	if (registration != NULL) {
+	if (registration) {
 		IUpdateServiceManager2_Release(registration);
 	}
 
-	if (serviceManager != NULL) {
+	if (serviceManager) {
 		IUpdateServiceManager2_Release(serviceManager);
 	}
 
