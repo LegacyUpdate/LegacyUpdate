@@ -69,7 +69,7 @@
     <ClCompile Include="ElevationHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\WMI.cpp">
+    <ClCompile Include="..\shared\WMI.c">
       <Filter>Shared</Filter>
     </ClCompile>
     <ClCompile Include="..\shared\Registry.c">
