@@ -310,14 +310,15 @@ end:
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::RunWizard(IUpdateInstaller *installer, BSTR dialogTitle, IInstallationResult **retval) {
+STDMETHODIMP CLegacyUpdateCtrl::RunWizard(IDispatch *installer, BSTR dialogTitle, IDispatch **retval) {
 	DoIsPermittedCheck();
 
 	// Handle preparing to run the wizard. When running through the elevation helper,
 	// put_ParentWindow() doesn't work. Set the parent hwnd from here and run the wizard.
-	installer->put_ParentHwnd(GetIEWindowHWND());
+	IUpdateInstaller *updateInstaller = (IUpdateInstaller *)installer;
+	updateInstaller->put_ParentHwnd(GetIEWindowHWND());
 
-	return installer->RunWizard(dialogTitle, retval);
+	return updateInstaller->RunWizard(dialogTitle, (IInstallationResult **)retval);
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
