@@ -343,7 +343,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	// Ask WU itself whether a reboot is required
 	CComPtr<ISystemInformation> systemInfo;
 	if (SUCCEEDED(systemInfo.CoCreateInstance(CLSID_SystemInformation, NULL, CLSCTX_INPROC_SERVER))) {
-		if (SUCCEEDED(systemInfo->get_RebootRequired(retval)) && *retval) {
+		if (SUCCEEDED(systemInfo->get_RebootRequired(retval)) && *retval == VARIANT_TRUE) {
 			return S_OK;
 		}
 	}
@@ -353,11 +353,11 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	HRESULT hr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", KEY_WOW64_64KEY, KEY_READ, &subkey);
 	if (SUCCEEDED(hr)) {
 		RegCloseKey(subkey);
-		*retval = TRUE;
+		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 
-	*retval = FALSE;
+	*retval = VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -485,7 +485,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 
 	DWORD useWUServer;
 	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", 0, &useWUServer);
-	*retval = SUCCEEDED(hr) && useWUServer == 1;
+	*retval = SUCCEEDED(hr) && useWUServer == 1 ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
