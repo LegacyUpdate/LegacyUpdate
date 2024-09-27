@@ -49,11 +49,11 @@ Function CleanUpRunOnceFinal
 	; Enable logon animation again if needed
 	${If} ${AtLeastWin8}
 		ClearErrors
-		ReadRegDword $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation_LegacyUpdateTemp"
+		ReadRegDword $0 HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation_LegacyUpdateTemp"
 		${If} ${Errors}
-			DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation"
+			DeleteRegValue HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation"
 		${Else}
-			WriteRegDword HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation" $0
+			WriteRegDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" $0
 		${EndIf}
 	${EndIf}
 FunctionEnd
@@ -95,11 +95,11 @@ FunctionEnd
 		; Temporarily disable logon animation if needed
 		${If} ${AtLeastWin8}
 			ClearErrors
-			ReadRegDword $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation"
+			ReadRegDword $0 HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation"
 			${IfNot} ${Errors}
-				WriteRegDword HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation_LegacyUpdateTemp" $0
+				WriteRegDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation_LegacyUpdateTemp" $0
 			${EndIf}
-			WriteRegDword HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableFirstLogonAnimation" 0
+			WriteRegDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
 		${EndIf}
 
 		; Reboot now
@@ -123,10 +123,6 @@ Function OnRunOnceLogon
 	; To be safe in case we crash, immediately restore setup keys. We'll set them again if needed.
 	Call CleanUpRunOnce
 
-!if ${SIGN} != 1
-	ExecShell "" "cmd.exe" "" SW_SHOWMINIMIZED
-!endif
-
 	; If we're in the middle of installing a service pack, let it keep doing its thing. We'll register
 	; for setup again, and try again on next boot.
 	ClearErrors
@@ -134,12 +130,6 @@ Function OnRunOnceLogon
 	${IfNot} ${Errors}
 		SetRebootFlag true
 		Call RebootIfRequired
-	${EndIf}
-
-	; Find and hide the FirstUxWnd window, if it exists (Windows 7+)
-	FindWindow $0 "FirstUxWndClass"
-	${If} $0 != 0
-		ShowWindow $0 ${SW_HIDE}
 	${EndIf}
 FunctionEnd
 

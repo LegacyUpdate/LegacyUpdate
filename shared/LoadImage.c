@@ -16,27 +16,32 @@ static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type)
 	IStream *stream;
 	HRSRC resource = FindResource(hInstance, name, type);
 	if (!resource) {
+		TRACE(L"FindResource failed: %d", GetLastError());
 		return NULL;
 	}
 
 	DWORD resourceSize = SizeofResource(hInstance, resource);
 	HGLOBAL imageHandle = LoadResource(hInstance, resource);
 	if (!imageHandle) {
+		TRACE(L"LoadResource failed: %d", GetLastError());
 		return NULL;
 	}
 
 	LPVOID sourceResourceData = LockResource(imageHandle);
-	if (!sourceResourceData) {
+	if (!LockResource) {
+		TRACE(L"FindResource failed: %d", GetLastError());
 		return NULL;
 	}
 
 	HGLOBAL resourceDataHandle = GlobalAlloc(GMEM_MOVEABLE, resourceSize);
 	if (!resourceDataHandle) {
+		TRACE(L"GlobalAlloc failed: %d", GetLastError());
 		return NULL;
 	}
 
 	LPVOID resourceData = GlobalLock(resourceDataHandle);
 	if (!resourceData) {
+		TRACE(L"GlobalLock failed: %d", GetLastError());
 		GlobalFree(resourceDataHandle);
 		return NULL;
 	}
@@ -58,7 +63,7 @@ static IWICBitmapSource *GetWICBitmap(IStream *imageStream) {
 	UINT frameCount;
 	IWICBitmapFrameDecode *frame;
 
-	if (!SUCCEEDED(CoCreateInstance(&CLSID_WICPngDecoder, NULL, CLSCTX_INPROC_SERVER, &IID_IWICBitmapDecoder, (LPVOID*)&decoder))) {
+	if (!SUCCEEDED(CoCreateInstance(&CLSID_WICPngDecoder, NULL, CLSCTX_INPROC_SERVER, &IID_IWICBitmapDecoder, (LPVOID *)&decoder))) {
 		return NULL;
 	}
 
@@ -126,11 +131,13 @@ HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourc
 
 	IStream *imageStream = GetResourceStream(hInstance, resourceName, resourceType);
 	if (!imageStream) {
+		TRACE(L"GetResourceStream failed: %d", GetLastError());
 		return NULL;
 	}
 
 	IWICBitmapSource *bitmap = GetWICBitmap(imageStream);
 	if (!bitmap) {
+		TRACE(L"GetWICBitmap failed: %d", GetLastError());
 		IStream_Release(imageStream);
 		return NULL;
 	}

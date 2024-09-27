@@ -2,6 +2,7 @@ FILES   = \
 	$(wildcard *.c) \
 	../include/nsis/pluginapi.c \
 	../Shared/HResult.c \
+	../Shared/LoadImage.c \
 	../Shared/GetPidForName.c \
 	../Shared/WUErrors.c
 RCFILES = resource.rc
@@ -93,9 +94,8 @@ obj/%.$(TAG).o: %.c
 obj/%.$(TAG).o: %.cpp
 	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
-# TODO: Change to C, WUErrors.c requires C++ for now
 obj/%.$(TAG).o: ../shared/%.c
-	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
+	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.cpp
 	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@

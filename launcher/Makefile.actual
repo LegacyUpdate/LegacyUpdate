@@ -2,6 +2,7 @@ FILES    = \
 	$(wildcard *.c) \
 	../shared/Exec.c \
 	../shared/GetPidForName.c \
+	../shared/LoadImage.c \
 	../shared/Registry.c \
 	../shared/VersionInfo.c \
 	../shared/Wow64.c
@@ -76,6 +77,8 @@ LDFLAGS = \
 	-lcomctl32 \
 	-lshell32 \
 	-lversion \
+	-lgdi32 \
+	-lmsimg32 \
 	-lLegacyUpdate.$(TAG)
 
 RCFLAGS = \

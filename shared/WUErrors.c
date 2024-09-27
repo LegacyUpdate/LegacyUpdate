@@ -262,5 +262,5 @@ struct HResultMessage WUErrorMessages[] = {
 	{ WU_E_EE_INVALID_ATTRIBUTEDATA, L"An expression evaluator operation could not be completed because there was an invalid attribute." },
 	{ WU_E_EE_CLUSTER_ERROR, L"An expression evaluator operation could not be completed because the cluster state of the computer could not be determined." },
 	{ WU_E_EE_UNEXPECTED, L"There was an expression evaluator error not covered by another WU_E_EE_* error code." },
-	NULL
+	{ 0, NULL }
 };
