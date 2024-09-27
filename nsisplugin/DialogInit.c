@@ -215,10 +215,8 @@ static UINT_PTR NSISPluginCallback(enum NSPIM event) {
 	return 0;
 }
 
-EXTERN_C __declspec(dllexport)
-void __cdecl DialogInit(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {
-	EXDLL_INIT();
-	g_hwndParent = hwndParent;
+PLUGIN_METHOD(DialogInit) {
+	PLUGIN_INIT();
 
 	if (g_dialogOrigWndProc) {
 		return;

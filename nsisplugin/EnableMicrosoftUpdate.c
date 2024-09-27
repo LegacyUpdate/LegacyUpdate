@@ -5,10 +5,8 @@
 
 static const LPWSTR MicrosoftUpdateServiceID = L"7971f918-a847-4430-9279-4a52d1efe18d";
 
-EXTERN_C __declspec(dllexport)
-void __cdecl EnableMicrosoftUpdate(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {
-	EXDLL_INIT();
-	g_hwndParent = hwndParent;
+PLUGIN_METHOD(EnableMicrosoftUpdate) {
+	PLUGIN_INIT();
 
 	IUpdateServiceManager2 *serviceManager;
 	IUpdateServiceRegistration *registration;

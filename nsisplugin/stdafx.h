@@ -20,3 +20,11 @@
 #include "Trace.h"
 
 EXTERN_C HWND g_hwndParent;
+
+#define PLUGIN_METHOD(name) \
+	EXTERN_C __declspec(dllexport) \
+	void __cdecl name(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra)
+
+#define PLUGIN_INIT() \
+	EXDLL_INIT(); \
+	g_hwndParent = hwndParent;

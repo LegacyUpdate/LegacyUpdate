@@ -52,10 +52,8 @@ static UINT_PTR NSISPluginCallback(enum NSPIM event) {
 	return 0;
 }
 
-EXTERN_C __declspec(dllexport)
-void __cdecl InitTaskbarProgress(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {
-	EXDLL_INIT();
-	g_hwndParent = hwndParent;
+PLUGIN_METHOD(InitTaskbarProgress) {
+	PLUGIN_INIT();
 
 	extra->RegisterPluginCallback(g_hInstance, NSISPluginCallback);
 

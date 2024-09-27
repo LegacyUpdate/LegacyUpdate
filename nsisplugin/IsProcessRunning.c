@@ -3,10 +3,8 @@
 #include "main.h"
 #include "GetPidForName.h"
 
-EXTERN_C __declspec(dllexport)
-void __cdecl IsProcessRunning(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {
-	EXDLL_INIT();
-	g_hwndParent = hwndParent;
+PLUGIN_METHOD(IsProcessRunning) {
+	PLUGIN_INIT();
 
 	LPTSTR process = (LPTSTR)LocalAlloc(LPTR, string_size * sizeof(TCHAR));
 	popstring(process);
