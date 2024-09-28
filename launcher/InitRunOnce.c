@@ -300,5 +300,10 @@ void RunOnce() {
 		CloseHandle(g_cmdHandle);
 	}
 
+	// Show FirstUxWnd again
+	if (firstUxWnd) {
+		ShowWindow(firstUxWnd, SW_SHOW);
+	}
+
 	PostQuitMessage(0);
 }
