@@ -2,4 +2,4 @@
 
 #include <windows.h>
 
-HRESULT RegisterServer(BOOL state, BOOL forLaunch);
+HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch);

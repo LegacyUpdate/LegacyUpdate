@@ -11,7 +11,7 @@ typedef HRESULT (WINAPI *_TaskDialogIndirect)(const TASKDIALOGCONFIG *pTaskConfi
 static BOOL _loadedTaskDialog = FALSE;
 static _TaskDialogIndirect $TaskDialogIndirect;
 
-int MsgBox(HWND hWnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
+int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 	if (!_loadedTaskDialog) {
 		_loadedTaskDialog = TRUE;
 		$TaskDialogIndirect = (_TaskDialogIndirect)GetProcAddress(LoadLibrary(L"comctl32.dll"), "TaskDialogIndirect");
@@ -31,7 +31,7 @@ int MsgBox(HWND hWnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 
 		MSGBOXPARAMS params = { 0 };
 		params.cbSize = sizeof(MSGBOXPARAMS);
-		params.hwndOwner = hWnd;
+		params.hwndOwner = hwnd;
 		params.hInstance = GetModuleHandle(NULL);
 		params.lpszText = finalBody;
 		params.lpszCaption = L"Legacy Update";
@@ -64,7 +64,7 @@ int MsgBox(HWND hWnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 
 	TASKDIALOGCONFIG config = { 0 };
 	config.cbSize = sizeof(TASKDIALOGCONFIG);
-	config.hwndParent = hWnd;
+	config.hwndParent = hwnd;
 	config.hInstance = GetModuleHandle(NULL);
 	config.dwFlags = TDF_POSITION_RELATIVE_TO_WINDOW;
 	config.dwCommonButtons = buttons;

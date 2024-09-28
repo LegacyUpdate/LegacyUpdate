@@ -73,7 +73,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	// Can we instantiate our own ActiveX control? If not, try to register it.
 	hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_LOCAL_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
 	if (hr == REGDB_E_CLASSNOTREG) {
-		hr = RegisterServer(TRUE, TRUE);
+		hr = RegisterServer(0, TRUE, TRUE);
 		if (!SUCCEEDED(hr)) {
 			goto end;
 		}

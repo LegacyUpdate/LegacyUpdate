@@ -37,15 +37,17 @@ HRESULT RegisterDll(LPWSTR path, BOOL state) {
 	return status == 0 ? S_OK : E_FAIL;
 }
 
-HRESULT RegisterServer(BOOL state, BOOL forLaunch) {
+HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	// Ensure elevation
 	HRESULT hr = S_OK;
 	LPWSTR installPath;
 	LPWSTR dllPath;
 
 	if (!IsUserAdmin()) {
+		LPWSTR args = (LPWSTR)LocalAlloc(LPTR, 512 * sizeof(WCHAR));
+		wsprintf(args, L"%ls %i", state ? L"/regserver" : L"/unregserver", hwnd);
 		DWORD code;
-		hr = SelfElevate(state ? L"/regserver" : L"/unregserver", &code);
+		hr = SelfElevate(args, &code);
 		if (!SUCCEEDED(hr)) {
 			// Ignore error on cancelling UAC dialog
 			if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
@@ -93,7 +95,7 @@ end:
 		// TODO: Fix GetMessageForHresult()
 		LPWSTR text;
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, NULL);
-		MsgBox(NULL, title, /*GetMessageForHresult(hr)*/ text, MB_OK | MB_ICONERROR);
+		MsgBox(hwnd, title, /*GetMessageForHresult(hr)*/ text, MB_OK | MB_ICONERROR);
 	}
 
 	if (!forLaunch) {

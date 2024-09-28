@@ -35,10 +35,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		LaunchUpdateSite(flagsCount, flags, nCmdShow);
 	} else if (wcscmp(action, L"/runonce") == 0) {
 		RunOnce();
-	} else if (wcscmp(action, L"/regserver") == 0) {
-		RegisterServer(TRUE, FALSE);
-	} else if (wcscmp(action, L"/unregserver") == 0) {
-		RegisterServer(FALSE, FALSE);
+	} else if (wcscmp(action, L"/regserver") == 0 || wcscmp(action, L"/unregserver") == 0) {
+		BOOL state = wcscmp(action, L"/regserver") == 0;
+		HWND hwnd = flagsCount > 0 ? (HWND)wcstol(flags[0], NULL, 10) : 0;
+		RegisterServer(hwnd, state, FALSE);
 	} else {
 		const LPWSTR usage = L""
 			L"LegacyUpdate.exe [/launch|/regserver|/unregserver]\n"

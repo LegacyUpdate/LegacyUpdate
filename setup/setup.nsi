@@ -373,7 +373,7 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 		SetOverwrite on
 
 		; Register DLL
-		ExecWait '"$OUTDIR\LegacyUpdate.exe" /regserver' $0
+		ExecWait '"$OUTDIR\LegacyUpdate.exe" /regserver $HWNDPARENT' $0
 		${If} $0 != 0
 			Abort
 		${EndIf}
@@ -473,7 +473,7 @@ Section "-un.Legacy Update website" un.ACTIVEX
 	${EndIf}
 
 	; Unregister DLLs
-	ExecWait '"$OUTDIR\LegacyUpdate.exe" /unregserver' $0
+	ExecWait '"$OUTDIR\LegacyUpdate.exe" /unregserver $HWNDPARENT' $0
 	${If} $0 != 0
 		Abort
 	${EndIf}
