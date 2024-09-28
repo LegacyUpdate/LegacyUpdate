@@ -1,0 +1,172 @@
+#include <olectl.h>
+#include <idispids.h>
+import "oaidl.idl";
+import "ocidl.idl";
+
+// Generated .IDL file (by the OLE/COM Object Viewer)
+//
+// typelib filename: licdll.dll
+
+[
+  uuid(C7879482-F798-4A74-AF43-E887FBDCED40),
+  version(1.0),
+  helpstring("licdll 1.0 Type Library")
+]
+library LICDLLLib
+{
+	// TLib :     // TLib : OLE Automation : {00020430-0000-0000-C000-000000000046}
+	importlib("stdole2.tlb");
+
+	// Forward declare all types defined in this typelib
+	interface ICOMLicenseAgent;
+	interface ICOMLicenseAgent2;
+
+	[
+	  uuid(ACADF079-CBCD-4032-83F2-FA47C4DB096F),
+	  helpstring("COMLicenseAgent Class")
+	]
+	coclass COMLicenseAgent {
+		[default] interface ICOMLicenseAgent;
+		interface ICOMLicenseAgent2;
+	};
+
+	[
+	  odl,
+	  uuid(B8CBAD79-3F1F-481A-BB0C-E7BBD77BDDD1),
+	  helpstring("ICOMLicenseAgent Interface"),
+	  dual,
+	  oleautomation
+	]
+	interface ICOMLicenseAgent : IDispatch {
+		[id(0x00000001), helpstring("method Initialize")]
+		HRESULT Initialize(
+						[in] unsigned long dwBPC,
+						[in] unsigned long dwMode,
+						[in] BSTR bstrLicSource,
+						[out, retval] unsigned long* pdwRetCode);
+		[id(0x00000003), helpstring("method GetFirstName")]
+		HRESULT GetFirstName([out, retval] BSTR* pbstrVal);
+		[id(0x00000004), helpstring("method SetFirstName")]
+		HRESULT SetFirstName([in] BSTR bstrNewVal);
+		[id(0x00000005), helpstring("method GetLastName")]
+		HRESULT GetLastName([out, retval] BSTR* pbstrVal);
+		[id(0x00000006), helpstring("method SetLastName")]
+		HRESULT SetLastName([in] BSTR bstrNewVal);
+		[id(0x00000007), helpstring("method GetOrgName")]
+		HRESULT GetOrgName([out, retval] BSTR* pbstrVal);
+		[id(0x00000008), helpstring("method SetOrgName")]
+		HRESULT SetOrgName([in] BSTR bstrNewVal);
+		[id(0x00000009), helpstring("method GetEmail")]
+		HRESULT GetEmail([out, retval] BSTR* pbstrVal);
+		[id(0x0000000a), helpstring("method SetEmail")]
+		HRESULT SetEmail([in] BSTR bstrNewVal);
+		[id(0x0000000b), helpstring("method GetPhone")]
+		HRESULT GetPhone([out, retval] BSTR* pbstrVal);
+		[id(0x0000000c), helpstring("method SetPhone")]
+		HRESULT SetPhone([in] BSTR bstrNewVal);
+		[id(0x0000000d), helpstring("method GetAddress1")]
+		HRESULT GetAddress1([out, retval] BSTR* pbstrVal);
+		[id(0x0000000e), helpstring("method SetAddress1")]
+		HRESULT SetAddress1([in] BSTR bstrNewVal);
+		[id(0x0000000f), helpstring("method GetCity")]
+		HRESULT GetCity([out, retval] BSTR* pbstrVal);
+		[id(0x00000010), helpstring("method SetCity")]
+		HRESULT SetCity([in] BSTR bstrNewVal);
+		[id(0x00000011), helpstring("method GetState")]
+		HRESULT GetState([out, retval] BSTR* pbstrVal);
+		[id(0x00000012), helpstring("method SetState")]
+		HRESULT SetState([in] BSTR bstrNewVal);
+		[id(0x00000013), helpstring("method GetCountryCode")]
+		HRESULT GetCountryCode([out, retval] BSTR* pbstrVal);
+		[id(0x00000014), helpstring("method SetCountryCode")]
+		HRESULT SetCountryCode([in] BSTR bstrNewVal);
+		[id(0x00000015), helpstring("method GetCountryDesc")]
+		HRESULT GetCountryDesc([out, retval] BSTR* pbstrVal);
+		[id(0x00000016), helpstring("method SetCountryDesc")]
+		HRESULT SetCountryDesc([in] BSTR bstrNewVal);
+		[id(0x00000017), helpstring("method GetZip")]
+		HRESULT GetZip([out, retval] BSTR* pbstrVal);
+		[id(0x00000018), helpstring("method SetZip")]
+		HRESULT SetZip([in] BSTR bstrNewVal);
+		[id(0x00000019), helpstring("method GetIsoLanguage")]
+		HRESULT GetIsoLanguage([out, retval] unsigned long* pdwVal);
+		[id(0x0000001a), helpstring("method SetIsoLanguage")]
+		HRESULT SetIsoLanguage([in] unsigned long dwNewVal);
+		[id(0x00000020), helpstring("method GetMSUpdate")]
+		HRESULT GetMSUpdate([out, retval] BSTR* pbstrVal);
+		[id(0x00000021), helpstring("method SetMSUpdate")]
+		HRESULT SetMSUpdate([in] BSTR bstrNewVal);
+		[id(0x00000022), helpstring("method GetMSOffer")]
+		HRESULT GetMSOffer([out, retval] BSTR* pbstrVal);
+		[id(0x00000023), helpstring("method SetMSOffer")]
+		HRESULT SetMSOffer([in] BSTR bstrNewVal);
+		[id(0x00000024), helpstring("method GetOtherOffer")]
+		HRESULT GetOtherOffer([out, retval] BSTR* pbstrVal);
+		[id(0x00000025), helpstring("method SetOtherOffer")]
+		HRESULT SetOtherOffer([in] BSTR bstrNewVal);
+		[id(0x00000026), helpstring("method GetAddress2")]
+		HRESULT GetAddress2([out, retval] BSTR* pbstrVal);
+		[id(0x00000027), helpstring("method SetAddress2")]
+		HRESULT SetAddress2([in] BSTR bstrNewVal);
+		[id(0x00000052), helpstring("method AsyncProcessHandshakeRequest")]
+		HRESULT AsyncProcessHandshakeRequest([in] long bReviseCustInfo);
+		[id(0x00000053), helpstring("method AsyncProcessNewLicenseRequest")]
+		HRESULT AsyncProcessNewLicenseRequest();
+		[id(0x00000054), helpstring("method AsyncProcessReissueLicenseRequest")]
+		HRESULT AsyncProcessReissueLicenseRequest();
+		[id(0x00000056), helpstring("method AsyncProcessReviseCustInfoRequest")]
+		HRESULT AsyncProcessReviseCustInfoRequest();
+		[id(0x0000005a), helpstring("method GetAsyncProcessReturnCode")]
+		HRESULT GetAsyncProcessReturnCode([out, retval] unsigned long* pdwRetCode);
+		[id(0x0000005d), helpstring("method AsyncProcessDroppedLicenseRequest")]
+		HRESULT AsyncProcessDroppedLicenseRequest();
+		[id(0x00000064), helpstring("method GenerateInstallationId")]
+		HRESULT GenerateInstallationId([out, retval] BSTR* pbstrVal);
+		[id(0x00000065), helpstring("method DepositConfirmationId")]
+		HRESULT DepositConfirmationId(
+						[in] BSTR bstrVal,
+						[out, retval] unsigned long* pdwRetCode);
+		[id(0x00000066), helpstring("method GetExpirationInfo")]
+		HRESULT GetExpirationInfo(
+						[out] unsigned long* pdwWPALeft,
+						[out, retval] unsigned long* pdwEvalLeft);
+		[id(0x00000067), helpstring("method AsyncProcessRegistrationRequest")]
+		HRESULT AsyncProcessRegistrationRequest();
+		[id(0x00000068), helpstring("method ProcessHandshakeRequest")]
+		HRESULT ProcessHandshakeRequest([in] long bReviseCustInfo);
+		[id(0x00000069), helpstring("method ProcessNewLicenseRequest")]
+		HRESULT ProcessNewLicenseRequest();
+		[id(0x0000006a), helpstring("method ProcessDroppedLicenseRequest")]
+		HRESULT ProcessDroppedLicenseRequest();
+		[id(0x0000006b), helpstring("method ProcessReissueLicenseRequest")]
+		HRESULT ProcessReissueLicenseRequest();
+		[id(0x0000006d), helpstring("method ProcessReviseCustInfoRequest")]
+		HRESULT ProcessReviseCustInfoRequest();
+		[id(0x0000006e), helpstring("method EnsureInternetConnection")]
+		HRESULT EnsureInternetConnection();
+		[id(0x0000006f), helpstring("method SetProductKey")]
+		HRESULT SetProductKey([in] LPWSTR pszNewProductKey);
+		[id(0x00000070), helpstring("method GetProductID")]
+		HRESULT GetProductID([out, retval] BSTR* pbstrVal);
+		[id(0x00000071), helpstring("method VerifyCheckDigits")]
+		HRESULT VerifyCheckDigits(
+						BSTR bstrCIDIID,
+						[out, retval] long* pbValue);
+	};
+
+	[
+	  odl,
+	  uuid(6A07C5A3-9C67-4BB6-B020-ECBE7FDFD326),
+	  helpstring("ICOMLicenseAgent Interface 2"),
+	  dual,
+	  oleautomation
+	]
+	interface ICOMLicenseAgent2 : ICOMLicenseAgent {
+		[id(0x00000072), helpstring("method SetReminders")]
+		HRESULT SetReminders(long bValue);
+		[id(0x00000073), helpstring("method GetReminders")]
+		HRESULT GetReminders(long* pbValue);
+		[id(0x00000074), helpstring("method GetKeyType")]
+		HRESULT GetKeyType([out, retval] unsigned long* pdwKeyType);
+	};
+};

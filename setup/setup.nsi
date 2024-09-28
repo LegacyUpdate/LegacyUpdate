@@ -776,11 +776,9 @@ Function .onInit
 	${If} ${AtLeastWinXP2002}
 	${AndIf} ${AtMostWin8.1}
 		; Check if the OS needs activation
-		; TODO: Switch this to WMI
-		; LegacyUpdateNSIS::IsProcessRunning "wpabaln.exe"
-		StrCpy $0 0
+		LegacyUpdateNSIS::IsActivated
 		Pop $0
-		${If} $0 == 0
+		${If} $0 == 1
 			!insertmacro RemoveSection ${ACTIVATE}
 		${EndIf}
 	${Else}
@@ -922,6 +920,7 @@ Function PostInstall
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
 		${IfNot} ${IsActiveXInstall}
+		${AndIf} ${FileExists} "$InstallDir\LegacyUpdate.exe"
 			Exec '"$InstallDir\LegacyUpdate.exe" /launch $0'
 		${ElseIf} ${AtLeastWinVista}
 			Exec '"$WINDIR\system32\wuauclt.exe" /ShowWUAutoScan'
@@ -930,7 +929,9 @@ Function PostInstall
 		; Launch activation wizard if requested by the user
 		${If} ${SectionIsSelected} ${ACTIVATE}
 			${If} ${AtLeastWinVista}
+				${DisableX64FSRedirection}
 				Exec '"$WINDIR\system32\slui.exe"'
+				${EnableX64FSRedirection}
 			${Else}
 				Exec '"$WINDIR\system32\oobe\msoobe.exe" /a'
 			${EndIf}
