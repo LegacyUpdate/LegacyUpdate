@@ -82,7 +82,6 @@ Var /GLOBAL AeroWizard.Font
 	${EndIf}
 
 	; Set up banner and glass
-	File /ONAME=$PLUGINSDIR\modern-header.bmp banner-wordmark-classic.bmp
 	LegacyUpdateNSIS::DialogInit
 !macroend
 
