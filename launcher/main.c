@@ -37,7 +37,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		RunOnce();
 	} else if (wcscmp(action, L"/regserver") == 0 || wcscmp(action, L"/unregserver") == 0) {
 		BOOL state = wcscmp(action, L"/regserver") == 0;
-		HWND hwnd = flagsCount > 0 ? (HWND)wcstol(flags[0], NULL, 10) : 0;
+		HWND hwnd = flagsCount > 0 ? (HWND)(intptr_t)wcstol(flags[0], NULL, 10) : 0;
 		RegisterServer(hwnd, state, FALSE);
 	} else {
 		const LPWSTR usage = L""
