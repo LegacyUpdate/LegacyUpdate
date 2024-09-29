@@ -6,6 +6,8 @@ static LPWSTR _version;
 
 HRESULT GetOwnVersion(LPWSTR *version) {
 	if (!_loadedOwnVersion) {
+		_loadedOwnVersion = TRUE;
+
 		LPWSTR filename;
 		GetOwnFileName(&filename);
 
@@ -16,13 +18,14 @@ HRESULT GetOwnVersion(LPWSTR *version) {
 			return HRESULT_FROM_WIN32(GetLastError());
 		}
 
-		LocalFree(filename);
-
 		LPVOID verInfo = LocalAlloc(LPTR, verInfoSize);
 		if (!GetFileVersionInfo(filename, verHandle, verInfoSize, verInfo)) {
+			LocalFree(filename);
 			LocalFree(verInfo);
 			return HRESULT_FROM_WIN32(GetLastError());
 		}
+
+		LocalFree(filename);
 
 		UINT size;
 		if (!VerQueryValue(verInfo, L"\\StringFileInfo\\040904B0\\ProductVersion", (LPVOID *)&_version, &size)) {
