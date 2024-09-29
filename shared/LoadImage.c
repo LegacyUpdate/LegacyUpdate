@@ -28,8 +28,8 @@ static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type)
 	}
 
 	LPVOID sourceResourceData = LockResource(imageHandle);
-	if (!LockResource) {
-		TRACE(L"FindResource failed: %d", GetLastError());
+	if (!sourceResourceData) {
+		TRACE(L"LockResource failed: %d", GetLastError());
 		return NULL;
 	}
 
