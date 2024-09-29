@@ -26,5 +26,8 @@ EXTERN_C HWND g_hwndParent;
 	void __cdecl name(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra)
 
 #define PLUGIN_INIT() \
+	if (extra && extra->exec_flags && (extra->exec_flags->plugin_api_version != NSISPIAPIVER_CURR)) { \
+		return; \
+	} \
 	EXDLL_INIT(); \
 	g_hwndParent = hwndParent;
