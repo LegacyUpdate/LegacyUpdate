@@ -45,21 +45,18 @@ static TCHAR *my_strstr(TCHAR *a, TCHAR *b);
 static unsigned int my_atoi(TCHAR *s);
 static int WINAPI AsExeWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow);
 
-void __declspec(dllexport) Exec(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {
-  g_hwndParent = hwndParent;
-  EXDLL_INIT();
+PLUGIN_METHOD(Exec) {
+  PLUGIN_INIT();
   ExecScript(MODE_IGNOREOUTPUT);
 }
 
-void __declspec(dllexport) ExecToLog(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {
-  g_hwndParent = hwndParent;
-  EXDLL_INIT();
-  ExecScript((extra->exec_flags->status_update % 4) ? MODE_LINES : MODE_IGNOREOUTPUT);
+PLUGIN_METHOD(ExecToLog) {
+  PLUGIN_INIT();
+  ExecScript(extra->exec_flags->status_update % 4 ? MODE_LINES : MODE_IGNOREOUTPUT);
 }
 
-void __declspec(dllexport) ExecToStack(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra) {
-  g_hwndParent = hwndParent;
-  EXDLL_INIT();
+PLUGIN_METHOD(ExecToStack) {
+  PLUGIN_INIT();
   ExecScript(MODE_STACK);
 }
 

@@ -29,7 +29,6 @@ CFLAGS = \
 	-DUNICODE \
 	-D_UNICODE \
 	$(if $(filter 1,$(DEBUG)),-D_DEBUG -g,-DNDEBUG -Os) \
-	-D__USE_MINGW_ANSI_STDIO=0 \
 	-D_USRDLL \
 	-s \
 	-fPIE \
