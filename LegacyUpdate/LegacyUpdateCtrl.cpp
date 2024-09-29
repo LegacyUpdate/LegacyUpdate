@@ -434,7 +434,7 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 			return hr;
 		}
 
-		return Exec(L"open", L"notepad.exe", L"WindowsUpdate.log", desktop, SW_SHOWDEFAULT, FALSE, NULL);
+		return Exec(L"open", L"WindowsUpdate.log", NULL, desktop, SW_SHOWDEFAULT, FALSE, NULL);
 	} else {
 		// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
 		// opening the file (most likely in Notepad).
