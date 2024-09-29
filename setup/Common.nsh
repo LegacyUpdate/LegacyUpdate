@@ -2,6 +2,8 @@
 
 SetPluginUnload alwaysoff
 
+!packhdr          upx.tmp 'upx --lzma -9 upx.tmp'
+
 !if ${SIGN} == 1
 	!finalize       '../build/sign.sh "%1"'
 	!uninstfinalize '../build/sign.sh "%1"'
@@ -52,7 +54,7 @@ Function DownloadRequest
 	; 	GetWinVer $9 Minor
 	; 	StrCpy $Download.UserAgent "Mozilla/4.0 (${NAME} ${VERSION}; Windows NT $8.$9)"
 	; ${EndIf}
-	; /HEADER "User-Agent: $Download.UserAgent" \
+	; /HEADER "User-Agent: $Download.UserAgent"
 
 	NSxfer::Request \
 		/TIMEOUTCONNECT 60000 \

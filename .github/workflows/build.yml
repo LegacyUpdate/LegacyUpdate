@@ -37,7 +37,7 @@ jobs:
     - name: Set up WSL
       run: |
         sudo apt-get update -q
-        sudo apt-get install -qy make nsis nsis-pluginapi mingw-w64-i686-dev cabextract
+        sudo apt-get install -qy make nsis nsis-pluginapi mingw-w64-i686-dev cabextract upx-ucl
         ./build/fix-nsis.sh
 
     - name: Install MinGW toolchain
