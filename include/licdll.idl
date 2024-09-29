@@ -1,7 +1,5 @@
-#include <olectl.h>
-#include <idispids.h>
+
 import "oaidl.idl";
-import "ocidl.idl";
 
 // Generated .IDL file (by the OLE/COM Object Viewer)
 //

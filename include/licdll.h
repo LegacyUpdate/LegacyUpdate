@@ -54,7 +54,6 @@ interface ICOMLicenseAgent2;
 /* Headers for imported files */
 
 #include <oaidl.h>
-#include <ocidl.h>
 
 #ifdef __cplusplus
 extern "C" {
