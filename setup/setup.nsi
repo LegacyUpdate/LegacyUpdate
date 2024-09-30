@@ -582,9 +582,12 @@ Function .onInit
 	${ElseIfNot} ${AtLeastWin10}
 		GetWinVer $0 Build
 		ReadRegDword $1 HKLM "System\CurrentControlSet\Control\Windows" "CSDVersion"
-		IntOp $2 $1 & 0xFF
+		IntOp $1 $1 & 0xFF
 		${If} $1 != 0
-		${OrIf} $0 != ${WINVER_BUILD_2000}
+			StrCpy $1 1
+		${EndIf}
+
+		${If} $0 != ${WINVER_BUILD_2000}
 		${AndIf} $0 != ${WINVER_BUILD_XP2002}
 		${AndIf} $0 != ${WINVER_BUILD_XP2003}
 		${AndIf} $0 != ${WINVER_BUILD_VISTA}
@@ -595,6 +598,12 @@ Function .onInit
 		${AndIf} $0 != ${WINVER_BUILD_7_SP1}
 		${AndIf} $0 != ${WINVER_BUILD_8}
 		${AndIf} $0 != ${WINVER_BUILD_8.1}
+		${AndIf} $0 != ${WINVER_BUILD_10}
+			MessageBox MB_OK "Unsupported build $0"
+			StrCpy $1 1
+		${EndIf}
+
+		${If} $1 == 1
 			MessageBox MB_USERICON|MB_OKCANCEL \
 				"The current version of Windows is a beta build. Legacy Update may not work correctly on this version of Windows.$\r$\n\
 				$\r$\n\
