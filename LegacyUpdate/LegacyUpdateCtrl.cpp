@@ -139,7 +139,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
 
 STDMETHODIMP CLegacyUpdateCtrl::MessageForHresult(LONG inHresult, BSTR *retval) {
 	DoIsPermittedCheck();
-	*retval = GetMessageForHresult(inHresult);
+	*retval = SysAllocString(GetMessageForHresult(inHresult));
 	return S_OK;
 }
 
