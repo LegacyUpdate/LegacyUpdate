@@ -1,0 +1,6 @@
+{
+	"files.associations": {
+		"*.rc": "cpp",
+		"*.idl": "cpp"
+	}
+}
