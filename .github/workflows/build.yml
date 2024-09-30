@@ -55,7 +55,7 @@ jobs:
       id: build
       run: |
         export PATH=/opt/gcc-13.2-binutils-2.41-mingw-v11.0.1-i686/bin:$PATH
-        make CI=1 SIGN=0
+        make CI=1 DEBUG=0
         echo "out=$(echo setup/LegacyUpdate-*.exe)" >> "$(wslpath -u "$GITHUB_OUTPUT")"
 
     - name: Upload Build Artifact

@@ -1,3 +1,4 @@
+export CI ?= 0
 export SIGN ?= 0
 export DEBUG ?= 1
 
