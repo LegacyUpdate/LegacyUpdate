@@ -95,7 +95,7 @@ FunctionEnd
 !insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 Update"                      "/passive /norestart"
 !insertmacro PatchHandler "XPSP1a"   "Windows XP Service Pack 1a"                        "-u -z"
 !insertmacro PatchHandler "XPSP3"    "Windows XP Service Pack 3"                         "/passive /norestart"
-!insertmacro PatchHandler "2003SP2"  "Windows XP x64 Edition/Server 2003 Service Pack 2" "/passive /norestart"
+!insertmacro PatchHandler "2003SP2"  "Windows XP Professional x64 Edition/Server 2003 Service Pack 2" "/passive /norestart"
 !insertmacro PatchHandler "XPESP3"   "Windows XP Embedded Service Pack 3"                "/passive /norestart"
 
 Function DownloadIE6
