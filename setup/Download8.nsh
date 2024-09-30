@@ -55,7 +55,7 @@ Function DownloadClearCompressionFlag
 	Call GetArch
 	Pop $0
 	ReadINIStr $0 $PLUGINSDIR\Patches.ini ClearCompressionFlag $0
-	ReadINIStr $1 $PLUGINSDIR\Patches.ini "$Patch.Key" Prefix
+	ReadINIStr $1 $PLUGINSDIR\Patches.ini ClearCompressionFlag Prefix
 	!insertmacro Download "Windows 8.1 Update 1 Preparation Tool" "$1$0" "ClearCompressionFlag.exe" 1
 FunctionEnd
 
