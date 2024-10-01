@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <shlobj.h>
 #include "Exec.h"
+#include "HResult.h"
 #include "LegacyUpdate.h"
 #include "MsgBox.h"
 #include "SelfElevate.h"
@@ -92,10 +93,7 @@ end:
 		LPWSTR title = state
 			? L"Failed to register Legacy Update ActiveX control"
 			: L"Failed to unregister Legacy Update ActiveX control";
-		// TODO: Fix GetMessageForHresult()
-		LPWSTR text;
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, NULL);
-		MsgBox(hwnd, title, /*GetMessageForHresult(hr)*/ text, MB_OK | MB_ICONERROR);
+		MsgBox(hwnd, title, GetMessageForHresult(hr), MB_ICONERROR);
 	}
 
 	if (!forLaunch) {

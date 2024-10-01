@@ -2,6 +2,7 @@ FILES   = \
 	$(wildcard *.c) \
 	../include/nsis/pluginapi.c \
 	../shared/HResult.c \
+	../shared/LegacyUpdate.c \
 	../shared/LoadImage.c \
 	../shared/Registry.c
 RCFILES = resource.rc

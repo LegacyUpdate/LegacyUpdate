@@ -1,7 +1,8 @@
 FILES    = \
 	$(wildcard *.c) \
 	../shared/Exec.c \
-	../shared/GetPidForName.c \
+	../shared/HResult.c \
+	../shared/LegacyUpdate.c \
 	../shared/LoadImage.c \
 	../shared/Registry.c \
 	../shared/VersionInfo.c \
@@ -77,8 +78,7 @@ LDFLAGS = \
 	-lshell32 \
 	-lversion \
 	-lgdi32 \
-	-lmsimg32 \
-	-lLegacyUpdate.$(TAG)
+	-lmsimg32
 
 RCFLAGS = \
 	-O coff

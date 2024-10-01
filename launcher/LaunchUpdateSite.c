@@ -8,8 +8,8 @@
 #include "Exec.h"
 #include "HResult.h"
 #include "MsgBox.h"
-#include "Registry.h"
 #include "RegisterServer.h"
+#include "Registry.h"
 #include "User.h"
 #include "VersionInfo.h"
 
@@ -203,8 +203,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 
 end:
 	if (!SUCCEEDED(hr)) {
-		// TODO: Fix
-		MsgBox(NULL, NULL, L"", MB_ICONEXCLAMATION);
+		MsgBox(NULL, GetMessageForHresult(hr), NULL, MB_ICONEXCLAMATION);
 	}
 
 	browser = NULL;

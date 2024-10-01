@@ -87,6 +87,9 @@
     <ClCompile Include="..\shared\Exec.c">
       <Filter>Shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\shared\LegacyUpdate.c">
+      <Filter>Shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -146,6 +149,9 @@
     <ClInclude Include="..\shared\Wow64.h">
       <Filter>Shared</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\LegacyUpdate.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LegacyUpdate.rc">
@@ -156,5 +162,10 @@
     <Midl Include="LegacyUpdate.idl">
       <Filter>Source Files</Filter>
     </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="wuerror.mc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

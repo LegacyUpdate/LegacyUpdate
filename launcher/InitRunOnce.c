@@ -1,6 +1,5 @@
 #include <windows.h>
 #include <commctrl.h>
-#include "GetPidForName.h"
 #include "MsgBox.h"
 #include "VersionInfo.h"
 #include "LoadImage.h"

@@ -2,4 +2,4 @@
 
 #include <windows.h>
 
-STDAPI_(LPWSTR) GetMessageForHresult(HRESULT hr);
+EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr);

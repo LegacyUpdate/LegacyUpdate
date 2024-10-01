@@ -7,7 +7,7 @@
 static BOOL g_loadedHModule;
 static HMODULE g_messagesHModule;
 
-STDAPI_(LPWSTR) GetMessageForHresult(HRESULT hr) {
+EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
 	if (!g_loadedHModule) {
 		g_loadedHModule = TRUE;
 
