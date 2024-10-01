@@ -115,9 +115,9 @@ Function InstallIE6
 	${If} $0 == 1
 		Call DownloadIE6
 		!insertmacro DetailPrint "Extracting Internet Explorer 6 SP1..."
-		LegacyUpdateNSIS::Exec '"$WINDIR\system32\expand.exe" "$OUTDIR\ie6sp1.cab" -F:ie6setup.exe "$PLUGINSDIR"'
-		LegacyUpdateNSIS::Exec '"$WINDIR\system32\expand.exe" "$OUTDIR\ie6sp1.cab" -F:iebatch.txt "$PLUGINSDIR"'
+		CreateDirectory "$PLUGINSDIR\IE6SP1"
+		LegacyUpdateNSIS::Exec '"$WINDIR\system32\expand.exe" "$OUTDIR\ie6sp1.cab" -F:* "$PLUGINSDIR\IE6SP1"'
 		!insertmacro DetailPrint "Installing Internet Explorer 6 SP1..."
-		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' '"$PLUGINSDIR\ie6setup.exe" /q'
+		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' '"$PLUGINSDIR\IE6SP1\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
 	${EndIf}
 FunctionEnd
