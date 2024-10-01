@@ -4,7 +4,6 @@ FILES   = \
 	../Shared/HResult.c \
 	../Shared/LoadImage.c \
 	../Shared/GetPidForName.c \
-	../Shared/WMI.c \
 	../Shared/WUErrors.c
 RCFILES = resource.rc
 
