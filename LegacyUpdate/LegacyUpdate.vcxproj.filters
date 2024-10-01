@@ -75,9 +75,6 @@
     <ClCompile Include="..\shared\Registry.c">
       <Filter>Shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\WUErrors.c">
-      <Filter>Shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\shared\VersionInfo.c">
       <Filter>Shared</Filter>
     </ClCompile>
@@ -135,9 +132,6 @@
       <Filter>Shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\HResult.h">
-      <Filter>Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shared\WUErrors.h">
       <Filter>Shared</Filter>
     </ClInclude>
     <ClInclude Include="..\include\wuerror.h">

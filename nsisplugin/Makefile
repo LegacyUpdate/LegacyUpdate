@@ -1,10 +1,9 @@
 FILES   = \
 	$(wildcard *.c) \
 	../include/nsis/pluginapi.c \
-	../Shared/HResult.c \
-	../Shared/LoadImage.c \
-	../Shared/GetPidForName.c \
-	../Shared/WUErrors.c
+	../shared/HResult.c \
+	../shared/LoadImage.c \
+	../shared/Registry.c
 RCFILES = resource.rc
 
 TAG     = i686

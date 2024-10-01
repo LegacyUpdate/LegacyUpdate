@@ -394,6 +394,37 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="ProgressBarControl.rgs" />
+    <CustomBuild Include="wuerror.mc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mc %(FullPath) -r $(IntDir) -h $(IntDir)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling Message Table</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Identity).rc;$(IntDir)%(Identity).h;$(IntDir)MSG0409.bin</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mc %(FullPath) -r $(IntDir) -h $(IntDir)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling Message Table</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Identity).rc;$(IntDir)%(Identity).h;$(IntDir)MSG0409.bin</Outputs>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </DeploymentContent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">mc %(FullPath) -r $(IntDir) -h $(IntDir)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">mc %(FullPath) -r $(IntDir) -h $(IntDir)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">mc %(FullPath) -r $(IntDir) -h $(IntDir)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">mc %(FullPath) -r $(IntDir) -h $(IntDir)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">Compiling Message Table</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">Compiling Message Table</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">Compiling Message Table</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">Compiling Message Table</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">$(IntDir)%(Identity).rc;$(IntDir)%(Identity).h;$(IntDir)MSG0409.bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">$(IntDir)%(Identity).rc;$(IntDir)%(Identity).h;$(IntDir)MSG0409.bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">$(IntDir)%(Identity).rc;$(IntDir)%(Identity).h;$(IntDir)MSG0409.bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">$(IntDir)%(Identity).rc;$(IntDir)%(Identity).h;$(IntDir)MSG0409.bin</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">false</ExcludedFromBuild>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\shared\Exec.c">
@@ -435,20 +466,6 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
-    </ClCompile>
-    <ClCompile Include="..\shared\WUErrors.c">
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="..\shared\WMI.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
@@ -540,7 +557,6 @@
     <ClInclude Include="..\shared\WMI.h" />
     <ClInclude Include="..\shared\HResult.h" />
     <ClInclude Include="..\shared\Wow64.h" />
-    <ClInclude Include="..\shared\WUErrors.h" />
     <ClInclude Include="Compat.h" />
     <ClInclude Include="ElevationHelper.h" />
     <ClInclude Include="IUpdateInstaller4.h" />

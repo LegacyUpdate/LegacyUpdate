@@ -126,6 +126,8 @@ END
 //
 1 TYPELIB "LegacyUpdate.tlb"
 
+#include "wuerror.rc"
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
