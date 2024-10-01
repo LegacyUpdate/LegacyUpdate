@@ -919,7 +919,7 @@ Function PostInstall
 	${If} ${FileExists} "$InstallDir\LegacyUpdate.exe"
 		ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "ActiveXInstalled"
 		${If} ${Errors}
-			StrCpy $0 "firstrun"
+			StrCpy $0 "/firstrun"
 		${Else}
 			StrCpy $0 ""
 		${EndIf}
