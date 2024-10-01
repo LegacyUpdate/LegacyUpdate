@@ -205,6 +205,9 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 			? SysAllocStringLen(data, size - 1)
 			// BuildLab doesn't exist on Windows 2000.
 			: SysAllocString(versionInfo->szCSDVersion);
+		if (data) {
+			LocalFree(data);
+		}
 		break;
 	}
 
@@ -236,6 +239,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 			if (SUCCEEDED(hr)) {
 				retval->vt = VT_BSTR;
 				retval->bstrVal = SysAllocStringLen(data, size - 1);
+				LocalFree(data);
 			} else {
 				VariantClear(retval);
 			}
@@ -250,6 +254,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		if (SUCCEEDED(hr)) {
 			retval->vt = VT_BSTR;
 			retval->bstrVal = SysAllocStringLen(data, size - 1);
+			LocalFree(data);
 		} else {
 			VariantClear(retval);
 		}
@@ -296,7 +301,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 		// is already running as admin on 2k/XP, or that it has requested elevation on Vista+.
 		m_nonElevatedHelper.CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER);
 		if (!SUCCEEDED(hr)) {
-				goto end;
+			goto end;
 		}
 		elevatedHelper = m_nonElevatedHelper;
 	}
@@ -420,8 +425,11 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	if (IsOSVersionOrLater(10, 0)) {
 		// Windows 10 moves WU/USO logs to ETW. The ETW logs can be converted back to a plain-text .log
 		// using a cmdlet.
+		WCHAR powershell[MAX_PATH];
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", powershell, ARRAYSIZE(powershell));
+
 		DWORD code;
-		HRESULT hr = Exec(NULL, L"powershell.exe", L"-Command Get-WindowsUpdateLog", windir, SW_SHOWDEFAULT, TRUE, &code);
+		HRESULT hr = Exec(NULL, powershell, L"-Command Get-WindowsUpdateLog", windir, SW_SHOWDEFAULT, TRUE, &code);
 		if (!SUCCEEDED(hr) || code != 0) {
 			return hr == S_OK ? E_FAIL : hr;
 		}
@@ -455,22 +463,19 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	PVOID oldValue;
 	BOOL isRedirected = DisableWow64FsRedirection(&oldValue);
 
-	WCHAR systemDir[MAX_PATH];
-	HRESULT hr = SHGetFolderPath(0, CSIDL_SYSTEM, NULL, 0, systemDir);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(hr));
-		return hr;
-	}
-
 	if (IsOSVersionOrLater(10, 0)) {
 		// Windows 10+: Open Settings app
 		Exec(NULL, L"ms-settings:windowsupdate-options", NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
 	} else if (IsOSVersionOrLater(6, 0)) {
 		// Windows Vista, 7, 8: Open Windows Update control panel
-		Exec(NULL, L"wuauclt.exe", L"/ShowOptions", systemDir, SW_SHOWDEFAULT, FALSE, NULL);
+		WCHAR wuauclt[MAX_PATH];
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\wuauclt.exe", wuauclt, ARRAYSIZE(wuauclt));
+		Exec(NULL, wuauclt, L"/ShowOptions", NULL, SW_SHOWDEFAULT, FALSE, NULL);
 	} else {
 		// Windows 2000, XP: Open Automatic Updates control panel
-		Exec(NULL, L"wuaucpl.cpl", NULL, systemDir, SW_SHOWDEFAULT, FALSE, NULL);
+		WCHAR wuaucpl[MAX_PATH];
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\wuaucpl.cpl", wuaucpl, ARRAYSIZE(wuaucpl));
+		Exec(NULL, wuaucpl, NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
 	}
 
 	// Revert WOW64 redirection if we changed it.
@@ -496,6 +501,9 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 	DWORD size;
 	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", 0, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
+	if (data) {
+		LocalFree(data);
+	}
 	return S_OK;
 }
 
@@ -506,5 +514,8 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 	DWORD size;
 	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", 0, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
+	if (data) {
+		LocalFree(data);
+	}
 	return S_OK;
 }

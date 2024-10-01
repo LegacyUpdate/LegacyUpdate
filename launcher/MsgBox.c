@@ -22,11 +22,11 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 	type = (type & ~0x000000F0) | MB_USERICON;
 
 	if (!$TaskDialogIndirect) {
-		LPCTSTR finalBody = instruction;
+		LPWSTR finalBody = (LPWSTR)instruction;
 		if (body && lstrlen(body) > 0) {
 			size_t length = lstrlen(instruction) + lstrlen(body) + 3;
-			finalBody = (LPCTSTR)LocalAlloc(LPTR, length * sizeof(TCHAR));
-			wsprintf((LPTSTR)finalBody, L"%s\n\n%s", instruction, body);
+			finalBody = (LPWSTR)LocalAlloc(LPTR, length * sizeof(TCHAR));
+			wsprintf(finalBody, L"%s\n\n%s", instruction, body);
 		}
 
 		MSGBOXPARAMS params = { 0 };
@@ -40,7 +40,7 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 		int result = MessageBoxIndirect(&params);
 
 		if (finalBody != body) {
-			LocalFree((HLOCAL)finalBody);
+			LocalFree(finalBody);
 		}
 
 		return result;

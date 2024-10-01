@@ -15,14 +15,14 @@ HRESULT RegisterDll(LPWSTR path, BOOL state) {
 		return hr;
 	}
 
-	LPWSTR system32 = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-	wsprintf(system32, L"%ls\\System32", windir);
+	WCHAR regsvr32[MAX_PATH];
+	ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\regsvr32.exe", regsvr32, ARRAYSIZE(regsvr32));
 
 	LPWSTR args = (LPWSTR)LocalAlloc(LPTR, (lstrlen(path) + 6) * sizeof(WCHAR));
 	wsprintf(args, L"/s %ls\"%ls\"", state ? L"" : L"/u ", path);
 
 	DWORD status;
-	hr = Exec(NULL, L"regsvr32.exe", args, system32, SW_HIDE, TRUE, &status);
+	hr = Exec(NULL, regsvr32, args, NULL, SW_HIDE, TRUE, &status);
 	if (!SUCCEEDED(hr)) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
 		return hr;
@@ -31,7 +31,7 @@ HRESULT RegisterDll(LPWSTR path, BOOL state) {
 	if (status != 0) {
 		// Run again without /s, so the user can see the error
 		wsprintf(args, L"%ls\"%ls\"", state ? L"" : L"/u ", path);
-		hr = Exec(NULL, L"regsvr32.exe", args, system32, SW_SHOWDEFAULT, TRUE, &status);
+		hr = Exec(NULL, regsvr32, args, NULL, SW_SHOWDEFAULT, TRUE, &status);
 	}
 
 	return status == 0 ? S_OK : E_FAIL;

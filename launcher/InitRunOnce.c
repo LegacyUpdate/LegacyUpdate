@@ -50,8 +50,7 @@ static void StartThemes() {
 
 static BOOL RunCmd(LPPROCESS_INFORMATION processInfo) {
 	WCHAR cmd[MAX_PATH];
-	GetSystemDirectory(cmd, ARRAYSIZE(cmd));
-	wcscat(cmd, L"\\cmd.exe");
+	ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\cmd.exe", cmd, ARRAYSIZE(cmd));
 
 	STARTUPINFO startupInfo = {0};
 	startupInfo.cb = sizeof(startupInfo);
@@ -195,18 +194,15 @@ static void CreateWallpaperWindow() {
 	// Register hotkey
 	RegisterHotKey(hwnd, HK_RUNCMD, MOD_SHIFT, VK_F10);
 
-	WCHAR sysDir[MAX_PATH];
-	GetSystemDirectory(sysDir, ARRAYSIZE(sysDir));
-
 	if (IsOSVersionEqual(6, 1)) {
 		// 7: Bitmap in oobe dir
 		WCHAR bmpPath[MAX_PATH];
-		wsprintf(bmpPath, L"%ls\\oobe\\background.bmp", sysDir);
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
 		g_wallpaperBitmap = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	} else if (IsOSVersionEqual(6, 0)) {
 		// Vista: Resources in ooberesources.dll
 		WCHAR ooberesPath[MAX_PATH];
-		wsprintf(ooberesPath, L"%ls\\oobe\\ooberesources.dll", sysDir);
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\ooberesources.dll", ooberesPath, ARRAYSIZE(ooberesPath));
 		HMODULE ooberes = LoadLibrary(ooberesPath);
 		if (ooberes) {
 			// Width logic is the same used by Vista msoobe.dll
@@ -218,28 +214,50 @@ static void CreateWallpaperWindow() {
 	UpdateWindow(hwnd);
 }
 
-void RunOnce() {
-#ifndef _DEBUG
-	// Only relevant if we're SYSTEM
+static BOOL IsSystemUser() {
+	BOOL result = FALSE;
+	PTOKEN_USER tokenInfo;
+	PSID systemSid;
 	HANDLE token;
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
-		return;
+		goto end;
 	}
 
 	DWORD tokenInfoLen;
 	GetTokenInformation(token, TokenUser, NULL, 0, &tokenInfoLen);
-	PTOKEN_USER tokenInfo = (PTOKEN_USER)LocalAlloc(LPTR, tokenInfoLen);
-	GetTokenInformation(token, TokenUser, tokenInfo, tokenInfoLen, &tokenInfoLen);
-
-	PSID systemSid;
-	CreateWellKnownSid(WinLocalSystemSid, NULL, NULL, &tokenInfo->User.Sid);
-
-	if (!EqualSid(tokenInfo->User.Sid, systemSid)) {
-		LocalFree(tokenInfo);
-		return;
+	tokenInfo = (PTOKEN_USER)LocalAlloc(LPTR, tokenInfoLen);
+	if (!GetTokenInformation(token, TokenUser, tokenInfo, tokenInfoLen, &tokenInfoLen)) {
+		goto end;
 	}
 
-	LocalFree(tokenInfo);
+	DWORD sidSize = SECURITY_MAX_SID_SIZE;
+	systemSid = LocalAlloc(LPTR, sidSize);
+	if (!CreateWellKnownSid(WinLocalSystemSid, NULL, systemSid, &sidSize)) {
+		goto end;
+	}
+
+	result = EqualSid(tokenInfo->User.Sid, systemSid);
+
+end:
+	if (tokenInfo) {
+		LocalFree(tokenInfo);
+	}
+	if (systemSid) {
+		LocalFree(systemSid);
+	}
+	if (token) {
+		CloseHandle(token);
+	}
+	return result;
+}
+
+void RunOnce() {
+#ifndef _DEBUG
+	// Only relevant if we're SYSTEM
+	if (!IsSystemUser()) {
+		PostQuitMessage(1);
+		return;
+	}
 #endif
 
 	// Start Themes on this desktop

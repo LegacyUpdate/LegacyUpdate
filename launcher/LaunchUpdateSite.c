@@ -13,33 +13,32 @@
 #include "User.h"
 #include "VersionInfo.h"
 
-const LPTSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
-const LPTSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
-const LPTSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
+const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
+const LPWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
+const LPWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
 
 DEFINE_GUID(IID_ILegacyUpdateCtrl,  0xC33085BB, 0xC3E1, 0x4D27, 0xA2, 0x14, 0xAF, 0x01, 0x95, 0x3D, 0xF5, 0xE5);
 DEFINE_GUID(CLSID_LegacyUpdateCtrl, 0xAD28E0DF, 0x5F5A, 0x40B5, 0x94, 0x32, 0x85, 0xEF, 0xD9, 0x7D, 0x1F, 0x9F);
 
-static BOOL CanUseSSLConnection() {
+static const LPWSTR GetUpdateSiteURL() {
+	// Fallback: Use SSL only on Vista and up
+	BOOL useHTTPS = IsOSVersionOrLater(6, 0);
+
 	// Get the Windows Update website URL set by Legacy Update setup
 	LPWSTR data;
 	DWORD size;
 	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate", L"URL", KEY_WOW64_64KEY, &data, &size);
-	if (!SUCCEEDED(hr)) {
-		goto end;
+	if (SUCCEEDED(hr)) {
+		// Return based on the URL value
+		if (wcscmp(data, UpdateSiteURLHttps) == 0) {
+			useHTTPS = TRUE;
+		} else if (wcscmp(data, UpdateSiteURLHttp) == 0) {
+			useHTTPS = FALSE;
+		}
+		LocalFree(data);
 	}
 
-	// Return based on the URL value
-	if (wcscmp(data, UpdateSiteURLHttps) == 0) {
-		return TRUE;
-	} else if (wcscmp(data, UpdateSiteURLHttp) == 0) {
-		return FALSE;
-	}
-
-end:
-	// Fallback: Use SSL only on Vista and up
-	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
-	return IsOSVersionOrLater(6, 0);
+	return useHTTPS ? UpdateSiteURLHttps : UpdateSiteURLHttp;
 }
 
 void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
@@ -98,20 +97,30 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		OSVERSIONINFOEX *versionInfo = GetVersionInfo();
 
 		// Windows 8+: Directly prompt to reinstall IE using Fondue.exe.
-		SYSTEM_INFO systemInfo;
-		GetSystemInfo(&systemInfo);
-		LPCTSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";
+		if (IsOSVersionOrLater(6, 2)) {
+			SYSTEM_INFO systemInfo;
+			GetSystemInfo(&systemInfo);
+			LPCTSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";
 
-		WCHAR fondueArgs[256];
-		wsprintf(fondueArgs, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
-		hr = Exec(NULL, L"fondue.exe", fondueArgs, NULL, SW_SHOWDEFAULT, FALSE, NULL);
-		if (!SUCCEEDED(hr)) {
-			// Tell the user what they need to do, then open the Optional Features dialog.
-			WCHAR message[4096];
-			LoadString(g_hInstance, IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
-			MsgBox(NULL, message, NULL, MB_OK | MB_ICONEXCLAMATION);
-			Exec(NULL, L"OptionalFeatures.exe", NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
+			WCHAR fondue[MAX_PATH];
+			ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\fondue.exe", fondue, ARRAYSIZE(fondue));
+
+			WCHAR fondueArgs[256];
+			wsprintf(fondueArgs, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
+			hr = Exec(NULL, fondue, fondueArgs, NULL, SW_SHOWDEFAULT, FALSE, NULL);
+			if (SUCCEEDED(hr)) {
+				goto end;
+			}
 		}
+
+		// Tell the user what they need to do, then open the Optional Features dialog.
+		WCHAR message[4096];
+		LoadString(GetModuleHandle(NULL), IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
+		MsgBox(NULL, message, NULL, MB_OK | MB_ICONEXCLAMATION);
+
+		WCHAR optionalFeatures[MAX_PATH];
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\OptionalFeatures.exe", optionalFeatures, ARRAYSIZE(optionalFeatures));
+		Exec(NULL, optionalFeatures, NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
 		hr = S_OK;
 		goto end;
 	} else if (!SUCCEEDED(hr)) {
@@ -119,7 +128,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	}
 
 	// Can we connect with https? WinInet will throw an error if not.
-	siteURL = CanUseSSLConnection() ? UpdateSiteURLHttps : UpdateSiteURLHttp;
+	siteURL = GetUpdateSiteURL();
 
 	// Is this a first run launch? Append first run flag if so.
 	if (argc > 0 && lstrcmpi(argv[0], L"/firstrun") == 0) {
@@ -194,6 +203,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 
 end:
 	if (!SUCCEEDED(hr)) {
+		// TODO: Fix
 		MsgBox(NULL, NULL, L"", MB_ICONEXCLAMATION);
 	}
 
