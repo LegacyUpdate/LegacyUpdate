@@ -72,7 +72,7 @@ Var /GLOBAL UninstallInstalled
 !include DownloadWUA.nsh
 !include RunOnce.nsh
 !include UpdateRoots.nsh
-!include ActiveXPage.nsh
+; !include ActiveXPage.nsh
 
 !insertmacro GetParameters
 !insertmacro GetOptions
@@ -86,7 +86,7 @@ Var /GLOBAL UninstallInstalled
 
 !insertmacro MUI_PAGE_COMPONENTS
 
-Page custom ActiveXPage
+; Page custom ActiveXPage
 
 !define MUI_PAGE_HEADER_TEXT         "Performing Actions"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
@@ -307,10 +307,11 @@ Section - PREREQS_END
 SectionEnd
 
 ; Main installation
-SectionGroup "Legacy Update" LEGACYUPDATE
-	${MementoSection} "-Configure Legacy Update server" WUSERVER
-		Call MakeUninstallEntry
+${MementoSection} "Legacy Update" LEGACYUPDATE
+	; WUSERVER section
+	Call MakeUninstallEntry
 
+	${If} ${AtMostWinVista}
 		; Check if Schannel is going to work with modern TLS
 		!insertmacro DetailPrint "Checking SSL connectivity..."
 		!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
@@ -332,97 +333,96 @@ SectionGroup "Legacy Update" LEGACYUPDATE
 			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
 		${EndIf}
 		WriteRegDword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
+	${EndIf}
 
-		; Restart service
-		Call RestartWUAUService
-	${MementoSectionEnd}
+	; Restart service
+	Call RestartWUAUService
 
-	${MementoSection} "-Legacy Update ActiveX control" ACTIVEX
-		!insertmacro DetailPrint "Installing ActiveX control..."
-		SetOutPath $InstallDir
-		Call MakeUninstallEntry
+	; ACTIVEX section
+	!insertmacro DetailPrint "Installing ActiveX control..."
+	SetOutPath $InstallDir
+	; Call MakeUninstallEntry
 
-		; Add Control Panel entry
-		; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
-		; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "" "${NAME}"
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-2'
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.exe",-4'
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.exe",-100'
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" "" '"$OUTDIR\LegacyUpdate.exe"'
-		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder" "Attributes" 0
-		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory" "5,10"
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl" '"$OUTDIR\LegacyUpdate.exe",-202'
-		WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
+	; Add Control Panel entry
+	; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
+	; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "" "${NAME}"
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-2'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "InfoTip" '@"$OUTDIR\LegacyUpdate.exe",-4'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon" "" '"$OUTDIR\LegacyUpdate.exe",-100'
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" "" '"$OUTDIR\LegacyUpdate.exe"'
+	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder" "Attributes" 0
+	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName" "${CPL_APPNAME}"
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory" "5,10"
+	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl" '"$OUTDIR\LegacyUpdate.exe",-202'
+	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
-		; Install DLL, with detection for it being in use by IE
-		; NOTE: Here we specifically check for amd64, because the DLL is amd64.
-		; We still install to native Program Files on IA64, but with x86 binaries.
-		SetOverwrite try
-		!insertmacro TryFile "..\${VSBUILD32}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
-		${If} ${IsNativeAMD64}
-			${If} ${FileExists} "$OUTDIR\LegacyUpdate32.dll"
-				!insertmacro TryDelete "$OUTDIR\LegacyUpdate32.dll"
-			${EndIf}
-			!insertmacro TryRename "$OUTDIR\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate32.dll"
-			!insertmacro TryFile "..\x64\${VSBUILD64}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
+	; Install DLL, with detection for it being in use by IE
+	; NOTE: Here we specifically check for amd64, because the DLL is amd64.
+	; We still install to native Program Files on IA64, but with x86 binaries.
+	SetOverwrite try
+	!insertmacro TryFile "..\${VSBUILD32}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
+	${If} ${IsNativeAMD64}
+		${If} ${FileExists} "$OUTDIR\LegacyUpdate32.dll"
+			!insertmacro TryDelete "$OUTDIR\LegacyUpdate32.dll"
 		${EndIf}
-		Call CopyLauncher
-		SetOverwrite on
+		!insertmacro TryRename "$OUTDIR\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate32.dll"
+		!insertmacro TryFile "..\x64\${VSBUILD64}\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate.dll"
+	${EndIf}
+	Call CopyLauncher
+	SetOverwrite on
 
-		; Register DLL
-		ExecWait '"$OUTDIR\LegacyUpdate.exe" /regserver $HWNDPARENT' $0
-		${If} $0 != 0
-			Abort
-		${EndIf}
+	; Register DLL
+	ExecWait '"$OUTDIR\LegacyUpdate.exe" /regserver $HWNDPARENT' $0
+	${If} $0 != 0
+		Abort
+	${EndIf}
 
-		; Create shortcut
-		CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
-			'"$OUTDIR\LegacyUpdate.exe"' '' \
-			"$OUTDIR\LegacyUpdate.exe" 0 \
-			SW_SHOWNORMAL "" \
-			'@"$OUTDIR\LegacyUpdate.exe",-4'
+	; Create shortcut
+	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
+		'"$OUTDIR\LegacyUpdate.exe"' '' \
+		"$OUTDIR\LegacyUpdate.exe" 0 \
+		SW_SHOWNORMAL "" \
+		'@"$OUTDIR\LegacyUpdate.exe",-4'
 
-		; Hide WU shortcuts
-		${If} ${AtMostWinXP2003}
-			${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
-				CreateDirectory "$OUTDIR\Backup"
-				Rename "$COMMONSTARTMENU\Windows Update.lnk" "$OUTDIR\Backup\Windows Update.lnk"
-			${EndIf}
-
-			${If} ${FileExists} "$COMMONSTARTMENU\Microsoft Update.lnk"
-				CreateDirectory "$OUTDIR\Backup"
-				Rename "$COMMONSTARTMENU\Microsoft Update.lnk" "$OUTDIR\Backup\Microsoft Update.lnk"
-			${EndIf}
+	; Hide WU shortcuts
+	${If} ${AtMostWinXP2003}
+		${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
+			CreateDirectory "$OUTDIR\Backup"
+			Rename "$COMMONSTARTMENU\Windows Update.lnk" "$OUTDIR\Backup\Windows Update.lnk"
 		${EndIf}
 
-		; Add to trusted sites
-		WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
-		WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
-		WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
-		WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
-
-		; Delete LegacyUpdate.dll in System32 from 1.0 installer
-		${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
-			Delete $WINDIR\System32\LegacyUpdate.dll
+		${If} ${FileExists} "$COMMONSTARTMENU\Microsoft Update.lnk"
+			CreateDirectory "$OUTDIR\Backup"
+			Rename "$COMMONSTARTMENU\Microsoft Update.lnk" "$OUTDIR\Backup\Microsoft Update.lnk"
 		${EndIf}
+	${EndIf}
 
-		; Delete LegacyUpdate.inf from 1.0 installer
-		${If} ${FileExists} $WINDIR\inf\LegacyUpdate.inf
-			Delete $WINDIR\inf\LegacyUpdate.inf
-		${EndIf}
+	; Add to trusted sites
+	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
+	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
+	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
+	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
 
-		; If 32-bit Legacy Update exists, move it to 64-bit Program Files
-		${If} ${RunningX64}
-		${AndIf} ${FileExists} "$PROGRAMFILES32\Legacy Update\Backup"
-			CreateDirectory "$PROGRAMFILES64\Legacy Update"
-			Rename "$PROGRAMFILES32\Legacy Update\Backup" "$PROGRAMFILES64\Legacy Update\Backup"
-			RMDir /r "$PROGRAMFILES32\Legacy Update"
-		${EndIf}
-	${MementoSectionEnd}
-SectionGroupEnd
+	; Delete LegacyUpdate.dll in System32 from 1.0 installer
+	${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
+		Delete $WINDIR\System32\LegacyUpdate.dll
+	${EndIf}
+
+	; Delete LegacyUpdate.inf from 1.0 installer
+	${If} ${FileExists} $WINDIR\inf\LegacyUpdate.inf
+		Delete $WINDIR\inf\LegacyUpdate.inf
+	${EndIf}
+
+	; If 32-bit Legacy Update exists, move it to 64-bit Program Files
+	${If} ${RunningX64}
+	${AndIf} ${FileExists} "$PROGRAMFILES32\Legacy Update\Backup"
+		CreateDirectory "$PROGRAMFILES64\Legacy Update"
+		Rename "$PROGRAMFILES32\Legacy Update\Backup" "$PROGRAMFILES64\Legacy Update\Backup"
+		RMDir /r "$PROGRAMFILES32\Legacy Update"
+	${EndIf}
+${MementoSectionEnd}
 
 ${MementoSectionDone}
 
@@ -528,12 +528,12 @@ SectionEnd
 	!insertmacro MUI_DESCRIPTION_TEXT ${ROOTCERTS}    "Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
 	!insertmacro MUI_DESCRIPTION_TEXT ${WIN7MU}       "Configures Windows to install updates for Microsoft Office and other Microsoft software."
 	!insertmacro MUI_DESCRIPTION_TEXT ${ACTIVATE}     "Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
-	!insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to Windows Update."
-	!insertmacro MUI_DESCRIPTION_TEXT ${WUSERVER}     "Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service."
+	; !insertmacro MUI_DESCRIPTION_TEXT ${LEGACYUPDATE} "Installs Legacy Update, enabling access to Windows Update."
+	; !insertmacro MUI_DESCRIPTION_TEXT ${WUSERVER}     "Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function OnMouseOverSection
-	${If} $0 == ${ACTIVEX}
+	${If} $0 == ${LEGACYUPDATE}
 		${If} ${AtMostWinXP2003}
 			StrCpy $0 "Installs the Legacy Update ActiveX control, enabling access to the full Windows Update interface via the legacyupdate.net website."
 		${ElseIf} ${AtMostWin8.1}
@@ -794,9 +794,9 @@ Function .onInit
 		!insertmacro RemoveSection ${ACTIVATE}
 	${EndIf}
 
-	${IfNot} ${AtMostWinVista}
-		!insertmacro RemoveSection ${WUSERVER}
-	${EndIf}
+	; ${IfNot} ${AtMostWinVista}
+	; 	!insertmacro RemoveSection ${LEGACYUPDATE}
+	; ${EndIf}
 
 	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
 	${If} ${AtLeastWin10}
@@ -813,13 +813,13 @@ Function ComponentsPageCheck
 
 	; Skip if installer was invoked by IE, and all prerequisites are installed
 	${If} ${IsActiveXInstall}
-	${AndIf} ${SectionIsSelected} ${ACTIVEX}
+	${AndIf} ${SectionIsSelected} ${LEGACYUPDATE}
 		StrCpy $1 0
 		${For} $0 ${PREREQS_START} ${PREREQS_END}
 			${If} ${SectionIsSelected} $0
 			${AndIf} $0 != ${PREREQS_START}
 			${AndIf} $0 != ${PREREQS_END}
-			${AndIf} $0 != ${ACTIVEX}
+			${AndIf} $0 != ${LEGACYUPDATE}
 			${AndIf} $0 != ${ROOTCERTS}
 				StrCpy $1 1
 				${Break}
