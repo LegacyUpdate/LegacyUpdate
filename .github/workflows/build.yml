@@ -17,13 +17,19 @@ jobs:
       WSLENV: GITHUB_OUTPUT
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
     - name: Install WSL
       uses: Vampire/setup-wsl@v2
       with:
-        distribution: Ubuntu-22.04
+        distribution: Ubuntu-24.04
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up WSL
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -qy cabextract curl make mingw-w64-x86-64-dev nsis nsis-pluginapi p7zip-full upx-ucl
+        ./build/fix-nsis.sh
 
     - name: Set up Visual Studio
       run: |
@@ -32,13 +38,7 @@ jobs:
         vs_installer.exe modify \
           --quiet --norestart --noUpdateInstaller \
           --installPath "$vs" \
-          --add Microsoft.VisualStudio.Component.WinXP
-
-    - name: Set up WSL
-      run: |
-        sudo apt-get update -q
-        sudo apt-get install -qy make nsis nsis-pluginapi mingw-w64-i686-dev cabextract upx-ucl
-        ./build/fix-nsis.sh
+          --config .vsconfig
 
     - name: Install MinGW toolchain
       run: |
