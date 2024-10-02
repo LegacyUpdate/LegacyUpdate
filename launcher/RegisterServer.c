@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <shlobj.h>
 #include "Exec.h"
 #include "HResult.h"
 #include "LegacyUpdate.h"
@@ -9,13 +8,31 @@
 #include "VersionInfo.h"
 #include "Wow64.h"
 
-HRESULT RegisterDll(LPWSTR path, BOOL state) {
-	WCHAR windir[MAX_PATH];
-	HRESULT hr = SHGetFolderPath(0, CSIDL_WINDOWS, NULL, 0, windir);
-	if (!SUCCEEDED(hr)) {
-		return hr;
+static HRESULT RegisterDllInternal(LPWSTR path, BOOL state) {
+	HMODULE module = LoadLibrary(path);
+	if (!module) {
+		return HRESULT_FROM_WIN32(GetLastError());
 	}
 
+	HRESULT hr = S_OK;
+	FARPROC proc = GetProcAddress(module, state ? "DllRegisterServer" : "DllUnregisterServer");
+	if (!proc) {
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		goto end;
+	}
+
+	hr = ((HRESULT (WINAPI *)())proc)();
+
+end:
+	if (module) {
+		FreeLibrary(module);
+	}
+
+	return hr;
+}
+
+#if _WIN64
+static HRESULT RegisterDllExternal(LPWSTR path, BOOL state) {
 	WCHAR regsvr32[MAX_PATH];
 	ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\regsvr32.exe", regsvr32, ARRAYSIZE(regsvr32));
 
@@ -23,7 +40,7 @@ HRESULT RegisterDll(LPWSTR path, BOOL state) {
 	wsprintf(args, L"/s %ls\"%ls\"", state ? L"" : L"/u ", path);
 
 	DWORD status;
-	hr = Exec(NULL, regsvr32, args, NULL, SW_HIDE, TRUE, &status);
+	HRESULT hr = Exec(NULL, regsvr32, args, NULL, SW_HIDE, TRUE, &status);
 	if (!SUCCEEDED(hr)) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
 		return hr;
@@ -37,6 +54,7 @@ HRESULT RegisterDll(LPWSTR path, BOOL state) {
 
 	return status == 0 ? S_OK : E_FAIL;
 }
+#endif
 
 HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	// Ensure elevation
@@ -69,7 +87,7 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	dllPath = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
 	wsprintf(dllPath, L"%ls\\LegacyUpdate.dll", installPath);
 
-	hr = RegisterDll(dllPath, state);
+	hr = RegisterDllInternal(dllPath, state);
 
 #if _WIN64
 	if (!SUCCEEDED(hr)) {
@@ -77,7 +95,7 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	}
 
 	wsprintf(dllPath, L"%ls\\LegacyUpdate32.dll", installPath);
-	hr = RegisterDll(dllPath, state);
+	hr = RegisterDllExternal(dllPath, state);
 #endif
 
 end:
