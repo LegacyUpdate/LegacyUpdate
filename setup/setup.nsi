@@ -313,13 +313,17 @@ ${MementoSection} "Legacy Update" LEGACYUPDATE
 
 	${If} ${AtMostWinVista}
 		; Check if Schannel is going to work with modern TLS
-		!insertmacro DetailPrint "Checking SSL connectivity..."
-		!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
-			`/TIMEOUTCONNECT 0 /TIMEOUTRECONNECT 0`
-		Pop $0
-		Call DownloadWaitSilent
-		Pop $0
-		Pop $0
+		${If} ${AtLeastWinVista}
+			!insertmacro DetailPrint "Checking SSL connectivity..."
+			!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
+				`/TIMEOUTCONNECT 0 /TIMEOUTRECONNECT 0`
+			Pop $0
+			Call DownloadWaitSilent
+			Pop $0
+			Pop $0
+		${Else}
+			StrCpy $0 ""
+		${EndIf}
 
 		${If} $0 == "OK"
 			; HTTPS will work
@@ -558,7 +562,6 @@ FunctionEnd
 	StrCpy $RunOnceDir "$COMMONPROGRAMDATA\Legacy Update"
 	!insertmacro EnsureAdminRights
 	SetDetailsPrint listonly
-
 !macroend
 
 Function .onInit
