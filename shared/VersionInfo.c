@@ -27,12 +27,15 @@ HRESULT GetOwnVersion(LPWSTR *version) {
 
 		LocalFree(filename);
 
+		LPWSTR value;
 		UINT size;
-		if (!VerQueryValue(verInfo, L"\\StringFileInfo\\040904B0\\ProductVersion", (LPVOID *)&_version, &size)) {
+		if (!VerQueryValue(verInfo, L"\\StringFileInfo\\040904B0\\ProductVersion", (LPVOID *)&value, &size)) {
 			LocalFree(verInfo);
 			return HRESULT_FROM_WIN32(GetLastError());
 		}
 
+		_version = (LPWSTR)LocalAlloc(LPTR, (wcslen(value) + 1) * sizeof(WCHAR));
+		wcscpy(_version, value);
 		LocalFree(verInfo);
 	}
 

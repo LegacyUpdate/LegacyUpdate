@@ -2,6 +2,12 @@
 #include <windows.h>
 #include "Registry.h"
 
+#if _WIN64
+	#define ProgramFilesEnv L"%ProgramFilesW6432%"
+#else
+	#define ProgramFilesEnv L"%ProgramFiles%"
+#endif
+
 static LPWSTR _installPath;
 
 EXTERN_C HRESULT GetInstallPath(LPWSTR *path) {
@@ -17,12 +23,10 @@ EXTERN_C HRESULT GetInstallPath(LPWSTR *path) {
 		}
 
 		// Do our best to guess where it should be
-		LPWSTR programFiles;
-		hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows\\CurrentVersion", L"ProgramFilesDir", KEY_WOW64_64KEY, &programFiles, &size);
-		if (SUCCEEDED(hr)) {
-			_installPath = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-			wsprintf(_installPath, L"%ls\\Legacy Update", programFiles);
-			LocalFree(programFiles);
+		hr = S_OK;
+		_installPath = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
+		if (ExpandEnvironmentStrings(ProgramFilesEnv L"\\Legacy Update", _installPath, MAX_PATH) == 0) {
+			hr = HRESULT_FROM_WIN32(GetLastError());
 		}
 	}
 

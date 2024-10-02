@@ -215,6 +215,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		LPWSTR data;
 		HRESULT hr = GetOwnVersion(&data);
 		if (!SUCCEEDED(hr)) {
+			VariantClear(retval);
 			return hr;
 		}
 		retval->vt = VT_BSTR;
@@ -239,7 +240,6 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 			if (SUCCEEDED(hr)) {
 				retval->vt = VT_BSTR;
 				retval->bstrVal = SysAllocStringLen(data, size - 1);
-				LocalFree(data);
 			} else {
 				VariantClear(retval);
 			}
