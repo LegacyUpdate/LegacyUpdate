@@ -18,9 +18,9 @@ jobs:
 
     steps:
     - name: Install WSL
-      uses: Vampire/setup-wsl@v3
+      uses: Vampire/setup-wsl@v2
       with:
-        distribution: Ubuntu-24.04
+        distribution: Ubuntu-22.04
 
     - name: Checkout
       uses: actions/checkout@v3
