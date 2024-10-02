@@ -18,7 +18,7 @@ jobs:
 
     steps:
     - name: Install WSL
-      uses: Vampire/setup-wsl@v2
+      uses: Vampire/setup-wsl@v3
       with:
         distribution: Ubuntu-24.04
 
