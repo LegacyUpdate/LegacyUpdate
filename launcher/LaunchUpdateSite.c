@@ -2,14 +2,12 @@
 #include "main.h"
 #include "resource.h"
 #include <exdisp.h>
-#include <shellapi.h>
-#include <shlobj.h>
-#include <wchar.h>
 #include "Exec.h"
 #include "HResult.h"
 #include "MsgBox.h"
 #include "RegisterServer.h"
 #include "Registry.h"
+#include "SelfElevate.h"
 #include "User.h"
 #include "VersionInfo.h"
 
@@ -22,7 +20,7 @@ DEFINE_GUID(CLSID_LegacyUpdateCtrl, 0xAD28E0DF, 0x5F5A, 0x40B5, 0x94, 0x32, 0x85
 
 static const LPWSTR GetUpdateSiteURL() {
 	// Fallback: Use SSL only on Vista and up
-	BOOL useHTTPS = IsOSVersionOrLater(6, 0);
+	BOOL useHTTPS = AtLeastWinVista();
 
 	// Get the Windows Update website URL set by Legacy Update setup
 	LPWSTR data;
@@ -55,11 +53,8 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	}
 
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
-	if (!IsOSVersionOrLater(6, 0) && !IsUserAdmin()) {
-		LPWSTR filename;
-		GetOwnFileName(&filename);
-		hr = Exec(L"runas", filename, GetCommandLineW(), NULL, nCmdShow, FALSE, NULL);
-		LocalFree(filename);
+	if (!AtLeastWinVista() && !IsUserAdmin()) {
+		hr = SelfElevate(GetCommandLineW(), NULL);
 
 		// Access denied happens when the user clicks No/Cancel.
 		if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
@@ -97,7 +92,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		OSVERSIONINFOEX *versionInfo = GetVersionInfo();
 
 		// Windows 8+: Directly prompt to reinstall IE using Fondue.exe.
-		if (IsOSVersionOrLater(6, 2)) {
+		if (AtLeastWin8()) {
 			SYSTEM_INFO systemInfo;
 			GetSystemInfo(&systemInfo);
 			LPCTSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";

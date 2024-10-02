@@ -268,7 +268,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
 	DoIsPermittedCheck();
 
-	if (m_elevatedHelper != NULL || !IsOSVersionOrLater(6, 0)) {
+	if (m_elevatedHelper != NULL || !AtLeastWinVista()) {
 		return S_OK;
 	}
 
@@ -422,7 +422,7 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 		return hr;
 	}
 
-	if (IsOSVersionOrLater(10, 0)) {
+	if (AtLeastWin10()) {
 		// Windows 10 moves WU/USO logs to ETW. The ETW logs can be converted back to a plain-text .log
 		// using a cmdlet.
 		WCHAR powershell[MAX_PATH];
@@ -463,10 +463,10 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	PVOID oldValue;
 	BOOL isRedirected = DisableWow64FsRedirection(&oldValue);
 
-	if (IsOSVersionOrLater(10, 0)) {
+	if (AtLeastWin10()) {
 		// Windows 10+: Open Settings app
 		Exec(NULL, L"ms-settings:windowsupdate-options", NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
-	} else if (IsOSVersionOrLater(6, 0)) {
+	} else if (AtLeastWinVista()) {
 		// Windows Vista, 7, 8: Open Windows Update control panel
 		WCHAR wuauclt[MAX_PATH];
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\wuauclt.exe", wuauclt, ARRAYSIZE(wuauclt));

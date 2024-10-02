@@ -21,14 +21,14 @@ PLUGIN_METHOD(IsActivated) {
 	PLUGIN_INIT();
 
 	// Activation is irrelevant prior to XP
-	if (g_loadedLicenseStatus || !IsOSVersionOrLater(5, 1)) {
+	if (g_loadedLicenseStatus || !AtLeastWinXP2002()) {
 		pushint(g_isActivated);
 		return;
 	}
 
 	g_loadedLicenseStatus = TRUE;
 
-	if (IsOSVersionOrLater(6, 0)) {
+	if (AtLeastWinVista()) {
 		// Vista+: Ask the Software Licensing Service
 		if (!$SLOpen) {
 			HMODULE slc = LoadLibrary(L"slc.dll");

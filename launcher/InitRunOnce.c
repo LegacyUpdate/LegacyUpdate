@@ -100,8 +100,8 @@ static LRESULT CALLBACK WallpaperWndProc(HWND hwnd, UINT message, WPARAM wParam,
 			DeleteDC(memDC);
 		} else {
 			HBRUSH brush;
-			if (IsOSVersionOrLater(6, 2)) {
-				brush = CreateSolidBrush(IsOSVersionOrLater(10, 0) ? WallpaperColorWin10 : WallpaperColorWin8);
+			if (AtLeastWin8()) {
+				brush = CreateSolidBrush(AtLeastWin10() ? WallpaperColorWin10 : WallpaperColorWin8);
 			} else {
 				brush = CreateSolidBrush(GetSysColor(COLOR_DESKTOP));
 			}
@@ -193,12 +193,12 @@ static void CreateWallpaperWindow() {
 	// Register hotkey
 	RegisterHotKey(hwnd, HK_RUNCMD, MOD_SHIFT, VK_F10);
 
-	if (IsOSVersionEqual(6, 1)) {
+	if (IsWin7()) {
 		// 7: Bitmap in oobe dir
 		WCHAR bmpPath[MAX_PATH];
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
 		g_wallpaperBitmap = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	} else if (IsOSVersionEqual(6, 0)) {
+	} else if (IsWinVista()) {
 		// Vista: Resources in ooberesources.dll
 		WCHAR ooberesPath[MAX_PATH];
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\ooberesources.dll", ooberesPath, ARRAYSIZE(ooberesPath));
