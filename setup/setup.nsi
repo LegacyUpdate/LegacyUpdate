@@ -76,8 +76,7 @@ Var /GLOBAL UninstallInstalled
 !include Common.nsh
 !include AeroWizard.nsh
 !include Download2KXP.nsh
-!include DownloadVista7.nsh
-!include Download8.nsh
+!include DownloadVista78.nsh
 !include DownloadWUA.nsh
 !include RunOnce.nsh
 !include UpdateRoots.nsh
@@ -725,7 +724,7 @@ Function .onInit
 			!insertmacro RemoveSection ${WHS2011U4}
 		${EndIf}
 
-		Call NeedsWin7SHA2
+		Call NeedsWin7PostSP1
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${WIN7SSU}
