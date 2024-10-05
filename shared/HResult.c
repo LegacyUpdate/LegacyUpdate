@@ -27,7 +27,11 @@ EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
 	}
 
 	LPWSTR message;
-	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, g_messagesHModule, hr, LANG_NEUTRAL, (LPWSTR)&message, 0, NULL) == 0) {
+	if (FormatMessage(FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, g_messagesHModule, hr, LANG_NEUTRAL, (LPWSTR)&message, 0, NULL) != 0) {
+		return message;
+	}
+
+	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, LANG_NEUTRAL, (LPWSTR)&message, 0, NULL) == 0) {
 		message = (LPWSTR)LocalAlloc(LPTR, 1024 * sizeof(WCHAR));
 		wsprintf(message, L"Error 0x%08X", hr);
 		return message;
