@@ -91,17 +91,15 @@ FunctionEnd
 
 Function DownloadWait
 	NSxfer::Wait /ID $Download.ID /MODE PAGE \
-		/STATUSTEXT \
-			"{TIMEREMAINING} left - {RECVSIZE} of {FILESIZE} ({SPEED})" \
-			"{TIMEREMAINING} left - {TOTALRECVSIZE} of {TOTALFILESIZE} ({SPEED})" \
-		/ABORT "Legacy Update" "Cancelling will terminate Legacy Update setup." \
+		/STATUSTEXT "$(DownloadStatusSingle)" "$(DownloadStatusMulti)" \
+		/ABORT "$(^Name)" "$(MsgBoxDownloadAbort)" \
 		/END
 	NSxfer::Query /ID $Download.ID /ERRORCODE /ERRORTEXT /END
 FunctionEnd
 
 !macro -Download name url filename verbose
 	${If} ${verbose} == 1
-		!insertmacro DetailPrint "Downloading ${name}..."
+		!insertmacro DetailPrint "$(Downloading)${name}..."
 	${EndIf}
 	!insertmacro DownloadRequest "${url}" "${filename}" ""
 	${If} ${verbose} == 1
@@ -152,9 +150,9 @@ Function ExecWithErrorHandling
 		SetErrorLevel ${ERROR_INSTALL_USEREXIT}
 		Abort
 	${ElseIf} $0 == ${WU_S_ALREADY_INSTALLED}
-		DetailPrint "Installation skipped - already installed"
+		DetailPrint "$(AlreadyInstalled)"
 	${ElseIf} $0 == ${WU_E_NOT_APPLICABLE}
-		DetailPrint "Installation skipped - not applicable"
+		DetailPrint "$(NotApplicable)"
 	${ElseIf} $0 != 0
 		LegacyUpdateNSIS::MessageForHresult $0
 		Pop $1
@@ -172,15 +170,15 @@ FunctionEnd
 !macroend
 
 !macro Install name filename args
-	!insertmacro DetailPrint "Installing ${name}..."
+	!insertmacro DetailPrint "$(Installing)${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" ${args}'
 !macroend
 
 !macro InstallSP name filename
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
-	!insertmacro DetailPrint "Extracting ${name}..."
+	!insertmacro DetailPrint "$(Extracting)${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"'
-	!insertmacro DetailPrint "Installing ${name}..."
+	!insertmacro DetailPrint "$(Installing)${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600'
 
 	; If we successfully abort a shutdown, we'll get exit code 0, so we know a reboot is required.
@@ -197,13 +195,13 @@ FunctionEnd
 !macro InstallMSU kbid name
 	; Stop AU service before running wusa so it doesn't try checking for updates online first (which
 	; may never complete before we install our patches).
-	!insertmacro DetailPrint "Extracting ${name} (${kbid})..."
+	!insertmacro DetailPrint "$(Extracting)${name}..."
 	SetDetailsPrint none
 	CreateDirectory "$PLUGINSDIR\${kbid}"
 	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\expand.exe" -F:* "$0" "$PLUGINSDIR\${kbid}"'
 	SetDetailsPrint lastused
 
-	!insertmacro DetailPrint "Installing ${name} (${kbid})..."
+	!insertmacro DetailPrint "$(Installing)${name}..."
 	${DisableX64FSRedirection}
 	FindFirst $0 $1 "$PLUGINSDIR\${kbid}\*.xml"
 	${Do}
@@ -227,10 +225,7 @@ FunctionEnd
 !macro EnsureAdminRights
 	${IfNot} ${AtLeastWin2000}
 		MessageBox MB_USERICON|MB_OKCANCEL \
-			"Legacy Update requires Windows 2000 or later.$\r$\n\
-			$\r$\n\
-			You might be interested in Windows Update Restored instead.$\r$\n\
-			Would you like to go to http://windowsupdaterestored.com/ now?" \
+			"$(MsgBoxOldWinVersion)" \
 			/SD IDCANCEL \
 			IDCANCEL +2
 		ExecShell "" "http://windowsupdaterestored.com/"
@@ -240,7 +235,7 @@ FunctionEnd
 
 	System::Call '${IsUserAnAdmin}() .r0'
 	${If} $0 == 0
-		MessageBox MB_USERICON "Log on as an administrator to install Legacy Update." /SD IDOK
+		MessageBox MB_USERICON "$(MsgBoxElevationRequired)" /SD IDOK
 		SetErrorLevel ${ERROR_ELEVATION_REQUIRED}
 		Quit
 	${EndIf}
@@ -252,27 +247,4 @@ FunctionEnd
 	${Else}
 		System::Call '${SetThreadExecutionState}(${ES_CONTINUOUS})'
 	${EndIf}
-!macroend
-
-!macro TryWithRetry command error
-	ClearErrors
-	${command}
-	IfErrors 0 +3
-		MessageBox MB_RETRYCANCEL|MB_USERICON \
-			'${error}$\r$\n$\r$\nIf Internet Explorer is open, close it and click Retry.' \
-			/SD IDCANCEL \
-			IDRETRY -3
-		Abort
-!macroend
-
-!macro TryFile file oname
-	!insertmacro TryWithRetry `File "/ONAME=${oname}" "${file}"` 'Unable to write to "${oname}".'
-!macroend
-
-!macro TryDelete file
-	!insertmacro TryWithRetry `Delete "${file}"` 'Unable to delete "${file}".'
-!macroend
-
-!macro TryRename src dest
-	!insertmacro TryWithRetry `Rename "${src}" "${dest}"` 'Unable to write to "${dest}".'
 !macroend

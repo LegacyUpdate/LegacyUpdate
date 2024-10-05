@@ -4,17 +4,25 @@
 
 ; Build
 !if ${DEBUG} == 1
-	!define VSBUILD32          "Debug-VC08"
-	!define VSBUILD64          "Debug-VC17"
+	!define VSBUILD32        "Debug-VC08"
+	!define VSBUILD64        "Debug-VC17"
 !else
 	!if ${CI} == 1
-		!define VSBUILD32        "Debug-VC17"
-		!define VSBUILD64        "Debug-VC17"
+		!define VSBUILD32      "Debug-VC17"
+		!define VSBUILD64      "Debug-VC17"
 	!else
-		!define VSBUILD32        "Release"
-		!define VSBUILD64        "Release"
+		!define VSBUILD32      "Release"
+		!define VSBUILD64      "Release"
 	!endif
 !endif
+
+; NSIS target
+!ifdef NSIS_UNICODE
+	!define NSIS_CHARSET     "unicode"
+!else
+	!define NSIS_CHARSET     "ansi"
+!endif
+!define NSIS_TARGET        "${NSIS_CPU}-${NSIS_CHARSET}"
 
 ; Version
 !getdllversion "..\${VSBUILD32}\LegacyUpdate.dll" DLLVersion_

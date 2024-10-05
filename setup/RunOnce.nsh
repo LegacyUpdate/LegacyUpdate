@@ -60,9 +60,9 @@ FunctionEnd
 
 Function CopyLauncher
 	${If} ${IsNativeAMD64}
-		!insertmacro TryFile "..\launcher\obj\LegacyUpdate64.exe" "$OUTDIR\LegacyUpdate.exe"
+		File "/ONAME=$OUTDIR\LegacyUpdate.exe" "..\launcher\obj\LegacyUpdate64.exe"
 	${Else}
-		!insertmacro TryFile "..\launcher\obj\LegacyUpdate32.exe" "$OUTDIR\LegacyUpdate.exe"
+		File "/ONAME=$OUTDIR\LegacyUpdate.exe" "..\launcher\obj\LegacyUpdate32.exe"
 	${EndIf}
 FunctionEnd
 

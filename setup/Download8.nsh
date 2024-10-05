@@ -1,19 +1,19 @@
 ; Windows 8 Servicing Stack
-!insertmacro MSUHandler "KB4598297" "2021-01 Servicing Stack Update for Windows Server 2012"
+!insertmacro MSUHandler "KB4598297" "2021-01 $(SSU) for Windows $(SRV) 2012"
 
 ; Windows 8.1 Servicing Stack
-!insertmacro MSUHandler "KB3021910" "2015-04 Servicing Stack Update for Windows 8.1"
+!insertmacro MSUHandler "KB3021910" "2015-04 $(SSU) for Windows 8.1"
 
 ; Windows 8.1 Update 1
-!insertmacro MSUHandler "KB2919355" "Windows 8.1 Update 1"
-!insertmacro MSUHandler "KB2932046" "Windows 8.1 Update 1"
-!insertmacro MSUHandler "KB2959977" "Windows 8.1 Update 1"
-!insertmacro MSUHandler "KB2937592" "Windows 8.1 Update 1"
-!insertmacro MSUHandler "KB2934018" "Windows 8.1 Update 1"
+!insertmacro MSUHandler "KB2919355" "Windows 8.1 $(Update) 1"
+!insertmacro MSUHandler "KB2932046" "Windows 8.1 $(Update) 1"
+!insertmacro MSUHandler "KB2959977" "Windows 8.1 $(Update) 1"
+!insertmacro MSUHandler "KB2937592" "Windows 8.1 $(Update) 1"
+!insertmacro MSUHandler "KB2934018" "Windows 8.1 $(Update) 1"
 
 ; Windows 8.1 Update 3
 ; TODO
-; !insertmacro MSUHandler "KB2934018" "Windows 8.1 Update 3"
+; !insertmacro MSUHandler "KB2934018" "Windows 8.1 $(Update) 3"
 
 Function NeedsWin81Update1
 	Call NeedsKB2919355
@@ -56,10 +56,10 @@ Function DownloadClearCompressionFlag
 	Pop $0
 	ReadINIStr $0 $PLUGINSDIR\Patches.ini ClearCompressionFlag $0
 	ReadINIStr $1 $PLUGINSDIR\Patches.ini ClearCompressionFlag Prefix
-	!insertmacro Download "Windows 8.1 Update 1 Preparation Tool" "$1$0" "ClearCompressionFlag.exe" 1
+	!insertmacro Download "Windows 8.1 $(Update) 1 $(PrepTool)" "$1$0" "ClearCompressionFlag.exe" 1
 FunctionEnd
 
 Function InstallClearCompressionFlag
 	Call DownloadClearCompressionFlag
-	!insertmacro Install "Windows 8.1 Update 1 Preparation Tool" "ClearCompressionFlag.exe" ""
+	!insertmacro Install "Windows 8.1 $(Update) 1 $(PrepTool)" "ClearCompressionFlag.exe" ""
 FunctionEnd

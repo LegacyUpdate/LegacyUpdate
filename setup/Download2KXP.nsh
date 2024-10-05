@@ -91,12 +91,12 @@ FunctionEnd
 !insertmacro NeedsFileVersionHandler "KB835732" "kernel32.dll" "5.00.2195.6897"
 !insertmacro NeedsFileVersionHandler "IE6"      "mshtml.dll"   "6.0.2600.0"
 
-!insertmacro PatchHandler "W2KSP4"   "Windows 2000 Service Pack 4"                       "-u -z"
-!insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 Update"                      "/passive /norestart"
-!insertmacro PatchHandler "XPSP1a"   "Windows XP Service Pack 1a"                        "-u -z"
-!insertmacro PatchHandler "XPSP3"    "Windows XP Service Pack 3"                         "/passive /norestart"
-!insertmacro PatchHandler "2003SP2"  "Windows XP Professional x64 Edition/Server 2003 Service Pack 2" "/passive /norestart"
-!insertmacro PatchHandler "XPESP3"   "Windows XP Embedded Service Pack 3"                "/passive /norestart"
+!insertmacro PatchHandler "W2KSP4"   "Windows 2000 $(SP) 4"            "-u -z"
+!insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 $(Update)" "/passive /norestart"
+!insertmacro PatchHandler "XPSP1a"   "Windows XP $(SP) 1a"             "-u -z"
+!insertmacro PatchHandler "XPSP3"    "Windows XP $(SP) 3"              "/passive /norestart"
+!insertmacro PatchHandler "2003SP2"  "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" "/passive /norestart"
+!insertmacro PatchHandler "XPESP3"   "Windows XP $(EMB) $(SP) 3"       "/passive /norestart"
 
 Function DownloadIE6
 	Call NeedsIE6
@@ -104,7 +104,7 @@ Function DownloadIE6
 	${If} $0 == 1
 		StrCpy $Patch.Key   "W2KIE6"
 		StrCpy $Patch.File  "ie6sp1.cab"
-		StrCpy $Patch.Title "Internet Explorer 6 SP1"
+		StrCpy $Patch.Title "$(IE) 6 $(SP) 1"
 		Call -PatchHandler
 	${EndIf}
 FunctionEnd
@@ -114,10 +114,10 @@ Function InstallIE6
 	Pop $0
 	${If} $0 == 1
 		Call DownloadIE6
-		!insertmacro DetailPrint "Extracting Internet Explorer 6 SP1..."
+		!insertmacro DetailPrint "$(Extracting)$(IE) 6 $(SP) 1..."
 		CreateDirectory "$PLUGINSDIR\IE6SP1"
 		LegacyUpdateNSIS::Exec '"$WINDIR\system32\expand.exe" "$OUTDIR\ie6sp1.cab" -F:* "$PLUGINSDIR\IE6SP1"'
-		!insertmacro DetailPrint "Installing Internet Explorer 6 SP1..."
-		!insertmacro ExecWithErrorHandling 'Internet Explorer 6 SP1' '"$PLUGINSDIR\IE6SP1\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
+		!insertmacro DetailPrint "$(Installing)$(IE) 6 $(SP) 1..."
+		!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\IE6SP1\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
 	${EndIf}
 FunctionEnd

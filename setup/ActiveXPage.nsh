@@ -66,7 +66,7 @@ Function ActiveXPage
 		StrCpy $1 "Use the Windows Update Control Panel"
 		StrCpy $2 "Legacy Update is compatible with the built-in Windows Update Control Panel. Make sure to check for updates $\"managed by your system administrator$\" to use the Legacy Update proxy server."
 	${Else}
-		${NSD_SetIcon} $0 "$WINDIR\System32\wupdmgr.exe" $1
+		${NSD_SetIcon} $0 "res://$WINDIR\System32\wupdmgr.exe/#Icon/APPICON" $1
 		StrCpy $1 "Use Automatic Updates"
 		StrCpy $2 "Use the built-in Automatic Updates feature to download and install updates. You will only be able to download critical updates."
 	${EndIf}

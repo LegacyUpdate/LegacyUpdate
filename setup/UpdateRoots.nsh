@@ -57,7 +57,7 @@ FunctionEnd
 !macroend
 
 Function DownloadRoots
-	!insertmacro DetailPrint "Downloading Certificate Trust List..."
+	!insertmacro DetailPrint "$(Downloading)Certificate Trust List..."
 	!insertmacro _DownloadSST "authroots"
 	!insertmacro _DownloadSST "delroots"
 	!insertmacro _DownloadSST "roots"
@@ -67,7 +67,7 @@ FunctionEnd
 
 Function UpdateRoots
 	File "updroots.exe"
-	!insertmacro DetailPrint "Installing Certificate Trust List..."
+	!insertmacro DetailPrint "$(Installing)Certificate Trust List..."
 	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" authroots.sst'
 	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" updroots.sst'
 	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l roots.sst'
