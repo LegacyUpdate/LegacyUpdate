@@ -188,7 +188,7 @@ FunctionEnd
 	!insertmacro DetailPrint "$(Extracting)${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"'
 	!insertmacro DetailPrint "$(Installing)${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '"$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600'
+	!insertmacro ExecWithErrorHandling '${name}' '"$WINDIR\system32\cmd.exe" /c "$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600'
 
 	; If we successfully abort a shutdown, we'll get exit code 0, so we know a reboot is required.
 	ExecWait '"$WINDIR\system32\shutdown.exe" /a' $0
