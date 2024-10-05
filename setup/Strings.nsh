@@ -21,6 +21,9 @@ LangString DownloadStatusMulti  ${LANG_ENGLISH} "{TIMEREMAINING} left - {TOTALRE
 FileErrorText \
 	'Unable to write to "$0".$\r$\n\
 	$\r$\n\
+	If Internet Explorer is open, close it and click Retry.' \
+	'Unable to write to "$0".$\r$\n\
+	$\r$\n\
 	If Internet Explorer is open, close it and click Retry.'
 
 LangString MsgBoxUsage ${LANG_ENGLISH} \
