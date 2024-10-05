@@ -7,13 +7,8 @@
 	!define VSBUILD32        "Debug-VC08"
 	!define VSBUILD64        "Debug-VC17"
 !else
-	!if ${CI} == 1
-		!define VSBUILD32      "Debug-VC17"
-		!define VSBUILD64      "Debug-VC17"
-	!else
-		!define VSBUILD32      "Release"
-		!define VSBUILD64      "Release"
-	!endif
+	!define VSBUILD32        "Release"
+	!define VSBUILD64        "Release"
 !endif
 
 ; NSIS target
