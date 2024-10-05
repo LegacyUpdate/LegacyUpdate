@@ -21,16 +21,13 @@ static inline OSVERSIONINFOEX *GetVersionInfo() {
 
 #define _IS_OS_MACRO(name, ver) \
 	static inline BOOL IsWin ## name() { \
-		GetVersionInfo(); \
-		return _winVer == ver; \
+		return LOWORD(GetVersion()) == ver; \
 	} \
 	static inline BOOL AtLeastWin ## name() { \
-		GetVersionInfo(); \
-		return _winVer >= ver; \
+		return LOWORD(GetVersion()) >= ver; \
 	} \
 	static inline BOOL AtMostWin ## name() { \
-		GetVersionInfo(); \
-		return _winVer <= ver; \
+		return LOWORD(GetVersion()) <= ver; \
 	}
 
 _IS_OS_MACRO(NT4,    0x0400)
