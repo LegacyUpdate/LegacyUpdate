@@ -75,9 +75,7 @@ Function .onInit
 		Quit
 	${EndIf}
 
-	Call NeedsIE6
-	Pop $0
-	${If} $0 == 0
+	${If} ${NeedsPatch} IE6
 		MessageBox MB_USERICON "Internet Explorer 6 Service Pack 1 is already installed." /SD IDOK
 		Quit
 	${EndIf}

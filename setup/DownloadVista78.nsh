@@ -37,6 +37,7 @@ FunctionEnd
 		Call GetComponentArch
 		Pop $0
 		ClearErrors
+		; TODO: CBS PackageIndex doesn't exist on Vista
 		EnumRegKey $1 HKLM "${REGPATH_CBS_PACKAGEINDEX}\Package_for_${kbid}~31bf3856ad364e35~$0~~0.0.0.0" 0
 		${If} ${Errors}
 			Push 1
@@ -46,9 +47,7 @@ FunctionEnd
 	FunctionEnd
 
 	Function Download${kbid}
-		Call Needs${kbid}
-		Pop $0
-		${If} $0 == 1
+		${If} ${NeedsPatch} ${kbid}
 			Call GetArch
 			Pop $0
 			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" $0
@@ -58,9 +57,7 @@ FunctionEnd
 	FunctionEnd
 
 	Function Install${kbid}
-		Call Needs${kbid}
-		Pop $0
-		${If} $0 == 1
+		${If} ${NeedsPatch} ${kbid}
 			Call Download${kbid}
 			!insertmacro InstallMSU "${kbid}" "${title}"
 		${EndIf}
@@ -114,21 +111,11 @@ FunctionEnd
 ; !insertmacro MSUHandler "KB2934018" "Windows 8.1 $(Update) 3"
 
 Function NeedsVistaPostSP2
-	Call NeedsKB3205638
-	Call NeedsKB4012583
-	Call NeedsKB4015195
-	Call NeedsKB4015380
-	Call NeedsKB4493730
-	Pop $0
-	Pop $1
-	Pop $2
-	Pop $3
-	Pop $4
-	${If} $0 == 1
-	${OrIf} $1 == 1
-	${OrIf} $2 == 1
-	${OrIf} $3 == 1
-	${OrIf} $4 == 1
+	${If} ${NeedsPatch} KB3205638
+	${OrIf} ${NeedsPatch} KB4012583
+	${OrIf} ${NeedsPatch} KB4015195
+	${OrIf} ${NeedsPatch} KB4015380
+	${OrIf} ${NeedsPatch} KB4493730
 		Push 1
 	${Else}
 		Push 0
@@ -136,15 +123,9 @@ Function NeedsVistaPostSP2
 FunctionEnd
 
 Function NeedsWin7PostSP1
-	Call NeedsKB3138612
-	Call NeedsKB4474419
-	Call NeedsKB4490628
-	Pop $0
-	Pop $1
-	Pop $2
-	${If} $0 == 1
-	${OrIf} $1 == 1
-	${OrIf} $2 == 1
+	${If} ${NeedsPatch} KB3138612
+	${OrIf} ${NeedsPatch} KB4474419
+	${OrIf} ${NeedsPatch} KB4490628
 		Push 1
 	${Else}
 		Push 0
@@ -152,20 +133,10 @@ Function NeedsWin7PostSP1
 FunctionEnd
 
 Function NeedsWin81Update1
-	Call NeedsKB2919355
-	Call NeedsKB2932046
-	Call NeedsKB2937592
-	Call NeedsKB2934018
-	Pop $0
-	Pop $1
-	Pop $2
-	Pop $3
-	Pop $4
-
-	${If} $0 == 1
-	${OrIf} $1 == 1
-	${OrIf} $2 == 1
-	${OrIf} $3 == 1
+	${If} ${NeedsPatch} KB2919355
+	${OrIf} ${NeedsPatch} KB2932046
+	${OrIf} ${NeedsPatch} KB2937592
+	${OrIf} ${NeedsPatch} KB2934018
 		Push 1
 	${Else}
 		Push 0
@@ -175,11 +146,9 @@ FunctionEnd
 ; TODO
 ; Function NeedsWin81Update3
 ; 	Call GetArch
-; 	Call NeedsKB2934018
 ; 	Pop $0
-; 	Pop $1
-; 	${If} $0 == 1
-; 	${AndIf} $1 == "arm"
+; 	${If} $0 == "arm"
+; 	${AndIf} ${NeedsPatch} KB2934018
 ; 		Push 1
 ; 	${Else}
 ; 		Push 0

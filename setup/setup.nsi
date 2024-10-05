@@ -617,18 +617,12 @@ Function .onInit
 
 	${If} ${IsWin2000}
 		; Determine whether Win2k prereqs need to be installed
-		Call NeedsW2KSP4
-		Call NeedsKB835732
-		Pop $0
-		Pop $1
-		${If} $0 == 0
-		${AndIf} $1 == 0
+		${IfNot} ${NeedsPatch} W2KSP4
+		${AndIfNot} ${NeedsPatch} KB835732
 			!insertmacro RemoveSection ${W2KSP4}
 		${EndIf}
 
-		Call NeedsIE6
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} IE6
 			!insertmacro RemoveSection ${IE6SP1}
 		${EndIf}
 	${Else}
@@ -642,9 +636,7 @@ Function .onInit
 			; Windows XP Embedded (version 2001), including FLP and WEPOS, has a different service pack
 			!insertmacro RemoveSection ${XPSP3}
 
-			Call NeedsXPESP3
-			Pop $0
-			${If} $0 == 0
+			${IfNot} ${NeedsPatch} XPESP3
 				!insertmacro RemoveSection ${XPESP3}
 			${EndIf}
 		${EndIf}
@@ -653,9 +645,7 @@ Function .onInit
 			; Determine whether XP prereqs need to be installed
 			!insertmacro RemoveSection ${XPESP3}
 
-			Call NeedsXPSP3
-			Pop $0
-			${If} $0 == 0
+			${IfNot} ${NeedsPatch} XPSP3
 				!insertmacro RemoveSection ${XPSP3}
 			${EndIf}
 		${EndIf}
@@ -672,9 +662,7 @@ Function .onInit
 
 	${If} ${IsWinXP2003}
 		; Determine whether 2003 prereqs need to be installed
-		Call Needs2003SP2
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} 2003SP2
 			!insertmacro RemoveSection ${2003SP2}
 		${EndIf}
 	${Else}
@@ -683,21 +671,15 @@ Function .onInit
 
 	${If} ${IsWinVista}
 		; Determine whether Vista prereqs need to be installed
-		Call NeedsVistaSP2
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} VistaSP2
 			!insertmacro RemoveSection ${VISTASP2}
 		${EndIf}
 
-		Call NeedsVistaPostSP2
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} VistaPostSP2
 			!insertmacro RemoveSection ${VISTASSU}
 		${EndIf}
 
-		Call NeedsIE9
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} IE9
 			!insertmacro RemoveSection ${VISTAIE9}
 		${EndIf}
 	${Else}
@@ -708,25 +690,16 @@ Function .onInit
 
 	${If} ${IsWin7}
 		; Determine whether 7 prereqs need to be installed
-		Call NeedsWin7SP1
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} Win7SP1
 			!insertmacro RemoveSection ${WIN7SP1}
 		${EndIf}
 
-		${If} ${IsHomeServer}
-			Call NeedsKB2757011
-			Pop $0
-			${If} $0 == 0
-				!insertmacro RemoveSection ${WHS2011U4}
-			${EndIf}
-		${Else}
+		${IfNot} ${IsHomeServer}
+		${OrIfNot} ${NeedsPatch} KB2757011
 			!insertmacro RemoveSection ${WHS2011U4}
 		${EndIf}
 
-		Call NeedsWin7PostSP1
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} Win7PostSP1
 			!insertmacro RemoveSection ${WIN7SSU}
 		${EndIf}
 
@@ -744,9 +717,7 @@ Function .onInit
 
 	${If} ${IsWin8}
 		; Determine whether 8 prereqs need to be installed
-		Call NeedsKB4598297
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} KB4598297
 			!insertmacro RemoveSection ${WIN8SSU}
 		${EndIf}
 	${Else}
@@ -755,15 +726,11 @@ Function .onInit
 
 	${If} ${IsWin8.1}
 		; Determine whether 8.1 prereqs need to be installed
-		Call NeedsWin81Update1
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} Win81Update1
 			!insertmacro RemoveSection ${WIN81U1}
 		${EndIf}
 
-		Call NeedsKB3021910
-		Pop $0
-		${If} $0 == 0
+		${IfNot} ${NeedsPatch} KB3021910
 			!insertmacro RemoveSection ${WIN81SSU}
 		${EndIf}
 	${Else}

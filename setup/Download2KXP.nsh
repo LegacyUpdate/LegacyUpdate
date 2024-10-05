@@ -62,9 +62,7 @@ FunctionEnd
 
 !macro PatchHandler kbid title params
 	Function Download${kbid}
-		Call Needs${kbid}
-		Pop $0
-		${If} $0 == 1
+		${If} ${NeedsPatch} ${kbid}
 			StrCpy $Patch.Key   "${kbid}"
 			StrCpy $Patch.File  "${kbid}.exe"
 			StrCpy $Patch.Title "${title}"
@@ -73,9 +71,7 @@ FunctionEnd
 	FunctionEnd
 
 	Function Install${kbid}
-		Call Needs${kbid}
-		Pop $0
-		${If} $0 == 1
+		${If} ${NeedsPatch} ${kbid}
 			Call Download${kbid}
 			!insertmacro Install "${title}" "${kbid}.exe" "${params}"
 		${EndIf}
@@ -99,9 +95,7 @@ FunctionEnd
 !insertmacro PatchHandler "XPESP3"   "Windows XP $(EMB) $(SP) 3"       "/passive /norestart"
 
 Function DownloadIE6
-	Call NeedsIE6
-	Pop $0
-	${If} $0 == 1
+	${If} ${NeedsPatch} IE6
 		StrCpy $Patch.Key   "W2KIE6"
 		StrCpy $Patch.File  "ie6sp1.cab"
 		StrCpy $Patch.Title "$(IE) 6 $(SP) 1"
@@ -110,9 +104,7 @@ Function DownloadIE6
 FunctionEnd
 
 Function InstallIE6
-	Call NeedsIE6
-	Pop $0
-	${If} $0 == 1
+	${If} ${NeedsPatch} IE6
 		Call DownloadIE6
 		!insertmacro DetailPrint "$(Extracting)$(IE) 6 $(SP) 1..."
 		CreateDirectory "$PLUGINSDIR\IE6SP1"

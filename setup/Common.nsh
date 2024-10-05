@@ -38,6 +38,15 @@ FunctionEnd
 !define IsActiveXInstall `"" HasFlag "/activex"`
 !define IsHelp           `"" HasFlag "/?"`
 
+!macro _NeedsPatch _a _b _t _f
+	!insertmacro _LOGICLIB_TEMP
+	Call Needs${_b}
+	Pop $_LOGICLIB_TEMP
+	StrCmp $_LOGICLIB_TEMP 1 `${_t}` `${_f}`
+!macroend
+
+!define NeedsPatch `"" NeedsPatch`
+
 !macro DetailPrint text
 	SetDetailsPrint both
 	DetailPrint "${text}"
@@ -150,9 +159,9 @@ Function ExecWithErrorHandling
 		SetErrorLevel ${ERROR_INSTALL_USEREXIT}
 		Abort
 	${ElseIf} $0 == ${WU_S_ALREADY_INSTALLED}
-		DetailPrint "$(AlreadyInstalled)"
+		!insertmacro DetailPrint "$(AlreadyInstalled)"
 	${ElseIf} $0 == ${WU_E_NOT_APPLICABLE}
-		DetailPrint "$(NotApplicable)"
+		!insertmacro DetailPrint "$(NotApplicable)"
 	${ElseIf} $0 != 0
 		LegacyUpdateNSIS::MessageForHresult $0
 		Pop $1
