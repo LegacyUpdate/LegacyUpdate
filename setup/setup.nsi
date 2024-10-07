@@ -902,13 +902,13 @@ Function PostInstall
 
 		; Launch activation wizard if requested by the user
 		${If} ${SectionIsSelected} ${ACTIVATE}
+			${DisableX64FSRedirection}
 			${If} ${AtLeastWinVista}
-				${DisableX64FSRedirection}
 				Exec '"$WINDIR\system32\slui.exe"'
-				${EnableX64FSRedirection}
 			${Else}
 				Exec '"$WINDIR\system32\oobe\msoobe.exe" /a'
 			${EndIf}
+			${EnableX64FSRedirection}
 		${EndIf}
 	${EndIf}
 FunctionEnd
