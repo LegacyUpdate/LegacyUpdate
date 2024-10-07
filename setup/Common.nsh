@@ -35,8 +35,8 @@ FunctionEnd
 	IfErrors `${_f}` `${_t}`
 !macroend
 
-!define IsActiveXInstall `"" HasFlag "/activex"`
-!define IsHelp           `"" HasFlag "/?"`
+!define IsPassive `"" HasFlag "/passive"`
+!define IsHelp    `"" HasFlag "/?"`
 
 !macro _NeedsPatch _a _b _t _f
 	!insertmacro _LOGICLIB_TEMP

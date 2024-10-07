@@ -773,7 +773,7 @@ Function ComponentsPageCheck
 	${EndIf}
 
 	; Skip if installer was invoked by IE, and all prerequisites are installed
-	${If} ${IsActiveXInstall}
+	${If} ${IsPassive}
 	${AndIf} ${SectionIsSelected} ${LEGACYUPDATE}
 		StrCpy $1 0
 		${For} $0 ${PREREQS_START} ${PREREQS_END}
@@ -890,8 +890,7 @@ Function PostInstall
 
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
-		${IfNot} ${IsActiveXInstall}
-		${AndIf} ${FileExists} "$InstallDir\LegacyUpdate.exe"
+		${If} ${FileExists} "$InstallDir\LegacyUpdate.exe"
 			Exec '"$InstallDir\LegacyUpdate.exe" /launch $0'
 		${ElseIf} ${AtLeastWinVista}
 			Exec '"$WINDIR\system32\wuauclt.exe" /ShowWUAutoScan'
