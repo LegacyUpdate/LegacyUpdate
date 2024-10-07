@@ -363,6 +363,8 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 	; Install DLLs
+	LegacyUpdateNSIS::CloseIEWindows
+
 	; NOTE: Here we specifically check for amd64, because the DLL is amd64.
 	; We still install to native Program Files on IA64, but with x86 binaries.
 	File "/ONAME=$OUTDIR\LegacyUpdate.dll" "..\${VSBUILD32}\LegacyUpdate.dll"
