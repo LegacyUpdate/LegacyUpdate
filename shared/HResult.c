@@ -8,31 +8,32 @@ static BOOL g_loadedHModule;
 static HMODULE g_messagesHModule;
 
 EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
-	if (!g_loadedHModule) {
-		g_loadedHModule = TRUE;
-
-		// Load messages table from main dll
-		LPWSTR installPath;
-		if (GetInstallPath(&installPath)) {
-			WCHAR path[MAX_PATH];
-			wsprintf(path, L"%ls\\LegacyUpdate.dll", installPath);
-			g_messagesHModule = LoadLibrary(path);
-			LocalFree(installPath);
-		}
-
-		if (!g_messagesHModule) {
-			// Try the current module
-			g_messagesHModule = (HMODULE)&__ImageBase;
-		}
-	}
-
 	LPWSTR message;
-	if (FormatMessage(FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, g_messagesHModule, hr, LANG_NEUTRAL, (LPWSTR)&message, 0, NULL) != 0) {
-		return message;
+
+	if (HRESULT_FACILITY(hr) == FACILITY_WINDOWSUPDATE) {
+		if (!g_loadedHModule) {
+			g_loadedHModule = TRUE;
+
+			// Load messages table from main dll
+			LPWSTR installPath;
+			if (GetInstallPath(&installPath)) {
+				WCHAR path[MAX_PATH];
+				wsprintf(path, L"%ls\\LegacyUpdate.dll", installPath);
+				g_messagesHModule = LoadLibrary(path);
+				LocalFree(installPath);
+			}
+
+			if (!g_messagesHModule) {
+				// Try the current module
+				g_messagesHModule = (HMODULE)&__ImageBase;
+			}
+		}
+
+		FormatMessage(FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, g_messagesHModule, hr, LANG_NEUTRAL, (LPWSTR)&message, 0, NULL);
 	}
 
-	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, LANG_NEUTRAL, (LPWSTR)&message, 0, NULL) == 0) {
-		message = (LPWSTR)LocalAlloc(LPTR, 1024 * sizeof(WCHAR));
+	if (!message && !FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, LANG_NEUTRAL, (LPWSTR)&message, 0, NULL)) {
+		message = (LPWSTR)LocalAlloc(LPTR, 17 * sizeof(WCHAR));
 		wsprintf(message, L"Error 0x%08X", hr);
 		return message;
 	}
