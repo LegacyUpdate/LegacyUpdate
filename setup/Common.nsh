@@ -204,13 +204,13 @@ FunctionEnd
 !macro InstallMSU kbid name
 	; Stop AU service before running wusa so it doesn't try checking for updates online first (which
 	; may never complete before we install our patches).
-	!insertmacro DetailPrint "$(Extracting)${name}..."
+	!insertmacro DetailPrint "$(Extracting)${name} (${kbid})..."
 	SetDetailsPrint none
 	CreateDirectory "$PLUGINSDIR\${kbid}"
 	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\expand.exe" -F:* "$0" "$PLUGINSDIR\${kbid}"'
 	SetDetailsPrint lastused
 
-	!insertmacro DetailPrint "$(Installing)${name}..."
+	!insertmacro DetailPrint "$(Installing)${name} (${kbid})..."
 	${DisableX64FSRedirection}
 	FindFirst $0 $1 "$PLUGINSDIR\${kbid}\*.xml"
 	${Do}
