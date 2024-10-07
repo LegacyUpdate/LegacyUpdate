@@ -892,6 +892,8 @@ Function PostInstall
 	${AndIfNot} ${IsRunOnce}
 		${If} ${FileExists} "$InstallDir\LegacyUpdate.exe"
 			Exec '"$InstallDir\LegacyUpdate.exe" /launch $0'
+		${ElseIf} ${AtLeastWin10}
+			ExecShell "" "ms-settings:windowsupdate" "" "" SW_SHOWNORMAL
 		${ElseIf} ${AtLeastWinVista}
 			Exec '"$WINDIR\system32\wuauclt.exe" /ShowWUAutoScan'
 		${EndIf}
