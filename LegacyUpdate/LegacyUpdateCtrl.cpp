@@ -422,6 +422,8 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 		return hr;
 	}
 
+	LPWSTR workDir = windir;
+
 	if (AtLeastWin10()) {
 		// Windows 10 moves WU/USO logs to ETW. The ETW logs can be converted back to a plain-text .log
 		// using a cmdlet.
@@ -431,7 +433,7 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 		DWORD code;
 		HRESULT hr = Exec(NULL, powershell, L"-Command Get-WindowsUpdateLog", windir, SW_SHOWDEFAULT, TRUE, &code);
 		if (!SUCCEEDED(hr) || code != 0) {
-			return hr == S_OK ? E_FAIL : hr;
+			return hr;
 		}
 
 		// On success, the log is written to Desktop\WindowsUpdate.log.
@@ -442,16 +444,10 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 			return hr;
 		}
 
-		return Exec(L"open", L"WindowsUpdate.log", NULL, desktop, SW_SHOWDEFAULT, FALSE, NULL);
-	} else {
-		// Try Windows Server 2003 Resource Kit (or MSYS/Cygwin/etc) tail.exe, falling back to directly
-		// opening the file (most likely in Notepad).
-		HRESULT hr = Exec(NULL, L"tail.exe", L"-f WindowsUpdate.log", windir, SW_SHOWDEFAULT, TRUE, NULL);
-		if (!SUCCEEDED(hr)) {
-			hr = Exec(L"open", L"WindowsUpdate.log", NULL, windir, SW_SHOWDEFAULT, FALSE, NULL);
-		}
-		return hr;
+		workDir = desktop;
 	}
+
+	return Exec(L"open", L"WindowsUpdate.log", NULL, workDir, SW_SHOWDEFAULT, FALSE, NULL);
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
