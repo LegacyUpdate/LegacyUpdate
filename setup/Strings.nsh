@@ -64,7 +64,9 @@ LangString MsgBoxActivateXP2003NotSP2 ${LANG_ENGLISH} \
 	"Windows XP Professional x64 Edition or Windows Server 2003 must be updated to Service Pack 2 to activate over the internet. The Service Pack 2 update action will be enabled."
 
 LangString MsgBoxMUFailed ${LANG_ENGLISH} \
-	"Failed to enable Microsoft Update.$\r$\n$\r$\n$0"
+	"Failed to enable Microsoft Update.$\r$\n\
+	$\r$\n\
+	$0"
 
 ; Statuses
 LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update service..."
@@ -89,9 +91,9 @@ LangString SectionWES09     ${LANG_ENGLISH} "Enable Windows Embedded 2009 update
 LangString SectionWHS2011U4 ${LANG_ENGLISH} "Windows Home Server 2011 Update Rollup 4"
 LangString SectionSSU       ${LANG_ENGLISH} "Windows Servicing Stack update"
 LangString SectionWUA       ${LANG_ENGLISH} "Windows Update Agent update"
-LangString SectionROOTCERTS ${LANG_ENGLISH} "Root certificates store update"
-LangString SectionENABLEMU  ${LANG_ENGLISH} "Enable Microsoft Update"
-LangString SectionACTIVATE  ${LANG_ENGLISH} "Activate Windows"
+LangString SectionRootCerts ${LANG_ENGLISH} "Root certificates store update"
+LangString SectionEnableMU  ${LANG_ENGLISH} "Enable Microsoft Update"
+LangString SectionActivate  ${LANG_ENGLISH} "Activate Windows"
 
 LangString SectionReboots   ${LANG_ENGLISH} \
 	"Your computer will restart automatically to complete installation."
@@ -112,40 +114,40 @@ LangString SectionWES09Desc     ${LANG_ENGLISH} \
 	"Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this."
 LangString Section2003SP2Desc   ${LANG_ENGLISH} \
 	"Updates Windows XP Professional x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. $(SectionReboots) $(SectionSupEULA)"
-LangString SectionVISTASP2Desc  ${LANG_ENGLISH} \
+LangString SectionVistaSP2Desc  ${LANG_ENGLISH} \
 	"Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. $(SectionReboots) $(SectionMSLT)"
-LangString SectionVISTASSUDesc  ${LANG_ENGLISH} \
+LangString SectionVistaSSUDesc  ${LANG_ENGLISH} \
 	"Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n$(SectionReboots)"
-LangString SectionVISTAIE9Desc  ${LANG_ENGLISH} \
+LangString SectionVistaIE9Desc  ${LANG_ENGLISH} \
 	"Updates Internet Explorer to 9.0.$\r$\n$(SectionReboots) $(SectionMSLT)"
-LangString SectionWIN7SP1Desc   ${LANG_ENGLISH} \
+LangString SectionWin7SP1Desc   ${LANG_ENGLISH} \
 	"Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. $(SectionReboots) $(SectionMSLT)"
-LangString SectionWIN7SSUDesc   ${LANG_ENGLISH} \
+LangString SectionWin7SSUDesc   ${LANG_ENGLISH} \
 	"Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n$(SectionReboots)"
-LangString SectionWIN8SSUDesc   ${LANG_ENGLISH} \
+LangString SectionWin8SSUDesc   ${LANG_ENGLISH} \
 	"Updates Windows 8 or Windows Server 2012 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n$(SectionReboots)"
-LangString SectionWIN81U1Desc ${LANG_ENGLISH} \
+LangString SectionWin81U1Desc   ${LANG_ENGLISH} \
 	"Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10.$\r$\n$(SectionReboots)"
-LangString SectionWIN81SSUDesc  ${LANG_ENGLISH} \
+LangString SectionWin81SSUDesc  ${LANG_ENGLISH} \
 	"Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n$(SectionReboots)"
 LangString SectionWHS2011U4Desc ${LANG_ENGLISH} \
 	"Updates Windows Home Server 2011 to Update Rollup 4 to resolve issues with the Windows Update Agent. Also fixes data corruption problems.$\r$\n$(SectionReboots)"
 LangString SectionWUADesc       ${LANG_ENGLISH} \
 	"Updates the Windows Update Agent to the latest version, as required for Legacy Update."
-LangString SectionROOTCERTSDesc ${LANG_ENGLISH} \
+LangString SectionRootCertsDesc ${LANG_ENGLISH} \
 	"Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
-LangString SectionWIN7MUDesc    ${LANG_ENGLISH} \
+LangString SectionWin7MUDesc    ${LANG_ENGLISH} \
 	"Configures Windows to install updates for Microsoft Office and other Microsoft software."
-LangString SectionACTIVATEDesc  ${LANG_ENGLISH} \
+LangString SectionActivateDesc  ${LANG_ENGLISH} \
 	"Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
-LangString SectionACTIVEX2KXPDesc ${LANG_ENGLISH} \
+LangString SectionActiveX2KXPDesc ${LANG_ENGLISH} \
 	"Installs the Legacy Update ActiveX control, enabling access to the full Windows Update interface via the legacyupdate.net website."
-LangString SectionACTIVEXVista78Desc ${LANG_ENGLISH} \
+LangString SectionActiveXVista78Desc ${LANG_ENGLISH} \
 	"Installs the Legacy Update ActiveX control, enabling access to the classic Windows Update interface via the legacyupdate.net website. Not required if you want to use the built-in Windows Update Control Panel."
-LangString SectionACTIVEXWin10Desc ${LANG_ENGLISH} \
+LangString SectionActiveXWin10Desc ${LANG_ENGLISH} \
 	"Installs the Legacy Update ActiveX control, enabling access to the classic Windows Update interface via the legacyupdate.net website."
 
-; LangString SectionLEGACYUPDATEDesc ${LANG_ENGLISH} \
+; LangString SectionLegacyUpdateDesc ${LANG_ENGLISH} \
 ; 	"Installs Legacy Update, enabling access to Windows Update."
-; LangString SectionWUSERVERDesc     ${LANG_ENGLISH} \
+; LangString SectionWUServerDesc     ${LANG_ENGLISH} \
 ; 	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service."
