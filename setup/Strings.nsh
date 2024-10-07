@@ -6,9 +6,9 @@ MiscButtonText "Back" "Next" "Cancel" "Close"
 ; Log
 LangString ^ExecShell  ${LANG_ENGLISH} "Execute: "
 LangString ^Completed  ${LANG_ENGLISH} "Done"
-LangString Downloading ${LANG_ENGLISH} "Downloading: "
-LangString Extracting  ${LANG_ENGLISH} "Extracting: "
-LangString Installing  ${LANG_ENGLISH} "Installing: "
+LangString Downloading ${LANG_ENGLISH} "Downloading "
+LangString Extracting  ${LANG_ENGLISH} "Extracting "
+LangString Installing  ${LANG_ENGLISH} "Installing "
 
 LangString AlreadyInstalled ${LANG_ENGLISH} "Installation skipped - already installed"
 LangString NotApplicable    ${LANG_ENGLISH} "Installation skipped - not applicable"
