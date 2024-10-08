@@ -22,7 +22,7 @@ Function DetermineWUAVersion
 		Return
 	${EndIf}
 
-	${GetFileVersion} "$SYSDIR\wuapi.dll" $1
+	${GetFileVersion} "$SYSDIR\wuaueng.dll" $1
 	${VersionCompare} $1 $2 $3
 	${If} $3 == 2
 		Call GetArch
