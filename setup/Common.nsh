@@ -207,6 +207,7 @@ FunctionEnd
 	!insertmacro DetailPrint "$(Extracting)${name} (${kbid})..."
 	SetDetailsPrint none
 	CreateDirectory "$PLUGINSDIR\${kbid}"
+	CreateDirectory "$PLUGINSDIR\${kbid}\Temp"
 	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\expand.exe" -F:* "$0" "$PLUGINSDIR\${kbid}"'
 	SetDetailsPrint lastused
 
@@ -221,9 +222,18 @@ FunctionEnd
 
 		; We prefer Dism, but need to fall back to Pkgmgr for Vista.
 		${If} ${IsWinVista}
-			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\pkgmgr.exe" /n:"$PLUGINSDIR\${kbid}\$1" /quiet /norestart'
+			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\pkgmgr.exe" \
+				/n:"$PLUGINSDIR\${kbid}\$1" \
+				/s:"$PLUGINSDIR\${kbid}\Temp" \
+				/l:"$TEMP\LegacyUpdate-CBS.log" \
+				/quiet /norestart'
 		${Else}
-			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\dism.exe" /Online /Apply-Unattend:"$PLUGINSDIR\${kbid}\$1" /Quiet /NoRestart'
+			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\dism.exe" \
+				/Online \
+				/Apply-Unattend:"$PLUGINSDIR\${kbid}\$1" \
+				/ScratchDir:"$PLUGINSDIR\${kbid}\Temp" \
+				/LogPath:"$TEMP\LegacyUpdate-CBS.log" \
+				/Quiet /NoRestart'
 		${EndIf}
 
 		FindNext $0 $1
