@@ -823,6 +823,10 @@ Function PreDownload
 
 	; Vista
 	${If} ${IsWinVista}
+		${If} ${NeedsPatch} VistaSP2
+			MessageBox MB_USERICON "$(MsgBoxVistaSPInstall)" /SD IDOK
+		${EndIf}
+
 		Call DownloadVistaSP1
 		Call DownloadVistaSP2
 		Call DownloadKB3205638
