@@ -70,7 +70,6 @@
 		Var /GLOBAL __WINVERBUILD
 		Var /GLOBAL __WINVERSP
 		Var /GLOBAL __WINVERPROD
-		Var /GLOBAL __WINVERSUITE
 	!endif
 
   StrCmp $__WINVEROS "" _winver_noveryet
@@ -81,7 +80,19 @@
 		GetWinVer $__WINVERBUILD Build
 		GetWinVer $__WINVERSP    ServicePack
 		GetWinVer $__WINVERPROD  Product
+!macroend
 
+!macro __WinVer_InitEx
+	!ifndef __WINVER_VARS_DECLARED_EX
+		!define __WINVER_VARS_DECLARED_EX
+
+		Var /GLOBAL __WINVERSUITE
+	!endif
+
+  StrCmp $__WINVERSUITE "" _winver_noveryet_ex
+		Return
+
+	_winver_noveryet_ex:
 		Push $0
 		Push $1
 		System::Alloc ${OSVERSIONINFOEXW_SIZE}
@@ -119,7 +130,7 @@
 
 !macro __WinVer_TestSuite _a num _t _f
 	!insertmacro _LOGICLIB_TEMP
-	${CallArtificialFunction} __WinVer_Init
+	${CallArtificialFunction} __WinVer_InitEx
 	IntOp $_LOGICLIB_TEMP $__WINVERSUITE & ${num}
 	!insertmacro _= $_LOGICLIB_TEMP ${num} `${_t}` `${_f}`
 !macroend

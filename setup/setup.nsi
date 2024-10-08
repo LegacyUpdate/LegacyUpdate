@@ -460,7 +460,6 @@ Section "-un.Legacy Update website" un.ACTIVEX
 	SetOutPath $InstallDir
 
 	; Delete shortcut
-	${UnpinShortcut} "$COMMONSTARTMENU\${NAME}.lnk"
 	Delete "$COMMONSTARTMENU\${NAME}.lnk"
 
 	; Delete Control Panel entry
@@ -542,11 +541,11 @@ SectionEnd
 Function OnMouseOverSection
 	${If} $0 == ${LEGACYUPDATE}
 		${If} ${AtMostWinXP2003}
-			StrCpy $0 "$(SectionACTIVEX2KXPDesc)"
+			StrCpy $0 "$(SectionActiveX2KXPDesc)"
 		${ElseIf} ${AtMostWin8.1}
-			StrCpy $0 "$(SectionACTIVEXVISTA78Desc)"
+			StrCpy $0 "$(SectionActiveXVista78Desc)"
 		${Else}
-			StrCpy $0 "$(SectionACTIVEXWIN10Desc)"
+			StrCpy $0 "$(SectionActiveXWin10Desc)"
 		${EndIf}
 		SendMessage $mui.ComponentsPage.DescriptionText ${WM_SETTEXT} 0 "STR:"
 		EnableWindow $mui.ComponentsPage.DescriptionText 1
@@ -554,7 +553,12 @@ Function OnMouseOverSection
 	${EndIf}
 FunctionEnd
 
-!macro Init
+Function .onInit
+	${If} ${IsHelp}
+		MessageBox MB_USERICON "$(MsgBoxUsage)"
+		Quit
+	${EndIf}
+
 	SetShellVarContext All
 	${If} ${RunningX64}
 		SetRegView 64
@@ -565,15 +569,6 @@ FunctionEnd
 	StrCpy $RunOnceDir "$COMMONPROGRAMDATA\Legacy Update"
 	!insertmacro EnsureAdminRights
 	SetDetailsPrint listonly
-!macroend
-
-Function .onInit
-	${If} ${IsHelp}
-		MessageBox MB_USERICON "$(MsgBoxUsage)"
-		Quit
-	${EndIf}
-
-	!insertmacro Init
 
 	${If} ${IsRunOnce}
 	${OrIf} ${IsPostInstall}
@@ -975,7 +970,11 @@ Function .onSelChange
 FunctionEnd
 
 Function un.onInit
-	!insertmacro Init
+	SetShellVarContext All
+	SetRegView 64
+	ReadRegStr $InstallDir HKLM "${REGPATH_UNINSTSUBKEY}" "InstallLocation"
+	StrCpy $RunOnceDir "$COMMONPROGRAMDATA\Legacy Update"
+	SetDetailsPrint listonly
 FunctionEnd
 
 Function un.onUninstSuccess
