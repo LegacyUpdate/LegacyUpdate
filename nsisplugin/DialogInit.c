@@ -12,10 +12,12 @@
 #include "LoadImage.h"
 #include "VersionInfo.h"
 
+#ifndef WM_DWMCOMPOSITIONCHANGED
 #define WM_DWMCOMPOSITIONCHANGED 0x031e
+#endif
 
-#define IDI_APPICON              103
-#define IDI_BANNER_WORDMARK_AERO 1337
+#define IDI_BANNER_WORDMARK      1337
+#define IDI_BANNER_WORDMARK_GLOW 1338
 
 typedef HRESULT (WINAPI *_DwmExtendFrameIntoClientArea)(HWND hWnd, const MARGINS *pMarInset);
 typedef HRESULT (WINAPI *_DwmIsCompositionEnabled)(BOOL *pfEnabled);
@@ -37,6 +39,7 @@ typedef enum Theme {
 } Theme;
 
 static HBITMAP g_bannerWordmark;
+static HBITMAP g_bannerWordmarkGlow;
 static Theme g_theme = ThemeUnknown;
 static WNDPROC g_dialogOrigWndProc;
 static WNDPROC g_bannerOrigWndProc;
@@ -88,10 +91,15 @@ static void ConfigureWindow() {
 		ShowWindow(bannerDivider, theme == ThemeClassic ? SW_SHOW : SW_HIDE);
 
 		if (g_theme == ThemeAero) {
-			g_bannerWordmark = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK_AERO), L"PNG");
+			g_bannerWordmark = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK), L"PNG");
+			if (AtMostWin7()) {
+				g_bannerWordmarkGlow = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK_GLOW), L"PNG");
+			}
 		} else {
 			DeleteObject(g_bannerWordmark);
+			DeleteObject(g_bannerWordmarkGlow);
 			g_bannerWordmark = NULL;
+			g_bannerWordmarkGlow = NULL;
 		}
 	}
 }
@@ -112,7 +120,30 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		RECT rect;
 		GetClientRect(hwnd, &rect);
 
+		BLENDFUNCTION blendFunc;
+		blendFunc.BlendOp = AC_SRC_OVER;
+		blendFunc.BlendFlags = 0;
+		blendFunc.SourceConstantAlpha = 0xFF;
+		blendFunc.AlphaFormat = AC_SRC_ALPHA;
+
 		// Draw wordmark with alpha blending
+		if (g_bannerWordmarkGlow) {
+			HDC hdcMem = CreateCompatibleDC(hdc);
+			SelectObject(hdcMem, g_bannerWordmarkGlow);
+
+			BITMAP bitmap;
+			GetObject(g_bannerWordmarkGlow, sizeof(bitmap), &bitmap);
+
+			int x = (rect.right - rect.left - bitmap.bmWidth) / 2;
+			int y = (rect.bottom - rect.top - bitmap.bmHeight) / 2;
+
+			AlphaBlend(hdc,
+				x, y, bitmap.bmWidth, bitmap.bmHeight, hdcMem,
+				0, 0, bitmap.bmWidth, bitmap.bmHeight, blendFunc);
+
+			DeleteDC(hdcMem);
+		}
+
 		if (g_bannerWordmark) {
 			HDC hdcMem = CreateCompatibleDC(hdc);
 			SelectObject(hdcMem, g_bannerWordmark);
@@ -121,13 +152,7 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 			GetObject(g_bannerWordmark, sizeof(bitmap), &bitmap);
 
 			int x = (rect.right - rect.left - bitmap.bmWidth) / 2;
-			int y = (rect.bottom - rect.top - bitmap.bmHeight) / 2;
-
-			BLENDFUNCTION blendFunc;
-			blendFunc.BlendOp = AC_SRC_OVER;
-			blendFunc.BlendFlags = 0;
-			blendFunc.SourceConstantAlpha = 0xFF;
-			blendFunc.AlphaFormat = AC_SRC_ALPHA;
+			int y = ((rect.bottom - rect.top - bitmap.bmHeight) / 2) - 1;
 
 			AlphaBlend(hdc,
 				x, y, bitmap.bmWidth, bitmap.bmHeight, hdcMem,

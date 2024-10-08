@@ -13,7 +13,8 @@
 !macroend
 
 ; This is a PE resource because there's no benefit to LZMA compressing it
-PEAddResource "banner-wordmark-aero.png" "PNG" "#1337"
+PEAddResource "banner-wordmark.png"      "PNG" "#1337"
+PEAddResource "banner-wordmark-glow.png" "PNG" "#1338"
 
 Var /GLOBAL ChildHwnd
 Var /GLOBAL AeroWizard.Font
