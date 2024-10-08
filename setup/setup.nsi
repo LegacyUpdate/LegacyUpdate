@@ -4,6 +4,7 @@ Name         "${NAME}"
 Caption      "${NAME}"
 BrandingText "${NAME} ${VERSION} - ${DOMAIN}"
 OutFile      "LegacyUpdate-${VERSION}.exe"
+InstallDir   "$PROGRAMFILES64\Legacy Update"
 InstallDirRegKey HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "InstallLocation"
 
 Unicode               true
@@ -34,9 +35,9 @@ ReserveFile "..\launcher\obj\LegacyUpdate32.exe"
 ReserveFile "..\launcher\obj\LegacyUpdate64.exe"
 ReserveFile "updroots.exe"
 
-Var /GLOBAL InstallDir
-Var /GLOBAL RunOnceDir
 Var /GLOBAL UninstallInstalled
+
+!define RUNONCEDIR "$COMMONPROGRAMDATA\Legacy Update"
 
 !define MUI_UI                       "modern_aerowizard.exe"
 !define MUI_UI_HEADERIMAGE           "modern_aerowizard.exe"
@@ -130,17 +131,17 @@ FunctionEnd
 Function MakeUninstallEntry
 	${IfNot} $UninstallInstalled == 1
 		StrCpy $UninstallInstalled 1
-		WriteUninstaller "$InstallDir\Uninstall.exe"
+		WriteUninstaller "$INSTDIR\Uninstall.exe"
 
 		; Add uninstall entry
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayName"          "${NAME}"
-		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon"          '"$InstallDir\Uninstall.exe",-103'
+		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon"          '"$INSTDIR\Uninstall.exe",-103'
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayVersion"       "${VERSION}"
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "Publisher"            "${NAME}"
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "URLInfoAbout"         "${WEBSITE}"
-		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "InstallLocation"      "$InstallDir"
-		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "UninstallString"      '"$InstallDir\Uninstall.exe"'
-		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "QuietUninstallString" '"$InstallDir\Uninstall.exe" /S'
+		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "InstallLocation"      "$INSTDIR"
+		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "UninstallString"      '"$INSTDIR\Uninstall.exe"'
+		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "QuietUninstallString" '"$INSTDIR\Uninstall.exe" /S'
 		WriteRegDword HKLM "${REGPATH_UNINSTSUBKEY}" "NoModify"             1
 		WriteRegDword HKLM "${REGPATH_UNINSTSUBKEY}" "NoRepair"             1
 		${MakeARPInstallDate} $0
@@ -280,7 +281,7 @@ Section "$(SectionWUA)" WUA
 	Call InstallWUA
 SectionEnd
 
-${MementoSection} "$(SectionROOTCERTS)" ROOTCERTS
+${MementoSection} "$(SectionRootCerts)" ROOTCERTS
 	Call ConfigureCrypto
 
 	${IfNot} ${IsPostInstall}
@@ -288,7 +289,7 @@ ${MementoSection} "$(SectionROOTCERTS)" ROOTCERTS
 	${EndIf}
 ${MementoSectionEnd}
 
-${MementoSection} "$(SectionENABLEMU)" WIN7MU
+${MementoSection} "$(SectionEnableMU)" WIN7MU
 	LegacyUpdateNSIS::EnableMicrosoftUpdate
 	Pop $0
 	${If} $0 != 0
@@ -299,7 +300,7 @@ ${MementoSection} "$(SectionENABLEMU)" WIN7MU
 	!insertmacro RestartWUAUService
 ${MementoSectionEnd}
 
-${MementoSection} "$(SectionACTIVATE)" ACTIVATE
+${MementoSection} "$(SectionActivate)" ACTIVATE
 	; No-op; we'll launch the activation wizard in post-install.
 ${MementoSectionEnd}
 
@@ -343,7 +344,7 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	${EndIf}
 
 	; ACTIVEX section
-	SetOutPath $InstallDir
+	SetOutPath $INSTDIR
 	; Call MakeUninstallEntry
 
 	; Add Control Panel entry
@@ -367,13 +368,13 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 
 	; NOTE: Here we specifically check for amd64, because the DLL is amd64.
 	; We still install to native Program Files on IA64, but with x86 binaries.
-	File "/ONAME=$OUTDIR\LegacyUpdate.dll" "..\${VSBUILD32}\LegacyUpdate.dll"
+	File "..\${VSBUILD32}\LegacyUpdate.dll"
 	${If} ${IsNativeAMD64}
-		${If} ${FileExists} "$OUTDIR\LegacyUpdate32.dll"
-			Delete "$OUTDIR\LegacyUpdate32.dll"
+		${If} ${FileExists} "LegacyUpdate32.dll"
+			Delete "LegacyUpdate32.dll"
 		${EndIf}
-		Rename "$OUTDIR\LegacyUpdate.dll" "$OUTDIR\LegacyUpdate32.dll"
-		File "/ONAME=$OUTDIR\LegacyUpdate.dll" "..\x64\${VSBUILD64}\LegacyUpdate.dll"
+		Rename "LegacyUpdate.dll" "LegacyUpdate32.dll"
+		File "..\x64\${VSBUILD64}\LegacyUpdate.dll"
 	${EndIf}
 	Call CopyLauncher
 
@@ -457,7 +458,7 @@ Section "-un.Legacy Update Server" un.WUSERVER
 SectionEnd
 
 Section "-un.Legacy Update website" un.ACTIVEX
-	SetOutPath $InstallDir
+	SetOutPath $INSTDIR
 
 	; Delete shortcut
 	Delete "$COMMONSTARTMENU\${NAME}.lnk"
@@ -485,7 +486,6 @@ Section "-un.Legacy Update website" un.ACTIVEX
 	Delete "$OUTDIR\LegacyUpdate.exe"
 	Delete "$OUTDIR\LegacyUpdate.dll"
 	Delete "$OUTDIR\LegacyUpdate32.dll"
-	Delete "$OUTDIR"
 
 	; Remove from trusted sites
 	DeleteRegKey HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
@@ -496,11 +496,11 @@ Section "-un.Legacy Update website" un.ACTIVEX
 SectionEnd
 
 Section -Uninstall
-	SetOutPath $InstallDir
+	SetOutPath $INSTDIR
 
 	; Delete folders
 	RMDir /r "$OUTDIR"
-	RMDir /r /REBOOTOK "$RunOnceDir"
+	RMDir /r /REBOOTOK "${RUNONCEDIR}"
 
 	; Delete uninstall entry
 	DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"
@@ -559,23 +559,19 @@ Function .onInit
 		Quit
 	${EndIf}
 
-	SetShellVarContext All
+	SetShellVarContext all
+	SetDetailsPrint listonly
 	${If} ${RunningX64}
 		SetRegView 64
-		StrCpy $InstallDir "$PROGRAMFILES64\${NAME}"
-	${Else}
-		StrCpy $InstallDir "$PROGRAMFILES32\${NAME}"
 	${EndIf}
-	StrCpy $RunOnceDir "$COMMONPROGRAMDATA\Legacy Update"
 	!insertmacro EnsureAdminRights
-	SetDetailsPrint listonly
 
 	${If} ${IsRunOnce}
 	${OrIf} ${IsPostInstall}
 		Call OnRunOnceLogon
 	${ElseIfNot} ${AtLeastWin10}
 		GetWinVer $0 Build
-		ReadRegDword $1 HKLM "System\CurrentControlSet\Control\Windows" "CSDVersion"
+		ReadRegDword $1 HKLM "${REGPATH_CONTROL_WINDOWS}" "CSDVersion"
 		IntOp $1 $1 & 0xFF
 		${If} $1 != 0
 			StrCpy $1 1
@@ -597,9 +593,7 @@ Function .onInit
 		${EndIf}
 
 		${If} $1 == 1
-			MessageBox MB_USERICON|MB_OKCANCEL \
-				"$(MsgBoxBetaOS)" \
-				/SD IDOK \
+			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxBetaOS)" /SD IDOK \
 				IDOK +2
 			Quit
 		${EndIf}
@@ -608,7 +602,7 @@ Function .onInit
 	SetOutPath $PLUGINSDIR
 	File Patches.ini
 
-	SetOutPath $RunOnceDir
+	SetOutPath "${RUNONCEDIR}"
 
 	${MementoSectionRestore}
 
@@ -636,9 +630,7 @@ Function .onInit
 			${IfNot} ${NeedsPatch} XPESP3
 				!insertmacro RemoveSection ${XPESP3}
 			${EndIf}
-		${EndIf}
-
-		${IfNot} ${IsEmbedded}
+		${Else}
 			; Determine whether XP prereqs need to be installed
 			!insertmacro RemoveSection ${XPESP3}
 
@@ -878,7 +870,7 @@ FunctionEnd
 
 Function PostInstall
 	; Handle first run flag if needed
-	${If} ${FileExists} "$InstallDir\LegacyUpdate.exe"
+	${If} ${FileExists} "$INSTDIR\LegacyUpdate.exe"
 		ClearErrors
 		ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "ActiveXInstalled"
 		${If} ${Errors}
@@ -891,8 +883,8 @@ Function PostInstall
 
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
-		${If} ${FileExists} "$InstallDir\LegacyUpdate.exe"
-			Exec '"$InstallDir\LegacyUpdate.exe" /launch $0'
+		${If} ${FileExists} "$INSTDIR\LegacyUpdate.exe"
+			Exec '"$INSTDIR\LegacyUpdate.exe" /launch $0'
 		${ElseIf} ${AtLeastWin10}
 			ExecShell "" "ms-settings:windowsupdate"
 		${ElseIf} ${AtLeastWinVista}
@@ -924,7 +916,7 @@ Function CleanUp
 
 	${If} ${IsPostInstall}
 	${OrIfNot} ${RebootFlag}
-		RMDir /r /REBOOTOK "$RunOnceDir"
+		RMDir /r /REBOOTOK "${RUNONCEDIR}"
 	${EndIf}
 FunctionEnd
 
@@ -946,11 +938,9 @@ FunctionEnd
 Function .onSelChange
 	${If} ${SectionIsSelected} ${WES09}
 		; Check for SSE2.
-		System::Call 'kernel32::IsProcessorFeaturePresent(i ${PF_XMMI64_INSTRUCTIONS_AVAILABLE}) i .r0'
+		System::Call '${IsProcessorFeaturePresent}(${PF_XMMI64_INSTRUCTIONS_AVAILABLE}) .r0'
 		${If} $0 == 0
-			MessageBox MB_USERICON \
-				"$(MsgBoxWES09NotSSE2)" \
-				/SD IDOK
+			MessageBox MB_USERICON "$(MsgBoxWES09NotSSE2)" /SD IDOK
 			!insertmacro UnselectSection ${WES09}
 		${EndIf}
 	${ElseIf} ${SectionIsSelected} ${ACTIVATE}
@@ -970,11 +960,9 @@ Function .onSelChange
 FunctionEnd
 
 Function un.onInit
-	SetShellVarContext All
-	SetRegView 64
-	ReadRegStr $InstallDir HKLM "${REGPATH_UNINSTSUBKEY}" "InstallLocation"
-	StrCpy $RunOnceDir "$COMMONPROGRAMDATA\Legacy Update"
+	SetShellVarContext all
 	SetDetailsPrint listonly
+	SetRegView 64
 FunctionEnd
 
 Function un.onUninstSuccess

@@ -56,9 +56,9 @@ FunctionEnd
 
 Function CopyLauncher
 	${If} ${IsNativeAMD64}
-		File "/ONAME=$OUTDIR\LegacyUpdate.exe" "..\launcher\obj\LegacyUpdate64.exe"
+		File /ONAME=LegacyUpdate.exe "..\launcher\obj\LegacyUpdate64.exe"
 	${Else}
-		File "/ONAME=$OUTDIR\LegacyUpdate.exe" "..\launcher\obj\LegacyUpdate32.exe"
+		File /ONAME=LegacyUpdate.exe "..\launcher\obj\LegacyUpdate32.exe"
 	${EndIf}
 FunctionEnd
 
@@ -68,19 +68,19 @@ FunctionEnd
 
 		${IfNot} ${IsRunOnce}
 			; Copy to runonce path to ensure installer is accessible by the temp user
-			CreateDirectory "$RunOnceDir"
-			SetOutPath "$RunOnceDir"
-			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
+			CreateDirectory "${RUNONCEDIR}"
+			SetOutPath "${RUNONCEDIR}"
+			CopyFiles /SILENT "$EXEPATH" "${RUNONCEDIR}\LegacyUpdateSetup.exe"
 			Call CopyLauncher
 
 			; Remove mark of the web to prevent "Open File - Security Warning" dialog
-			System::Call '${DeleteFile}("$RunOnceDir\LegacyUpdateSetup.exe:Zone.Identifier")'
+			System::Call '${DeleteFile}("${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier")'
 		${EndIf}
 
 		; Somewhat documented in KB939857:
 		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
 		; See also Wine winternl.h
-		WriteRegStr   HKLM "${REGPATH_SETUP}" "CmdLine" '"$RunOnceDir\LegacyUpdate.exe" /runonce'
+		WriteRegStr   HKLM "${REGPATH_SETUP}" "CmdLine" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce'
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
 
@@ -125,7 +125,7 @@ Function OnRunOnceDone
 	${If} ${IsRunOnce}
 	${AndIfNot} ${Abort}
 		; Set up postinstall runonce
-		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"$RunOnceDir\LegacyUpdateSetup.exe" /postinstall'
+		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"${RUNONCEDIR}\LegacyUpdateSetup.exe" /postinstall'
 
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
 		${If} $0 == "SYSTEM"

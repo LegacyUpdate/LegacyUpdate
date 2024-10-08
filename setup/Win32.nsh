@@ -1,10 +1,4 @@
 ; advapi32
-!define SECURITY_BUILTIN_DOMAIN_RID 0x00000020
-!define DOMAIN_ALIAS_RID_ADMINS     0x00000220
-
-!define AllocateAndInitializeSid 'advapi32::AllocateAndInitializeSid(i, i, i, i, i, i, i, i, i, i, *i) i'
-!define LookupAccountSid         'advapi32::LookupAccountSid(i, i, t, *i, t, *i, *i) i'
-!define FreeSid                  'advapi32::FreeSid(i)'
 !define GetUserName              'advapi32::GetUserName(t, *i) i'
 
 ; kernel32
@@ -14,18 +8,12 @@
 !define ES_SYSTEM_REQUIRED 0x00000001
 
 !define GetVersionEx             'kernel32::GetVersionEx(pr) i'
-!define GetLogicalProcessorInformationEx 'kernel32::GetLogicalProcessorInformationEx(i, *i, *i) i'
+!define IsProcessorFeaturePresent 'kernel32::IsProcessorFeaturePresent(i) i'
 !define SetThreadExecutionState  'kernel32::SetThreadExecutionState(i) i'
 !define OpenEvent                'kernel32::OpenEvent(i, i, t) i'
 !define SetEvent                 'kernel32::SetEvent(i) i'
 !define CloseHandle              'kernel32::CloseHandle(i) i'
 !define DeleteFile               'kernel32::DeleteFile(t) i'
-
-; netapi32
-!define NetApiBufferFree         'netapi32::NetApiBufferFree(i) i'
-!define NetUserGetInfo           'netapi32::NetUserGetInfo(t, t, i, *i) i'
-!define NetUserAdd               'netapi32::NetUserAdd(t, i, t, i, *i) i'
-!define NetLocalGroupAddMembers  'netapi32::NetLocalGroupAddMembers(t, t, i, *i, i) i'
 
 ; shell32
 !define IsUserAnAdmin            'shell32::IsUserAnAdmin() i'
@@ -33,9 +21,7 @@
 
 ; user32
 !define EWX_REBOOT 0x02
-!define EWX_FORCE  0x04
 
-!define ExitWindowsEx            'user32::ExitWindowsEx(i, i) i'
 !define GetSystemMetrics         'user32::GetSystemMetrics(i) i'
 
 ; winhttp

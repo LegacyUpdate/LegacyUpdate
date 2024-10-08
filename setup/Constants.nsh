@@ -22,9 +22,13 @@
 ; Version
 !getdllversion "..\${VSBUILD32}\LegacyUpdate.dll" DLLVersion_
 !define LONGVERSION        "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}.${DLLVersion_4}"
-!define VERSION            "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}"
+!define VERSION            "${LONGVERSION}"
 
-!if ${DLLVersion_3} == 0
+!if ${DLLVersion_4} == 0
+	!define /redef VERSION   "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}"
+!endif
+
+!if ${DLLVersion_3}.${DLLVersion_4} == 0.0
 	!define /redef VERSION   "${DLLVersion_1}.${DLLVersion_2}"
 !endif
 
@@ -34,6 +38,7 @@
 !define UPDATE_URL_HTTPS   "https://legacyupdate.net/windowsupdate/v6/"
 !define WSUS_SERVER        "http://legacyupdate.net/v6"
 !define WSUS_SERVER_HTTPS  "https://legacyupdate.net/v6"
+!define WUR_WEBSITE        "http://windowsupdaterestored.com/"
 !define TRUSTEDR           "http://download.windowsupdate.com/msdownload/update/v3/static/trustedr/en"
 
 ; Control Panel entry
@@ -48,6 +53,11 @@
 !define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
 !define REGPATH_HKCR_CPLCLSID      "CLSID\${CPL_GUID}"
 
+; System
+!define REGPATH_HARDWARE_SYSTEM    "Hardware\Description\System"
+!define REGPATH_CONTROL_LANGUAGE   "System\CurrentControlSet\Control\Nls\Language"
+!define REGPATH_CONTROL_WINDOWS    "System\CurrentControlSet\Control\Windows"
+
 ; XP POSReady hack
 !define REGPATH_POSREADY           "System\WPA\PosReady"
 
@@ -59,7 +69,6 @@
 ; Windows Update keys
 !define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"
 !define REGPATH_WU_SERVICES        "${REGPATH_WU}\Services"
-!define REGPATH_WU_OSUPGRADE       "${REGPATH_WU}\OSUpgrade"
 
 ; Windows Update policies
 !define REGPATH_WUPOLICY           "Software\Policies\Microsoft\Windows\WindowsUpdate"

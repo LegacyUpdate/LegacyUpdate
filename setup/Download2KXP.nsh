@@ -1,11 +1,11 @@
 Function GetUpdateLanguage
 	Var /GLOBAL UpdateLanguage
 	${If} $UpdateLanguage == ""
-		ReadRegStr $UpdateLanguage HKLM "Hardware\Description\System" "Identifier"
+		ReadRegStr $UpdateLanguage HKLM "${REGPATH_HARDWARE_SYSTEM}" "Identifier"
 		${If} $UpdateLanguage == "NEC PC-98"
 			StrCpy $UpdateLanguage "NEC98"
 		${Else}
-			ReadRegStr $UpdateLanguage HKLM "System\CurrentControlSet\Control\Nls\Language" "InstallLanguage"
+			ReadRegStr $UpdateLanguage HKLM "${REGPATH_CONTROL_LANGUAGE}" "InstallLanguage"
 			ReadINIStr $UpdateLanguage $PLUGINSDIR\Patches.ini Language $UpdateLanguage
 		${EndIf}
 	${EndIf}
@@ -51,7 +51,8 @@ Function -PatchHandler
 		ClearErrors
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" $1
 		${If} ${Errors}
-			MessageBox MB_USERICON "$Patch.Title could not be installed.$\r$\n$\r$\nThe installed Windows language and/or architecture is not supported." /SD IDOK
+			StrCpy $0 "$Patch.Title"
+			MessageBox MB_USERICON "$(MsgBoxPatchNotFound)" /SD IDOK
 			SetErrorLevel 1
 			Abort
 		${EndIf}

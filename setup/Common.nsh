@@ -120,7 +120,8 @@ FunctionEnd
 	Pop $0
 	${If} $0 != "OK"
 		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
-			MessageBox MB_USERICON "${name} failed to download.$\r$\n$\r$\n$0 ($1)" /SD IDOK
+			StrCpy $2 "${name}"
+			MessageBox MB_USERICON "$(MsgBoxDownloadFailed)" /SD IDOK
 		${EndIf}
 		Delete /REBOOTOK "${filename}"
 		SetErrorLevel 1
@@ -130,19 +131,11 @@ FunctionEnd
 
 !macro Download name url filename verbose
 	${If} ${FileExists} "$EXEDIR\${filename}"
-		${If} $OUTDIR != "$EXEDIR"
-			SetOutPath "$EXEDIR"
-		${EndIf}
-		StrCpy $0 "$EXEDIR\${filename}"
-	${Else}
-		${If} $OUTDIR != "$RunOnceDir"
-			SetOutPath "$RunOnceDir"
-		${EndIf}
-		${IfNot} ${FileExists} "$RunOnceDir\${filename}"
-			!insertmacro -Download '${name}' '${url}' '$RunOnceDir\${filename}' ${verbose}
-		${EndIf}
-		StrCpy $0 "$RunOnceDir\${filename}"
+		CopyFiles /SILENT "$EXEDIR\${filename}" "${RUNONCEDIR}\${filename}"
+	${ElseIfNot} ${FileExists} "${RUNONCEDIR}\${filename}"
+		!insertmacro -Download '${name}' '${url}' '${RUNONCEDIR}\${filename}' ${verbose}
 	${EndIf}
+	StrCpy $0 "${RUNONCEDIR}\${filename}"
 !macroend
 
 Var /GLOBAL Exec.Command
@@ -165,7 +158,8 @@ Function ExecWithErrorHandling
 	${ElseIf} $0 != 0
 		LegacyUpdateNSIS::MessageForHresult $0
 		Pop $1
-		MessageBox MB_USERICON "$Exec.Name failed to install.$\r$\n$\r$\n$1 ($0)" /SD IDOK
+		StrCpy $2 "$Exec.Name"
+		MessageBox MB_USERICON "$(MsgBoxInstallFailed)" /SD IDOK
 		SetErrorLevel $0
 		Abort
 	${EndIf}
@@ -225,14 +219,13 @@ FunctionEnd
 			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\pkgmgr.exe" \
 				/n:"$PLUGINSDIR\${kbid}\$1" \
 				/s:"$PLUGINSDIR\${kbid}\Temp" \
-				/l:"$TEMP\LegacyUpdate-CBS.log" \
 				/quiet /norestart'
 		${Else}
 			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\dism.exe" \
 				/Online \
 				/Apply-Unattend:"$PLUGINSDIR\${kbid}\$1" \
 				/ScratchDir:"$PLUGINSDIR\${kbid}\Temp" \
-				/LogPath:"$TEMP\LegacyUpdate-CBS.log" \
+				/LogPath:"$TEMP\LegacyUpdate-Dism.log" \
 				/Quiet /NoRestart'
 		${EndIf}
 
@@ -243,11 +236,9 @@ FunctionEnd
 
 !macro EnsureAdminRights
 	${IfNot} ${AtLeastWin2000}
-		MessageBox MB_USERICON|MB_OKCANCEL \
-			"$(MsgBoxOldWinVersion)" \
-			/SD IDCANCEL \
+		MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxOldWinVersion)" /SD IDCANCEL \
 			IDCANCEL +2
-		ExecShell "" "http://windowsupdaterestored.com/"
+		ExecShell "" "${WUR_WEBSITE}"
 		SetErrorLevel ${ERROR_OLD_WIN_VERSION}
 		Quit
 	${EndIf}

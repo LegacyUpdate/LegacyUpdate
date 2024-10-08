@@ -17,15 +17,7 @@ LangString NotApplicable    ${LANG_ENGLISH} "Installation skipped - not applicab
 LangString DownloadStatusSingle ${LANG_ENGLISH} "{TIMEREMAINING} left - {RECVSIZE} of {FILESIZE} ({SPEED})"
 LangString DownloadStatusMulti  ${LANG_ENGLISH} "{TIMEREMAINING} left - {TOTALRECVSIZE} of {TOTALFILESIZE} ({SPEED})"
 
-; Error dialogs
-FileErrorText \
-	'Unable to write to "$0".$\r$\n\
-	$\r$\n\
-	If Internet Explorer is open, close it and click Retry.' \
-	'Unable to write to "$0".$\r$\n\
-	$\r$\n\
-	If Internet Explorer is open, close it and click Retry.'
-
+; Startup errors
 LangString MsgBoxUsage ${LANG_ENGLISH} \
 	"Usage: setup.exe [/S] [/norestart]$\r$\n\
 	$\r$\n\
@@ -42,18 +34,49 @@ LangString MsgBoxOldWinVersion ${LANG_ENGLISH} \
 	"Legacy Update requires Windows 2000 or later.$\r$\n\
 	$\r$\n\
 	You might be interested in Windows Update Restored instead.$\r$\n\
-	Would you like to go to http://windowsupdaterestored.com/ now?"
+	Would you like to go to ${WUR_WEBSITE} now?"
 
 LangString MsgBoxBetaOS ${LANG_ENGLISH} \
 	"The current version of Windows is a beta build. Legacy Update may not work correctly on this version of Windows.$\r$\n\
 	$\r$\n\
 	Continue anyway?"
 
+; Install errors
+FileErrorText \
+	'Unable to write to "$0".$\r$\n\
+	$\r$\n\
+	If Internet Explorer is open, close it and click Retry.' \
+	'Unable to write to "$0".$\r$\n\
+	$\r$\n\
+	If Internet Explorer is open, close it and click Retry.'
+
 LangString MsgBoxDownloadAbort ${LANG_ENGLISH} \
 	"Cancelling will terminate Legacy Update setup."
 
+LangString MsgBoxDownloadFailed ${LANG_ENGLISH} \
+	"$2 failed to download.$\r$\n\
+	$\r$\n\
+	$0 ($1)"
+
+LangString MsgBoxInstallFailed ${LANG_ENGLISH} \
+	"$2 failed to install.$\r$\n\
+	$\r$\n\
+	$1 ($0)"
+
+LangString MsgBoxPatchNotFound ${LANG_ENGLISH} \
+	"$0 failed to install.$\r$\n\
+	$\r$\n\
+	The installed Windows language and/or architecture is not supported."
+
+LangString MsgBoxMUFailed ${LANG_ENGLISH} \
+	"Failed to enable Microsoft Update.$\r$\n\
+	$\r$\n\
+	$0"
+
+; Warnings
 LangString MsgBoxWES09NotSSE2 ${LANG_ENGLISH} \
-	"Your processor does not support the Streaming SIMD Extensions 2 (SSE2) instruction set, which is required to install Windows Embedded 2009 updates released after May 2018. Processors that initially implemented SSE2 instructions include the Intel Pentium 4, Pentium M, and AMD Athlon 64.$\r$\n\
+	"Your processor does not support the Streaming SIMD Extensions 2 (SSE2) instruction set, which is required to install Windows Embedded 2009 updates released after May 2018.$\r$\n\
+	Processors that initially implemented SSE2 instructions include the Intel Pentium 4, Pentium M, and AMD Athlon 64.$\r$\n\
 	$\r$\n\
 	To protect your Windows installation from becoming corrupted by incompatible updates, this option will be disabled."
 
@@ -65,11 +88,6 @@ LangString MsgBoxActivateXP2003NotSP2 ${LANG_ENGLISH} \
 
 LangString MsgBoxVistaSPInstall ${LANG_ENGLISH} \
 	"Your computer will restart several times to install Windows Vista Service Pack 2. Your screen may appear blank for an extended period of time. Do not turn off your computer during this process."
-
-LangString MsgBoxMUFailed ${LANG_ENGLISH} \
-	"Failed to enable Microsoft Update.$\r$\n\
-	$\r$\n\
-	$0"
 
 ; Statuses
 LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update service..."
