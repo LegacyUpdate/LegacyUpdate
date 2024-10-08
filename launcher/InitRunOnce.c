@@ -4,22 +4,24 @@
 #include "VersionInfo.h"
 #include "LoadImage.h"
 
-#ifndef WM_DPICHANGED
-#define WM_DPICHANGED 0x02E0
-#endif
-
 #define HK_RUNCMD 1
 
 typedef DWORD (__fastcall *_ThemeWaitForServiceReady)(DWORD timeout);
 typedef DWORD (__fastcall *_ThemeWatchForStart)();
 
-static HBITMAP g_wallpaperBitmap;
+static const COLORREF WallpaperColorWin2k = RGB(58, 110, 165); // #3a6ea5
+static const COLORREF WallpaperColorWinXP = RGB( 0,  78, 152); // #004e98
+static const COLORREF WallpaperColorWin8  = RGB(32, 103, 178); // #2067b2
+static const COLORREF WallpaperColorWin10 = RGB(24,   0,  82); // #180052
+
+static const WCHAR RunOnceClassName[] = L"LegacyUpdateRunOnce";
+
 static HANDLE g_cmdHandle;
 
 static void StartThemes() {
 	// Ask UxInit.dll to ask the Themes service to start a session for this desktop. Themes doesn't
 	// automatically start a session for the SYSTEM desktop, so we need to ask it to. This matches
-	// what msoobe.exe does, e.g., on first boot.
+	// what msoobe.exe does on first boot.
 
 	// Windows 7 moves this to UxInit.dll
 	HMODULE shsvcs = LoadLibrary(L"UxInit.dll");
@@ -64,66 +66,8 @@ static BOOL RunCmd(LPPROCESS_INFORMATION processInfo) {
 	return TRUE;
 }
 
-static const COLORREF WallpaperColorWin10 = RGB(24,   0,  82); // #180052
-static const COLORREF WallpaperColorWin8  = RGB(32, 103, 178); // #2067b2
-
-static COLORREF g_wallpaperColor;
-
-static LRESULT CALLBACK WallpaperWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
-	case WM_PAINT: {
-		// Set background image on the window
-		// 2k/XP: Desktop color
-		// Vista/7: OOBE wallpaper
-		// 8/10+: Solid color
-
-		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hwnd, &ps);
-
-		if (g_wallpaperBitmap) {
-			HDC memDC = CreateCompatibleDC(hdc);
-			HBITMAP oldBitmap = SelectObject(memDC, g_wallpaperBitmap);
-
-			BITMAP bitmap;
-			GetObject(g_wallpaperBitmap, sizeof(BITMAP), &bitmap);
-
-			// Get the dimensions of the window
-			RECT rect;
-			GetClientRect(hwnd, &rect);
-
-			// Stretch the bitmap to fit the entire window
-			SetStretchBltMode(hdc, HALFTONE);
-			StretchBlt(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
-				memDC, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
-
-			SelectObject(memDC, oldBitmap);
-			DeleteDC(memDC);
-		} else {
-			HBRUSH brush;
-			if (AtLeastWin8()) {
-				brush = CreateSolidBrush(AtLeastWin10() ? WallpaperColorWin10 : WallpaperColorWin8);
-			} else {
-				brush = CreateSolidBrush(GetSysColor(COLOR_DESKTOP));
-			}
-
-			FillRect(hdc, &ps.rcPaint, brush);
-			DeleteObject(brush);
-		}
-
-		break;
-	}
-
-	case WM_DISPLAYCHANGE:
-	case WM_THEMECHANGED:
-	case WM_DPICHANGED: {
-		// Resize to fit the new screen size
-		DWORD width = GetSystemMetrics(SM_CXSCREEN);
-		DWORD height = GetSystemMetrics(SM_CYSCREEN);
-		SetWindowPos(hwnd, NULL, 0, 0, width, height, SWP_NOZORDER | SWP_NOMOVE);
-		InvalidateRect(hwnd, NULL, TRUE);
-		break;
-	}
-
 	case WM_NCHITTEST:
 		// Don't accept any mouse input
 		return HTNOWHERE;
@@ -149,9 +93,7 @@ static LRESULT CALLBACK WallpaperWndProc(HWND hwnd, UINT message, WPARAM wParam,
 	return DefWindowProc(hwnd, message, wParam, lParam);;
 }
 
-const WCHAR WallpaperClassName[] = L"LegacyUpdateWallpaper";
-
-static void CreateWallpaperWindow() {
+static void CreateRunOnceWindow() {
 	// Init COM
 	CoInitialize(NULL);
 
@@ -164,9 +106,9 @@ static void CreateWallpaperWindow() {
 	// Create window
 	WNDCLASS wndClass = {0};
 	wndClass.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_NOCLOSE;
-	wndClass.lpfnWndProc = WallpaperWndProc;
+	wndClass.lpfnWndProc = RunOnceWndProc;
 	wndClass.hInstance = GetModuleHandle(NULL);
-	wndClass.lpszClassName = WallpaperClassName;
+	wndClass.lpszClassName = RunOnceClassName;
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 
 	if (!RegisterClass(&wndClass)) {
@@ -174,13 +116,12 @@ static void CreateWallpaperWindow() {
 		return;
 	}
 
-	DWORD width = GetSystemMetrics(SM_CXSCREEN);
-	DWORD height = GetSystemMetrics(SM_CYSCREEN);
 	HWND hwnd = CreateWindowEx(
 		WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
-		wndClass.lpszClassName, L"Legacy Update",
+		wndClass.lpszClassName,
+		L"Legacy Update",
 		WS_POPUP,
-		0, 0, width, height,
+		0, 0, 0, 0,
 		NULL, NULL,
 		wndClass.hInstance,
 		NULL
@@ -193,11 +134,23 @@ static void CreateWallpaperWindow() {
 	// Register hotkey
 	RegisterHotKey(hwnd, HK_RUNCMD, MOD_SHIFT, VK_F10);
 
+	// Set the wallpaper color
+	COLORREF color = GetSysColor(COLOR_DESKTOP);
+	if (AtLeastWin10()) {
+		color = WallpaperColorWin10;
+	} else if (AtLeastWin8()) {
+		color = WallpaperColorWin8;
+	} else if ((IsWinXP2002() || IsWinXP2003()) && color == RGB(0, 0, 0)) {
+		// XP uses a black wallpaper in fast user switching mode. Override to the default blue.
+		color = WallpaperColorWinXP;
+	}
+	SetSysColors(1, (const INT[1]){COLOR_DESKTOP}, (const COLORREF[1]){color});
+
 	if (IsWin7()) {
 		// 7: Bitmap in oobe dir
 		WCHAR bmpPath[MAX_PATH];
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
-		g_wallpaperBitmap = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)bmpPath, SPIF_SENDWININICHANGE);
 	} else if (IsWinVista()) {
 		// Vista: Resources in ooberesources.dll
 		WCHAR ooberesPath[MAX_PATH];
@@ -205,7 +158,14 @@ static void CreateWallpaperWindow() {
 		HMODULE ooberes = LoadLibrary(ooberesPath);
 		if (ooberes) {
 			// Width logic is the same used by Vista msoobe.dll
-			g_wallpaperBitmap = LoadPNGResource(ooberes, width < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0", RT_RCDATA);
+			LPWSTR resource = GetSystemMetrics(SM_CXSCREEN) < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0";
+
+			// Write to disk
+			WCHAR tempPath[MAX_PATH];
+			ExpandEnvironmentStrings(L"%ProgramData%\\Legacy Update\\background.bmp", tempPath, ARRAYSIZE(tempPath));
+			if (GetFileAttributes(tempPath) != INVALID_FILE_ATTRIBUTES || WritePNGResourceToBMP(ooberes, resource, RT_RCDATA, tempPath)) {
+				SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)tempPath, SPIF_SENDWININICHANGE);
+			}
 		}
 	}
 
@@ -268,8 +228,8 @@ void RunOnce() {
 		ShowWindow(firstUxWnd, SW_HIDE);
 	}
 
-	// Show our wallpaper window
-	CreateWallpaperWindow();
+	// Set up our window
+	CreateRunOnceWindow();
 
 	// Construct path to LegacyUpdateSetup.exe
 	WCHAR setupPath[MAX_PATH];

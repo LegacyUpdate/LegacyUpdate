@@ -12,8 +12,7 @@ typedef HRESULT (WINAPI *_WICConvertBitmapSource)(REFWICPixelFormatGUID dstForma
 
 static _WICConvertBitmapSource $WICConvertBitmapSource;
 
-static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
-	IStream *stream;
+static HGLOBAL GetRawResource(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
 	HRSRC resource = FindResource(hInstance, name, type);
 	if (!resource) {
 		TRACE(L"FindResource failed: %d", GetLastError());
@@ -48,12 +47,22 @@ static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type)
 
 	CopyMemory(resourceData, sourceResourceData, resourceSize);
 	GlobalUnlock(resourceDataHandle);
+	return resourceDataHandle;
+}
 
-	if (SUCCEEDED(CreateStreamOnHGlobal(resourceDataHandle, TRUE, &stream))) {
+static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
+	IStream *stream;
+	HGLOBAL resource = GetRawResource(hInstance, name, type);
+	if (!resource) {
+		TRACE(L"GetResource failed: %d", GetLastError());
+		return NULL;
+	}
+
+	if (SUCCEEDED(CreateStreamOnHGlobal(resource, TRUE, &stream))) {
 		return stream;
 	}
 
-	GlobalFree(resourceDataHandle);
+	GlobalFree(resource);
 	return NULL;
 }
 
@@ -145,5 +154,83 @@ HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourc
 	HBITMAP result = GetHBitmapForWICBitmap(bitmap);
 	IWICBitmapSource_Release(bitmap);
 	IStream_Release(imageStream);
+	return result;
+}
+
+BOOL WritePNGResourceToBMP(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourceType, LPWSTR outputPath) {
+	BOOL result = FALSE;
+	HBITMAP hBitmap = LoadPNGResource(hInstance, resourceName, resourceType);
+	if (!hBitmap) {
+		TRACE(L"LoadPNGResource failed: %d", GetLastError());
+		return FALSE;
+	}
+
+	HDC hdc = GetDC(NULL);
+	BITMAP bmp;
+	if (!GetObject(hBitmap, sizeof(BITMAP), &bmp)) {
+		TRACE(L"GetObject failed: %d", GetLastError());
+		goto end;
+	}
+
+	BITMAPINFOHEADER bmih = {0};
+	bmih.biSize = sizeof(BITMAPINFOHEADER);
+	bmih.biWidth = bmp.bmWidth;
+	bmih.biHeight = bmp.bmHeight;
+	bmih.biPlanes = 1;
+	bmih.biBitCount = bmp.bmBitsPixel;
+	bmih.biCompression = BI_RGB;
+	bmih.biSizeImage = bmp.bmWidthBytes * bmp.bmHeight;
+
+	BITMAPFILEHEADER bmfh = {0};
+	bmfh.bfType = 0x4D42;
+	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	bmfh.bfSize = bmfh.bfOffBits + bmih.biSizeImage;
+
+	HGLOBAL handle = GlobalAlloc(GMEM_MOVEABLE, bmih.biSizeImage);
+	if (!handle) {
+		TRACE(L"GlobalAlloc failed: %d", GetLastError());
+		goto end;
+	}
+
+	BYTE *bitmapData = (BYTE *)GlobalLock(handle);
+	if (!bitmapData) {
+		TRACE(L"GlobalLock failed: %d", GetLastError());
+		goto end;
+	}
+
+	if (!GetDIBits(hdc, hBitmap, 0, bmp.bmHeight, bitmapData, (BITMAPINFO *)&bmih, DIB_RGB_COLORS)) {
+		TRACE(L"GetDIBits failed: %d", GetLastError());
+		goto end;
+	}
+
+	HANDLE file = CreateFile(outputPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file == INVALID_HANDLE_VALUE) {
+		TRACE(L"CreateFile failed: %d", GetLastError());
+		goto end;
+	}
+
+	DWORD written;
+	if (!WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &written, NULL) ||
+		!WriteFile(file, &bmih, sizeof(BITMAPINFOHEADER), &written, NULL) ||
+		!WriteFile(file, bitmapData, bmih.biSizeImage, &written, NULL)) {
+		TRACE(L"WriteFile failed: %d", GetLastError());
+		goto end;
+	}
+
+	result = TRUE;
+
+end:
+	if (file && file != INVALID_HANDLE_VALUE) {
+		CloseHandle(file);
+	}
+	if (hBitmap) {
+		DeleteObject(hBitmap);
+	}
+	if (handle) {
+		GlobalUnlock(handle);
+		GlobalFree(handle);
+	}
+	ReleaseDC(NULL, hdc);
+
 	return result;
 }

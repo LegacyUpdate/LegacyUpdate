@@ -64,7 +64,7 @@ LangString MsgBoxActivateXP2003NotSP2 ${LANG_ENGLISH} \
 	"Windows XP Professional x64 Edition or Windows Server 2003 must be updated to Service Pack 2 to activate over the internet. The Service Pack 2 update action will be enabled."
 
 LangString MsgBoxVistaSPInstall ${LANG_ENGLISH} \
-	"Your computer will restart several times to install Windows Vista Service Pack 2. Your screen may appear black for an extended period of time. Do not turn off your computer during this process."
+	"Your computer will restart several times to install Windows Vista Service Pack 2. Your screen may appear blank for an extended period of time. Do not turn off your computer during this process."
 
 LangString MsgBoxMUFailed ${LANG_ENGLISH} \
 	"Failed to enable Microsoft Update.$\r$\n\
