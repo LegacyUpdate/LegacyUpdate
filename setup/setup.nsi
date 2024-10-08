@@ -962,7 +962,11 @@ FunctionEnd
 Function un.onInit
 	SetShellVarContext all
 	SetDetailsPrint listonly
-	SetRegView 64
+
+	; Hack to avoid bundling System.dll in uninstaller
+	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"
+		SetRegView 64
+	${EndIf}
 FunctionEnd
 
 Function un.onUninstSuccess
