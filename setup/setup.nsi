@@ -979,9 +979,5 @@ Function un.onInit
 FunctionEnd
 
 Function un.onUninstSuccess
-	!insertmacro DetailPrint "$(^Completed)"
-	Call un.RebootIfRequired
-	${IfNot} ${RebootFlag}
-		Quit
-	${EndIf}
+	Quit
 FunctionEnd

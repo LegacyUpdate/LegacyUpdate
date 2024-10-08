@@ -41,10 +41,6 @@ Function CleanUpRunOnce
 	!insertmacro -CleanUpRunOnce
 FunctionEnd
 
-Function un.CleanUpRunOnce
-	; Empty
-FunctionEnd
-
 Function CleanUpRunOnceFinal
 	; Enable logon animation again if needed
 	${If} ${AtLeastWin8}
@@ -66,11 +62,7 @@ Function CopyLauncher
 	${EndIf}
 FunctionEnd
 
-Function un.CopyLauncher
-	; Empty
-FunctionEnd
-
-!macro -RebootIfRequired un
+!macro -RebootIfRequired
 	${If} ${RebootFlag}
 		!insertmacro DetailPrint "Preparing to restart..."
 
@@ -79,7 +71,7 @@ FunctionEnd
 			CreateDirectory "$RunOnceDir"
 			SetOutPath "$RunOnceDir"
 			CopyFiles /SILENT "$EXEPATH" "$RunOnceDir\LegacyUpdateSetup.exe"
-			Call ${un}CopyLauncher
+			Call CopyLauncher
 
 			; Remove mark of the web to prevent "Open File - Security Warning" dialog
 			System::Call '${DeleteFile}("$RunOnceDir\LegacyUpdateSetup.exe:Zone.Identifier")'
@@ -106,17 +98,13 @@ FunctionEnd
 		!insertmacro -PromptReboot
 	${Else}
 		; Restore setup keys
-		Call ${un}CleanUpRunOnce
+		Call CleanUpRunOnce
 	${EndIf}
 !macroend
 
 Function RebootIfRequired
 	${MementoSectionSave}
-	!insertmacro -RebootIfRequired ""
-FunctionEnd
-
-Function un.RebootIfRequired
-	!insertmacro -RebootIfRequired "un."
+	!insertmacro -RebootIfRequired
 FunctionEnd
 
 Function OnRunOnceLogon
