@@ -29,53 +29,43 @@ Var /GLOBAL AeroWizard.Font
 		${If} ${AtLeastWin11}
 			; Semi-Fluent style
 			CreateFont $3 "Segoe UI Variable Display Semibold" 14 600
-			!insertmacro SetControlColor $HWNDPARENT 1037 SYSCLR:WINDOWTEXT
+			StrCpy $4 SYSCLR:WINDOWTEXT
 		${Else}
+			; Aero style
 			CreateFont $3 "Segoe UI" 12 400
-			!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
+			StrCpy $4 0x003399
 		${EndIf}
+
+		!insertmacro SetControlColor $HWNDPARENT 1037 $4
 		CreateFont $AeroWizard.Font "Segoe UI" 8 400
-		!insertmacro SetFont $3               $HWNDPARENT 1037
-		!insertmacro SetFont $AeroWizard.Font $HWNDPARENT 1
-		!insertmacro SetFont $AeroWizard.Font $HWNDPARENT 2
-		!insertmacro SetFont $AeroWizard.Font $HWNDPARENT 3
+		!insertmacro SetFont $3 $HWNDPARENT 1037
 		!insertmacro SetFont $AeroWizard.Font $HWNDPARENT 1028
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1000
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1004
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1006
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1016
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1022
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1023
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1029
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1027
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1032
-		!insertmacro SetFont $AeroWizard.Font $ChildHwnd  1043
+		${For} $4 1 3
+			!insertmacro SetFont $AeroWizard.Font $HWNDPARENT $4
+		${Next}
+		${For} $4 1000 1043
+			!insertmacro SetFont $AeroWizard.Font $ChildHwnd $4
+		${Next}
 	${Else}
-		; Wizard97 style
+		; Wizard97ish style
 		${If} ${FileExists} "$FONTS\framd.ttf"
 			CreateFont $2 "Franklin Gothic Medium" 13 400
-			!insertmacro SetFont $2 $HWNDPARENT 1037
-			!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
+			StrCpy $4 0x003399
 		${Else}
 			CreateFont $2 "Verdana" 12 800
-			!insertmacro SetFont $2 $HWNDPARENT 1037
-			!insertmacro SetControlColor $HWNDPARENT 1037 SYSCLR:WINDOWTEXT
+			StrCpy $4 SYSCLR:WINDOWTEXT
 		${EndIf}
+		!insertmacro SetFont $2 $HWNDPARENT 1037
+		!insertmacro SetControlColor $HWNDPARENT 1037 $4
 		CreateFont $AeroWizard.Font "MS Shell Dlg 2" 8 400
 	${EndIf}
 
 	; Set white background
 	SetCtlColors $HWNDPARENT SYSCLR:WINDOWTEXT SYSCLR:WINDOW
 	SetCtlColors $ChildHwnd  SYSCLR:WINDOWTEXT SYSCLR:WINDOW
-	!insertmacro SetBackground $ChildHwnd 1020
-	!insertmacro SetBackground $ChildHwnd 1028
-	!insertmacro SetBackground $ChildHwnd 1006
-	!insertmacro SetBackground $ChildHwnd 1022
-	!insertmacro SetBackground $ChildHwnd 1023
-	!insertmacro SetBackground $ChildHwnd 1027
-	!insertmacro SetBackground $ChildHwnd 1029
-	!insertmacro SetBackground $ChildHwnd 1032
-	!insertmacro SetBackground $ChildHwnd 1043
+	${For} $4 1000 1043
+		!insertmacro SetBackground $ChildHwnd $4
+	${Next}
 
 	; Activate taskbar progress bar plugin
 	${If} ${AtLeastWin7}
