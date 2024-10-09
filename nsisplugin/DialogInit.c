@@ -120,6 +120,8 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		RECT rect;
 		GetClientRect(hwnd, &rect);
 
+		float scale = (float)GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
+
 		BLENDFUNCTION blendFunc;
 		blendFunc.BlendOp = AC_SRC_OVER;
 		blendFunc.BlendFlags = 0;
@@ -129,35 +131,43 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		// Draw wordmark with alpha blending
 		if (g_bannerWordmarkGlow) {
 			HDC hdcMem = CreateCompatibleDC(hdc);
-			SelectObject(hdcMem, g_bannerWordmarkGlow);
+			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_bannerWordmarkGlow);
 
 			BITMAP bitmap;
 			GetObject(g_bannerWordmarkGlow, sizeof(bitmap), &bitmap);
 
-			int x = (rect.right - rect.left - bitmap.bmWidth) / 2;
-			int y = (rect.bottom - rect.top - bitmap.bmHeight) / 2;
+			LONG width = bitmap.bmWidth * scale;
+			LONG height = bitmap.bmHeight * scale;
+			LONG x = (rect.right - rect.left - width) / 2;
+			LONG y = (rect.bottom - rect.top - height) / 2;
 
+			SetStretchBltMode(hdc, HALFTONE);
 			AlphaBlend(hdc,
-				x, y, bitmap.bmWidth, bitmap.bmHeight, hdcMem,
+				x, y, width, height, hdcMem,
 				0, 0, bitmap.bmWidth, bitmap.bmHeight, blendFunc);
 
+			SelectObject(hdcMem, hbmOld);
 			DeleteDC(hdcMem);
 		}
 
 		if (g_bannerWordmark) {
 			HDC hdcMem = CreateCompatibleDC(hdc);
-			SelectObject(hdcMem, g_bannerWordmark);
+			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_bannerWordmark);
 
 			BITMAP bitmap;
 			GetObject(g_bannerWordmark, sizeof(bitmap), &bitmap);
 
-			int x = (rect.right - rect.left - bitmap.bmWidth) / 2;
-			int y = ((rect.bottom - rect.top - bitmap.bmHeight) / 2) - 1;
+			LONG width = bitmap.bmWidth * scale;
+			LONG height = bitmap.bmHeight * scale;
+			LONG x = (rect.right - rect.left - width) / 2;
+			LONG y = ((rect.bottom - rect.top - height) / 2) - (1 * scale);
 
+			SetStretchBltMode(hdc, HALFTONE);
 			AlphaBlend(hdc,
-				x, y, bitmap.bmWidth, bitmap.bmHeight, hdcMem,
+				x, y, width, height, hdcMem,
 				0, 0, bitmap.bmWidth, bitmap.bmHeight, blendFunc);
 
+			SelectObject(hdcMem, hbmOld);
 			DeleteDC(hdcMem);
 		}
 
