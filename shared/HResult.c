@@ -8,7 +8,7 @@ static BOOL g_loadedHModule;
 static HMODULE g_messagesHModule;
 
 EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
-	LPWSTR message;
+	LPWSTR message = NULL;
 
 	if (HRESULT_FACILITY(hr) == FACILITY_WINDOWSUPDATE) {
 		if (!g_loadedHModule) {

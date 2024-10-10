@@ -9,7 +9,7 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, DWORD
 		goto end;
 	}
 
-	if (data != NULL && size != NULL) {
+	if (data != NULL) {
 		DWORD length = 512 * sizeof(WCHAR);
 		LPWSTR buffer = (LPWSTR)LocalAlloc(LPTR, length);
 		LSTATUS status;
@@ -25,7 +25,10 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, DWORD
 		} while (status == ERROR_MORE_DATA);
 
 		*data = buffer;
-		*size = length / sizeof(WCHAR);
+
+		if (size != NULL) {
+			*size = length / sizeof(WCHAR);
+		}
 	}
 
 end:

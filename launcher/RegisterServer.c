@@ -3,6 +3,7 @@
 #include "HResult.h"
 #include "LegacyUpdate.h"
 #include "MsgBox.h"
+#include "Registry.h"
 #include "SelfElevate.h"
 #include "User.h"
 #include "VersionInfo.h"
@@ -92,6 +93,18 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	dllPath = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
 	wsprintf(dllPath, L"%ls\\LegacyUpdate.dll", installPath);
 
+#ifdef _DEBUG
+	// Warn if registration path differs, to help with debugging
+	LPWSTR currentPath;
+	hr = GetRegistryString(HKEY_CLASSES_ROOT, L"CLSID\\{AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F}\\InprocServer32", NULL, KEY_WOW64_64KEY, &currentPath, NULL);
+	if (SUCCEEDED(hr) && wcscmp(currentPath, dllPath) != 0) {
+		if (MsgBox(hwnd, L"DEBUG: Native dll currently registered at a different path. Override?", currentPath, MB_YESNO) != IDYES) {
+			hr = S_OK;
+			goto end;
+		}
+	}
+#endif
+
 	hr = RegisterDllInternal(dllPath, state);
 
 #if _WIN64
@@ -100,6 +113,18 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	}
 
 	wsprintf(dllPath, L"%ls\\LegacyUpdate32.dll", installPath);
+
+#ifdef _DEBUG
+	// Warn if registration path differs, to help with debugging
+	hr = GetRegistryString(HKEY_CLASSES_ROOT, L"CLSID\\{AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F}\\InprocServer32", NULL, KEY_WOW64_32KEY, &currentPath, NULL);
+	if (SUCCEEDED(hr) && wcscmp(currentPath, dllPath) != 0) {
+		if (MsgBox(hwnd, L"DEBUG: 32-bit dll currently registered at a different path. Override?", currentPath, MB_YESNO) != IDYES) {
+			hr = S_OK;
+			goto end;
+		}
+	}
+#endif
+
 	hr = RegisterDllExternal(dllPath, state);
 
 	RevertWow64FsRedirection(oldValue);
