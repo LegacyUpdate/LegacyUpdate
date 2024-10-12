@@ -15,6 +15,9 @@
 !define CloseHandle              'kernel32::CloseHandle(i) i'
 !define DeleteFile               'kernel32::DeleteFile(t) i'
 
+; ntdll
+!define RtlGetNtVersionNumbers   'ntdll::RtlGetNtVersionNumbers(*i, *i, *i)'
+
 ; shell32
 !define IsUserAnAdmin            'shell32::IsUserAnAdmin() i'
 !define RestartDialog            'shell32::RestartDialog(p, t, i) i'

@@ -41,6 +41,11 @@ LangString MsgBoxBetaOS ${LANG_ENGLISH} \
 	$\r$\n\
 	Continue anyway?"
 
+LangString MsgBoxCompatMode ${LANG_ENGLISH} \
+	"A compatibility mode has been set on this program. Legacy Update will not work correctly in compatibility mode.$\r$\n\
+	$\r$\n\
+	Disable it in the Properties dialog of this file and try again."
+
 ; Install errors
 FileErrorText \
 	'Unable to write to "$0".$\r$\n\

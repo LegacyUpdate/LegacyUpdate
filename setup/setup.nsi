@@ -599,6 +599,21 @@ Function .onInit
 		${EndIf}
 	${EndIf}
 
+	; Check for compatibility mode (GetVersionEx() and RtlGetNtVersionNumbers() disagreeing)
+	GetWinVer $0 Major
+	GetWinVer $1 Minor
+	GetWinVer $2 Build
+	System::Call '${RtlGetNtVersionNumbers}(.r3, .r4, .r5)'
+	IntOp $5 $5 & 0xFFFF
+
+	${If} $0 != $3
+	${OrIf} $1 != $4
+	${OrIf} $2 != $5
+		MessageBox MB_USERICON "$(MsgBoxCompatMode)" /SD IDOK
+		SetErrorLevel 1
+		Quit
+	${EndIf}
+
 	SetOutPath $PLUGINSDIR
 	File Patches.ini
 
