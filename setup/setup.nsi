@@ -922,7 +922,6 @@ FunctionEnd
 Function CleanUp
 	; Called only after all tasks have completed
 	Call CleanUpRunOnce
-	Call CleanUpRunOnceFinal
 	!insertmacro InhibitSleep 0
 
 	${If} ${IsRunOnce}
@@ -931,7 +930,7 @@ Function CleanUp
 
 	${If} ${IsPostInstall}
 	${OrIfNot} ${RebootFlag}
-		RMDir /r /REBOOTOK "${RUNONCEDIR}"
+		Call CleanUpRunOnceFinal
 	${EndIf}
 FunctionEnd
 
@@ -947,6 +946,7 @@ Function .onInstSuccess
 FunctionEnd
 
 Function .onInstFailed
+	${MementoSectionSave}
 	Call CleanUp
 FunctionEnd
 

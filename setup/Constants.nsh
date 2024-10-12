@@ -65,6 +65,7 @@
 !define REGPATH_SETUP              "System\Setup"
 !define REGPATH_RUNONCE            "Software\Microsoft\Windows\CurrentVersion\RunOnce"
 !define REGPATH_POLICIES_SYSTEM    "Software\Microsoft\Windows\CurrentVersion\Policies\System"
+!define REGPATH_SECURITYCENTER     "Software\Microsoft\Security Center"
 
 ; Windows Update keys
 !define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"

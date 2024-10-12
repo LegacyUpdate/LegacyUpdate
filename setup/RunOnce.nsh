@@ -2,7 +2,7 @@
 !define IsPostInstall `"" HasFlag "/postinstall"`
 !define NoRestart     `"" HasFlag "/norestart"`
 
-!macro -PromptReboot
+!macro PromptReboot
 	!insertmacro InhibitSleep 0
 	SetErrorLevel ${ERROR_SUCCESS_REBOOT_REQUIRED}
 
@@ -29,29 +29,50 @@
 	${EndIf}
 !macroend
 
-!macro -CleanUpRunOnce
+!macro RunOnceOverwriteDword root subkey name value
+	ClearErrors
+	ReadRegDword $0 ${root} "${subkey}" "${name}"
+	${IfNot} ${Errors}
+		WriteRegDword ${root} "${subkey}" "${name}_LegacyUpdateTemp" $0
+	${EndIf}
+	WriteRegDword ${root} "${subkey}" "${name}" ${value}
+!macroend
+
+!macro RunOnceRestoreDword root subkey name
+	ClearErrors
+	ReadRegDword $0 ${root} "${subkey}" "${name}_LegacyUpdateTemp"
+	${If} ${Errors}
+		DeleteRegValue ${root} "${subkey}" "${name}"
+	${Else}
+		WriteRegDword ${root} "${subkey}" "${name}" $0
+		DeleteRegValue ${root} "${subkey}" "${name}_LegacyUpdateTemp"
+	${EndIf}
+!macroend
+
+Function CleanUpRunOnce
 	; Restore setup keys
 	; Be careful here. Doing this wrong can cause SYSTEM_LICENSE_VIOLATION bootloops!
 	WriteRegStr    HKLM "${REGPATH_SETUP}" "CmdLine" ""
 	WriteRegDword  HKLM "${REGPATH_SETUP}" "SetupType" 0
 	DeleteRegValue HKLM "${REGPATH_SETUP}" "SetupShutdownRequired"
-!macroend
 
-Function CleanUpRunOnce
-	!insertmacro -CleanUpRunOnce
+	${If} ${Abort}
+		Call CleanUpRunOnceFinal
+	${EndIf}
 FunctionEnd
 
 Function CleanUpRunOnceFinal
-	; Enable logon animation again if needed
-	${If} ${AtLeastWin8}
-		ClearErrors
-		ReadRegDword $0 HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation_LegacyUpdateTemp"
-		${If} ${Errors}
-			DeleteRegValue HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation"
-		${Else}
-			WriteRegDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" $0
-		${EndIf}
+	; Enable keys we disabled if needed
+	${If} ${IsWinXP2002}
+		!insertmacro RunOnceRestoreDword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled"
 	${EndIf}
+
+	${If} ${AtLeastWin8}
+		!insertmacro RunOnceRestoreDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation"
+	${EndIf}
+
+	; Delete runonce stuff
+	RMDir /r /REBOOTOK "${RUNONCEDIR}"
 FunctionEnd
 
 Function CopyLauncher
@@ -62,7 +83,8 @@ Function CopyLauncher
 	${EndIf}
 FunctionEnd
 
-!macro -RebootIfRequired
+Function RebootIfRequired
+	${MementoSectionSave}
 	${If} ${RebootFlag}
 		!insertmacro DetailPrint "Preparing to restart..."
 
@@ -84,27 +106,23 @@ FunctionEnd
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
 
+		; Temporarily disable Security Center first run if needed
+		${If} ${IsWinXP2002}
+		${AndIfNot} ${AtLeastServicePack} 2
+			!insertmacro RunOnceOverwriteDword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled" 1
+		${EndIf}
+
 		; Temporarily disable logon animation if needed
 		${If} ${AtLeastWin8}
-			ClearErrors
-			ReadRegDword $0 HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation"
-			${IfNot} ${Errors}
-				WriteRegDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation_LegacyUpdateTemp" $0
-			${EndIf}
-			WriteRegDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
+			!insertmacro RunOnceOverwriteDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
 		${EndIf}
 
 		; Reboot now
-		!insertmacro -PromptReboot
+		!insertmacro PromptReboot
 	${Else}
 		; Restore setup keys
 		Call CleanUpRunOnce
 	${EndIf}
-!macroend
-
-Function RebootIfRequired
-	${MementoSectionSave}
-	!insertmacro -RebootIfRequired
 FunctionEnd
 
 Function OnRunOnceLogon
