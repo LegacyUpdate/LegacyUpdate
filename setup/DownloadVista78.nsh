@@ -157,14 +157,18 @@ FunctionEnd
 
 ; Weird prerequisite to Update 1 that fixes the main KB2919355 update failing to install
 Function DownloadClearCompressionFlag
-	Call GetArch
-	Pop $0
-	ReadINIStr $0 $PLUGINSDIR\Patches.ini ClearCompressionFlag $0
-	ReadINIStr $1 $PLUGINSDIR\Patches.ini ClearCompressionFlag Prefix
-	!insertmacro Download "Windows 8.1 $(Update) 1 $(PrepTool)" "$1$0" "ClearCompressionFlag.exe" 1
+	${If} ${NeedsPatch} KB2919355
+		Call GetArch
+		Pop $0
+		ReadINIStr $0 $PLUGINSDIR\Patches.ini ClearCompressionFlag $0
+		ReadINIStr $1 $PLUGINSDIR\Patches.ini ClearCompressionFlag Prefix
+		!insertmacro Download "Windows 8.1 $(Update) 1 $(PrepTool)" "$1$0" "ClearCompressionFlag.exe" 1
+	${EndIf}
 FunctionEnd
 
 Function InstallClearCompressionFlag
-	Call DownloadClearCompressionFlag
-	!insertmacro Install "Windows 8.1 $(Update) 1 $(PrepTool)" "ClearCompressionFlag.exe" ""
+	${If} ${NeedsPatch} KB2919355
+		Call DownloadClearCompressionFlag
+		!insertmacro Install "Windows 8.1 $(Update) 1 $(PrepTool)" "ClearCompressionFlag.exe" ""
+	${EndIf}
 FunctionEnd
