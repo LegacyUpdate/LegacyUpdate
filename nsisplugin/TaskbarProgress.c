@@ -1,5 +1,7 @@
 // Based on https://nsis.sourceforge.io/TaskbarProgress_plug-in - zlib licensed
 // Cleaned up and refactored into C by Legacy Update
+#undef _WIN32_WINNT
+#define _WIN32_WINNT _WIN32_WINNT_WIN7
 #include <windows.h>
 #include <nsis/pluginapi.h>
 #include <commctrl.h>
@@ -7,12 +9,14 @@
 #include <shobjidl.h>
 #include "main.h"
 
+static extra_parameters *g_extra;
 static ITaskbarList3 *g_taskbarList;
 static UINT g_totalRange;
-static WNDPROC g_origWndProc;
+static WNDPROC g_progressOrigWndProc;
+static WNDPROC g_dialogOrigWndProc;
 
 LRESULT CALLBACK ProgressBarWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	if (g_origWndProc == NULL) {
+	if (!g_progressOrigWndProc) {
 		return 0;
 	}
 
@@ -26,25 +30,55 @@ LRESULT CALLBACK ProgressBarWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		break;
 
 	case PBM_SETPOS:
-		if (g_taskbarList != NULL) {
+		if (g_taskbarList) {
 			ITaskbarList3_SetProgressValue(g_taskbarList, g_hwndParent, wParam, g_totalRange);
 		}
 		break;
 
 	case WM_DESTROY:
-		SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)g_origWndProc);
+		SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)g_progressOrigWndProc);
 
-		if (g_taskbarList != NULL) {
+		if (g_taskbarList) {
 			ITaskbarList3_SetProgressState(g_taskbarList, g_hwndParent, TBPF_NOPROGRESS);
 			ITaskbarList3_Release(g_taskbarList);
 			g_taskbarList = NULL;
 		}
 
-		g_origWndProc = NULL;
+		g_progressOrigWndProc = NULL;
 		break;
 	}
 
-	return CallWindowProc(g_origWndProc, hwnd, uMsg, wParam, lParam);
+	return CallWindowProc(g_progressOrigWndProc, hwnd, uMsg, wParam, lParam);
+}
+
+static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	if (!g_dialogOrigWndProc) {
+		return 0;
+	}
+
+	switch (uMsg) {
+	case WM_NOTIFY_OUTER_NEXT:
+		if (g_extra->exec_flags->abort) {
+			// Set the progress bar to error state (red)
+			HWND innerWindow = FindWindowEx(hwnd, NULL, L"#32770", NULL);
+			HWND progressBar = FindWindowEx(innerWindow, NULL, L"msctls_progress32", NULL);
+			if (progressBar) {
+				SendMessage(progressBar, PBM_SETSTATE, PBST_ERROR, 0);
+			}
+
+			if (g_taskbarList) {
+				ITaskbarList3_SetProgressState(g_taskbarList, g_hwndParent, TBPF_ERROR);
+			}
+		}
+		break;
+
+	case WM_DESTROY:
+		SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)g_dialogOrigWndProc);
+		g_dialogOrigWndProc = NULL;
+		break;
+	}
+
+	return CallWindowProc(g_dialogOrigWndProc, hwnd, uMsg, wParam, lParam);
 }
 
 static UINT_PTR NSISPluginCallback(enum NSPIM event) {
@@ -55,9 +89,10 @@ static UINT_PTR NSISPluginCallback(enum NSPIM event) {
 PLUGIN_METHOD(InitTaskbarProgress) {
 	PLUGIN_INIT();
 
+	g_extra = extra;
 	extra->RegisterPluginCallback(g_hInstance, NSISPluginCallback);
 
-	if (g_taskbarList != NULL && g_origWndProc != NULL) {
+	if (g_progressOrigWndProc) {
 		// Already initialised
 		return;
 	}
@@ -67,11 +102,11 @@ PLUGIN_METHOD(InitTaskbarProgress) {
 	PBRANGE range;
 	HRESULT hr;
 
-	if (progressBar == NULL) {
+	if (!progressBar) {
 		goto fail;
 	}
 
-	hr = CoCreateInstance(&CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, &IID_ITaskbarList3, (void**)&g_taskbarList);
+	hr = CoCreateInstance(&CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, &IID_ITaskbarList3, (void **)&g_taskbarList);
 	if (!SUCCEEDED(hr)) {
 		goto fail;
 	}
@@ -86,17 +121,19 @@ PLUGIN_METHOD(InitTaskbarProgress) {
 	g_totalRange = range.iLow + range.iHigh;
 
 	// Add our own window procedure so we can respond to progress bar updates
-	g_origWndProc = (WNDPROC)SetWindowLongPtr(progressBar, GWLP_WNDPROC, (LONG_PTR)ProgressBarWndProc);
-	if (g_origWndProc == NULL) {
+	g_progressOrigWndProc = (WNDPROC)SetWindowLongPtr(progressBar, GWLP_WNDPROC, (LONG_PTR)ProgressBarWndProc);
+	g_dialogOrigWndProc = (WNDPROC)SetWindowLongPtr(g_hwndParent, GWLP_WNDPROC, (LONG_PTR)MainWndProc);
+	if (!g_progressOrigWndProc || !g_dialogOrigWndProc) {
 		goto fail;
 	}
 	return;
 
 fail:
-	if (g_taskbarList != NULL) {
+	if (g_taskbarList) {
 		ITaskbarList3_Release(g_taskbarList);
 		g_taskbarList = NULL;
 	}
 
-	g_origWndProc = NULL;
+	g_progressOrigWndProc = NULL;
+	g_dialogOrigWndProc = NULL;
 }
