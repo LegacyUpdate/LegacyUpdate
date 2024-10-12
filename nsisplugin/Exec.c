@@ -52,7 +52,7 @@ PLUGIN_METHOD(Exec) {
 
 PLUGIN_METHOD(ExecToLog) {
   PLUGIN_INIT();
-  ExecScript(extra->exec_flags->status_update % 4 ? MODE_LINES : MODE_IGNOREOUTPUT);
+  ExecScript(extra->exec_flags->status_update & 1 ? MODE_LINES : MODE_IGNOREOUTPUT);
 }
 
 PLUGIN_METHOD(ExecToStack) {
