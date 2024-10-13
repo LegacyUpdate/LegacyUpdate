@@ -29,14 +29,12 @@ Var /GLOBAL AeroWizard.Font
 		${If} ${AtLeastWin11}
 			; Semi-Fluent style
 			CreateFont $3 "Segoe UI Variable Display Semibold" 14 600
-			StrCpy $4 SYSCLR:WINDOWTEXT
+			!insertmacro SetControlColor $HWNDPARENT 1037 SYSCLR:WINDOWTEXT
 		${Else}
 			; Aero style
 			CreateFont $3 "Segoe UI" 12 400
-			StrCpy $4 0x003399
+			!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
 		${EndIf}
-
-		!insertmacro SetControlColor $HWNDPARENT 1037 $4
 		CreateFont $AeroWizard.Font "Segoe UI" 8 400
 		!insertmacro SetFont $3 $HWNDPARENT 1037
 		!insertmacro SetFont $AeroWizard.Font $HWNDPARENT 1028
@@ -50,13 +48,12 @@ Var /GLOBAL AeroWizard.Font
 		; Wizard97ish style
 		${If} ${FileExists} "$FONTS\framd.ttf"
 			CreateFont $2 "Franklin Gothic Medium" 13 400
-			StrCpy $4 0x003399
+			!insertmacro SetControlColor $HWNDPARENT 1037 0x003399
 		${Else}
 			CreateFont $2 "Verdana" 12 800
-			StrCpy $4 SYSCLR:WINDOWTEXT
+			!insertmacro SetControlColor $HWNDPARENT 1037 SYSCLR:WINDOWTEXT
 		${EndIf}
 		!insertmacro SetFont $2 $HWNDPARENT 1037
-		!insertmacro SetControlColor $HWNDPARENT 1037 $4
 		CreateFont $AeroWizard.Font "MS Shell Dlg 2" 8 400
 	${EndIf}
 
