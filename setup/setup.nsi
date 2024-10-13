@@ -608,7 +608,13 @@ Function .onInit
 	System::Call '${RtlGetNtVersionNumbers}(.r3, .r4, .r5)'
 	IntOp $5 $5 & 0xFFFF
 
-	; Windows 2000 lacks RtlGetNtVersionNumbers()
+	; Detect NNN4NT5
+	ReadEnvStr $6 "_COMPAT_VER_NNN"
+	${If} $6 != ""
+		StrCpy $3 "?"
+	${EndIf}
+
+	; Windows 2000 lacks RtlGetNtVersionNumbers(), but there is no compatibility mode anyway.
 	${If} "$3.$4.$5" != "0.0.0"
 	${AndIf} "$0.$1.$2" != "$3.$4.$5"
 		MessageBox MB_USERICON "$(MsgBoxCompatMode)" /SD IDOK
