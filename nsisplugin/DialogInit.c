@@ -43,6 +43,7 @@ static HBITMAP g_bannerWordmarkGlow;
 static Theme g_theme = ThemeUnknown;
 static WNDPROC g_dialogOrigWndProc;
 static WNDPROC g_bannerOrigWndProc;
+static WNDPROC g_bottomOrigWndProc;
 
 static Theme GetTheme() {
 	// return ThemeClassic;
@@ -61,7 +62,8 @@ static Theme GetTheme() {
 static void ConfigureWindow() {
 	HWND bannerWindow = GetDlgItem(g_hwndParent, 1046);
 	HWND bannerDivider = GetDlgItem(g_hwndParent, 1047);
-	if (!bannerWindow || !bannerDivider) {
+	HWND bottomDivider = GetDlgItem(g_hwndParent, 6900);
+	if (!bannerWindow || !bannerDivider || !bottomDivider) {
 		return;
 	}
 
@@ -88,7 +90,8 @@ static void ConfigureWindow() {
 			$DwmExtendFrameIntoClientArea(g_hwndParent, &margins);
 		}
 
-		ShowWindow(bannerDivider, theme == ThemeClassic ? SW_SHOW : SW_HIDE);
+		ShowWindow(bannerDivider, theme >= ThemeBasic ? SW_HIDE : SW_SHOW);
+		ShowWindow(bottomDivider, theme >= ThemeBasic ? SW_HIDE : SW_SHOW);
 
 		if (g_theme == ThemeAero) {
 			g_bannerWordmark = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK), L"PNG");
@@ -191,6 +194,43 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	return CallWindowProc(g_bannerOrigWndProc, hwnd, uMsg, wParam, lParam);
 }
 
+static LRESULT CALLBACK BottomWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	if (!g_bottomOrigWndProc) {
+		return 0;
+	}
+
+	switch (uMsg) {
+	case WM_PAINT: {
+		// Draw subtle 1px divider line for Aero
+		if (g_theme < ThemeBasic) {
+			break;
+		}
+
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+
+		// TODO: Can we get this color from uxtheme?
+		HBRUSH brush = CreateSolidBrush(RGB(0xDF, 0xDF, 0xDF));
+		RECT lineRect = {rect.left, rect.top, rect.right, rect.top + 1};
+		FillRect(hdc, &lineRect, brush);
+		DeleteObject(brush);
+
+		brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+		lineRect = (RECT){rect.left, rect.top + 1, rect.right, rect.bottom};
+		FillRect(hdc, &lineRect, brush);
+		DeleteObject(brush);
+
+		EndPaint(hwnd, &ps);
+		return 0;
+	}
+	}
+
+	return CallWindowProc(g_bottomOrigWndProc, hwnd, uMsg, wParam, lParam);
+}
+
 static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	if (!g_dialogOrigWndProc) {
 		return 0;
@@ -287,6 +327,8 @@ PLUGIN_METHOD(DialogInit) {
 
 	// Set up window procedures
 	HWND bannerWindow = GetDlgItem(g_hwndParent, 1046);
-	g_bannerOrigWndProc = (WNDPROC)SetWindowLongPtr(bannerWindow, GWLP_WNDPROC, (LONG_PTR)BannerWndProc);
+	HWND bottomWindow = GetDlgItem(g_hwndParent, 6901);
 	g_dialogOrigWndProc = (WNDPROC)SetWindowLongPtr(g_hwndParent, GWLP_WNDPROC, (LONG_PTR)MainWndProc);
+	g_bannerOrigWndProc = (WNDPROC)SetWindowLongPtr(bannerWindow, GWLP_WNDPROC, (LONG_PTR)BannerWndProc);
+	g_bottomOrigWndProc = (WNDPROC)SetWindowLongPtr(bottomWindow, GWLP_WNDPROC, (LONG_PTR)BottomWndProc);
 }
