@@ -157,29 +157,47 @@ HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourc
 	return result;
 }
 
-BOOL WritePNGResourceToBMP(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourceType, LPWSTR outputPath) {
+BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outputPath) {
 	BOOL result = FALSE;
-	HBITMAP hBitmap = LoadPNGResource(hInstance, resourceName, resourceType);
 	if (!hBitmap) {
-		TRACE(L"LoadPNGResource failed: %d", GetLastError());
+		TRACE(L"Null bitmap");
 		return FALSE;
 	}
 
 	HDC hdc = GetDC(NULL);
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	HBITMAP scaledBitmap = CreateCompatibleBitmap(hdc, width, height);
+	if (!scaledBitmap) {
+		TRACE(L"CreateCompatibleBitmap failed: %d", GetLastError());
+		goto end;
+	}
+
 	BITMAP bmp;
 	if (!GetObject(hBitmap, sizeof(BITMAP), &bmp)) {
 		TRACE(L"GetObject failed: %d", GetLastError());
 		goto end;
 	}
 
+	HBITMAP hOld = (HBITMAP)SelectObject(hdcMem, hBitmap);
+	HDC hdcMemScaled = CreateCompatibleDC(hdc);
+	HBITMAP hOldScaled = (HBITMAP)SelectObject(hdcMemScaled, scaledBitmap);
+	SetStretchBltMode(hdcMemScaled, HALFTONE);
+
+	if (!StretchBlt(hdcMemScaled,
+		0, 0, width, height, hdcMem,
+		0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY)) {
+		TRACE(L"StretchBlt failed: %d", GetLastError());
+		goto end;
+	}
+
 	BITMAPINFOHEADER bmih = {0};
 	bmih.biSize = sizeof(BITMAPINFOHEADER);
-	bmih.biWidth = bmp.bmWidth;
-	bmih.biHeight = bmp.bmHeight;
+	bmih.biWidth = width;
+	bmih.biHeight = height;
 	bmih.biPlanes = 1;
 	bmih.biBitCount = bmp.bmBitsPixel;
 	bmih.biCompression = BI_RGB;
-	bmih.biSizeImage = bmp.bmWidthBytes * bmp.bmHeight;
+	bmih.biSizeImage = ((width * bmp.bmBitsPixel + 31) / 32) * 4 * height;
 
 	BITMAPFILEHEADER bmfh = {0};
 	bmfh.bfType = 0x4D42;
@@ -198,7 +216,7 @@ BOOL WritePNGResourceToBMP(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR reso
 		goto end;
 	}
 
-	if (!GetDIBits(hdc, hBitmap, 0, bmp.bmHeight, bitmapData, (BITMAPINFO *)&bmih, DIB_RGB_COLORS)) {
+	if (!GetDIBits(hdcMemScaled, scaledBitmap, 0, height, bitmapData, (BITMAPINFO *)&bmih, DIB_RGB_COLORS)) {
 		TRACE(L"GetDIBits failed: %d", GetLastError());
 		goto end;
 	}
@@ -223,14 +241,16 @@ end:
 	if (file && file != INVALID_HANDLE_VALUE) {
 		CloseHandle(file);
 	}
-	if (hBitmap) {
-		DeleteObject(hBitmap);
+	if (scaledBitmap) {
+		DeleteObject(scaledBitmap);
 	}
 	if (handle) {
 		GlobalUnlock(handle);
 		GlobalFree(handle);
 	}
 	ReleaseDC(NULL, hdc);
+	DeleteDC(hdcMem);
+	DeleteDC(hdcMemScaled);
 
 	return result;
 }

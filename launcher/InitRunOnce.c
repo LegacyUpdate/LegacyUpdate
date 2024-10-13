@@ -146,11 +146,15 @@ static void CreateRunOnceWindow() {
 	}
 	SetSysColors(1, (const INT[1]){COLOR_DESKTOP}, (const COLORREF[1]){color});
 
+	DWORD width = GetSystemMetrics(SM_CXSCREEN);
+	DWORD height = GetSystemMetrics(SM_CYSCREEN);
+	HBITMAP wallpaper;
+
 	if (IsWin7()) {
 		// 7: Bitmap in oobe dir
 		WCHAR bmpPath[MAX_PATH];
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
-		SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)bmpPath, SPIF_SENDWININICHANGE);
+		wallpaper = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	} else if (IsWinVista()) {
 		// Vista: Resources in ooberesources.dll
 		WCHAR ooberesPath[MAX_PATH];
@@ -159,14 +163,20 @@ static void CreateRunOnceWindow() {
 		if (ooberes) {
 			// Width logic is the same used by Vista msoobe.dll
 			LPWSTR resource = GetSystemMetrics(SM_CXSCREEN) < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0";
-
-			// Write to disk
-			WCHAR tempPath[MAX_PATH];
-			ExpandEnvironmentStrings(L"%ProgramData%\\Legacy Update\\background.bmp", tempPath, ARRAYSIZE(tempPath));
-			if (GetFileAttributes(tempPath) != INVALID_FILE_ATTRIBUTES || WritePNGResourceToBMP(ooberes, resource, RT_RCDATA, tempPath)) {
-				SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)tempPath, SPIF_SENDWININICHANGE);
-			}
+			wallpaper = LoadPNGResource(ooberes, resource, RT_RCDATA);
 		}
+		FreeLibrary(ooberes);
+	}
+
+	if (wallpaper) {
+		// Write to disk
+		WCHAR tempPath[MAX_PATH];
+		ExpandEnvironmentStrings(L"%ProgramData%\\Legacy Update\\background.bmp", tempPath, ARRAYSIZE(tempPath));
+		if (GetFileAttributes(tempPath) != INVALID_FILE_ATTRIBUTES || ScaleAndWriteToBMP(wallpaper, width, height, tempPath)) {
+			SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)tempPath, SPIF_SENDWININICHANGE);
+		}
+
+		DeleteObject(wallpaper);
 	}
 
 	ShowWindow(hwnd, SW_SHOW);
