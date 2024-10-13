@@ -9,6 +9,19 @@ SetPluginUnload alwaysoff
 	!uninstfinalize '../build/sign.sh "%1"'
 !endif
 
+!macro -Trace msg
+	!if ${DEBUG} == 1
+		!insertmacro _LOGICLIB_TEMP
+		!ifdef __FUNCTION__
+			StrCpy $_LOGICLIB_TEMP "${__FUNCTION__}"
+		!else
+			StrCpy $_LOGICLIB_TEMP "${__SECTION__}"
+		!endif
+		MessageBox MB_OK `${__FILE__}(${__LINE__}): $_LOGICLIB_TEMP: ${msg}`
+	!endif
+!macroend
+!define TRACE '!insertmacro -Trace'
+
 !define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'
 
 Function GetArch
@@ -143,7 +156,7 @@ Var /GLOBAL Exec.Name
 
 Function ExecWithErrorHandling
 	Push $0
-	LegacyUpdateNSIS::ExecToLog '$Exec.Command'
+	LegacyUpdateNSIS::ExecToLog `$Exec.Command`
 	Pop $0
 
 	${If} $0 == ${ERROR_SUCCESS_REBOOT_REQUIRED}
@@ -202,7 +215,7 @@ FunctionEnd
 	SetDetailsPrint none
 	CreateDirectory "$PLUGINSDIR\${kbid}"
 	CreateDirectory "$PLUGINSDIR\${kbid}\Temp"
-	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\expand.exe" -F:* "$0" "$PLUGINSDIR\${kbid}"'
+	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\expand.exe" -F:* "${kbid}.msu" "$PLUGINSDIR\${kbid}"'
 	SetDetailsPrint lastused
 
 	!insertmacro DetailPrint "$(Installing)${name} (${kbid})..."
@@ -243,7 +256,8 @@ FunctionEnd
 		Quit
 	${EndIf}
 
-	System::Call '${IsUserAnAdmin}() .r0'
+	LegacyUpdateNSIS::IsAdmin
+	Pop $0
 	${If} $0 == 0
 		MessageBox MB_USERICON "$(MsgBoxElevationRequired)" /SD IDOK
 		SetErrorLevel ${ERROR_ELEVATION_REQUIRED}
