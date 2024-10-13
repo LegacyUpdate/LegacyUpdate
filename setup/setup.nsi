@@ -405,10 +405,10 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	${EndIf}
 
 	; Add to trusted sites
-	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
-	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
-	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
-	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
+	WriteRegDword HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
+	WriteRegDword HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
+	WriteRegDword HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
+	WriteRegDword HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
 
 	; Delete LegacyUpdate.dll in System32 from 1.0 installer
 	${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
@@ -489,7 +489,9 @@ Section "-un.Legacy Update website" un.ACTIVEX
 
 	; Remove from trusted sites
 	DeleteRegKey HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
+	DeleteRegKey HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
 	DeleteRegKey HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
+	DeleteRegKey HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
 
 	; Restart service
 	!insertmacro RestartWUAUService
@@ -561,7 +563,7 @@ Function .onInit
 
 	SetShellVarContext all
 	SetDetailsPrint listonly
-	${If} ${RunningX64}
+	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"
 		SetRegView 64
 	${EndIf}
 	!insertmacro EnsureAdminRights
@@ -606,9 +608,9 @@ Function .onInit
 	System::Call '${RtlGetNtVersionNumbers}(.r3, .r4, .r5)'
 	IntOp $5 $5 & 0xFFFF
 
-	${If} $0 != $3
-	${OrIf} $1 != $4
-	${OrIf} $2 != $5
+	; Windows 2000 lacks RtlGetNtVersionNumbers()
+	${If} "$3.$4.$5" != "0.0.0"
+	${AndIf} "$0.$1.$2" != "$3.$4.$5"
 		MessageBox MB_USERICON "$(MsgBoxCompatMode)" /SD IDOK
 		SetErrorLevel 1
 		Quit
