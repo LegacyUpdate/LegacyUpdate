@@ -215,7 +215,6 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		LPWSTR data;
 		HRESULT hr = GetOwnVersion(&data);
 		if (!SUCCEEDED(hr)) {
-			VariantClear(retval);
 			return hr;
 		}
 		retval->vt = VT_BSTR;
@@ -240,8 +239,6 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 			if (SUCCEEDED(hr)) {
 				retval->vt = VT_BSTR;
 				retval->bstrVal = SysAllocStringLen(data, size - 1);
-			} else {
-				VariantClear(retval);
 			}
 		}
 		break;
@@ -255,16 +252,9 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 			retval->vt = VT_BSTR;
 			retval->bstrVal = SysAllocStringLen(data, size - 1);
 			LocalFree(data);
-		} else {
-			VariantClear(retval);
 		}
 		break;
 	}
-	}
-
-	if (retval->vt == VT_EMPTY) {
-		VariantClear(retval);
-		return E_INVALIDARG;
 	}
 
 	return S_OK;
@@ -325,7 +315,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetBrowserHwnd(VARIANT *retval) {
 
 	VariantInit(retval);
 	retval->vt = VT_I4;
-	retval->lVal = (LONG)GetIEWindowHWND();
+	retval->lVal = (LONG_PTR)GetIEWindowHWND();
 	return S_OK;
 }
 
