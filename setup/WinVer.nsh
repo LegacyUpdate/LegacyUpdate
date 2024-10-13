@@ -16,6 +16,7 @@
 !define WINVER_7                 0x0601 ;  6.1.7600
 !define WINVER_8                 0x0602 ;  6.2.9200
 !define WINVER_8.1               0x0603 ;  6.3.9600
+!define WINVER_10TP              0x0604 ;  6.4.9841-9883
 !define WINVER_10                0x0A00 ; 10.0.10240
 
 !define WINVER_SERVER_2000       ${WINVER_2000}
