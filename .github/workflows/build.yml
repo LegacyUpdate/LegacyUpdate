@@ -35,10 +35,20 @@ jobs:
       run: |
         PATH='/mnt/c/Program Files (x86)/Microsoft Visual Studio/Installer':$PATH
         vs="$(vswhere.exe -latest -property installationPath | tr -d '\r')"
-        vs_installer.exe modify \
+        if ! vs_installer.exe modify \
           --quiet --norestart --noUpdateInstaller \
           --installPath "$vs" \
-          --config .vsconfig
+          --config .vsconfig; then
+          echo "vs_installer.exe exit code: $?"
+          cd /tmp
+          curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
+          chmod +x vscollect.exe
+          ./vscollect.exe
+          unzip vscollect.zip
+          cat *.log
+          exit 1
+        fi
+
 
     - name: Install MinGW toolchain
       run: |
