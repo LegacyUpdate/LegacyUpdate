@@ -32,7 +32,6 @@ end:
 	return hr;
 }
 
-#if _WIN64
 static HRESULT RegisterDllExternal(LPWSTR path, BOOL state) {
 	WCHAR regsvr32[MAX_PATH];
 	ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\regsvr32.exe", regsvr32, ARRAYSIZE(regsvr32));
@@ -55,7 +54,6 @@ static HRESULT RegisterDllExternal(LPWSTR path, BOOL state) {
 
 	return status == 0 ? S_OK : E_FAIL;
 }
-#endif
 
 HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	// Ensure elevation
@@ -106,6 +104,12 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 #endif
 
 	hr = RegisterDllInternal(dllPath, state);
+	if (!SUCCEEDED(hr)) {
+		// Try external registration
+		if (!SUCCEEDED(RegisterDllExternal(dllPath, state))) {
+			goto end;
+		}
+	}
 
 #if _WIN64
 	if (!SUCCEEDED(hr)) {
