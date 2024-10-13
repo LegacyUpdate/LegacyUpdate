@@ -10,9 +10,7 @@
 		; Prompt for reboot
 		${IfNot} ${Silent}
 		${AndIfNot} ${IsPassive}
-			System::Call '${RestartDialog}($HWNDPARENT, \
-				"Windows will restart to complete installation of prerequisite components. Setup will resume after the restart.", \
-				${EWX_REBOOT})'
+			System::Call '${RestartDialog}($HWNDPARENT, "", ${EWX_REBOOT})'
 		${EndIf}
 		Quit
 	${Else}
