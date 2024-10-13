@@ -106,7 +106,9 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	hr = RegisterDllInternal(dllPath, state);
 	if (!SUCCEEDED(hr)) {
 		// Try external registration
-		if (!SUCCEEDED(RegisterDllExternal(dllPath, state))) {
+		if (SUCCEEDED(RegisterDllExternal(dllPath, state))) {
+			hr = S_OK;
+		} else {
 			goto end;
 		}
 	}
