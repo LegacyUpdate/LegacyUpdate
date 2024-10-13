@@ -513,7 +513,7 @@ SectionEnd
 !define DESCRIPTION_MSLT    ""
 
 !macro DESCRIPTION_STRING section
-	!insertmacro MUI_DESCRIPTION_TEXT ${section} "$(Section${section}Desc)"
+	!insertmacro MUI_DESCRIPTION_TEXT ${${section}} "$(Section${section}Desc)"
 !macroend
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
