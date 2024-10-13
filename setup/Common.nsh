@@ -49,6 +49,7 @@ FunctionEnd
 !macroend
 
 !define IsPassive `"" HasFlag "/passive"`
+!define IsActiveX `"" HasFlag "/activex"`
 !define IsHelp    `"" HasFlag "/?"`
 
 !macro _NeedsPatch _a _b _t _f

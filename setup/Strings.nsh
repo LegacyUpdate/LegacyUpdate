@@ -19,10 +19,11 @@ LangString DownloadStatusMulti  ${LANG_ENGLISH} "{TIMEREMAINING} left - {TOTALRE
 
 ; Startup errors
 LangString MsgBoxUsage ${LANG_ENGLISH} \
-	"Usage: setup.exe [/S] [/norestart]$\r$\n\
+	"Usage: setup.exe [/S] [/passive] [/norestart]$\r$\n\
 	$\r$\n\
-	/S$\tExecutes Legacy Update setup silently.$\r$\n\
-	/norestart$\tDisables automatic restart during installation.$\r$\n\
+	/S$\tExecute Legacy Update setup silently.$\r$\n\
+	/passive$\tInstall without user interaction.$\r$\n\
+	/norestart$\tDisable automatic restart during installation.$\r$\n\
 	$\r$\n\
 	If no flags are passed, Legacy Update will launch its full user interface.$\r$\n\
 	For more information on these flags, visit legacyupdate.net."

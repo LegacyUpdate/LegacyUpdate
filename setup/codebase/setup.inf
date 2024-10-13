@@ -6,4 +6,4 @@ AdvancedINF=2.0
 setup=setup
 
 [setup]
-run="%EXTRACT_DIR%\setup.exe" /passive
+run="%EXTRACT_DIR%\setup.exe" /activex

@@ -772,14 +772,15 @@ Function .onInit
 FunctionEnd
 
 Function ComponentsPageCheck
-	; Skip the page if we're being launched via RunOnce
+	; Skip the page if we're being launched with /runonce, /postinstall, or /passive
 	${If} ${IsRunOnce}
 	${OrIf} ${IsPostInstall}
+	${OrIf} ${IsPassive}
 		Abort
 	${EndIf}
 
 	; Skip if installer was invoked by IE, and all prerequisites are installed
-	${If} ${IsPassive}
+	${If} ${IsActiveX}
 	${AndIf} ${SectionIsSelected} ${LEGACYUPDATE}
 		StrCpy $1 0
 		${For} $0 ${PREREQS_START} ${PREREQS_END}
@@ -828,6 +829,7 @@ Function PreDownload
 	; Vista
 	${If} ${IsWinVista}
 		${If} ${NeedsPatch} VistaSP2
+		${AndIfNot} ${IsPassive}
 			MessageBox MB_USERICON "$(MsgBoxVistaSPInstall)" /SD IDOK
 		${EndIf}
 
