@@ -103,7 +103,7 @@ public:
 	STDMETHODIMP GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
 	STDMETHODIMP RequestElevation();
 	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
-	STDMETHODIMP RunWizard(IDispatch *installer, BSTR dialogTitle, IDispatch **retval);
+	STDMETHODIMP GetBrowserHwnd(VARIANT *retval);
 	STDMETHODIMP GetUserType(UserType *retval);
 	STDMETHODIMP get_IsRebootRequired(VARIANT_BOOL *retval);
 	STDMETHODIMP get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);

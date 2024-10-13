@@ -262,6 +262,11 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	}
 	}
 
+	if (retval->vt == VT_EMPTY) {
+		VariantClear(retval);
+		return E_INVALIDARG;
+	}
+
 	return S_OK;
 }
 
@@ -315,15 +320,13 @@ end:
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::RunWizard(IDispatch *installer, BSTR dialogTitle, IDispatch **retval) {
+STDMETHODIMP CLegacyUpdateCtrl::GetBrowserHwnd(VARIANT *retval) {
 	DoIsPermittedCheck();
 
-	// Handle preparing to run the wizard. When running through the elevation helper,
-	// put_ParentWindow() doesn't work. Set the parent hwnd from here and run the wizard.
-	IUpdateInstaller *updateInstaller = (IUpdateInstaller *)installer;
-	updateInstaller->put_ParentHwnd(GetIEWindowHWND());
-
-	return updateInstaller->RunWizard(dialogTitle, (IInstallationResult **)retval);
+	VariantInit(retval);
+	retval->vt = VT_I4;
+	retval->lVal = (LONG)GetIEWindowHWND();
+	return S_OK;
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {

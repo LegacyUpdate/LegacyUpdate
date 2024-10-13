@@ -47,7 +47,7 @@ interface ILegacyUpdateCtrl : IDispatch {
 	[id(3)]  HRESULT GetOSVersionInfo(OSVersionField osField, LONG systemMetric, [out, retval] VARIANT *retval);
 	[id(14)] HRESULT RequestElevation(void);
 	[id(4)]  HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
-	[id(15)] HRESULT RunWizard(IDispatch *installer, BSTR dialogTitle, [out, retval] IDispatch **retval);
+	[id(15)] HRESULT GetBrowserHwnd([out, retval] VARIANT *retval);
 	[id(5)]  HRESULT GetUserType([out, retval] UserType *retval);
 	[id(8)]  HRESULT RebootIfRequired(void);
 	[id(9)]  HRESULT ViewWindowsUpdateLog(void);

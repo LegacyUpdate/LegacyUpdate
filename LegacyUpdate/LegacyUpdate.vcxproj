@@ -146,6 +146,7 @@
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -190,6 +191,7 @@
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -231,6 +233,7 @@
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -274,6 +277,7 @@
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
+      <RegisterOutput>true</RegisterOutput>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
