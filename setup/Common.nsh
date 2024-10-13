@@ -198,7 +198,8 @@ FunctionEnd
 	!insertmacro ExecWithErrorHandling '${name}' '"$WINDIR\system32\cmd.exe" /c "$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600'
 
 	; If we successfully abort a shutdown, we'll get exit code 0, so we know a reboot is required.
-	ExecWait '"$WINDIR\system32\shutdown.exe" /a' $0
+	LegacyUpdateNSIS::Exec '"$WINDIR\system32\shutdown.exe" /a'
+	Pop $0
 	${If} $0 == 0
 		SetRebootFlag true
 	${EndIf}
@@ -209,8 +210,6 @@ FunctionEnd
 !macroend
 
 !macro InstallMSU kbid name
-	; Stop AU service before running wusa so it doesn't try checking for updates online first (which
-	; may never complete before we install our patches).
 	!insertmacro DetailPrint "$(Extracting)${name} (${kbid})..."
 	SetDetailsPrint none
 	CreateDirectory "$PLUGINSDIR\${kbid}"
