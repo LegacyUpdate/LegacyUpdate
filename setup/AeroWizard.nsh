@@ -67,13 +67,11 @@ Var /GLOBAL AeroWizard.Font
 		!insertmacro SetBackground $ChildHwnd $4
 	${Next}
 
-	; Activate taskbar progress bar plugin
-	${If} ${AtLeastWin7}
-		LegacyUpdateNSIS::InitTaskbarProgress
-	${EndIf}
-
 	; Set up banner and glass
 	LegacyUpdateNSIS::DialogInit
+
+	; Activate taskbar progress bar plugin
+	LegacyUpdateNSIS::InitTaskbarProgress
 !macroend
 
 Function AeroWizardOnShow

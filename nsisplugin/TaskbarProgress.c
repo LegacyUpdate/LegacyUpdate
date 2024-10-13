@@ -8,6 +8,7 @@
 #include <objbase.h>
 #include <shobjidl.h>
 #include "main.h"
+#include "VersionInfo.h"
 
 static extra_parameters *g_extra;
 static ITaskbarList3 *g_taskbarList;
@@ -88,6 +89,10 @@ static UINT_PTR NSISPluginCallback(enum NSPIM event) {
 
 PLUGIN_METHOD(InitTaskbarProgress) {
 	PLUGIN_INIT();
+
+	if (!AtLeastWinVista()) {
+		return;
+	}
 
 	g_extra = extra;
 	extra->RegisterPluginCallback(g_hInstance, NSISPluginCallback);
