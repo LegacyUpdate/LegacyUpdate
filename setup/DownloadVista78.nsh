@@ -1,12 +1,3 @@
-Function GetComponentArch
-	Call GetArch
-	Pop $0
-	${If} $0 == "x64"
-		StrCpy $0 "amd64"
-	${EndIf}
-	Push $0
-FunctionEnd
-
 !macro SPHandler kbid title os sp
 	!insertmacro NeedsSPHandler "${kbid}" "${os}" "${sp}"
 
@@ -34,11 +25,9 @@ FunctionEnd
 
 !macro MSUHandler kbid title
 	Function Needs${kbid}
-		Call GetComponentArch
-		Pop $0
 		ClearErrors
-		; TODO: CBS PackageIndex doesn't exist on Vista
-		EnumRegKey $1 HKLM "${REGPATH_CBS_PACKAGEINDEX}\Package_for_${kbid}~31bf3856ad364e35~$0~~0.0.0.0" 0
+		FindFirst $1 $2 "$WINDIR\servicing\Packages\Package_for_${kbid}~31bf3856ad364e35~*"
+		FindClose $1
 		${If} ${Errors}
 			Push 1
 		${Else}
