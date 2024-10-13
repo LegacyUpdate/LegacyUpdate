@@ -1,0 +1,39 @@
+import "oaidl.idl";
+
+// Just types we need from wuapi.idl
+
+[
+	helpstring("IUpdateInstaller Interface"),
+	object,
+	oleautomation,
+	dual,
+	nonextensible,
+	uuid(7b929c68-ccdc-4226-96b1-8724600b54c2),
+	pointer_default(unique),
+]
+interface IUpdateInstaller : IDispatch {
+	[id(0x60020003), propget, restricted]
+	HRESULT ParentHwnd([out, retval] HWND *retval);
+
+	[id(0x60020003), propput, restricted]
+	HRESULT ParentHwnd([in, unique] HWND value);
+};
+
+[
+	uuid(B596CC9F-56E5-419E-A622-E01BB457431E),
+	version(2.0),
+	helpstring("WUAPI 2.0 Type Library")
+]
+library WUApiLib
+{
+	importlib("stdole2.tlb");
+
+	[
+		helpstring("UpdateInstaller Class"),
+		uuid(D2E0FE7F-D23E-48E1-93C0-6FA8CC346474)
+	]
+	coclass UpdateInstaller
+	{
+		[default] interface IUpdateInstaller2;
+	};
+};

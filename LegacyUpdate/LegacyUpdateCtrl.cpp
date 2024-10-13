@@ -310,12 +310,20 @@ end:
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::GetBrowserHwnd(VARIANT *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
 	DoIsPermittedCheck();
 
-	VariantInit(retval);
-	retval->vt = VT_I4;
-	retval->lVal = (LONG_PTR)GetIEWindowHWND();
+	if (installer == NULL) {
+		return E_INVALIDARG;
+	}
+
+	CComPtr<IUpdateInstaller> updateInstaller = NULL;
+	HRESULT hr = installer->QueryInterface(IID_IUpdateInstaller, (void **)&updateInstaller);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	updateInstaller->put_ParentHwnd(GetIEWindowHWND());
 	return S_OK;
 }
 

@@ -8,6 +8,7 @@
 #include <idispids.h>
 import "oaidl.idl";
 import "ocidl.idl";
+import "wuapi.idl";
 
 typedef enum OSVersionField {
 	e_majorVer = 0,
@@ -47,7 +48,7 @@ interface ILegacyUpdateCtrl : IDispatch {
 	[id(3)]  HRESULT GetOSVersionInfo(OSVersionField osField, LONG systemMetric, [out, retval] VARIANT *retval);
 	[id(14)] HRESULT RequestElevation(void);
 	[id(4)]  HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
-	[id(15)] HRESULT GetBrowserHwnd([out, retval] VARIANT *retval);
+	[id(15)] HRESULT SetBrowserHwnd(IUpdateInstaller *installer);
 	[id(5)]  HRESULT GetUserType([out, retval] UserType *retval);
 	[id(8)]  HRESULT RebootIfRequired(void);
 	[id(9)]  HRESULT ViewWindowsUpdateLog(void);

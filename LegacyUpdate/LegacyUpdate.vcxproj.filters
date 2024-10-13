@@ -162,6 +162,9 @@
     <Midl Include="LegacyUpdate.idl">
       <Filter>Source Files</Filter>
     </Midl>
+    <Midl Include="wuapi.idl">
+      <Filter>Source Files</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="wuerror.mc">
