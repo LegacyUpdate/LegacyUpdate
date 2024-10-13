@@ -99,18 +99,24 @@ Function DownloadIE6
 	${If} ${NeedsPatch} IE6
 		StrCpy $Patch.Key   "W2KIE6"
 		StrCpy $Patch.File  "ie6sp1.cab"
-		StrCpy $Patch.Title "$(IE) 6 $(SP) 1"
+		StrCpy $Patch.Title "$(IE) 6 $(SP) 1 $(Setup)"
 		Call -PatchHandler
+
+		${IfNot} ${FileExists} "$PLUGINSDIR\W2KIE6\ie6setup.exe"
+			!insertmacro DetailPrint "$(Extracting)$(IE) 6 $(SP) 1 $(Setup)..."
+			CreateDirectory "$PLUGINSDIR\W2KIE6"
+			!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$WINDIR\system32\expand.exe" -F:* ie6sp1.cab "$PLUGINSDIR\W2KIE6"'
+			!insertmacro DetailPrint "$(Downloading)$(IE) 6 $(SP) 1..."
+			!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\W2KIE6\ie6setup.exe" /c:"ie6wzd.exe /q /d /s:""#e"""'
+		${EndIf}
 	${EndIf}
 FunctionEnd
 
 Function InstallIE6
 	${If} ${NeedsPatch} IE6
 		Call DownloadIE6
-		!insertmacro DetailPrint "$(Extracting)$(IE) 6 $(SP) 1..."
-		CreateDirectory "$PLUGINSDIR\IE6SP1"
-		LegacyUpdateNSIS::Exec '"$WINDIR\system32\expand.exe" "$OUTDIR\ie6sp1.cab" -F:* "$PLUGINSDIR\IE6SP1"'
 		!insertmacro DetailPrint "$(Installing)$(IE) 6 $(SP) 1..."
-		!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\IE6SP1\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
+		!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\W2KIE6\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
+		RMDir /r /REBOOTOK "$WINDIR\Windows Update Setup Files"
 	${EndIf}
 FunctionEnd

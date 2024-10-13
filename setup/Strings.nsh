@@ -99,6 +99,7 @@ LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update servi
 LangString StatusCheckingSSL    ${LANG_ENGLISH} "Checking SSL connectivity..."
 
 ; Sections
+LangString Setup    ${LANG_ENGLISH} "Setup"
 LangString IE       ${LANG_ENGLISH} "Internet Explorer"
 LangString PRO      ${LANG_ENGLISH} "Professional"
 LangString P64      ${LANG_ENGLISH} "Professional x64 Edition"
