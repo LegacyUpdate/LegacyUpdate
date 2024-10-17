@@ -39,7 +39,7 @@ jobs:
           --quiet --norestart --noUpdateInstaller \
           --installPath "$vs" \
           --config .vsconfig
-        if [ $? == 0 ]; then
+        if [ $? != 0 ]; then
           cd /tmp
           curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
           chmod +x vscollect.exe
