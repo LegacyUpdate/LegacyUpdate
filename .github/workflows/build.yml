@@ -39,18 +39,12 @@ jobs:
           --quiet --norestart --noUpdateInstaller \
           --installPath "$vs" \
           --config .vsconfig
-        #if [ $? != 0 ]; then
-        #  cd /tmp
-        #  curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
-        #  chmod +x vscollect.exe
-        #  ./vscollect.exe
-        #  unzip vscollect.zip
-        #  cat *.log
-        #  exit 1
-        #else
-        #  echo "Installation of Visual Studio was successful."
-        #fi
-
+        cd /tmp
+        curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
+        chmod +x vscollect.exe
+        ./vscollect.exe
+        unzip vscollect.zip || true
+        cat *.log || true
 
     - name: Install MinGW toolchain
       run: |
