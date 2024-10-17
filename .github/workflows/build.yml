@@ -39,9 +39,7 @@ jobs:
           --quiet --norestart --noUpdateInstaller \
           --installPath "$vs" \
           --config .vsconfig
-        RESULT=$?
-        echo "vs_installer.exe exit code: $RESULT"
-        if [ $RESULT != 0]; then
+        if [ $? == 0 ]; then
           cd /tmp
           curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
           chmod +x vscollect.exe
@@ -49,6 +47,8 @@ jobs:
           unzip vscollect.zip
           cat *.log
           exit 1
+        else
+          echo "Installation of Visual Studio was successful."
         fi
 
 
