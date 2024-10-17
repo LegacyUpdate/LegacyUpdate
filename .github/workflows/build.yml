@@ -28,7 +28,7 @@ jobs:
     - name: Set up WSL
       run: |
         sudo apt-get update -q
-        sudo apt-get install -qy cabextract curl make mingw-w64-x86-64-dev nsis nsis-pluginapi p7zip-full upx-ucl
+        sudo apt-get install -qy cabextract curl make mingw-w64-x86-64-dev nsis nsis-pluginapi p7zip-full upx-ucl unzip
         ./build/fix-nsis.sh
 
     - name: Set up Visual Studio
