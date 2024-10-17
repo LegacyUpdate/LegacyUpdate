@@ -35,11 +35,13 @@ jobs:
       run: |
         PATH='/mnt/c/Program Files (x86)/Microsoft Visual Studio/Installer':$PATH
         vs="$(vswhere.exe -latest -property installationPath | tr -d '\r')"
-        if ! vs_installer.exe modify \
+        vs_installer.exe modify \
           --quiet --norestart --noUpdateInstaller \
           --installPath "$vs" \
-          --config .vsconfig; then
-          echo "vs_installer.exe exit code: $?"
+          --config .vsconfig
+        RESULT=$?
+        echo "vs_installer.exe exit code: $RESULT"
+        if [ $RESULT != 0]; then
           cd /tmp
           curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
           chmod +x vscollect.exe
