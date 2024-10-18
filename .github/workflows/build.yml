@@ -32,16 +32,20 @@ jobs:
         ./build/fix-nsis.sh
 
     - name: Set up Visual Studio
+      shell: pwsh -command ". '{0}'"
       run: |
-        PATH='/mnt/c/Program Files (x86)/Microsoft Visual Studio/Installer':$PATH
-        vs="$(vswhere.exe -latest -property installationPath | tr -d '\r')"
-        vs_installer.exe modify \
-          --quiet --norestart --noUpdateInstaller \
-          --installPath "$vs" \
-          --config .vsconfig
-        curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
-        chmod +x vscollect.exe
-        ./vscollect.exe -zip=vslogs.zip
+        $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;" + $env:PATH
+        $vs = vswhere -latest -property installationPath
+        $installer = Start-Process -Wait -PassThru -FilePath vs_installer.exe -ArgumentList ( `
+          'modify', '--quiet', '--norestart', '--noUpdateInstaller', `
+          '--installPath', "`"$vs`"", `
+          '--config', '.vsconfig' `
+        )
+        # if ($installer.ExitCode -ne 0) {
+          Invoke-WebRequest -Uri https://aka.ms/vscollect.exe -OutFile vscollect.exe
+          & .\vscollect.exe -zip:vslogs.zip
+          exit $installer.ExitCode
+        # }
 
     - name: Upload Visual Studio error logs
       if: failure()
