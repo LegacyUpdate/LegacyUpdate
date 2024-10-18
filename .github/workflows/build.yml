@@ -39,12 +39,16 @@ jobs:
           --quiet --norestart --noUpdateInstaller \
           --installPath "$vs" \
           --config .vsconfig
-        cd /tmp
         curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
         chmod +x vscollect.exe
-        ./vscollect.exe
-        unzip vscollect.zip || true
-        cat *.log || true
+        ./vscollect.exe -zip=vslogs.zip
+
+    - name: Upload Visual Studio error logs
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: vslogs
+        path: vslogs.zip
 
     - name: Install MinGW toolchain
       run: |
