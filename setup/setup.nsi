@@ -33,7 +33,6 @@ ReserveFile "..\${VSBUILD32}\LegacyUpdate.dll"
 ReserveFile "..\x64\${VSBUILD64}\LegacyUpdate.dll"
 ReserveFile "..\launcher\obj\LegacyUpdate32.exe"
 ReserveFile "..\launcher\obj\LegacyUpdate64.exe"
-ReserveFile "updroots.exe"
 
 Var /GLOBAL UninstallInstalled
 

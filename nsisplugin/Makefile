@@ -69,7 +69,8 @@ LDFLAGS = \
 	-loleaut32 \
 	-ladvapi32 \
 	-lgdi32 \
-	-lmsimg32
+	-lmsimg32 \
+	-lcrypt32
 
 RCFLAGS = \
 	-F pe-i386 \

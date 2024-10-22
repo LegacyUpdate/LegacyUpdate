@@ -39,15 +39,6 @@ In the WSL environment, run the following command to install build dependencies.
 sudo apt install make nsis nsis-pluginapi mingw-w64-i686-dev
 ```
 
-You will also need to extract a copy of updroots.exe from [this update](http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe). You can do this manually using 7-Zip, placing the exe at `setup/updroots.exe`, or run the following in WSL:
-
-```bash
-sudo apt install cabextract
-curl -L http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe -o /tmp/rvkroots.exe
-cabextract -d setup -F updroots.exe /tmp/rvkroots.exe
-rm /tmp/rvkroots.exe
-```
-
 When opening the solution for the first time, Visual Studio will ask if you want to retarget it against the latest Windows SDK. Select No Upgrade.
 
 ### Testing

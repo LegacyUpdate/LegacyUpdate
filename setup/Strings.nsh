@@ -114,6 +114,7 @@ LangString Update   ${LANG_ENGLISH} "Update"
 LangString PrepTool ${LANG_ENGLISH} "Preparation Tool"
 LangString PUS      ${LANG_ENGLISH} "Platform Update Supplement"
 LangString SHA2     ${LANG_ENGLISH} "SHA-2 Code Signing Support Update"
+LangString CTL      ${LANG_ENGLISH} "Certificate Trust List"
 
 LangString SectionWES09     ${LANG_ENGLISH} "Enable Windows Embedded 2009 updates"
 LangString SectionWHS2011U4 ${LANG_ENGLISH} "Windows Home Server 2011 Update Rollup 4"

@@ -53,24 +53,36 @@ Function ConfigureCrypto
 FunctionEnd
 
 !macro _DownloadSST name
-	!insertmacro Download "Certificate Trust List (${name})" "${TRUSTEDR}/${name}.sst" "${name}.sst" 0
+	!insertmacro Download "$(CTL) (${name})" "${TRUSTEDR}/${name}.sst" "${name}.sst" 0
 !macroend
 
 Function DownloadRoots
-	!insertmacro DetailPrint "$(Downloading)Certificate Trust List..."
-	!insertmacro _DownloadSST "authroots"
-	!insertmacro _DownloadSST "delroots"
-	!insertmacro _DownloadSST "roots"
-	!insertmacro _DownloadSST "updroots"
-	!insertmacro _DownloadSST "disallowedcert"
+	!insertmacro DetailPrint "$(Downloading)$(CTL)..."
+	!insertmacro _DownloadSST authroots
+	!insertmacro _DownloadSST delroots
+	!insertmacro _DownloadSST roots
+	!insertmacro _DownloadSST updroots
+	!insertmacro _DownloadSST disallowedcert
 FunctionEnd
 
+!macro _InstallRoots state store file
+	LegacyUpdateNSIS::UpdateRoots ${state} ${store} "${file}"
+	Pop $0
+	${If} $0 != 0
+		LegacyUpdateNSIS::MessageForHresult $0
+		Pop $1
+		StrCpy $2 "$(CTL) (${file})"
+		MessageBox MB_USERICON "$(MsgBoxInstallFailed)" /SD IDOK
+		SetErrorLevel $0
+		Abort
+	${EndIf}
+!macroend
+
 Function UpdateRoots
-	File "updroots.exe"
-	!insertmacro DetailPrint "$(Installing)Certificate Trust List..."
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" authroots.sst'
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" updroots.sst'
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l roots.sst'
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -d delroots.sst'
-	!insertmacro ExecWithErrorHandling "Certificate Trust List" '"$OUTDIR\updroots.exe" -l -u disallowedcert.sst'
+	!insertmacro DetailPrint "$(Installing)$(CTL)..."
+	!insertmacro _InstallRoots /update AuthRoot authroots.sst
+	!insertmacro _InstallRoots /update AuthRoot updroots.sst
+	!insertmacro _InstallRoots /update Root roots.sst
+	!insertmacro _InstallRoots /delete AuthRoot delroots.sst
+	!insertmacro _InstallRoots /update Disallowed disallowedcert.sst
 FunctionEnd
