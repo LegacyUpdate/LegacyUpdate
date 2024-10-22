@@ -2,7 +2,9 @@
 
 SetPluginUnload alwaysoff
 
-!packhdr          upx.tmp 'upx --lzma -9 upx.tmp'
+!if ${DEBUG} == 0
+	!packhdr        upx.tmp 'upx --lzma -9 upx.tmp'
+!endif
 
 !if ${SIGN} == 1
 	!finalize       '../build/sign.sh "%1"'
