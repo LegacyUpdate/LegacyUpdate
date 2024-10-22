@@ -7,6 +7,7 @@
 #include <nsis/pluginapi.h>
 #include <shlwapi.h>
 #include <uxtheme.h>
+#include <vsstyle.h>
 #include <windowsx.h>
 #include "main.h"
 #include "LoadImage.h"
@@ -34,6 +35,9 @@ typedef HRESULT (WINAPI *_DwmDefWindowProc)(HWND hwnd, UINT msg, WPARAM wParam, 
 typedef HRESULT (WINAPI *_DwmSetWindowAttribute)(HWND hwnd, DWORD dwAttribute, LPCVOID pvAttribute, DWORD cbAttribute);
 typedef HRESULT (WINAPI *_SetWindowThemeAttribute)(HWND hwnd, enum WINDOWTHEMEATTRIBUTETYPE eAttribute, PVOID pvAttribute, DWORD cbAttribute);
 typedef BOOL (WINAPI *_IsThemeActive)();
+typedef HTHEME (WINAPI *_OpenThemeData)(HWND hwnd, LPCWSTR pszClassList);
+typedef HRESULT (WINAPI *_CloseThemeData)(HTHEME hTheme);
+typedef HRESULT (WINAPI *_DrawThemeBackground)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect);
 
 static _DwmExtendFrameIntoClientArea $DwmExtendFrameIntoClientArea;
 static _DwmIsCompositionEnabled $DwmIsCompositionEnabled;
@@ -41,6 +45,9 @@ static _DwmDefWindowProc $DwmDefWindowProc;
 static _DwmSetWindowAttribute $DwmSetWindowAttribute;
 static _SetWindowThemeAttribute $SetWindowThemeAttribute;
 static _IsThemeActive $IsThemeActive;
+static _OpenThemeData $OpenThemeData;
+static _CloseThemeData $CloseThemeData;
+static _DrawThemeBackground $DrawThemeBackground;
 
 typedef enum Theme {
 	ThemeUnknown = -1,
@@ -52,6 +59,7 @@ typedef enum Theme {
 
 static HBITMAP g_bannerWordmark;
 static HBITMAP g_bannerWordmarkGlow;
+static HTHEME g_aeroTheme;
 static Theme g_theme = ThemeUnknown;
 
 static WNDPROC g_dialogOrigWndProc;
@@ -89,16 +97,10 @@ static void ConfigureWindow() {
 		MARGINS margins = {0};
 
 		if (theme >= ThemeAeroLight) {
-			// Set black brush for DWM
-			SetClassLongPtr(bannerWindow, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(BLACK_BRUSH));
-
 			// Set glass area
 			RECT rect;
 			GetWindowRect(bannerWindow, &rect);
 			margins.cyTopHeight = rect.bottom - rect.top;
-		} else {
-			// Remove black brush
-			SetClassLongPtr(bannerWindow, GCLP_HBRBACKGROUND, (LONG_PTR)GetSysColorBrush(COLOR_BTNFACE));
 		}
 
 		if ($DwmExtendFrameIntoClientArea) {
@@ -131,11 +133,7 @@ static void ConfigureWindow() {
 }
 
 static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	if (g_bannerOrigWndProc == NULL) {
-		return 0;
-	}
-
-	if (g_theme < ThemeAeroLight) {
+	if (g_theme < ThemeBasic) {
 		return CallWindowProc(g_bannerOrigWndProc, hwnd, uMsg, wParam, lParam);
 	}
 
@@ -145,6 +143,16 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		HDC hdc = BeginPaint(hwnd, &ps);
 		RECT rect;
 		GetClientRect(hwnd, &rect);
+
+		// Draw glass area
+		FillRect(hdc, &rect, GetStockObject(BLACK_BRUSH));
+
+		// Draw Aero Basic titlebar
+		if (g_theme == ThemeBasic && g_aeroTheme && $DrawThemeBackground) {
+			// Draw background
+			int state = GetActiveWindow() == g_hwndParent ? AW_S_TITLEBAR_ACTIVE : AW_S_TITLEBAR_INACTIVE;
+			$DrawThemeBackground(g_aeroTheme, hdc, AW_TITLEBAR, state, &rect, NULL);
+		}
 
 		float scale = (float)GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
 
@@ -207,25 +215,20 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	case WM_NCHITTEST:
 		// Pass through to parent
 		return HTTRANSPARENT;
+	}
 
-	case WM_DESTROY:
-		SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)g_bannerOrigWndProc);
-		g_bannerOrigWndProc = NULL;
-		break;
+	if (!g_bannerOrigWndProc) {
+		return 0;
 	}
 
 	return CallWindowProc(g_bannerOrigWndProc, hwnd, uMsg, wParam, lParam);
 }
 
 static LRESULT CALLBACK BottomWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	if (!g_bottomOrigWndProc) {
-		return 0;
-	}
-
 	switch (uMsg) {
 	case WM_PAINT: {
 		// Draw subtle 1px divider line for Aero
-		if (g_theme < ThemeBasic) {
+		if (g_theme < ThemeBasic || !g_aeroTheme || !$DrawThemeBackground) {
 			break;
 		}
 
@@ -234,31 +237,21 @@ static LRESULT CALLBACK BottomWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 
 		RECT rect;
 		GetClientRect(hwnd, &rect);
-
-		// TODO: Can we get this color from uxtheme?
-		HBRUSH brush = CreateSolidBrush(RGB(0xDF, 0xDF, 0xDF));
-		RECT lineRect = {rect.left, rect.top, rect.right, rect.top + 1};
-		FillRect(hdc, &lineRect, brush);
-		DeleteObject(brush);
-
-		brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-		lineRect = (RECT){rect.left, rect.top + 1, rect.right, rect.bottom};
-		FillRect(hdc, &lineRect, brush);
-		DeleteObject(brush);
+		$DrawThemeBackground(g_aeroTheme, hdc, AW_COMMANDAREA, 0, &rect, NULL);
 
 		EndPaint(hwnd, &ps);
 		return 0;
 	}
 	}
 
+	if (!g_bottomOrigWndProc) {
+		return 0;
+	}
+
 	return CallWindowProc(g_bottomOrigWndProc, hwnd, uMsg, wParam, lParam);
 }
 
 static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	if (!g_dialogOrigWndProc) {
-		return 0;
-	}
-
 	if (g_theme >= ThemeAeroLight && $DwmDefWindowProc) {
 		LRESULT lRet = 0;
 		if ($DwmDefWindowProc(hwnd, uMsg, wParam, lParam, &lRet)) {
@@ -272,8 +265,16 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		ConfigureWindow();
 		break;
 
+	case WM_ACTIVATE:
+	case WM_NCACTIVATE:
+		// Redraw banner on activation
+		if (g_theme == ThemeBasic) {
+			InvalidateRect(GetDlgItem(hwnd, 1046), NULL, FALSE);
+		}
+		break;
+
 	case WM_NCHITTEST: {
-		if (g_theme < ThemeAeroLight) {
+		if (g_theme < ThemeBasic) {
 			break;
 		}
 
@@ -298,11 +299,10 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		}
 		break;
 	}
+	}
 
-	case WM_DESTROY:
-		SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)g_dialogOrigWndProc);
-		g_dialogOrigWndProc = NULL;
-		break;
+	if (!g_dialogOrigWndProc) {
+		return 0;
 	}
 
 	return CallWindowProc(g_dialogOrigWndProc, hwnd, uMsg, wParam, lParam);
@@ -335,6 +335,14 @@ PLUGIN_METHOD(DialogInit) {
 	if (uxtheme) {
 		$SetWindowThemeAttribute = (_SetWindowThemeAttribute)GetProcAddress(uxtheme, "SetWindowThemeAttribute");
 		$IsThemeActive = (_IsThemeActive)GetProcAddress(uxtheme, "IsThemeActive");
+		$OpenThemeData = (_OpenThemeData)GetProcAddress(uxtheme, "OpenThemeData");
+		$CloseThemeData = (_CloseThemeData)GetProcAddress(uxtheme, "CloseThemeData");
+		$DrawThemeBackground = (_DrawThemeBackground)GetProcAddress(uxtheme, "DrawThemeBackground");
+	}
+
+	// Get AeroWizard theme
+	if ($OpenThemeData) {
+		g_aeroTheme = $OpenThemeData(g_hwndParent, L"AeroWizard");
 	}
 
 	// Hide title caption/icon
