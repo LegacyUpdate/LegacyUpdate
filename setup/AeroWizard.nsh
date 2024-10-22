@@ -12,9 +12,10 @@
 	!insertmacro SetControlColor ${parent} ${control} SYSCLR:WINDOWTEXT
 !macroend
 
-; This is a PE resource because there's no benefit to LZMA compressing it
-PEAddResource "banner-wordmark.png"      "PNG" "#1337"
-PEAddResource "banner-wordmark-glow.png" "PNG" "#1338"
+; These are PE resources because there's no benefit to LZMA compressing PNGs
+PEAddResource "banner-wordmark-light.png" "PNG" "#1337"
+PEAddResource "banner-wordmark-dark.png"  "PNG" "#1338"
+PEAddResource "banner-wordmark-glow.png"  "PNG" "#1339"
 
 Var /GLOBAL ChildHwnd
 Var /GLOBAL AeroWizard.Font

@@ -10,24 +10,35 @@
 #include <windowsx.h>
 #include "main.h"
 #include "LoadImage.h"
+#include "Registry.h"
 #include "VersionInfo.h"
 
 #ifndef WM_DWMCOMPOSITIONCHANGED
 #define WM_DWMCOMPOSITIONCHANGED 0x031e
 #endif
 
-#define IDI_BANNER_WORDMARK      1337
-#define IDI_BANNER_WORDMARK_GLOW 1338
+#define DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 19
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#define DWMWA_CAPTION_COLOR       35
+#define DWMWA_SYSTEMBACKDROP_TYPE 38
+#define DWMWA_COLOR_NONE          0xFFFFFFFE
+#define DWMSBT_MAINWINDOW         2
+
+#define IDI_BANNER_WORDMARK_LIGHT 1337
+#define IDI_BANNER_WORDMARK_DARK  1338
+#define IDI_BANNER_WORDMARK_GLOW  1339
 
 typedef HRESULT (WINAPI *_DwmExtendFrameIntoClientArea)(HWND hWnd, const MARGINS *pMarInset);
 typedef HRESULT (WINAPI *_DwmIsCompositionEnabled)(BOOL *pfEnabled);
 typedef HRESULT (WINAPI *_DwmDefWindowProc)(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult);
+typedef HRESULT (WINAPI *_DwmSetWindowAttribute)(HWND hwnd, DWORD dwAttribute, LPCVOID pvAttribute, DWORD cbAttribute);
 typedef HRESULT (WINAPI *_SetWindowThemeAttribute)(HWND hwnd, enum WINDOWTHEMEATTRIBUTETYPE eAttribute, PVOID pvAttribute, DWORD cbAttribute);
 typedef BOOL (WINAPI *_IsThemeActive)();
 
 static _DwmExtendFrameIntoClientArea $DwmExtendFrameIntoClientArea;
 static _DwmIsCompositionEnabled $DwmIsCompositionEnabled;
 static _DwmDefWindowProc $DwmDefWindowProc;
+static _DwmSetWindowAttribute $DwmSetWindowAttribute;
 static _SetWindowThemeAttribute $SetWindowThemeAttribute;
 static _IsThemeActive $IsThemeActive;
 
@@ -35,25 +46,30 @@ typedef enum Theme {
 	ThemeUnknown = -1,
 	ThemeClassic,
 	ThemeBasic,
-	ThemeAero
+	ThemeAeroLight,
+	ThemeAeroDark
 } Theme;
 
 static HBITMAP g_bannerWordmark;
 static HBITMAP g_bannerWordmarkGlow;
 static Theme g_theme = ThemeUnknown;
+
 static WNDPROC g_dialogOrigWndProc;
 static WNDPROC g_bannerOrigWndProc;
 static WNDPROC g_bottomOrigWndProc;
 
 static Theme GetTheme() {
-	// return ThemeClassic;
 	BOOL enabled;
 	if (!$DwmIsCompositionEnabled || !$IsThemeActive || !SUCCEEDED($DwmIsCompositionEnabled(&enabled))) {
 		return ThemeClassic;
 	}
 
 	if (enabled) {
-		return ThemeAero;
+		DWORD light = 1;
+		if (AtLeastWin10_1809()) {
+			GetRegistryDword(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", 0, &light);
+		}
+		return light ? ThemeAeroLight : ThemeAeroDark;
 	}
 
 	return $IsThemeActive() ? ThemeBasic : ThemeClassic;
@@ -68,12 +84,11 @@ static void ConfigureWindow() {
 	}
 
 	Theme theme = GetTheme();
-
 	if (g_theme != theme) {
 		g_theme = theme;
 		MARGINS margins = {0};
 
-		if (theme == ThemeAero) {
+		if (theme >= ThemeAeroLight) {
 			// Set black brush for DWM
 			SetClassLongPtr(bannerWindow, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(BLACK_BRUSH));
 
@@ -93,8 +108,9 @@ static void ConfigureWindow() {
 		ShowWindow(bannerDivider, theme >= ThemeBasic ? SW_HIDE : SW_SHOW);
 		ShowWindow(bottomDivider, theme >= ThemeBasic ? SW_HIDE : SW_SHOW);
 
-		if (g_theme == ThemeAero) {
-			g_bannerWordmark = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK), L"PNG");
+		if (g_theme >= ThemeAeroLight) {
+			DWORD wordmark = g_theme == ThemeAeroDark ? IDI_BANNER_WORDMARK_DARK : IDI_BANNER_WORDMARK_LIGHT;
+			g_bannerWordmark = LoadPNGResource(NULL, MAKEINTRESOURCE(wordmark), L"PNG");
 			if (AtMostWin7()) {
 				g_bannerWordmarkGlow = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK_GLOW), L"PNG");
 			}
@@ -104,6 +120,13 @@ static void ConfigureWindow() {
 			g_bannerWordmark = NULL;
 			g_bannerWordmarkGlow = NULL;
 		}
+
+		// Set dark mode state
+		if (AtLeastWin10_1809() && $DwmSetWindowAttribute) {
+			DWORD attr = AtLeastWin10_2004() ? DWMWA_USE_IMMERSIVE_DARK_MODE : DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1;
+			DWORD value = g_theme == ThemeAeroDark;
+			$DwmSetWindowAttribute(g_hwndParent, attr, &value, sizeof(value));
+		}
 	}
 }
 
@@ -112,7 +135,7 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		return 0;
 	}
 
-	if (g_theme != ThemeAero) {
+	if (g_theme < ThemeAeroLight) {
 		return CallWindowProc(g_bannerOrigWndProc, hwnd, uMsg, wParam, lParam);
 	}
 
@@ -236,7 +259,7 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		return 0;
 	}
 
-	if (g_theme == ThemeAero && $DwmDefWindowProc) {
+	if (g_theme >= ThemeAeroLight && $DwmDefWindowProc) {
 		LRESULT lRet = 0;
 		if ($DwmDefWindowProc(hwnd, uMsg, wParam, lParam, &lRet)) {
 			return lRet;
@@ -250,7 +273,7 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		break;
 
 	case WM_NCHITTEST: {
-		if (g_theme != ThemeAero) {
+		if (g_theme < ThemeAeroLight) {
 			break;
 		}
 
@@ -299,15 +322,15 @@ PLUGIN_METHOD(DialogInit) {
 
 	extra->RegisterPluginCallback(g_hInstance, NSISPluginCallback);
 
-	// Get DWM symbols
+	// Get symbols
 	HMODULE dwmapi = LoadLibrary(L"dwmapi.dll");
 	if (dwmapi) {
 		$DwmExtendFrameIntoClientArea = (_DwmExtendFrameIntoClientArea)GetProcAddress(dwmapi, "DwmExtendFrameIntoClientArea");
 		$DwmIsCompositionEnabled = (_DwmIsCompositionEnabled)GetProcAddress(dwmapi, "DwmIsCompositionEnabled");
 		$DwmDefWindowProc = (_DwmDefWindowProc)GetProcAddress(dwmapi, "DwmDefWindowProc");
+		$DwmSetWindowAttribute = (_DwmSetWindowAttribute)GetProcAddress(dwmapi, "DwmSetWindowAttribute");
 	}
 
-	// Get UxTheme symbols
 	HMODULE uxtheme = LoadLibrary(L"uxtheme.dll");
 	if (uxtheme) {
 		$SetWindowThemeAttribute = (_SetWindowThemeAttribute)GetProcAddress(uxtheme, "SetWindowThemeAttribute");
@@ -320,6 +343,19 @@ PLUGIN_METHOD(DialogInit) {
 		options.dwFlags = WTNCA_NODRAWCAPTION | WTNCA_NODRAWICON;
 		options.dwMask = WTNCA_NODRAWCAPTION | WTNCA_NODRAWICON;
 		$SetWindowThemeAttribute(g_hwndParent, WTA_NONCLIENT, &options, sizeof(options));
+	}
+
+	// Enable Acrylic blur
+	if (AtLeastWin11_21H1() && $DwmSetWindowAttribute) {
+		// I stole this undocumented 1029 attr from Microsoft Store's StoreInstaller.exe
+		BOOL modern = AtLeastWin11_22H2();
+		DWORD attr = modern ? DWMWA_SYSTEMBACKDROP_TYPE : 1029;
+		DWORD value = modern ? DWMSBT_MAINWINDOW : 1;
+		$DwmSetWindowAttribute(g_hwndParent, attr, &value, sizeof(value));
+
+		// Hide caption background
+		value = DWMWA_COLOR_NONE;
+		$DwmSetWindowAttribute(g_hwndParent, DWMWA_CAPTION_COLOR, &value, sizeof(value));
 	}
 
 	// Set up extended client frame
