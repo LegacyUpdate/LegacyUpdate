@@ -34,14 +34,12 @@ PLUGIN_METHOD(UpdateRoots) {
 		goto end;
 	}
 
-
 	HCERTSTORE dstStore = CertOpenStore(CERT_STORE_PROV_SYSTEM_REGISTRY_W, 0, 0, CERT_SYSTEM_STORE_LOCAL_MACHINE, store);
 	if (!dstStore) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
 		TRACE(L"CertOpenStore for %ls failed: %08x", store, hr);
 		goto end;
 	}
-
 
 	PCCERT_CONTEXT cert = NULL;
 	while ((cert = CertEnumCertificatesInStore(srcStore, cert)) != NULL) {
