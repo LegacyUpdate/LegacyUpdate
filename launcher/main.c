@@ -5,6 +5,7 @@
 #include <commctrl.h>
 #include "MsgBox.h"
 #include "RegisterServer.h"
+#include "Startup.h"
 
 HINSTANCE g_hInstance;
 
@@ -14,6 +15,7 @@ extern void RunOnce();
 EXTERN_C __declspec(dllexport)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 	g_hInstance = hInstance;
+	Startup();
 
 	int argc;
 	LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
