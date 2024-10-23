@@ -79,7 +79,7 @@ STDAPI DllRegisterServer(void) {
 	}
 
 	WCHAR iconRef[512];
-	hr = StringCchPrintf((LPWSTR)&iconRef, ARRAYSIZE(iconRef), L"@\"%ls\\LegacyUpdate.exe\",-100", installPath);
+	hr = StringCchPrintf((LPWSTR)&iconRef, ARRAYSIZE(iconRef), L"@%ls\\LegacyUpdate.exe,-100", installPath);
 	LocalFree(installPath);
 	if (!SUCCEEDED(hr)) {
 		return hr;
