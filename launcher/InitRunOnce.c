@@ -3,6 +3,7 @@
 #include "MsgBox.h"
 #include "VersionInfo.h"
 #include "LoadImage.h"
+#include "Gdip.h"
 
 #define HK_RUNCMD 1
 
@@ -148,13 +149,16 @@ static void CreateRunOnceWindow() {
 
 	DWORD width = GetSystemMetrics(SM_CXSCREEN);
 	DWORD height = GetSystemMetrics(SM_CYSCREEN);
-	HBITMAP wallpaper;
+	GpBitmap *wallpaper;
 
 	if (IsWin7()) {
 		// 7: Bitmap in oobe dir
 		WCHAR bmpPath[MAX_PATH];
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
-		wallpaper = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		_GdipLoadImageFromFile $GdipLoadImageFromFile = (_GdipLoadImageFromFile)GetGdiplusSymbol("GdipLoadImageFromFile");
+		if ($GdipLoadImageFromFile) {
+			$GdipLoadImageFromFile(bmpPath, &wallpaper);
+		}
 	} else if (IsWinVista()) {
 		// Vista: Resources in ooberesources.dll
 		WCHAR ooberesPath[MAX_PATH];

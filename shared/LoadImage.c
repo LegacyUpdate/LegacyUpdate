@@ -1,16 +1,9 @@
 #include <windows.h>
 #include <wincodec.h>
 #include <gdiplus.h>
+#include "Gdip.h"
 
-// Adapted from https://faithlife.codes/blog/2008/09/displaying_a_splash_screen_with_c_part_i/
-//  1. Get resource as an IStream
-//  2. Use Windows Imaging Component to load the PNG
-//  3. Convert the WIC bitmap to an HBITMAP
-// Why does loading a PNG need to be so difficult?
-
-typedef HRESULT (WINAPI *_WICConvertBitmapSource)(REFWICPixelFormatGUID dstFormat, IWICBitmapSource *pISrc, IWICBitmapSource **ppIDst);
-
-static _WICConvertBitmapSource $WICConvertBitmapSource;
+DEFINE_GUID(CLSID_EncoderBMP, 0x557cf400, 0x1a04, 0x11d3, 0x9a, 0x73, 0x00, 0xc0, 0x4f, 0x8e, 0x38, 0x82);
 
 static HGLOBAL GetRawResource(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
 	HRSRC resource = FindResource(hInstance, name, type);
@@ -66,191 +59,103 @@ static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type)
 	return NULL;
 }
 
-static IWICBitmapSource *GetWICBitmap(IStream *imageStream) {
-	IWICBitmapSource *bitmap;
-	IWICBitmapDecoder *decoder;
-	UINT frameCount;
-	IWICBitmapFrameDecode *frame;
-
-	if (!SUCCEEDED(CoCreateInstance(&CLSID_WICPngDecoder, NULL, CLSCTX_INPROC_SERVER, &IID_IWICBitmapDecoder, (LPVOID *)&decoder))) {
-		return NULL;
-	}
-
-	if (!SUCCEEDED(IWICBitmapDecoder_Initialize(decoder, imageStream, WICDecodeMetadataCacheOnLoad))) {
-		goto end;
-	}
-
-	if (!SUCCEEDED(IWICBitmapDecoder_GetFrameCount(decoder, &frameCount)) || frameCount != 1) {
-		goto end;
-	}
-
-	if (!SUCCEEDED(IWICBitmapDecoder_GetFrame(decoder, 0, &frame))) {
-		goto end;
-	}
-
-	$WICConvertBitmapSource(&GUID_WICPixelFormat32bppPBGRA, (IWICBitmapSource *)frame, &bitmap);
-	IWICBitmapFrameDecode_Release(frame);
-
-end:
-	IWICBitmapDecoder_Release(decoder);
-	return bitmap;
-}
-
-static HBITMAP GetHBitmapForWICBitmap(IWICBitmapSource *bitmap) {
-	HBITMAP hBitmap;
-	UINT width, height;
-	if (!SUCCEEDED(IWICBitmapSource_GetSize(bitmap, &width, &height)) || width == 0 || height == 0) {
-		return NULL;
-	}
-
-	BITMAPINFO bminfo;
-	ZeroMemory(&bminfo, sizeof(bminfo));
-	bminfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	bminfo.bmiHeader.biWidth = width;
-	bminfo.bmiHeader.biHeight = -(LONG)height;
-	bminfo.bmiHeader.biPlanes = 1;
-	bminfo.bmiHeader.biBitCount = 32;
-	bminfo.bmiHeader.biCompression = BI_RGB;
-
-	void *imageBits;
-	HDC screenDC = GetDC(NULL);
-	hBitmap = CreateDIBSection(screenDC, &bminfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
-	ReleaseDC(NULL, screenDC);
-	if (!hBitmap) {
-		return NULL;
-	}
-
-	UINT stride = width * 4;
-	UINT imageSize = stride * height;
-	if (!SUCCEEDED(IWICBitmapSource_CopyPixels(bitmap, NULL, stride, imageSize, (BYTE*)imageBits))) {
-		DeleteObject(hBitmap);
-		return NULL;
-	}
-
-	return hBitmap;
-}
-
-HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourceType) {
-	if (!$WICConvertBitmapSource) {
-		$WICConvertBitmapSource = (_WICConvertBitmapSource)GetProcAddress(LoadLibrary(L"windowscodecs.dll"), "WICConvertBitmapSource");
-		if (!$WICConvertBitmapSource) {
-			return NULL;
-		}
-	}
-
+GpBitmap *LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourceType) {
 	IStream *imageStream = GetResourceStream(hInstance, resourceName, resourceType);
 	if (!imageStream) {
 		TRACE(L"GetResourceStream failed: %d", GetLastError());
 		return NULL;
 	}
 
-	IWICBitmapSource *bitmap = GetWICBitmap(imageStream);
-	if (!bitmap) {
-		TRACE(L"GetWICBitmap failed: %d", GetLastError());
-		IStream_Release(imageStream);
-		return NULL;
+	GpBitmap *bitmap;
+	_GdipCreateBitmapFromStream $GdipCreateBitmapFromStream = (_GdipCreateBitmapFromStream)GetGdiplusSymbol("GdipCreateBitmapFromStream");
+	if (!$GdipCreateBitmapFromStream) {
+		TRACE(L"gdip symbols not available");
+		goto end;
 	}
 
-	HBITMAP result = GetHBitmapForWICBitmap(bitmap);
-	IWICBitmapSource_Release(bitmap);
+	if ($GdipCreateBitmapFromStream(imageStream, &bitmap) != Ok) {
+		TRACE(L"GdipCreateBitmapFromStream failed: %d", GetLastError());
+		bitmap = NULL;
+		goto end;
+	}
+
+end:
 	IStream_Release(imageStream);
-	return result;
+	return bitmap;
 }
 
-BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outputPath) {
+BOOL ScaleAndWriteToBMP(GpBitmap *bitmap, DWORD width, DWORD height, LPWSTR outputPath) {
 	BOOL result = FALSE;
-	if (!hBitmap) {
+	if (!bitmap) {
 		TRACE(L"Null bitmap");
 		return FALSE;
 	}
 
-	HDC hdc = GetDC(NULL);
-	HDC hdcMem = CreateCompatibleDC(hdc);
-	HBITMAP scaledBitmap = CreateCompatibleBitmap(hdc, width, height);
-	if (!scaledBitmap) {
-		TRACE(L"CreateCompatibleBitmap failed: %d", GetLastError());
+	_GdipCreateBitmapFromScan0 $GdipCreateBitmapFromScan0 = (_GdipCreateBitmapFromScan0)GetGdiplusSymbol("GdipCreateBitmapFromScan0");
+	_GdipDeleteGraphics $GdipDeleteGraphics = (_GdipDeleteGraphics)GetGdiplusSymbol("GdipDeleteGraphics");
+	_GdipDisposeImage $GdipDisposeImage = (_GdipDisposeImage)GetGdiplusSymbol("GdipDisposeImage");
+	_GdipDrawImageRectRectI $GdipDrawImageRectRectI = (_GdipDrawImageRectRectI)GetGdiplusSymbol("GdipDrawImageRectRectI");
+	_GdipGetImageGraphicsContext $GdipGetImageGraphicsContext = (_GdipGetImageGraphicsContext)GetGdiplusSymbol("GdipGetImageGraphicsContext");
+	_GdipGetImageHeight $GdipGetImageHeight = (_GdipGetImageHeight)GetGdiplusSymbol("GdipGetImageHeight");
+	_GdipGetImageWidth $GdipGetImageWidth = (_GdipGetImageWidth)GetGdiplusSymbol("GdipGetImageWidth");
+	_GdipSaveImageToFile $GdipSaveImageToFile = (_GdipSaveImageToFile)GetGdiplusSymbol("GdipSaveImageToFile");
+
+	if (!$GdipCreateBitmapFromScan0 || !$GdipDeleteGraphics || !$GdipDisposeImage || !$GdipDrawImageRectRectI || !$GdipGetImageGraphicsContext || !$GdipGetImageHeight || !$GdipGetImageWidth || !$GdipSaveImageToFile) {
+		TRACE(L"gdip symbols not available");
+		return FALSE;
+	}
+
+	GpGraphics *graphics;
+	GpStatus status;
+	status = $GdipGetImageGraphicsContext(bitmap, &graphics);
+	if (status != Ok) {
+		TRACE(L"GdipGetImageGraphicsContext failed: %d", status);
 		goto end;
 	}
 
-	BITMAP bmp;
-	if (!GetObject(hBitmap, sizeof(BITMAP), &bmp)) {
-		TRACE(L"GetObject failed: %d", GetLastError());
+	UINT originalWidth, originalHeight;
+	$GdipGetImageWidth(bitmap, &originalWidth);
+	$GdipGetImageHeight(bitmap, &originalHeight);
+
+	GpBitmap *scaledBitmap;
+	status = $GdipCreateBitmapFromScan0(width, height, 0, PixelFormat32bppARGB, NULL, &scaledBitmap);
+	if (status != Ok) {
+		TRACE(L"GdipCreateBitmapFromScan0 failed: %d", status);
 		goto end;
 	}
 
-	HBITMAP hOld = (HBITMAP)SelectObject(hdcMem, hBitmap);
-	HDC hdcMemScaled = CreateCompatibleDC(hdc);
-	HBITMAP hOldScaled = (HBITMAP)SelectObject(hdcMemScaled, scaledBitmap);
-	SetStretchBltMode(hdcMemScaled, HALFTONE);
-
-	if (!StretchBlt(hdcMemScaled,
-		0, 0, width, height, hdcMem,
-		0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY)) {
-		TRACE(L"StretchBlt failed: %d", GetLastError());
+	GpGraphics *scaledGraphics;
+	status = $GdipGetImageGraphicsContext(scaledBitmap, &scaledGraphics);
+	if (status != Ok) {
+		TRACE(L"GdipGetImageGraphicsContext for scaledBitmap failed: %d", status);
 		goto end;
 	}
 
-	BITMAPINFOHEADER bmih = {0};
-	bmih.biSize = sizeof(BITMAPINFOHEADER);
-	bmih.biWidth = width;
-	bmih.biHeight = height;
-	bmih.biPlanes = 1;
-	bmih.biBitCount = bmp.bmBitsPixel;
-	bmih.biCompression = BI_RGB;
-	bmih.biSizeImage = ((width * bmp.bmBitsPixel + 31) / 32) * 4 * height;
-
-	BITMAPFILEHEADER bmfh = {0};
-	bmfh.bfType = 0x4D42;
-	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-	bmfh.bfSize = bmfh.bfOffBits + bmih.biSizeImage;
-
-	HGLOBAL handle = GlobalAlloc(GMEM_MOVEABLE, bmih.biSizeImage);
-	if (!handle) {
-		TRACE(L"GlobalAlloc failed: %d", GetLastError());
+	status = $GdipDrawImageRectRectI(scaledGraphics, bitmap,
+		0, 0, width, height,
+		0, 0, originalWidth, originalHeight,
+		UnitPixel, NULL, NULL, NULL);
+	if (status != Ok) {
+		TRACE(L"GdipDrawImageRectRectI failed: %d", status);
 		goto end;
 	}
 
-	BYTE *bitmapData = (BYTE *)GlobalLock(handle);
-	if (!bitmapData) {
-		TRACE(L"GlobalLock failed: %d", GetLastError());
+	status = $GdipSaveImageToFile(scaledBitmap, outputPath, &CLSID_EncoderBMP, NULL);
+	if (status != Ok) {
+		TRACE(L"GdipSaveImageToFile failed: %d", status);
 		goto end;
 	}
 
-	if (!GetDIBits(hdcMemScaled, scaledBitmap, 0, height, bitmapData, (BITMAPINFO *)&bmih, DIB_RGB_COLORS)) {
-		TRACE(L"GetDIBits failed: %d", GetLastError());
-		goto end;
-	}
-
-	HANDLE file = CreateFile(outputPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (file == INVALID_HANDLE_VALUE) {
-		TRACE(L"CreateFile failed: %d", GetLastError());
-		goto end;
-	}
-
-	DWORD written;
-	if (!WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &written, NULL) ||
-		!WriteFile(file, &bmih, sizeof(BITMAPINFOHEADER), &written, NULL) ||
-		!WriteFile(file, bitmapData, bmih.biSizeImage, &written, NULL)) {
-		TRACE(L"WriteFile failed: %d", GetLastError());
-		goto end;
-	}
+	$GdipDeleteGraphics(scaledGraphics);
 
 	result = TRUE;
 
 end:
-	if (file && file != INVALID_HANDLE_VALUE) {
-		CloseHandle(file);
+	if (graphics) {
+		$GdipDeleteGraphics(graphics);
 	}
 	if (scaledBitmap) {
-		DeleteObject(scaledBitmap);
+		$GdipDisposeImage(scaledBitmap);
 	}
-	if (handle) {
-		GlobalUnlock(handle);
-		GlobalFree(handle);
-	}
-	ReleaseDC(NULL, hdc);
-	DeleteDC(hdcMem);
-	DeleteDC(hdcMemScaled);
-
 	return result;
 }
