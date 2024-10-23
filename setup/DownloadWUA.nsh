@@ -16,9 +16,8 @@ Function DetermineWUAVersion
 
 	StrCpy $0 ""
 
-	ClearErrors
 	ReadINIStr $2 $PLUGINSDIR\Patches.ini WUA $1
-	${If} ${Errors}
+	${If} $2 == ""
 		Return
 	${EndIf}
 
