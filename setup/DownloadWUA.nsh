@@ -1,21 +1,20 @@
 Function DetermineWUAVersion
+	GetWinVer $1 Major
+	GetWinVer $2 Minor
+	GetWinVer $3 ServicePack
+	StrCpy $1 "$1.$2.$3"
+
 	; Hardcoded special case for XP Home/Embedded SP3, because the WUA 7.6.7600.256 setup SFX is
 	; seriously broken on it, potentially causing an unbootable Windows install due to it entering an
 	; infinite loop of creating folders in the root of C:.
-	${If} ${IsWinXP2002}
-	${AndIf} ${AtLeastServicePack} 3
-	${AndIf} ${IsHomeEdition}
-	${OrIf} ${IsEmbedded}
-		StrCpy $1 "5.1.3-home"
-	${Else}
-		GetWinVer $1 Major
-		GetWinVer $2 Minor
-		GetWinVer $3 ServicePack
-		StrCpy $1 "$1.$2.$3"
+	${If} $1 == "5.1.3"
+		${If} ${IsHomeEdition}
+		${OrIf} ${IsEmbedded}
+			StrCpy $1 "$1-home"
+		${EndIf}
 	${EndIf}
 
 	StrCpy $0 ""
-
 	ReadINIStr $2 $PLUGINSDIR\Patches.ini WUA $1
 	${If} $2 == ""
 		Return
@@ -27,6 +26,10 @@ Function DetermineWUAVersion
 		Call GetArch
 		Pop $0
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini WUA $2-$0
+		${If} $0 == ""
+			Return
+		${EndIf}
+
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini WUA Prefix
 		StrCpy $0 "$1$0"
 	${EndIf}
