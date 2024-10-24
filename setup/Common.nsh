@@ -65,14 +65,15 @@ FunctionEnd
 !define NeedsPatch `"" NeedsPatch`
 
 !macro -DetailPrint level text
-	${If} ${level} == 0
-	${AndIf} ${IsVerbose}
+!if ${level} == 0
+	${If} ${IsVerbose}
 		DetailPrint "${text}"
-	${Else}
-		SetDetailsPrint both
-		DetailPrint "${text}"
-		SetDetailsPrint listonly
 	${EndIf}
+!else
+	SetDetailsPrint both
+	DetailPrint "${text}"
+	SetDetailsPrint listonly
+!endif
 !macroend
 
 !define VerbosePrint `!insertmacro -DetailPrint 0`
@@ -126,21 +127,24 @@ Function DownloadWait
 FunctionEnd
 
 !macro -Download name url filename verbose
-	${If} ${verbose} == 1
-	${OrIf} ${IsVerbose}
-		${DetailPrint} "$(Downloading)${name}..."
-	${EndIf}
+!if ${verbose} == 1
+	${DetailPrint} "$(Downloading)${name}..."
+!endif
 	${If} ${IsVerbose}
+		${DetailPrint} "$(Downloading)${name}..."
 		${VerbosePrint} "From: ${url}"
 		${VerbosePrint} "To: ${filename}"
 	${EndIf}
 	!insertmacro DownloadRequest "${url}" "${filename}" ""
-	${If} ${verbose} == 1
-	${OrIf} ${IsVerbose}
+!if ${verbose} == 1
+	Call DownloadWait
+!else
+	${If} ${IsVerbose}
 		Call DownloadWait
 	${Else}
 		Call DownloadWaitSilent
 	${EndIf}
+!endif
 	Pop $1
 	Pop $0
 	${If} $0 != "OK"
@@ -295,9 +299,9 @@ FunctionEnd
 !macroend
 
 !macro InhibitSleep state
-	${If} ${state} == 1
-		System::Call '${SetThreadExecutionState}(${ES_CONTINUOUS}|${ES_SYSTEM_REQUIRED})'
-	${Else}
-		System::Call '${SetThreadExecutionState}(${ES_CONTINUOUS})'
-	${EndIf}
+!if ${state} == 1
+	System::Call '${SetThreadExecutionState}(${ES_CONTINUOUS}|${ES_SYSTEM_REQUIRED})'
+!else
+	System::Call '${SetThreadExecutionState}(${ES_CONTINUOUS})'
+!endif
 !macroend
