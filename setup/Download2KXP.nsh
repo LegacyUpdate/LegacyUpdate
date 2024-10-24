@@ -103,10 +103,10 @@ Function DownloadIE6
 		Call -PatchHandler
 
 		${IfNot} ${FileExists} "$PLUGINSDIR\W2KIE6\ie6setup.exe"
-			!insertmacro DetailPrint "$(Extracting)$(IE) 6 $(SP) 1 $(Setup)..."
+			${DetailPrint} "$(Extracting)$(IE) 6 $(SP) 1 $(Setup)..."
 			CreateDirectory "$PLUGINSDIR\W2KIE6"
 			!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$WINDIR\system32\expand.exe" -F:* ie6sp1.cab "$PLUGINSDIR\W2KIE6"'
-			!insertmacro DetailPrint "$(Downloading)$(IE) 6 $(SP) 1..."
+			${DetailPrint} "$(Downloading)$(IE) 6 $(SP) 1..."
 			!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\W2KIE6\ie6setup.exe" /c:"ie6wzd.exe /q /d /s:""#e"""'
 		${EndIf}
 	${EndIf}
@@ -115,7 +115,7 @@ FunctionEnd
 Function InstallIE6
 	${If} ${NeedsPatch} IE6
 		Call DownloadIE6
-		!insertmacro DetailPrint "$(Installing)$(IE) 6 $(SP) 1..."
+		${DetailPrint} "$(Installing)$(IE) 6 $(SP) 1..."
 		!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\W2KIE6\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
 		RMDir /r /REBOOTOK "$WINDIR\Windows Update Setup Files"
 	${EndIf}

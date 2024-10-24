@@ -1,5 +1,7 @@
 !macro -SetSecureProtocolsBitmask root path key
 	ReadRegDword $0 ${root} "${path}" "${key}"
+	${VerbosePrint} "${root}\${path}"
+	${VerbosePrint} "Before: $0"
 
 	; If the value isn't yet set, ReadRegDword will return 0. This means TLSv1.1 and v1.2 will be the
 	; only enabled protocols. This is intentional behavior, because SSLv2 and SSLv3 are not secure,
@@ -13,6 +15,7 @@
 	IntOp $0 $0 | ${WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_1}
 	IntOp $0 $0 | ${WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2}
 
+	${VerbosePrint} "After: $0"
 	WriteRegDword ${root} "${path}" "${key}" $0
 !macroend
 
@@ -42,10 +45,12 @@ Function _ConfigureCrypto
 FunctionEnd
 
 Function ConfigureCrypto
+	${VerbosePrint} "Configuring crypto (native)"
 	Call _ConfigureCrypto
 
 	; Repeat in the WOW64 registry if needed
 	${If} ${RunningX64}
+		${VerbosePrint} "Configuring crypto (WOW64)"
 		SetRegView 32
 		Call _ConfigureCrypto
 		SetRegView 64
@@ -57,7 +62,7 @@ FunctionEnd
 !macroend
 
 Function DownloadRoots
-	!insertmacro DetailPrint "$(Downloading)$(CTL)..."
+	${DetailPrint} "$(Downloading)$(CTL)..."
 	!insertmacro _DownloadSST authroots
 	!insertmacro _DownloadSST delroots
 	!insertmacro _DownloadSST roots
@@ -79,7 +84,7 @@ FunctionEnd
 !macroend
 
 Function UpdateRoots
-	!insertmacro DetailPrint "$(Installing)$(CTL)..."
+	${DetailPrint} "$(Installing)$(CTL)..."
 	!insertmacro _InstallRoots /update AuthRoot authroots.sst
 	!insertmacro _InstallRoots /update AuthRoot updroots.sst
 	!insertmacro _InstallRoots /update Root roots.sst

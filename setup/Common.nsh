@@ -53,6 +53,7 @@ FunctionEnd
 !define IsPassive `"" HasFlag "/passive"`
 !define IsActiveX `"" HasFlag "/activex"`
 !define IsHelp    `"" HasFlag "/?"`
+!define IsVerbose `"" HasFlag "/v"`
 
 !macro _NeedsPatch _a _b _t _f
 	!insertmacro _LOGICLIB_TEMP
@@ -63,11 +64,19 @@ FunctionEnd
 
 !define NeedsPatch `"" NeedsPatch`
 
-!macro DetailPrint text
-	SetDetailsPrint both
-	DetailPrint "${text}"
-	SetDetailsPrint listonly
+!macro -DetailPrint level text
+	${If} ${level} == 0
+	${AndIf} ${IsVerbose}
+		DetailPrint "${text}"
+	${Else}
+		SetDetailsPrint both
+		DetailPrint "${text}"
+		SetDetailsPrint listonly
+	${EndIf}
 !macroend
+
+!define VerbosePrint `!insertmacro -DetailPrint 0`
+!define DetailPrint  `!insertmacro -DetailPrint 1`
 
 Var /GLOBAL Download.ID
 
@@ -75,9 +84,9 @@ Function DownloadRequest
 	; TODO: This is broken on XP for some reason
 	; Var /GLOBAL Download.UserAgent
 	; ${If} $Download.UserAgent == ""
-	; 	GetWinVer $8 Major
-	; 	GetWinVer $9 Minor
-	; 	StrCpy $Download.UserAgent "Mozilla/4.0 (${NAME} ${VERSION}; Windows NT $8.$9)"
+	; 	GetWinVer $R8 Major
+	; 	GetWinVer $R9 Minor
+	; 	StrCpy $Download.UserAgent "Mozilla/4.0 (${NAME} ${VERSION}; Windows NT $R8.$R9)"
 	; ${EndIf}
 	; /HEADER "User-Agent: $Download.UserAgent"
 
@@ -87,26 +96,20 @@ Function DownloadRequest
 		/OPTCONNECTTIMEOUT 60000 \
 		/OPTRECEIVETIMEOUT 60000 \
 		/OPTSENDTIMEOUT 60000 \
-		/URL "$0" \
-		/LOCAL "$1" \
+		/URL "$R0" \
+		/LOCAL "$R1" \
 		/INTERNETFLAGS ${INTERNET_FLAG_RELOAD}|${INTERNET_FLAG_NO_CACHE_WRITE}|${INTERNET_FLAG_KEEP_CONNECTION}|${INTERNET_FLAG_NO_COOKIES}|${INTERNET_FLAG_NO_UI} \
 		/SECURITYFLAGS ${SECURITY_FLAG_STRENGTH_STRONG} \
-		$2 \
+		$R2 \
 		/END
 	Pop $Download.ID
 FunctionEnd
 
 !macro DownloadRequest url local extra
-	Push $0
-	Push $1
-	Push $2
-	StrCpy $0 "${url}"
-	StrCpy $1 "${local}"
-	StrCpy $2 "${extra}"
+	StrCpy $R0 "${url}"
+	StrCpy $R1 "${local}"
+	StrCpy $R2 "${extra}"
 	Call DownloadRequest
-	Pop $2
-	Pop $1
-	Pop $0
 !macroend
 
 Function DownloadWaitSilent
@@ -124,10 +127,16 @@ FunctionEnd
 
 !macro -Download name url filename verbose
 	${If} ${verbose} == 1
-		!insertmacro DetailPrint "$(Downloading)${name}..."
+	${OrIf} ${IsVerbose}
+		${DetailPrint} "$(Downloading)${name}..."
+	${EndIf}
+	${If} ${IsVerbose}
+		${VerbosePrint} "From: ${url}"
+		${VerbosePrint} "To: ${filename}"
 	${EndIf}
 	!insertmacro DownloadRequest "${url}" "${filename}" ""
 	${If} ${verbose} == 1
+	${OrIf} ${IsVerbose}
 		Call DownloadWait
 	${Else}
 		Call DownloadWaitSilent
@@ -146,40 +155,46 @@ FunctionEnd
 !macroend
 
 !macro Download name url filename verbose
-	${If} ${FileExists} "$EXEDIR\${filename}"
-		CopyFiles /SILENT "$EXEDIR\${filename}" "${RUNONCEDIR}\${filename}"
-	${ElseIfNot} ${FileExists} "${RUNONCEDIR}\${filename}"
-		!insertmacro -Download '${name}' '${url}' '${RUNONCEDIR}\${filename}' ${verbose}
+	${IfNot} ${FileExists} "${RUNONCEDIR}\${filename}"
+		${If} ${FileExists} "$EXEDIR\${filename}"
+			CopyFiles /SILENT "$EXEDIR\${filename}" "${RUNONCEDIR}\${filename}"
+		${Else}
+			!insertmacro -Download '${name}' '${url}' '${RUNONCEDIR}\${filename}' ${verbose}
+		${EndIf}
 	${EndIf}
 	StrCpy $0 "${RUNONCEDIR}\${filename}"
 !macroend
 
 Var /GLOBAL Exec.Command
+Var /GLOBAL Exec.Patch
 Var /GLOBAL Exec.Name
 
 Function ExecWithErrorHandling
-	Push $0
+	${VerbosePrint} "$(^Exec)$Exec.Command"
 	LegacyUpdateNSIS::ExecToLog `$Exec.Command`
-	Pop $0
+	Pop $R0
+	${VerbosePrint} "$(ExitCode)$R0"
 
-	${If} $0 == ${ERROR_SUCCESS_REBOOT_REQUIRED}
+	${If} $R0 == ${ERROR_SUCCESS_REBOOT_REQUIRED}
+		${VerbosePrint} "$(RestartRequired)"
 		SetRebootFlag true
-	${ElseIf} $0 == ${ERROR_INSTALL_USEREXIT}
+	${ElseIf} $R0 == ${ERROR_INSTALL_USEREXIT}
 		SetErrorLevel ${ERROR_INSTALL_USEREXIT}
 		Abort
-	${ElseIf} $0 == ${WU_S_ALREADY_INSTALLED}
-		!insertmacro DetailPrint "$(AlreadyInstalled)"
-	${ElseIf} $0 == ${WU_E_NOT_APPLICABLE}
-		!insertmacro DetailPrint "$(NotApplicable)"
-	${ElseIf} $0 != 0
-		LegacyUpdateNSIS::MessageForHresult $0
+	${ElseIf} $R0 == ${WU_S_ALREADY_INSTALLED}
+		${DetailPrint} "$(AlreadyInstalled)"
+	${ElseIf} $R0 == ${WU_E_NOT_APPLICABLE}
+		${DetailPrint} "$(NotApplicable)"
+	${ElseIf} $R0 != 0
+		StrCpy $0 $R0
+		LegacyUpdateNSIS::MessageForHresult $R0
 		Pop $1
+		${DetailPrint} "$1 ($0)"
 		StrCpy $2 "$Exec.Name"
 		MessageBox MB_USERICON "$(MsgBoxInstallFailed)" /SD IDOK
-		SetErrorLevel $0
+		SetErrorLevel $R0
 		Abort
 	${EndIf}
-	Pop $0
 FunctionEnd
 
 !macro ExecWithErrorHandling name command
@@ -189,15 +204,15 @@ FunctionEnd
 !macroend
 
 !macro Install name filename args
-	!insertmacro DetailPrint "$(Installing)${name}..."
+	${DetailPrint} "$(Installing)${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" ${args}'
 !macroend
 
 !macro InstallSP name filename
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
-	!insertmacro DetailPrint "$(Extracting)${name}..."
+	${DetailPrint} "$(Extracting)${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"'
-	!insertmacro DetailPrint "$(Installing)${name}..."
+	${DetailPrint} "$(Installing)${name}..."
 	!insertmacro ExecWithErrorHandling '${name}' '"$WINDIR\system32\cmd.exe" /c "$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600'
 
 	; If we successfully abort a shutdown, we'll get exit code 0, so we know a reboot is required.
@@ -212,41 +227,53 @@ FunctionEnd
 	!insertmacro Download '${name} (${kbid})' '${url}' '${kbid}.msu' 1
 !macroend
 
-!macro InstallMSU kbid name
-	!insertmacro DetailPrint "$(Extracting)${name} (${kbid})..."
-	SetDetailsPrint none
-	CreateDirectory "$PLUGINSDIR\${kbid}"
-	CreateDirectory "$PLUGINSDIR\${kbid}\Temp"
-	!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\expand.exe" -F:* "${kbid}.msu" "$PLUGINSDIR\${kbid}"'
-	SetDetailsPrint lastused
+Function InstallMSU
+	${DetailPrint} "$(Extracting)$Exec.Name..."
+	${IfNot} ${IsVerbose}
+		SetDetailsPrint none
+	${EndIf}
+	CreateDirectory "$PLUGINSDIR\$Exec.Patch"
+	CreateDirectory "$PLUGINSDIR\$Exec.Patch\Temp"
+	StrCpy $Exec.Command '"$WINDIR\system32\expand.exe" -F:* "$0" "$PLUGINSDIR\$Exec.Patch"'
+	Call ExecWithErrorHandling
+	${IfNot} ${IsVerbose}
+		SetDetailsPrint lastused
+	${EndIf}
 
-	!insertmacro DetailPrint "$(Installing)${name} (${kbid})..."
+	${DetailPrint} "$(Installing)$Exec.Name..."
 	${DisableX64FSRedirection}
-	FindFirst $0 $1 "$PLUGINSDIR\${kbid}\*.xml"
+	FindFirst $0 $1 "$PLUGINSDIR\$Exec.Patch\*.xml"
 	${Do}
 		${If} $1 == ""
-			FindClose $0
+			FindClose $R0
 			${Break}
 		${EndIf}
 
 		; We prefer Dism, but need to fall back to Pkgmgr for Vista.
 		${If} ${IsWinVista}
-			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\pkgmgr.exe" \
-				/n:"$PLUGINSDIR\${kbid}\$1" \
-				/s:"$PLUGINSDIR\${kbid}\Temp" \
+			StrCpy $Exec.Command '"$WINDIR\system32\pkgmgr.exe" \
+				/n:"$PLUGINSDIR\$Exec.Patch\$R1" \
+				/s:"$PLUGINSDIR\$Exec.Patch\Temp" \
 				/quiet /norestart'
 		${Else}
-			!insertmacro ExecWithErrorHandling '${name} (${kbid})' '"$WINDIR\system32\dism.exe" \
+			StrCpy $Exec.Command '"$WINDIR\system32\dism.exe" \
 				/Online \
-				/Apply-Unattend:"$PLUGINSDIR\${kbid}\$1" \
-				/ScratchDir:"$PLUGINSDIR\${kbid}\Temp" \
+				/Apply-Unattend:"$PLUGINSDIR\$Exec.Patch\$1" \
+				/ScratchDir:"$PLUGINSDIR\$Exec.Patch\Temp" \
 				/LogPath:"$TEMP\LegacyUpdate-Dism.log" \
 				/Quiet /NoRestart'
 		${EndIf}
+		Call ExecWithErrorHandling
 
 		FindNext $0 $1
 	${Loop}
 	${EnableX64FSRedirection}
+FunctionEnd
+
+!macro InstallMSU kbid name
+	StrCpy $Exec.Patch '${kbid}'
+	StrCpy $Exec.Name '${name} (${kbid})'
+	Call InstallMSU
 !macroend
 
 !macro EnsureAdminRights

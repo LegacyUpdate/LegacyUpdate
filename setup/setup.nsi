@@ -115,7 +115,7 @@ Var /GLOBAL UninstallInstalled
 !include Strings.nsh
 
 !macro RestartWUAUService
-	!insertmacro DetailPrint "$(StatusRestartingWUAU)"
+	${DetailPrint} "$(StatusRestartingWUAU)"
 	LegacyUpdateNSIS::Exec '"$WINDIR\system32\net.exe" stop wuauserv'
 !macroend
 
@@ -293,7 +293,8 @@ ${MementoSection} "$(SectionEnableMU)" WIN7MU
 	Pop $0
 	${If} $0 != 0
 		LegacyUpdateNSIS::MessageForHresult $0
-		Pop $0
+		Pop $1
+		${DetailPrint} "$1 ($0)"
 		MessageBox MB_USERICON "$(MsgBoxMUFailed)" /SD IDOK
 	${EndIf}
 	!insertmacro RestartWUAUService
@@ -314,13 +315,14 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	${If} ${AtMostWinVista}
 		; Check if Schannel is going to work with modern TLS
 		${If} ${AtLeastWinVista}
-			!insertmacro DetailPrint "$(StatusCheckingSSL)"
+			${DetailPrint} "$(StatusCheckingSSL)"
 			!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
 				`/TIMEOUTCONNECT 0 /TIMEOUTRECONNECT 0`
 			Pop $0
 			Call DownloadWaitSilent
 			Pop $0
 			Pop $0
+			${VerbosePrint} "Ping result: $0"
 		${Else}
 			StrCpy $0 ""
 		${EndIf}
@@ -363,6 +365,7 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 	; Install DLLs
+	${VerbosePrint} "Closing IE windows"
 	LegacyUpdateNSIS::CloseIEWindows
 
 	; NOTE: Here we specifically check for amd64, because the DLL is amd64.
@@ -435,24 +438,27 @@ Section "-un.Legacy Update Server" un.WUSERVER
 	; Clear WSUS server
 	${If} ${AtMostWinVista}
 		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUServer"
+		${VerbosePrint} "WUServer: $0"
 		${If} $0 == "${WSUS_SERVER}"
 		${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
 			DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUServer"
-			DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
+			DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"
 		${EndIf}
 
 		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
+		${VerbosePrint} "WUStatusServer: $0"
 		${If} $0 == "${WSUS_SERVER}"
 		${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
 			DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer"
-			DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUStatusServer"
+			DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"
 		${EndIf}
 
-		ReadRegDword $0 HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"
-
-		DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUServer"
-		DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer"
-		DeleteRegValue HKLM "${REGPATH_WU}"         "URL"
+		ReadRegStr $0 HKLM "${REGPATH_WU}" "URL"
+		${VerbosePrint} "URL: $0"
+		${If} $0 == "${UPDATE_URL}"
+		${OrIf} $0 == "${UPDATE_URL_HTTPS}"
+			DeleteRegValue HKLM "${REGPATH_WU}" "URL"
+		${EndIf}
 	${EndIf}
 SectionEnd
 
@@ -561,7 +567,11 @@ Function .onInit
 	${EndIf}
 
 	SetShellVarContext all
-	SetDetailsPrint listonly
+	${If} ${IsVerbose}
+		SetDetailsPrint both
+	${Else}
+		SetDetailsPrint listonly
+	${EndIf}
 	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"
 		SetRegView 64
 	${EndIf}
@@ -575,6 +585,7 @@ Function .onInit
 		ReadRegDword $1 HKLM "${REGPATH_CONTROL_WINDOWS}" "CSDVersion"
 		IntOp $1 $1 & 0xFF
 		${If} $1 != 0
+			${VerbosePrint} "Unexpected service pack: $1"
 			StrCpy $1 1
 		${EndIf}
 
@@ -589,7 +600,7 @@ Function .onInit
 		${AndIf} $0 != ${WINVER_BUILD_7_SP1}
 		${AndIf} $0 != ${WINVER_BUILD_8}
 		${AndIf} $0 != ${WINVER_BUILD_8.1}
-		${AndIf} $0 != ${WINVER_BUILD_10}
+			${VerbosePrint} "Unexpected build: $0"
 			StrCpy $1 1
 		${EndIf}
 
@@ -616,6 +627,7 @@ Function .onInit
 	; Windows 2000 lacks RtlGetNtVersionNumbers(), but there is no compatibility mode anyway.
 	${If} "$3.$4.$5" != "0.0.0"
 	${AndIf} "$0.$1.$2" != "$3.$4.$5"
+		${VerbosePrint} "Compatibility mode detected. Fake: $0.$1.$2, Actual: $3.$4.$5"
 		MessageBox MB_USERICON "$(MsgBoxCompatMode)" /SD IDOK
 		SetErrorLevel 1
 		Quit
@@ -985,7 +997,11 @@ FunctionEnd
 
 Function un.onInit
 	SetShellVarContext all
-	SetDetailsPrint listonly
+	${If} ${IsVerbose}
+		SetDetailsPrint both
+	${Else}
+		SetDetailsPrint listonly
+	${EndIf}
 
 	; Hack to avoid bundling System.dll in uninstaller
 	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"

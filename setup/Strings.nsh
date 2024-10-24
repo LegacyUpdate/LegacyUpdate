@@ -9,7 +9,9 @@ LangString ^Completed  ${LANG_ENGLISH} "Done"
 LangString Downloading ${LANG_ENGLISH} "Downloading "
 LangString Extracting  ${LANG_ENGLISH} "Extracting "
 LangString Installing  ${LANG_ENGLISH} "Installing "
+LangString ExitCode    ${LANG_ENGLISH} "Exit code: "
 
+LangString RestartRequired  ${LANG_ENGLISH} "Success - restart required"
 LangString AlreadyInstalled ${LANG_ENGLISH} "Installation skipped - already installed"
 LangString NotApplicable    ${LANG_ENGLISH} "Installation skipped - not applicable"
 
@@ -22,6 +24,7 @@ LangString MsgBoxUsage ${LANG_ENGLISH} \
 	"Usage: setup.exe [/S] [/passive] [/norestart]$\r$\n\
 	$\r$\n\
 	/S$\tExecute Legacy Update setup silently.$\r$\n\
+	/v$\tDisplay verbose details during installation.$\r$\n\
 	/passive$\tInstall without user interaction.$\r$\n\
 	/norestart$\tDisable automatic restart during installation.$\r$\n\
 	$\r$\n\
@@ -77,7 +80,7 @@ LangString MsgBoxPatchNotFound ${LANG_ENGLISH} \
 LangString MsgBoxMUFailed ${LANG_ENGLISH} \
 	"Failed to enable Microsoft Update.$\r$\n\
 	$\r$\n\
-	$0"
+	$1 ($0)"
 
 ; Warnings
 LangString MsgBoxWES09NotSSE2 ${LANG_ENGLISH} \

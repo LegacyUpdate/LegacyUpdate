@@ -18,7 +18,7 @@
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
 		${If} ${IsRunOnce}
 		${AndIf} $0 == "SYSTEM"
-			; Running in setup mode. Quit with success, which will cause winlogon to reboot.
+			; Running in setup mode. Quit with success, which makes winlogon happy.
 			SetErrorLevel ${ERROR_SUCCESS}
 			Quit
 		${Else}
@@ -85,7 +85,7 @@ FunctionEnd
 Function RebootIfRequired
 	${MementoSectionSave}
 	${If} ${RebootFlag}
-		!insertmacro DetailPrint "Preparing to restart..."
+		${DetailPrint} "Preparing to restart..."
 
 		${IfNot} ${IsRunOnce}
 			; Copy to runonce path to ensure installer is accessible by the temp user
@@ -95,7 +95,7 @@ Function RebootIfRequired
 			Call CopyLauncher
 
 			; Remove mark of the web to prevent "Open File - Security Warning" dialog
-			System::Call '${DeleteFile}("${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier")'
+			Delete "${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier"
 		${EndIf}
 
 		; Somewhat documented in KB939857:
@@ -108,11 +108,13 @@ Function RebootIfRequired
 		; Temporarily disable Security Center first run if needed
 		${If} ${IsWinXP2002}
 		${AndIfNot} ${AtLeastServicePack} 2
+			${VerbosePrint} "Disabling Security Center first run"
 			!insertmacro RunOnceOverwriteDword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled" 1
 		${EndIf}
 
 		; Temporarily disable logon animation if needed
 		${If} ${AtLeastWin8}
+			${VerbosePrint} "Disabling first logon animation"
 			!insertmacro RunOnceOverwriteDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
 		${EndIf}
 
@@ -133,6 +135,7 @@ Function OnRunOnceLogon
 	ClearErrors
 	EnumRegKey $0 HKLM "${REGPATH_CBS_PKGSPENDING}" 0
 	${IfNot} ${Errors}
+		${VerbosePrint} "Packages still pending - deferring to next reboot"
 		SetRebootFlag true
 		Call RebootIfRequired
 	${EndIf}
@@ -142,6 +145,7 @@ Function OnRunOnceDone
 	${If} ${IsRunOnce}
 	${AndIfNot} ${Abort}
 		; Set up postinstall runonce
+		${VerbosePrint} "Preparing postinstall"
 		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"${RUNONCEDIR}\LegacyUpdateSetup.exe" /postinstall'
 
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
