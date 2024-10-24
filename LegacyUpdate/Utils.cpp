@@ -17,13 +17,30 @@ static CComVariant _productName;
 
 HRESULT GetOSProductName(LPVARIANT productName) {
 	if (!_loadedProductName) {
+		_loadedProductName = TRUE;
 		VariantInit(&_productName);
-		HRESULT hr = QueryWMIProperty(L"SELECT Caption FROM Win32_OperatingSystem", L"Caption", &_productName);
-		if (!SUCCEEDED(hr)) {
-			return hr;
+
+		if (IsWinXP2003()) {
+			// If this is Windows Storage Server 2003, load the brand string from wssbrand.dll
+			HMODULE wssbrand = LoadLibrary(L"wssbrand.dll");
+			if (wssbrand) {
+				WCHAR brand[256];
+				LoadString(wssbrand, 1102, brand, ARRAYSIZE(brand));
+				_productName.vt = VT_BSTR;
+				_productName.bstrVal = SysAllocString(brand);
+				FreeLibrary(wssbrand);
+			}
+		}
+
+		if (_productName.vt == VT_EMPTY) {
+			// Get from WMI
+			HRESULT hr = QueryWMIProperty(L"SELECT Caption FROM Win32_OperatingSystem", L"Caption", &_productName);
+			if (!SUCCEEDED(hr)) {
+				return hr;
+			}
 		}
 	}
-	
+
 	VariantCopy(productName, &_productName);
 	return S_OK;
 }
