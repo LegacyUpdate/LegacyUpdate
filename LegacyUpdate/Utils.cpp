@@ -3,6 +3,7 @@
 #include <atlstr.h>
 #include "HResult.h"
 #include "WMI.h"
+#include "VersionInfo.h"
 
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "advapi32.lib")
