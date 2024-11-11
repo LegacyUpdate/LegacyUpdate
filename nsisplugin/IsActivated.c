@@ -20,6 +20,13 @@ static BOOL g_isActivated = TRUE;
 PLUGIN_METHOD(IsActivated) {
 	PLUGIN_INIT();
 
+	// Get the Operating System Version information as well as the CPU architecture.
+	// We'll need this so that we activate the correct COM object on 64-bit versions
+	// of Windows XP and Windows Server 2003.
+	OSVERSIONINFOEX* versionInfo = GetVersionInfo();
+	SYSTEM_INFO systemInfo;
+	GetSystemInfo(&systemInfo);
+
 	// Activation is irrelevant prior to XP
 	if (g_loadedLicenseStatus || !AtLeastWinXP2002()) {
 		pushint(g_isActivated);
@@ -68,7 +75,15 @@ end_slc:
 	} else {
 		// XP: Use private API
 		ICOMLicenseAgent *agent;
-		HRESULT hr = CoCreateInstance(&CLSID_COMLicenseAgent, NULL, CLSCTX_INPROC_SERVER, &IID_ICOMLicenseAgent, (void **)&agent);
+		HRESULT hr;
+
+		// On XP and Server 2003 x64, we need to pass a different argument to CoCreateInstance.
+		if (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) {
+			hr = CoCreateInstance(&CLSID_COMLicenseAgent, NULL, CLSCTX_INPROC_SERVER | CLSCTX_ACTIVATE_64_BIT_SERVER, &IID_ICOMLicenseAgent, (void **)&agent);
+		} else {
+			hr = CoCreateInstance(&CLSID_COMLicenseAgent, NULL, CLSCTX_INPROC_SERVER, &IID_ICOMLicenseAgent, (void **)&agent);
+		}
+
 		if (!SUCCEEDED(hr)) {
 			TRACE(L"COMLicenseAgent load failed: %x", hr);
 			goto end_xp;
