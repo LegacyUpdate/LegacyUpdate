@@ -28,23 +28,27 @@ jobs:
     - name: Set up WSL
       run: |
         sudo apt-get update -q
-        sudo apt-get install -qy cabextract curl make mingw-w64-x86-64-dev nsis nsis-pluginapi p7zip-full upx-ucl unzip
+        sudo apt-get install -qy curl make mingw-w64-x86-64-dev nsis nsis-pluginapi p7zip-full upx-ucl unzip
         ./build/fix-nsis.sh
 
     - name: Set up Visual Studio
       run: |
         PATH='/mnt/c/Program Files (x86)/Microsoft Visual Studio/Installer':$PATH
         vs="$(vswhere.exe -latest -property installationPath | tr -d '\r')"
-        vs_installer.exe modify \
+        if ! vs_installer.exe modify \
           --quiet --norestart --noUpdateInstaller \
           --installPath "$vs" \
-          --config .vsconfig
-        cd /tmp
-        curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
-        chmod +x vscollect.exe
-        ./vscollect.exe
-        unzip vscollect.zip || true
-        cat *.log || true
+          --config .vsconfig; then
+          cd /tmp
+          curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
+          chmod +x vscollect.exe
+          ./vscollect.exe -zip:vslogs.zip
+          unzip -o vslogs.zip
+          for i in Temp/*.log; do
+            printf '\n==== %s ====\n' "$i"
+            cat "$i"
+          done
+        fi
 
     - name: Install MinGW toolchain
       run: |
@@ -53,12 +57,6 @@ jobs:
         sudo tar -xf /tmp/mingw32.tar.xz -C /opt
         sudo tar -xf /tmp/mingw64.tar.xz -C /opt
         rm /tmp/mingw{32,64}.tar.xz
-
-    - name: Extract updroots.exe
-      run: |
-        curl -fsSL http://download.windowsupdate.com/d/msdownload/update/software/secu/2015/03/rvkroots_3f2ce4676450c06f109b5b4e68bec252873ccc21.exe -o /tmp/rvkroots.exe
-        cabextract -d setup -F updroots.exe /tmp/rvkroots.exe
-        rm /tmp/rvkroots.exe
 
     - name: Build
       id: build
