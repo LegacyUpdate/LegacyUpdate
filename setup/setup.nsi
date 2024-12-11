@@ -412,6 +412,11 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	WriteRegDword HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
 	WriteRegDword HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
 
+	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
+	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
+	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
+	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
+
 	; Delete LegacyUpdate.dll in System32 from 1.0 installer
 	${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
 		Delete $WINDIR\System32\LegacyUpdate.dll
@@ -493,10 +498,10 @@ Section "-un.Legacy Update website" un.ACTIVEX
 	Delete "$OUTDIR\LegacyUpdate32.dll"
 
 	; Remove from trusted sites
-	DeleteRegKey HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
 	DeleteRegKey HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
-	DeleteRegKey HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
+	DeleteRegKey HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
 	DeleteRegKey HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
+	DeleteRegKey HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
 
 	; Restart service
 	!insertmacro RestartWUAUService
