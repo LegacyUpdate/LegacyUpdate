@@ -94,7 +94,7 @@ private:
 	IHTMLDocument2 *GetHTMLDocument();
 	HWND GetIEWindowHWND();
 	BOOL IsPermitted();
-	STDMETHODIMP GetElevatedHelper(IElevationHelper **retval);
+	STDMETHODIMP GetElevatedHelper(CComPtr<IElevationHelper> &retval);
 
 public:
 	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite);

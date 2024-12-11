@@ -113,7 +113,7 @@ end:
 	return FALSE;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(IElevationHelper **retval) {
+STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(CComPtr<IElevationHelper> &retval) {
 	CComPtr<IElevationHelper> elevatedHelper = m_elevatedHelper ? m_elevatedHelper : m_nonElevatedHelper;
 	if (elevatedHelper == NULL) {
 		// Use the helper directly, without elevation. It's the responsibility of the caller to ensure it
@@ -122,10 +122,11 @@ STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(IElevationHelper **retval) {
 		if (!SUCCEEDED(hr)) {
 			return hr;
 		}
+
 		elevatedHelper = m_nonElevatedHelper;
 	}
 
-	*retval = elevatedHelper;
+	retval = elevatedHelper;
 	return S_OK;
 }
 
@@ -305,7 +306,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 		goto end;
 	}
 
-	hr = GetElevatedHelper(&elevatedHelper);
+	hr = GetElevatedHelper(elevatedHelper);
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
@@ -419,7 +420,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 
 
 		CComPtr<IElevationHelper> elevatedHelper;
-		hr = GetElevatedHelper(&elevatedHelper);
+		hr = GetElevatedHelper(elevatedHelper);
 		if (!SUCCEEDED(hr)) {
 			return hr;
 		}
