@@ -40,17 +40,13 @@ static const LPWSTR GetUpdateSiteURL() {
 }
 
 void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
-	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+	HRESULT hr = S_OK;
 	IWebBrowser2 *browser;
 	VARIANT url;
 	VARIANT flags;
 	VARIANT nullVariant;
 	LPTSTR siteURL;
 	HMONITOR monitor;
-
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
 
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
 	if (!AtLeastWinVista() && !IsUserAdmin()) {
