@@ -454,9 +454,10 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	DoIsPermittedCheck();
 
-	hr = GetInstallPath(&path);
+	LPWSTR path;
+	HRESULT hr = GetInstallPath(&path);
 	if (!SUCCEEDED(hr)) {
-		goto end;
+		return hr;
 	}
 
 	PathAppend(path, L"LegacyUpdate.exe");
