@@ -21,6 +21,7 @@ BOOL ProgIDIsPermitted(PWSTR progID) {
 			return TRUE;
 		}
 	}
+
 	return FALSE;
 }
 

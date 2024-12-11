@@ -6,6 +6,7 @@
 #include "ElevationHelper.h"
 #include "Exec.h"
 #include "HResult.h"
+#include "LegacyUpdate.h"
 #include "Registry.h"
 #include "User.h"
 #include "Utils.h"
@@ -25,7 +26,6 @@ const BSTR permittedHosts[] = {
 	L"test.legacyupdate.net",
 	NULL
 };
-const int permittedHostsMax = 2;
 
 // CLegacyUpdateCtrl message handlers
 
@@ -100,7 +100,7 @@ BOOL CLegacyUpdateCtrl::IsPermitted(void) {
 		goto end;
 	}
 
-	for (int i = 0; i < permittedHostsMax; i++) {
+	for (int i = 0; permittedHosts[i] != NULL; i++) {
 		if (wcscmp(host, permittedHosts[i]) == 0) {
 			return TRUE;
 		}
