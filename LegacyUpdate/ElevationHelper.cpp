@@ -1,5 +1,6 @@
 // ElevationHelper.cpp : Implementation of CElevationHelper
 #include "stdafx.h"
+#include "Compat.h"
 #include "ElevationHelper.h"
 #include "HResult.h"
 #include "Utils.h"
@@ -9,14 +10,13 @@ const BSTR permittedProgIDs[] = {
 	L"Microsoft.Update.",
 	NULL
 };
-const int permittedProgIDsMax = 1;
 
 BOOL ProgIDIsPermitted(PWSTR progID) {
 	if (progID == NULL) {
 		return FALSE;
 	}
 
-	for (int i = 0; i < permittedProgIDsMax; i++) {
+	for (int i = 0; permittedProgIDs[i] != NULL; i++) {
 		if (wcsncmp(progID, permittedProgIDs[i], wcslen(permittedProgIDs[i])) == 0) {
 			return TRUE;
 		}
@@ -40,43 +40,6 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, __in REFCLSID rclsid, __in REFII
 	bindOpts.hwnd = hwnd;
 	bindOpts.dwClassContext = CLSCTX_LOCAL_SERVER;
 	return CoGetObject(monikerName, &bindOpts, riid, ppv);
-}
-
-#ifndef PROCESS_PER_MONITOR_DPI_AWARE
-typedef int PROCESS_DPI_AWARENESS;
-#define PROCESS_PER_MONITOR_DPI_AWARE 2
-#endif
-
-#ifndef DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
-typedef int DPI_AWARENESS_CONTEXT;
-#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((DPI_AWARENESS_CONTEXT)-4)
-#endif
-
-typedef BOOL (WINAPI *_SetProcessDpiAwarenessContext)(DPI_AWARENESS_CONTEXT value);
-typedef HRESULT (WINAPI *_SetProcessDpiAwareness)(PROCESS_DPI_AWARENESS);
-typedef void (WINAPI *_SetProcessDPIAware)();
-
-static void BecomeDPIAware() {
-	// Make the process DPI-aware... hopefully
-	// Windows 10 1703+ per-monitor v2
-	_SetProcessDpiAwarenessContext $SetProcessDpiAwarenessContext = (_SetProcessDpiAwarenessContext)GetProcAddress(LoadLibrary(L"user32.dll"), "SetProcessDpiAwarenessContext");
-	if ($SetProcessDpiAwarenessContext) {
-		$SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-		return;
-	}
-
-	// Windows 8.1 - 10 1607 per-monitor v1
-	_SetProcessDpiAwareness $SetProcessDpiAwareness = (_SetProcessDpiAwareness)GetProcAddress(LoadLibrary(L"shcore.dll"), "SetProcessDpiAwareness");
-	if ($SetProcessDpiAwareness) {
-		$SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-		return;
-	}
-
-	// Windows Vista - 8
-	_SetProcessDPIAware $SetProcessDPIAware = (_SetProcessDPIAware)GetProcAddress(LoadLibrary(L"user32.dll"), "SetProcessDPIAware");
-	if ($SetProcessDPIAware) {
-		$SetProcessDPIAware();
-	}
 }
 
 CElevationHelper::CElevationHelper() {
