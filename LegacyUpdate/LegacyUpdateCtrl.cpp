@@ -113,6 +113,22 @@ end:
 	return FALSE;
 }
 
+STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(IElevationHelper **retval) {
+	CComPtr<IElevationHelper> elevatedHelper = m_elevatedHelper ? m_elevatedHelper : m_nonElevatedHelper;
+	if (elevatedHelper == NULL) {
+		// Use the helper directly, without elevation. It's the responsibility of the caller to ensure it
+		// is already running as admin on 2k/XP, or that it has requested elevation on Vista+.
+		HRESULT hr = m_nonElevatedHelper.CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER);
+		if (!SUCCEEDED(hr)) {
+			return hr;
+		}
+		elevatedHelper = m_nonElevatedHelper;
+	}
+
+	*retval = elevatedHelper;
+	return S_OK;
+}
+
 #define DoIsPermittedCheck() \
 	if (!IsPermitted()) { \
 		return E_ACCESSDENIED; \
@@ -289,15 +305,9 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 		goto end;
 	}
 
-	elevatedHelper = m_elevatedHelper ? m_elevatedHelper : m_nonElevatedHelper;
-	if (elevatedHelper == NULL) {
-		// Use the helper directly, without elevation. It's the responsibility of the caller to ensure it
-		// is already running as admin on 2k/XP, or that it has requested elevation on Vista+.
-		m_nonElevatedHelper.CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER);
-		if (!SUCCEEDED(hr)) {
-			goto end;
-		}
-		elevatedHelper = m_nonElevatedHelper;
+	hr = GetElevatedHelper(&elevatedHelper);
+	if (!SUCCEEDED(hr)) {
+		goto end;
 	}
 
 	return elevatedHelper->CreateObject(progID, retval);
@@ -407,7 +417,14 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 			}
 		}
 
-		hr = Reboot();
+
+		CComPtr<IElevationHelper> elevatedHelper;
+		hr = GetElevatedHelper(&elevatedHelper);
+		if (!SUCCEEDED(hr)) {
+			return hr;
+		}
+
+		hr = elevatedHelper->Reboot();
 	}
 
 	return hr;

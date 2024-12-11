@@ -56,7 +56,7 @@ HRESULT Reboot() {
 	}
 
 	LUID shutdownLuid;
-	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &shutdownLuid) != 0) {
+	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &shutdownLuid)) {
 		hr = AtlHresultFromLastError();
 		TRACE("LookupPrivilegeValue() failed: %ls\n", GetMessageForHresult(hr));
 		goto end;

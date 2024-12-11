@@ -47,7 +47,7 @@ CElevationHelper::CElevationHelper() {
 	BecomeDPIAware();
 }
 
-HRESULT CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
+STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
 	if (progID == NULL) {
 		return E_INVALIDARG;
 	}
@@ -77,4 +77,8 @@ end:
 		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(hr));
 	}
 	return hr;
+}
+
+STDMETHODIMP CElevationHelper::Reboot(void) {
+	return ::Reboot();
 }

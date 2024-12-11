@@ -39,6 +39,7 @@ public:
 	void FinalRelease() {}
 
 	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
+	STDMETHODIMP Reboot(void);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(ElevationHelper), CElevationHelper)

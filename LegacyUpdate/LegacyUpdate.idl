@@ -85,6 +85,7 @@ interface IProgressBarControl : IDispatch
 interface IElevationHelper : IDispatch
 {
 	[id(1)] HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
+	[id(2)] HRESULT Reboot(void);
 };
 
 [
