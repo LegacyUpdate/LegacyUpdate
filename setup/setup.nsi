@@ -417,6 +417,15 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
 	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
 
+	; Add low rights elevation policy
+	WriteRegDword HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "Policy"  3
+	WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppPath" "$OUTDIR"
+	WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppName" "LegacyUpdate.exe"
+
+	WriteRegDword HKCU "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "Policy"  3
+	WriteRegStr   HKCU "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppPath" "$OUTDIR"
+	WriteRegStr   HKCU "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppName" "LegacyUpdate.exe"
+
 	; Delete LegacyUpdate.dll in System32 from 1.0 installer
 	${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
 		Delete $WINDIR\System32\LegacyUpdate.dll
@@ -502,6 +511,10 @@ Section "-un.Legacy Update website" un.ACTIVEX
 	DeleteRegKey HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
 	DeleteRegKey HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
 	DeleteRegKey HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}"
+
+	; Remove IE elevation policy
+	DeleteRegKey HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}"
+	DeleteRegKey HKCU "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}"
 
 	; Restart service
 	!insertmacro RestartWUAUService

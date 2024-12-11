@@ -78,11 +78,6 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 		goto end;
 	}
 
-#if _WIN64
-	PVOID oldValue;
-	DisableWow64FsRedirection(&oldValue);
-#endif
-
 	hr = GetInstallPath(&installPath);
 	if (!SUCCEEDED(hr)) {
 		goto end;
@@ -132,8 +127,6 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 #endif
 
 	hr = RegisterDllExternal(dllPath, state);
-
-	RevertWow64FsRedirection(oldValue);
 #endif
 
 end:

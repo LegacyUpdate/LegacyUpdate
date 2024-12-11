@@ -8,6 +8,11 @@ static BOOL _loadedWow64;
 static _Wow64DisableWow64FsRedirection $Wow64DisableWow64FsRedirection;
 static _Wow64RevertWow64FsRedirection $Wow64RevertWow64FsRedirection;
 
+#if _WIN64
+// Not needed
+#define DisableWow64FsRedirection(OldValue) TRUE
+#define RevertWow64FsRedirection(OldValue)  TRUE
+#else
 static void LoadWow64Symbols() {
 	if (!_loadedWow64) {
 		_loadedWow64 = TRUE;
@@ -37,3 +42,4 @@ BOOL RevertWow64FsRedirection(PVOID OldValue) {
 		return TRUE;
 	}
 }
+#endif

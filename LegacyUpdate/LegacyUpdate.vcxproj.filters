@@ -81,9 +81,6 @@
     <ClCompile Include="..\shared\HResult.c">
       <Filter>Shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\Wow64.c">
-      <Filter>Shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\shared\Exec.c">
       <Filter>Shared</Filter>
     </ClCompile>
@@ -144,9 +141,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\Exec.h">
-      <Filter>Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shared\Wow64.h">
       <Filter>Shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\LegacyUpdate.h">

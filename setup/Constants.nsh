@@ -45,6 +45,9 @@
 !define CPL_GUID           "{FFBE8D44-E9CF-4DD8-9FD6-976802C94D9C}"
 !define CPL_APPNAME        "LegacyUpdate"
 
+; IE elevation policy
+!define ELEVATIONPOLICY_GUID "{3D800943-0434-49F2-89A1-472A259AD982}"
+
 ; Legacy Update keys
 !define REGPATH_LEGACYUPDATE_SETUP "Software\Hashbang Productions\Legacy Update\Setup"
 !define REGPATH_UNINSTSUBKEY       "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
@@ -84,6 +87,9 @@
 !define REGPATH_INETSETTINGS       "Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 !define REGPATH_ZONEDOMAINS        "${REGPATH_INETSETTINGS}\ZoneMap\Domains"
 !define REGPATH_ZONEESCDOMAINS     "${REGPATH_INETSETTINGS}\ZoneMap\EscDomains"
+
+; IE elevation policy keys
+!define REGPATH_ELEVATIONPOLICY    "Software\Microsoft\Internet Explorer\Low Rights\ElevationPolicy"
 
 ; SChannel protocol keys
 !define REGPATH_SCHANNEL_PROTOCOLS "System\CurrentControlSet\Control\SecurityProviders\SChannel\Protocols"

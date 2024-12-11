@@ -10,7 +10,6 @@
 #include "User.h"
 #include "Utils.h"
 #include "VersionInfo.h"
-#include "Wow64.h"
 #include <atlbase.h>
 #include <ShellAPI.h>
 #include <ShlObj.h>
@@ -340,6 +339,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 		// The control has no admin rights (although it may not have requested them yet).
 		*retval = e_nonAdmin;
 	}
+
 	return S_OK;
 }
 
@@ -454,32 +454,37 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	DoIsPermittedCheck();
 
-	// Some issues arise from the working directory being SysWOW64 rather than System32. Notably,
-	// Windows Vista - 8.1 don't have wuauclt.exe in SysWOW64. Disable WOW64 redirection temporarily
-	// to work around this.
-	PVOID oldValue;
-	BOOL isRedirected = DisableWow64FsRedirection(&oldValue);
-
-	if (AtLeastWin10()) {
-		// Windows 10+: Open Settings app
-		Exec(NULL, L"ms-settings:windowsupdate-options", NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
-	} else if (AtLeastWinVista()) {
-		// Windows Vista, 7, 8: Open Windows Update control panel
-		WCHAR wuauclt[MAX_PATH];
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\wuauclt.exe", wuauclt, ARRAYSIZE(wuauclt));
-		Exec(NULL, wuauclt, L"/ShowOptions", NULL, SW_SHOWDEFAULT, FALSE, NULL);
-	} else {
-		// Windows 2000, XP: Open Automatic Updates control panel
-		WCHAR wuaucpl[MAX_PATH];
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\wuaucpl.cpl", wuaucpl, ARRAYSIZE(wuaucpl));
-		Exec(NULL, wuaucpl, NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
+	hr = GetInstallPath(&path);
+	if (!SUCCEEDED(hr)) {
+		goto end;
 	}
 
-	// Revert WOW64 redirection if we changed it.
-	if (isRedirected) {
-		RevertWow64FsRedirection(oldValue);
+	PathAppend(path, L"LegacyUpdate.exe");
+
+	DWORD code;
+	hr = Exec(L"open", path, L"/options", NULL, SW_SHOW, TRUE, &code);
+	if (SUCCEEDED(hr)) {
+		hr = HRESULT_FROM_WIN32(code);
 	}
-	return S_OK;
+
+	if (!SUCCEEDED(hr)) {
+		TRACE(L"OpenWindowsUpdateSettings() failed: %ls\n", GetMessageForHresult(hr));
+
+		// Might happen if the site isn't trusted, and the user rejected the IE medium integrity prompt.
+		// Use the basic Automatic Updates dialog directly from COM.
+		CComPtr<IAutomaticUpdates> automaticUpdates;
+		hr = automaticUpdates.CoCreateInstance(CLSID_AutomaticUpdates, NULL, CLSCTX_INPROC_SERVER);
+
+		if (SUCCEEDED(hr)) {
+			hr = automaticUpdates->ShowSettingsDialog();
+		}
+
+		if (!SUCCEEDED(hr)) {
+			TRACE(L"OpenWindowsUpdateSettings() failed: %ls\n", GetMessageForHresult(hr));
+		}
+	}
+
+	return hr;
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {

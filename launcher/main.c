@@ -10,7 +10,25 @@
 HINSTANCE g_hInstance;
 
 extern void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow);
+extern void LaunchOptions(int nCmdShow);
 extern void RunOnce();
+
+typedef enum Action {
+	ActionLaunch,
+	ActionOptions,
+	ActionRunOnce,
+	ActionRegServer,
+	ActionUnregServer
+} Action;
+
+static const LPWSTR actions[] = {
+	L"/launch",
+	L"/options",
+	L"/runonce",
+	L"/regserver",
+	L"/unregserver",
+	NULL
+};
 
 EXTERN_C __declspec(dllexport)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
@@ -20,9 +38,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	int argc;
 	LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
-	LPWSTR action = L"/launch";
+	LPWSTR actionFlag = L"/launch";
 	if (argc > 1) {
-		action = argv[1];
+		actionFlag = argv[1];
 	}
 
 	// All remaining args past the action
@@ -33,20 +51,45 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		flagsCount = argc - 2;
 	}
 
-	if (wcscmp(action, L"/launch") == 0) {
+	Action action = -1;
+
+	for (int i = 0; actions[i] != NULL; i++) {
+		if (wcscmp(actionFlag, actions[i]) == 0) {
+			action = i;
+			break;
+		}
+	}
+
+	switch (action) {
+	case ActionLaunch:
 		LaunchUpdateSite(flagsCount, flags, nCmdShow);
-	} else if (wcscmp(action, L"/runonce") == 0) {
+		break;
+
+	case ActionOptions:
+		LaunchOptions(nCmdShow);
+		break;
+
+	case ActionRunOnce:
 		RunOnce();
-	} else if (wcscmp(action, L"/regserver") == 0 || wcscmp(action, L"/unregserver") == 0) {
-		BOOL state = wcscmp(action, L"/regserver") == 0;
+		break;
+
+	case ActionRegServer:
+	case ActionUnregServer: {
+		BOOL state = action == ActionRegServer;
 		HWND hwnd = flagsCount > 0 ? (HWND)(intptr_t)wcstol(flags[0], NULL, 10) : 0;
 		RegisterServer(hwnd, state, FALSE);
-	} else {
+		break;
+	}
+
+	default: {
 		const LPWSTR usage = L""
 			L"LegacyUpdate.exe [/launch|/regserver|/unregserver]\n"
 			L"\n"
 			L"/launch\n"
 			L"    Launch Legacy Update website in Internet Explorer\n"
+			L"\n"
+			L"/options\n"
+			L"    Open the Windows Update Options control panel\n"
 			L"\n"
 			L"/regserver\n"
 			L"    Register ActiveX control\n"
@@ -57,6 +100,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 			L"If no parameters are provided, /launch is assumed.";
 		MsgBox(NULL, L"LegacyUpdate.exe usage", usage, MB_OK);
 		PostQuitMessage(1);
+		break;
+	}
 	}
 
 	MSG msg;
