@@ -35,6 +35,7 @@ Generated\ Files/
 *_p.c
 *_i.h
 *idl.h
+*.i
 *.ilk
 *.meta
 *.obj
