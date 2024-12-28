@@ -4,7 +4,6 @@
 HRESULT Exec(LPWSTR verb, LPWSTR file, LPWSTR params, LPWSTR workingDir, WORD show, BOOL wait, LPDWORD exitCode) {
 	SHELLEXECUTEINFO execInfo = {0};
 	execInfo.cbSize = sizeof(execInfo);
-	execInfo.fMask = wait ? SEE_MASK_NOCLOSEPROCESS : 0;
 	execInfo.lpVerb = verb;
 	execInfo.lpFile = file;
 	execInfo.lpParameters = params;
