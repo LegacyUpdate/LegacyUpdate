@@ -3,7 +3,7 @@
 #include "VersionInfo.h"
 #include <malloc.h>
 
-static inline REGSAM GetWow64Flag(REGSAM options) {
+static ALWAYS_INLINE REGSAM GetWow64Flag(REGSAM options) {
 #ifdef _WIN64
 	return options;
 #else

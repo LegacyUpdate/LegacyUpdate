@@ -1,6 +1,7 @@
 #pragma once
 
 #include <windows.h>
+#include "stdafx.h"
 
 // Windows 11 Copper (22H2). "WIN10" typo is from the original sdkddkvers.h
 #ifndef NTDDI_WIN10_CU
@@ -44,15 +45,15 @@ static inline OSVERSIONINFOEX *GetVersionInfo() {
 }
 
 #define _IS_OS_MACRO(name, ver) \
-	static inline BOOL IsWin ## name() { \
+	static ALWAYS_INLINE BOOL IsWin ## name() { \
 		GetVersionInfo(); \
 		return _winVer == ver; \
 	} \
-	static inline BOOL AtLeastWin ## name() { \
+	static ALWAYS_INLINE BOOL AtLeastWin ## name() { \
 		GetVersionInfo(); \
 		return _winVer >= ver; \
 	} \
-	static inline BOOL AtMostWin ## name() { \
+	static ALWAYS_INLINE BOOL AtMostWin ## name() { \
 		GetVersionInfo(); \
 		return _winVer <= ver; \
 	}
@@ -69,13 +70,13 @@ _IS_OS_MACRO(10,     0x0A00)
 #undef _IS_OS_MACRO
 
 #define _IS_BUILD_MACRO(ver) \
-	static inline BOOL IsWin ## ver() { \
+	static ALWAYS_INLINE BOOL IsWin ## ver() { \
 		return GetVersionInfo()->dwBuildNumber == BUILD_WIN ## ver; \
 	} \
-	static inline BOOL AtLeastWin ## ver() { \
+	static ALWAYS_INLINE BOOL AtLeastWin ## ver() { \
 		return GetVersionInfo()->dwBuildNumber >= BUILD_WIN ## ver; \
 	} \
-	static inline BOOL AtMostWin ## ver() { \
+	static ALWAYS_INLINE BOOL AtMostWin ## ver() { \
 		return GetVersionInfo()->dwBuildNumber <= BUILD_WIN ## ver; \
 	}
 
@@ -101,7 +102,7 @@ _IS_BUILD_MACRO(11_24H2)
 
 EXTERN_C HRESULT GetOwnVersion(LPWSTR *version);
 
-static inline void GetOwnFileName(LPWSTR *filename) {
+static ALWAYS_INLINE void GetOwnFileName(LPWSTR *filename) {
 	*filename = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
 	GetModuleFileName((HMODULE)&__ImageBase, *filename, MAX_PATH);
 }
