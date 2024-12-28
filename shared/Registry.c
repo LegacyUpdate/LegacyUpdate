@@ -23,37 +23,50 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSA
 		goto end;
 	}
 
-	if (data != NULL) {
+	if (data) {
 		DWORD length = 512 * sizeof(WCHAR);
 		LPWSTR buffer = (LPWSTR)LocalAlloc(LPTR, length);
+		if (!buffer) {
+			hr = E_OUTOFMEMORY;
+			goto end;
+		}
+
 		LSTATUS status;
 		do {
 			status = RegQueryValueEx(subkey, valueName, NULL, NULL, (BYTE *)buffer, &length);
 			if (status == ERROR_MORE_DATA) {
 				length += 256 * sizeof(WCHAR);
-				buffer = (LPWSTR)LocalReAlloc(buffer, length, LMEM_MOVEABLE);
+				LPWSTR newBuffer = (LPWSTR)LocalReAlloc(buffer, length, LMEM_MOVEABLE);
+				if (!newBuffer) {
+					LocalFree(buffer);
+					hr = E_OUTOFMEMORY;
+					goto end;
+				}
+
+				buffer = newBuffer;
 			} else if (status != ERROR_SUCCESS) {
 				hr = HRESULT_FROM_WIN32(status);
+				LocalFree(buffer);
 				goto end;
 			}
 		} while (status == ERROR_MORE_DATA);
 
 		*data = buffer;
 
-		if (size != NULL) {
+		if (size) {
 			*size = length / sizeof(WCHAR);
 		}
 	}
 
 end:
-	if (subkey != NULL) {
+	if (subkey) {
 		RegCloseKey(subkey);
 	}
 	if (!SUCCEEDED(hr)) {
-		if (data != NULL) {
+		if (data) {
 			*data = NULL;
 		}
-		if (size != NULL) {
+		if (size) {
 			*size = 0;
 		}
 	}
@@ -67,13 +80,13 @@ HRESULT GetRegistryDword(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSAM
 		goto end;
 	}
 
-	if (data != NULL) {
+	if (data) {
 		DWORD length = sizeof(DWORD);
 		hr = HRESULT_FROM_WIN32(RegQueryValueEx(subkey, valueName, NULL, NULL, (LPBYTE)data, &length));
 	}
 
 end:
-	if (subkey != NULL) {
+	if (subkey) {
 		RegCloseKey(subkey);
 	}
 	return hr;

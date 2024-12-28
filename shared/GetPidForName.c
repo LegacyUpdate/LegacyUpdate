@@ -19,7 +19,7 @@ DWORD GetPidForName(const LPTSTR process) {
 			WCHAR path[MAX_PATH];
 			if (GetModuleBaseName(handle, NULL, path, ARRAYSIZE(path))) {
 				LPWSTR basename = wcsrchr(path, L'\\');
-				if (basename != NULL) {
+				if (basename) {
 					basename += 1;
 					CharLowerBuffW(basename, (DWORD)wcslen(basename));
 					if (_wcsicmp(process, basename) == 0) {
