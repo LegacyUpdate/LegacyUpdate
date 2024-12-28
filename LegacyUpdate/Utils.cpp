@@ -19,8 +19,10 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 		VariantInit(&_productName);
 
 		if (IsWinXP2003()) {
-			// If this is Windows Storage Server 2003, load the brand string from wssbrand.dll. On this edition, the brand
-			// string from WMI remains "Microsoft Windows Server 2003".
+			// Special case for Windows Storage Server 2003: Load the brand string from wssbrand.dll. On this edition, the
+			// brand string from WMI remains "Microsoft Windows Server 2003".
+			// TODO: This actually unconditionally shows the WSS name on all Server 2003. How does the OS decide it's WSS?
+			// TODO: Add XP Media Center Edition, Tablet PC Edition, Compute Cluster 2003?
 			HMODULE wssbrand = LoadLibrary(L"wssbrand.dll");
 			if (wssbrand) {
 				WCHAR brand[256];
