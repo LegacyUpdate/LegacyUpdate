@@ -39,7 +39,7 @@ You will need to install:
     * C++ Windows XP Support for VS 2017 (v141) tools
     * C++ ATL for v141 build tools (x86 & x64)
     * C++/CLI support for v141 build tools (14.16)
-  * [Visual Studio 2008](https://my.visualstudio.com/Downloads?q=Visual%20Studio%20Express%202008%20with%20Service%20Pack%201&pgroup=) for compiling a build that works on XP RTM and 2000 SP4 - not required if you only want to build for XP SP2 and later
+  * [Visual Studio 2008 SP1](https://my.visualstudio.com/Downloads?q=Visual%20Studio%20Express%202008%20with%20Service%20Pack%201&pgroup=) for compiling a build that works on XP RTM and 2000 SP4 - not required if you only want to build for XP SP2 and later
     * You will also need [Visual Studio 2010](https://my.visualstudio.com/Downloads?q=Visual%20Studio%202010&pgroup=), which provides bridging from 2008’s VSBuild system to the modern MSBuild.
 * On Linux:
   * [MinGW-w64](https://www.mingw-w64.org/) for i686 and x86_64
@@ -55,6 +55,8 @@ sudo apt install make nsis upx-ucl mingw-w64-i686-dev mingw-w64-x86-64-dev
 If you use Debian/Ubuntu’s build of NSIS, please note that it is compiled for Pentium II and later, and will fail to launch on Pentium, AMD K6, and other CPUs lacking SSE instructions. If you want to support these CPUs, run `./build/fix-nsis.sh` to patch the NSIS exehead binaries with a build that supports these CPUs.
 
 When opening the solution for the first time in Visual Studio 2022, it will suggest to retarget it against the latest Windows SDK. Cancel this dialog.
+
+If you get “unexpected precompiled header error” when building, install [KB976656](https://content.legacyupdate.net/support.microsoft.com/kb/976656/VS90SP1-KB976656-x86.exe), or merge `build\fix-vc08-aslr.reg`, which disables ASLR for `cl.exe`.
 
 ### Testing
 
