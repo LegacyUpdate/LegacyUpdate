@@ -98,6 +98,9 @@ LangString MsgBoxActivateXP2003NotSP2 ${LANG_ENGLISH} \
 LangString MsgBoxVistaSPInstall ${LANG_ENGLISH} \
 	"Your computer will restart several times to install Windows Vista Service Pack 2. Your screen may appear blank for an extended period of time. Do not turn off your computer during this process."
 
+LangString MsgBoxWUA2000Datacenter ${LANG_ENGLISH} \
+	"Windows Update Agent is not supported on Windows 2000 Datacenter Server. The Legacy Update action will be disabled."
+
 ; Statuses
 LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update service..."
 LangString StatusCheckingSSL    ${LANG_ENGLISH} "Checking SSL connectivity..."

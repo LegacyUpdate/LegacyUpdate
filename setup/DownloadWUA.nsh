@@ -1,12 +1,18 @@
 Function DetermineWUAVersion
+	; WUA refuses to install on 2000 Datacenter Server. Maybe we can hack around this in future.
+	${If} ${IsWin2000}
+	${AndIf} ${IsDatacenter}
+		Return
+	${EndIf}
+
 	GetWinVer $1 Major
 	GetWinVer $2 Minor
 	GetWinVer $3 ServicePack
 	StrCpy $1 "$1.$2.$3"
 
-	; Hardcoded special case for XP Home/Embedded SP3, because the WUA 7.6.7600.256 setup SFX is
-	; seriously broken on it, potentially causing an unbootable Windows install due to it entering an
-	; infinite loop of creating folders in the root of C:.
+	; Hardcoded special case for XP Home/Embedded SP3, because the WUA 7.6.7600.256 setup SFX is seriously broken on it,
+	; potentially causing an unbootable Windows install due to it entering an infinite loop of creating folders in the
+	; root of C:.
 	${If} $1 == "5.1.3"
 		${If} ${IsHomeEdition}
 		${OrIf} ${IsEmbedded}

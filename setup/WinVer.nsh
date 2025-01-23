@@ -151,6 +151,7 @@
 
 !define IsHomeEdition      `"" _WinVer_TestSuite ${VER_SUITE_PERSONAL}`
 !define IsEmbedded         `"" _WinVer_TestSuite ${VER_SUITE_EMBEDDEDNT}`
+!define IsDatacenter       `"" _WinVer_TestSuite ${VER_SUITE_DATACENTER}`
 !define IsHomeServer       `"" _WinVer_TestSuite ${VER_SUITE_WH_SERVER}`
 
 !define IsSafeMode         `!= _WinVer_TestSystemMetric ${SM_CLEANBOOT}`

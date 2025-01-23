@@ -991,7 +991,7 @@ FunctionEnd
 
 Function .onSelChange
 	${If} ${SectionIsSelected} ${WES09}
-		; Check for SSE2.
+		; Check for SSE2
 		System::Call '${IsProcessorFeaturePresent}(${PF_XMMI64_INSTRUCTIONS_AVAILABLE}) .r0'
 		${If} $0 == 0
 			MessageBox MB_USERICON "$(MsgBoxWES09NotSSE2)" /SD IDOK
@@ -1009,6 +1009,13 @@ Function .onSelChange
 		${AndIfNot} ${SectionIsSelected} ${2003SP2}
 			MessageBox MB_USERICON "$(MsgBoxActivateXP2003NotSP2)" /SD IDOK
 			!insertmacro SelectSection ${2003SP2}
+		${EndIf}
+	${ElseIf} ${SectionIsSelected} ${LEGACYUPDATE}
+		; Handle 2000 Datacenter Server
+		${If} ${IsWin2000}
+		${AndIf} ${IsDatacenter}
+			MessageBox MB_USERICON "$(MsgBoxWUA2000Datacenter)" /SD IDOK
+			!insertmacro UnselectSection ${LEGACYUPDATE}
 		${EndIf}
 	${EndIf}
 FunctionEnd
