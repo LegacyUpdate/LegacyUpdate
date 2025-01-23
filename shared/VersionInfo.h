@@ -27,35 +27,44 @@
 #define BUILD_WIN11_23H2 22631
 #define BUILD_WIN11_24H2 26100
 
+// Undocumented IsOS() flags
+#define OS_STARTER        0x26 // Starter Edition
+#define OS_STORAGESERVER  0x28 // Windows Storage Server 2003
+#define OS_COMPUTECLUSTER 0x29 // Windows Compute Cluster 2003
+#define OS_SERVERR2       0x2a // Windows Server 2003 R2 (in combination with edition)
+#define OS_HOMESERVER     0x2b // Windows Home Server (2007)
+#define OS_WINFLP         0x2c // Windows Fundamentals for Legacy PCs
+#define OS_EMBSTD         0x2d // Windows Embedded Standard
+#define OS_EMBPOS         0x43 // Windows Embedded for Point of Service
+
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 static BOOL _loadedVersionInfo = FALSE;
 static OSVERSIONINFOEX _versionInfo;
-static DWORD _winVer;
 
-static inline OSVERSIONINFOEX *GetVersionInfo() {
+static OSVERSIONINFOEX *GetVersionInfo() {
 	if (!_loadedVersionInfo) {
 		_loadedVersionInfo = TRUE;
 		ZeroMemory(&_versionInfo, sizeof(OSVERSIONINFOEX));
 		_versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 		GetVersionEx((LPOSVERSIONINFO)&_versionInfo);
-		_winVer = (_versionInfo.dwMajorVersion << 8) | _versionInfo.dwMinorVersion;
 	}
 	return &_versionInfo;
 }
 
+static ALWAYS_INLINE WORD GetWinVer() {
+	return __builtin_bswap16(LOWORD(GetVersion()));
+}
+
 #define _IS_OS_MACRO(name, ver) \
 	static ALWAYS_INLINE BOOL IsWin ## name() { \
-		GetVersionInfo(); \
-		return _winVer == ver; \
+		return GetWinVer() == ver; \
 	} \
 	static ALWAYS_INLINE BOOL AtLeastWin ## name() { \
-		GetVersionInfo(); \
-		return _winVer >= ver; \
+		return GetWinVer() >= ver; \
 	} \
 	static ALWAYS_INLINE BOOL AtMostWin ## name() { \
-		GetVersionInfo(); \
-		return _winVer <= ver; \
+		return GetWinVer() <= ver; \
 	}
 
 _IS_OS_MACRO(NT4,    0x0400)

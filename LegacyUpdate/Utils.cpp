@@ -1,35 +1,89 @@
 #include "stdafx.h"
 #include <comdef.h>
 #include <atlstr.h>
+#include <shlwapi.h>
 #include "HResult.h"
 #include "WMI.h"
 #include "VersionInfo.h"
 
-#pragma comment(lib, "version.lib")
 #pragma comment(lib, "advapi32.lib")
+#pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "version.lib")
 
 typedef DWORD (WINAPI *_InitiateShutdownW)(LPWSTR lpMachineName, LPWSTR lpMessage, DWORD dwGracePeriod, DWORD dwShutdownFlags, DWORD dwReason);
 
 static BOOL _loadedProductName = FALSE;
 static CComVariant _productName;
 
+typedef struct {
+	DWORD version;
+	DWORD osFlag;
+	LPWSTR library;
+	UINT stringIDs[3];
+} WinNT5Variant;
+
+static const WinNT5Variant nt5Variants[] = {
+	// XP
+	{0x0501, OS_TABLETPC,       L"winbrand.dll", { 180, 2000}},
+	{0x0501, OS_MEDIACENTER,    L"winbrand.dll", { 180, 2001}},
+	{0x0501, OS_STARTER,        L"winbrand.dll", { 180, 2002}},
+	// {0x0501, OS_WEPOS,          L"winbrand.dll", { 180, 2003}},
+	{0x0501, OS_WINFLP,         L"winbrand.dll", { 180, 2004}},
+
+	// Server 2003
+	{0x0502, OS_APPLIANCE,      L"winbrand.dll", { 181, 2002}},
+	{0x0502, OS_STORAGESERVER,  L"wssbrand.dll", {1101, 1102}},
+	{0x0502, OS_COMPUTECLUSTER, L"hpcbrand.dll", {1101, 1102, 1103}},
+	{0x0502, OS_HOMESERVER,     L"whsbrand.dll", {1101, 1102}},
+};
+
 HRESULT GetOSProductName(LPVARIANT productName) {
 	if (!_loadedProductName) {
 		_loadedProductName = TRUE;
 		VariantInit(&_productName);
 
-		if (IsWinXP2003()) {
-			// Special case for Windows Storage Server 2003: Load the brand string from wssbrand.dll. On this edition, the
-			// brand string from WMI remains "Microsoft Windows Server 2003".
-			// TODO: This actually unconditionally shows the WSS name on all Server 2003. How does the OS decide it's WSS?
-			// TODO: Add XP Media Center Edition, Tablet PC Edition, Compute Cluster 2003?
-			HMODULE wssbrand = LoadLibrary(L"wssbrand.dll");
-			if (wssbrand) {
-				WCHAR brand[256];
-				LoadString(wssbrand, 1102, brand, ARRAYSIZE(brand));
-				_productName.vt = VT_BSTR;
-				_productName.bstrVal = SysAllocString(brand);
-				FreeLibrary(wssbrand);
+		// Handle the absolute disaster of Windows XP/Server 2003 edition branding
+		WORD winver = GetWinVer();
+		if (LOBYTE(winver) == 5) {
+			WinNT5Variant variant;
+			for (DWORD i = 0; i < ARRAYSIZE(nt5Variants); i++) {
+				if (winver == nt5Variants[i].version && IsOS(nt5Variants[i].osFlag)) {
+					variant = nt5Variants[i];
+					break;
+				}
+			}
+
+			if (variant.version) {
+				HMODULE brandDll = LoadLibraryEx(variant.library, NULL, LOAD_LIBRARY_AS_DATAFILE);
+				if (brandDll) {
+					WCHAR brandStr[1024];
+					DWORD j = 0;
+					while (variant.stringIDs[j] != 0) {
+						UINT id = variant.stringIDs[j];
+						WCHAR str[340];
+						if (id == 180 || id == 181) {
+							// Get "Microsoft Windows XP" or "Microsoft Windows Server 2003" string
+							HMODULE sysdm = LoadLibraryEx(L"sysdm.cpl", NULL, LOAD_LIBRARY_AS_DATAFILE);
+							if (sysdm) {
+								LoadString(sysdm, id, str, ARRAYSIZE(str));
+								FreeLibrary(sysdm);
+							}
+						} else {
+							LoadString(brandDll, id, str, ARRAYSIZE(str));
+						}
+
+						if (j > 0) {
+							wcscat(brandStr, L" ");
+						}
+
+						wcscat(brandStr, str);
+						j++;
+					}
+
+					_productName.vt = VT_BSTR;
+					_productName.bstrVal = SysAllocString(brandStr);
+					FreeLibrary(brandDll);
+				}
 			}
 		}
 
