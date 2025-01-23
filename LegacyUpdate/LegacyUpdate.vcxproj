@@ -52,12 +52,14 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
+    <XPDeprecationWarning>false</XPDeprecationWarning>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
+    <XPDeprecationWarning>false</XPDeprecationWarning>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -74,6 +76,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
+    <XPDeprecationWarning>false</XPDeprecationWarning>
     <UseOfAtl>Static</UseOfAtl>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
@@ -146,7 +149,7 @@
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>false</RegisterOutput>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -191,7 +194,7 @@
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>false</RegisterOutput>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -233,7 +236,7 @@
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>false</RegisterOutput>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -277,7 +280,7 @@
       <ModuleDefinitionFile>.\LegacyUpdate.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalOptions>/filealign:0x200 %(AdditionalOptions)</AdditionalOptions>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>false</RegisterOutput>
     </Link>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
