@@ -19,7 +19,7 @@ static inline void HardenDllSearchPaths() {
 	GetSystemDirectory(path, ARRAYSIZE(path));
 	SetEnvironmentVariable(L"PATH", path);
 
-	wcscat_s(path, ARRAYSIZE(path), L"\\kernel32.dll");
+	wcscat(path, L"\\kernel32.dll");
 	HMODULE kernel32 = GetModuleHandle(path);
 	if (!kernel32) {
 		return;
