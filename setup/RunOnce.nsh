@@ -52,8 +52,8 @@ Function CleanUpRunOnce
 	; Restore setup keys
 	; Be careful here. Doing this wrong can cause SYSTEM_LICENSE_VIOLATION bootloops!
 	WriteRegStr    HKLM "${REGPATH_SETUP}" "CmdLine" ""
-	WriteRegDword  HKLM "${REGPATH_SETUP}" "SetupType" 0
 	DeleteRegValue HKLM "${REGPATH_SETUP}" "SetupShutdownRequired"
+	!insertmacro RunOnceRestoreDword HKLM "${REGPATH_SETUP}" "SetupType"
 
 	${If} ${Abort}
 		Call CleanUpRunOnceFinal
@@ -102,8 +102,8 @@ Function RebootIfRequired
 		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
 		; See also Wine winternl.h
 		WriteRegStr   HKLM "${REGPATH_SETUP}" "CmdLine" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce'
-		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
+		!insertmacro RunOnceOverwriteDword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 
 		; Temporarily disable Security Center first run if needed
 		${If} ${IsWinXP2002}
