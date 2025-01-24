@@ -102,8 +102,10 @@ LangString MsgBoxWUA2000Datacenter ${LANG_ENGLISH} \
 	"Windows Update Agent is not supported on Windows 2000 Datacenter Server. The Legacy Update action will be disabled."
 
 ; Statuses
+LangString StatusRestarting     ${LANG_ENGLISH} "Restarting..."
 LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update service..."
 LangString StatusCheckingSSL    ${LANG_ENGLISH} "Checking SSL connectivity..."
+LangString StatusCbsInstalling  ${LANG_ENGLISH} "Waiting for updates to install..."
 
 ; Sections
 LangString Setup    ${LANG_ENGLISH} "Setup"

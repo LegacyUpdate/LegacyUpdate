@@ -152,6 +152,12 @@ Section -BeforeInstall
 	!insertmacro InhibitSleep 1
 SectionEnd
 
+Section -WaitForCbsInstall
+	${If} ${IsRunOnce}
+		Call PollCbsInstall
+	${EndIf}
+SectionEnd
+
 Section -PreDownload
 	${IfNot} ${IsRunOnce}
 	${AndIfNot} ${IsPostInstall}
@@ -531,10 +537,6 @@ Section -Uninstall
 	DeleteRegKey HKLM "${REGPATH_UNINSTSUBKEY}"
 SectionEnd
 
-!define DESCRIPTION_REBOOTS ""
-!define DESCRIPTION_SUPEULA ""
-!define DESCRIPTION_MSLT    ""
-
 !macro DESCRIPTION_STRING section
 	!insertmacro MUI_DESCRIPTION_TEXT ${${section}} "$(Section${section}Desc)"
 !macroend
@@ -863,11 +865,6 @@ Function PreDownload
 
 	; Vista
 	${If} ${IsWinVista}
-		${If} ${NeedsPatch} VistaSP2
-		${AndIfNot} ${IsPassive}
-			MessageBox MB_USERICON "$(MsgBoxVistaSPInstall)" /SD IDOK
-		${EndIf}
-
 		Call DownloadVistaSP1
 		Call DownloadVistaSP2
 		Call DownloadKB3205638

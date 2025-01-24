@@ -24,6 +24,9 @@
 ; user32
 !define EWX_REBOOT 0x02
 
+!define PBS_SMOOTH  0x02
+!define PBS_MARQUEE 0x08
+
 !define GetSystemMetrics         'user32::GetSystemMetrics(i) i'
 
 ; winhttp

@@ -256,7 +256,7 @@ Function InstallMSU
 		; We prefer Dism, but need to fall back to Pkgmgr for Vista.
 		${If} ${IsWinVista}
 			StrCpy $Exec.Command '"$WINDIR\system32\pkgmgr.exe" \
-				/n:"$PLUGINSDIR\$Exec.Patch\$R1" \
+				/n:"$PLUGINSDIR\$Exec.Patch\$1" \
 				/s:"$PLUGINSDIR\$Exec.Patch\Temp" \
 				/quiet /norestart'
 		${Else}

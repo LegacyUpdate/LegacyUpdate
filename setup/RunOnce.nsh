@@ -82,11 +82,8 @@ Function CopyLauncher
 	${EndIf}
 FunctionEnd
 
-Function RebootIfRequired
-	${MementoSectionSave}
+Function PrepareRunOnce
 	${If} ${RebootFlag}
-		${DetailPrint} "Preparing to restart..."
-
 		${IfNot} ${IsRunOnce}
 			; Copy to runonce path to ensure installer is accessible by the temp user
 			CreateDirectory "${RUNONCEDIR}"
@@ -117,8 +114,18 @@ Function RebootIfRequired
 			${VerbosePrint} "Disabling first logon animation"
 			!insertmacro RunOnceOverwriteDword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
 		${EndIf}
+	${EndIf}
+FunctionEnd
 
-		; Reboot now
+Function RebootIfRequired
+	${MementoSectionSave}
+	${If} ${RebootFlag}
+		; Give the user a moment to understand we're rebooting
+		${DetailPrint} "$(StatusRestarting)"
+		Sleep 2000
+
+		; Now reboot
+		Call PrepareRunOnce
 		!insertmacro PromptReboot
 	${Else}
 		; Restore setup keys
@@ -130,15 +137,68 @@ Function OnRunOnceLogon
 	; To be safe in case we crash, immediately restore setup keys. We'll set them again if needed.
 	Call CleanUpRunOnce
 
-	; If we're in the middle of installing a service pack, let it keep doing its thing. We'll register
-	; for setup again, and try again on next boot.
+	; If we're in the middle of installing a service pack, the system will reboot without notice. Be prepared for that
+	; to happen.
 	ClearErrors
-	EnumRegKey $0 HKLM "${REGPATH_CBS_PKGSPENDING}" 0
+	EnumRegKey $1 HKLM "${REGPATH_CBS_REBOOTINPROGRESS}" 0
 	${IfNot} ${Errors}
-		${VerbosePrint} "Packages still pending - deferring to next reboot"
-		SetRebootFlag true
-		Call RebootIfRequired
+		; System will reboot without notice. Be prepared for that to happen.
+		${VerbosePrint} "CBS reboot is pending"
+		Call PrepareRunOnce
 	${EndIf}
+FunctionEnd
+
+!macro SetMarquee state
+	Push $0
+	FindWindow $0 "#32770" "" $HWNDPARENT
+	FindWindow $0 "msctls_progress32" "" $0
+!if ${state} == 1
+	${NSD_RemoveExStyle} $0 ${PBS_SMOOTH}
+	${NSD_AddStyle} $0 ${PBS_MARQUEE}
+	SendMessage $0 ${PBM_SETMARQUEE} 1 100
+!else
+	${NSD_RemoveExStyle} $1 ${PBS_MARQUEE}
+	${NSD_AddStyle} $0 ${PBS_SMOOTH}
+!endif
+	Pop $0
+!macroend
+
+Function PollCbsInstall
+	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
+	${If} $0 <= 0
+	${OrIf} $0 == 0xffffffff
+		Return
+	${EndIf}
+
+	${VerbosePrint} "Packages are still installing [$0]"
+	${DetailPrint} "$(StatusCbsInstalling)"
+
+	; Set marquee progress bar
+	!insertmacro SetMarquee 1
+
+	; Are we in a RebootInProgress phase?
+	ClearErrors
+	EnumRegKey $1 HKLM "${REGPATH_CBS_REBOOTINPROGRESS}" 0
+	${IfNot} ${Errors}
+		; Spin forever. TrustedInstaller will reboot on its own.
+		${While} 1 == 1
+			Sleep 10000
+		${EndWhile}
+	${EndIf}
+
+	; Poll ExecuteState, waiting for TrustedInstaller to be done.
+	${While} 1 == 1
+		ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
+		${If} $0 <= 0
+		${OrIf} $0 == 0xffffffff
+			${Break}
+		${EndIf}
+
+		Sleep 1000
+	${EndWhile}
+
+	; Revert progress bar
+	!insertmacro SetMarquee 0
 FunctionEnd
 
 Function OnRunOnceDone
