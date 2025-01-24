@@ -47,13 +47,16 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 	}
 
 	TASKDIALOG_COMMON_BUTTON_FLAGS buttons;
+	DWORD flags = TDF_POSITION_RELATIVE_TO_WINDOW;
 
 	switch (type & 0x0000000F) {
 	case MB_OK:
 		buttons = TDCBF_OK_BUTTON;
+		flags |= TDF_ALLOW_DIALOG_CANCELLATION;
 		break;
 	case MB_OKCANCEL:
 		buttons = TDCBF_OK_BUTTON | TDCBF_CANCEL_BUTTON;
+		flags |= TDF_ALLOW_DIALOG_CANCELLATION;
 		break;
 	case MB_YESNO:
 		buttons = TDCBF_YES_BUTTON | TDCBF_NO_BUTTON;
@@ -66,7 +69,7 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 	config.cbSize = sizeof(TASKDIALOGCONFIG);
 	config.hwndParent = hwnd;
 	config.hInstance = GetModuleHandle(NULL);
-	config.dwFlags = TDF_POSITION_RELATIVE_TO_WINDOW;
+	config.dwFlags = flags;
 	config.dwCommonButtons = buttons;
 	config.pszWindowTitle = L"Legacy Update";
 	config.pszMainInstruction = instruction;
