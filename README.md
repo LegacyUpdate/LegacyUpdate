@@ -1,7 +1,7 @@
 # [<img src="https://legacyupdate.net/socialbanner.png" alt="Legacy Update">](http://legacyupdate.net/)
 
 [![wakatime](https://wakatime.com/badge/user/b9fcf8ba-3fce-41a4-a480-d3fe6074a1ad/project/c9516ff1-10b9-41da-82fb-b86b24b0acc8.svg)](https://wakatime.com/badge/user/b9fcf8ba-3fce-41a4-a480-d3fe6074a1ad/project/c9516ff1-10b9-41da-82fb-b86b24b0acc8)
-[![Build](https://github.com/kirb/LegacyUpdate/actions/workflows/build.yml/badge.svg)](https://github.com/kirb/LegacyUpdate/actions/workflows/build.yml)
+[![Build](https://github.com/LegacyUpdate/LegacyUpdate/actions/workflows/build.yml/badge.svg)](https://github.com/LegacyUpdate/LegacyUpdate/actions/workflows/build.yml)
 
 Since Windows XP was discontinued in 2014, followed by Windows 7 in 2020, Microsoft has closed services they depend on, such as Windows Update. There are also design flaws with these earlier versions of Windows Update, which make them difficult to get working on new installations.
 
@@ -17,9 +17,9 @@ Just want to appreciate the nostalgia of the classic Windows Update website? Leg
 
 ## Download
 
-Download the latest version from the [Releases](https://github.com/kirb/LegacyUpdate/releases) page of this repo, or from [**legacyupdate.net**](https://legacyupdate.net/).
+Download the latest version from the [Releases](https://github.com/LegacyUpdate/LegacyUpdate/releases) page of this repo, or from [**legacyupdate.net**](https://legacyupdate.net/).
 
-You can also download the [latest nightly build](https://nightly.link/kirb/LegacyUpdate/workflows/build/main/artifact.zip), based on the current development work. Nightly builds are not guaranteed to be stable, and unlike release builds, require at least Windows 2000 SP4 or Windows XP SP2. You may also need to accept extra SmartScreen and other security warnings since these executables are unique to each build. If you’re not sure what to download, you probably want the [stable release](https://legacyupdate.net/).
+You can also download the [latest nightly build](https://nightly.link/LegacyUpdate/LegacyUpdate/workflows/build/main/artifact.zip), based on the current development work. Nightly builds are not guaranteed to be stable, and unlike release builds, require at least Windows 2000 SP4 or Windows XP SP2. You may also need to accept extra SmartScreen and other security warnings since these executables are unique to each build. If you’re not sure what to download, you probably want the [stable release](https://legacyupdate.net/).
 
 ## The ActiveX Control
 
@@ -116,6 +116,6 @@ We make use of some portions of the Windows SDK, [MinGW-w64](https://www.mingw-w
 
 ## License
 
-Licensed under the Apache License, version 2.0. Refer to [LICENSE.md](https://github.com/kirb/LegacyUpdate/blob/main/LICENSE.md).
+Licensed under the Apache License, version 2.0. Refer to [LICENSE.md](https://github.com/LegacyUpdate/LegacyUpdate/blob/main/LICENSE.md).
 
 The repository includes some portions of NSIS, licensed under the [zlib/libpng license](https://nsis.sourceforge.io/License). It also includes a compiled copy of my fork of [NSxfer](https://github.com/kirb/nsis-nsxfer), licensed under the [zlib/libpng license](https://github.com/kirb/nsis-nsxfer/blob/master/LICENSE).
