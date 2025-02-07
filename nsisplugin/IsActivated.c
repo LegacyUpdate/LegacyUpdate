@@ -63,7 +63,14 @@ PLUGIN_METHOD(IsActivated) {
 			goto end_slc;
 		}
 
-		g_isActivated = status->eStatus == SL_LICENSING_STATUS_LICENSED;
+		// Iterate through all statuses until we find one in Licensed status.
+		g_isActivated = FALSE;
+		for (int i = 0; i < count; i++) {
+			if (status[i].eStatus == SL_LICENSING_STATUS_LICENSED) {
+				g_isActivated = TRUE;
+				break;
+			}
+		}
 
 end_slc:
 		if (status) {
