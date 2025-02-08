@@ -697,6 +697,10 @@ Function .onInit
 		${If} $0 == 1
 			!insertmacro RemoveSection ${WES09}
 		${EndIf}
+		ReadRegDword $0 HKLM "${REGPATH_WES}" "Installed"
+		${If} $0 == 1
+			!insertmacro RemoveSection ${WES09}
+		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${XPSP3}
 		!insertmacro RemoveSection ${XPESP3}
