@@ -696,10 +696,11 @@ Function .onInit
 		ReadRegDword $0 HKLM "${REGPATH_POSREADY}" "Installed"
 		${If} $0 == 1
 			!insertmacro RemoveSection ${WES09}
-		${EndIf}
-		ReadRegDword $0 HKLM "${REGPATH_WES}" "Installed"
-		${If} $0 == 1
-			!insertmacro RemoveSection ${WES09}
+		${Else}
+			ReadRegDword $0 HKLM "${REGPATH_WES}" "Installed"
+			${If} $0 == 1
+				!insertmacro RemoveSection ${WES09}
+			${EndIf}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${XPSP3}
