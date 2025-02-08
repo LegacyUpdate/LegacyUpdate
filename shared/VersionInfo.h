@@ -32,7 +32,7 @@
 #define OS_STORAGESERVER  40 // Windows Storage Server 2003
 #define OS_COMPUTECLUSTER 41 // Windows Compute Cluster 2003
 #define OS_SERVERR2       42 // Windows Server 2003 R2 (in combination with edition)
-#define OS_EMBPOS		  43 // Windows Embedded for Point of Service
+#define OS_EMBPOS         43 // Windows Embedded for Point of Service
 #define OS_HOMESERVER     43 // Windows Home Server (2007)
 #define OS_WINFLP         44 // Windows Fundamentals for Legacy PCs
 #define OS_EMBSTD2009     45 // Windows Embedded Standard 2009
