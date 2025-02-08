@@ -28,14 +28,15 @@
 #define BUILD_WIN11_24H2 26100
 
 // Undocumented IsOS() flags
-#define OS_STARTER        0x26 // Starter Edition
-#define OS_STORAGESERVER  0x28 // Windows Storage Server 2003
-#define OS_COMPUTECLUSTER 0x29 // Windows Compute Cluster 2003
-#define OS_SERVERR2       0x2a // Windows Server 2003 R2 (in combination with edition)
-#define OS_HOMESERVER     0x2b // Windows Home Server (2007)
-#define OS_WINFLP         0x2c // Windows Fundamentals for Legacy PCs
-#define OS_EMBSTD         0x2d // Windows Embedded Standard
-#define OS_EMBPOS         0x43 // Windows Embedded for Point of Service
+#define OS_STARTER        38 // Starter Edition
+#define OS_STORAGESERVER  40 // Windows Storage Server 2003
+#define OS_COMPUTECLUSTER 41 // Windows Compute Cluster 2003
+#define OS_SERVERR2       42 // Windows Server 2003 R2 (in combination with edition)
+#define OS_EMBPOS		  43 // Windows Embedded for Point of Service
+#define OS_HOMESERVER     43 // Windows Home Server (2007)
+#define OS_WINFLP         44 // Windows Fundamentals for Legacy PCs
+#define OS_EMBSTD2009     45 // Windows Embedded Standard 2009
+#define OS_EMBPOS2009     46 // Windows Embedded POSReady 2009
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
