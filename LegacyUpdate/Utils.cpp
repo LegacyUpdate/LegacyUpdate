@@ -27,7 +27,7 @@ static const WinNT5Variant nt5Variants[] = {
 	{0x0501, OS_TABLETPC,       L"winbrand.dll", { 180, 2000}},
 	{0x0501, OS_MEDIACENTER,    L"winbrand.dll", { 180, 2001}},
 	{0x0501, OS_STARTER,        L"winbrand.dll", { 180, 2002}},
-    {0x0501, OS_EMBPOS,         L"winbrand.dll", { 180, 2003}},
+	{0x0501, OS_EMBPOS,         L"winbrand.dll", { 180, 2003}},
 	{0x0501, OS_WINFLP,         L"winbrand.dll", { 180, 2004}},
 	{0x0501, OS_EMBSTD2009,     L"winbrand.dll", { 180, 2005}},
 	{0x0501, OS_EMBPOS2009,     L"winbrand.dll", { 180, 2006}},
