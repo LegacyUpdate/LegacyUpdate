@@ -57,6 +57,8 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 				HMODULE brandDll = LoadLibraryEx(variant.library, NULL, LOAD_LIBRARY_AS_DATAFILE);
 				if (brandDll) {
 					WCHAR brandStr[1024];
+					ZeroMemory(brandStr, ARRAYSIZE(brandStr));
+
 					DWORD j = 0;
 					while (variant.stringIDs[j] != 0) {
 						UINT id = variant.stringIDs[j];
