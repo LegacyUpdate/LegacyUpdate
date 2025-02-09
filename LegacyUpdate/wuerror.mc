@@ -1,4 +1,4 @@
-;// Reverse engineered from wuerror.h from Windows SDK 10.0.22621.0
+;// Reverse engineered from wuerror.h from Windows SDK 10.0.26100.0
 
 ;/***************************************************************************
 ;*                                                                          *
@@ -936,6 +936,22 @@ Language     = English
 User context passed to installation from caller with insufficient privileges.
 .
 
+MessageId    = 0x0067
+Facility     = WindowsUpdate
+Severity     = Error
+SymbolicName = WU_E_STANDBY_ACTIVITY_NOT_ALLOWED
+Language     = English
+Operation is not allowed because the device is in DC (Direct Current) and DS (Disconnected Standby).
+.
+
+MessageId    = 0x0068
+Facility     = WindowsUpdate
+Severity     = Error
+SymbolicName = WU_E_COULD_NOT_EVALUATE_PROPERTY
+Language     = English
+The property could not be evaluated.
+.
+
 MessageId    = 0x0FFF
 Facility     = WindowsUpdate
 Severity     = Error
@@ -1371,6 +1387,14 @@ Language     = English
 The server is shedding load.
 .
 
+MessageId    = 0x402E
+Facility     = WindowsUpdate
+Severity     = Error
+SymbolicName = WU_E_PT_CLIENT_ENFORCED_LOAD_SHEDDING
+Language     = English
+Windows Update Agent is enforcing honoring the service load shedding interval.
+.
+
 MessageId    = 0x502D
 Facility     = WindowsUpdate
 Severity     = Error
@@ -1642,7 +1666,7 @@ Facility     = WindowsUpdate
 Severity     = Error
 SymbolicName = WU_E_PT_GENERAL_AAD_CLIENT_ERROR
 Language     = English
-The client hit an error in retrievingg AAD device ticket.
+The client hit an error in retrieving AAD device ticket.
 .
 
 MessageId    = 0x4FFF
@@ -2774,6 +2798,22 @@ Language     = English
 Unable to find a package volume marked as system.
 .
 
+MessageId    = 0x2025
+Facility     = WindowsUpdate
+Severity     = Error
+SymbolicName = WU_E_UH_UA_SESSION_INFO_VERSION_NOT_SUPPORTED
+Language     = English
+UA does not support the version of OptionalSessionInfo.
+.
+
+MessageId    = 0x2026
+Facility     = WindowsUpdate
+Severity     = Error
+SymbolicName = WU_E_UH_RESERVICING_REQUIRED_BASELINE
+Language     = English
+This operation cannot be completed. You must install the baseline update(s) before you can install this update.
+.
+
 MessageId    = 0x2FFF
 Facility     = WindowsUpdate
 Severity     = Error
@@ -3007,6 +3047,14 @@ Severity     = Error
 SymbolicName = WU_E_DM_DOSVC_REQUIRED
 Language     = English
 The update has to be downloaded via DO.
+.
+
+MessageId    = 0x601F
+Facility     = WindowsUpdate
+Severity     = Error
+SymbolicName = WU_E_DM_DOWNLOADTYPE_CONFLICT
+Language     = English
+Windows Update only supports one download type per update at one time. The download failure is by design here since the same update with different download type is operating. Please try again later.
 .
 
 MessageId    = 0x6FFF
