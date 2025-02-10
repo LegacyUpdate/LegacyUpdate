@@ -581,84 +581,13 @@ Function OnMouseOverSection
 FunctionEnd
 
 Function .onInit
-	${If} ${IsHelp}
-		MessageBox MB_USERICON "$(MsgBoxUsage)"
-		Quit
-	${EndIf}
+	!insertmacro InitChecks
 
-	SetShellVarContext all
-	${If} ${IsVerbose}
-		SetDetailsPrint both
-	${Else}
-		SetDetailsPrint listonly
-	${EndIf}
-	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"
-		SetRegView 64
-	${EndIf}
-	!insertmacro EnsureAdminRights
-
-	${If} ${IsRunOnce}
-	${OrIf} ${IsPostInstall}
-		Call OnRunOnceLogon
-	${ElseIfNot} ${AtLeastWin10}
-		GetWinVer $0 Build
-		ReadRegDword $1 HKLM "${REGPATH_CONTROL_WINDOWS}" "CSDVersion"
-		IntOp $1 $1 & 0xFF
-		${If} $1 != 0
-			${VerbosePrint} "Unexpected service pack: $1"
-			StrCpy $1 1
-		${EndIf}
-
-		${If} $0 != ${WINVER_BUILD_2000}
-		${AndIf} $0 != ${WINVER_BUILD_XP2002}
-		${AndIf} $0 != ${WINVER_BUILD_XP2003}
-		${AndIf} $0 != ${WINVER_BUILD_VISTA}
-		${AndIf} $0 != ${WINVER_BUILD_VISTA_SP1}
-		${AndIf} $0 != ${WINVER_BUILD_VISTA_SP2}
-		${AndIf} $0 != ${WINVER_BUILD_VISTA_ESU}
-		${AndIf} $0 != ${WINVER_BUILD_7}
-		${AndIf} $0 != ${WINVER_BUILD_7_SP1}
-		${AndIf} $0 != ${WINVER_BUILD_8}
-		${AndIf} $0 != ${WINVER_BUILD_8.1}
-			${VerbosePrint} "Unexpected build: $0"
-			StrCpy $1 1
-		${EndIf}
-
-		${If} $1 == 1
-			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxBetaOS)" /SD IDOK \
-				IDOK +2
-			Quit
-		${EndIf}
-	${EndIf}
-
-	; Check for compatibility mode (GetVersionEx() and RtlGetNtVersionNumbers() disagreeing)
-	GetWinVer $0 Major
-	GetWinVer $1 Minor
-	GetWinVer $2 Build
-	System::Call '${RtlGetNtVersionNumbers}(.r3, .r4, .r5)'
-	IntOp $5 $5 & 0xFFFF
-
-	; Detect NNN4NT5
-	ReadEnvStr $6 "_COMPAT_VER_NNN"
-	${If} $6 != ""
-		StrCpy $3 "?"
-	${EndIf}
-
-	; Windows 2000 lacks RtlGetNtVersionNumbers(), but there is no compatibility mode anyway.
-	${If} "$3.$4.$5" != "0.0.0"
-	${AndIf} "$0.$1.$2" != "$3.$4.$5"
-		${VerbosePrint} "Compatibility mode detected. Fake: $0.$1.$2, Actual: $3.$4.$5"
-		MessageBox MB_USERICON "$(MsgBoxCompatMode)" /SD IDOK
-		SetErrorLevel 1
-		Quit
-	${EndIf}
+	${MementoSectionRestore}
 
 	SetOutPath $PLUGINSDIR
 	File Patches.ini
-
 	SetOutPath "${RUNONCEDIR}"
-
-	${MementoSectionRestore}
 
 	${If} ${IsWin2000}
 		; Determine whether Win2k prereqs need to be installed
@@ -834,6 +763,12 @@ Function ComponentsPageCheck
 		${If} $1 == 0
 			Abort
 		${EndIf}
+	${EndIf}
+
+	; Handle 2000 Datacenter Server
+	${If} ${IsWin2000}
+	${AndIf} ${IsDatacenter}
+		!insertmacro UnselectSection ${LEGACYUPDATE}
 	${EndIf}
 FunctionEnd
 

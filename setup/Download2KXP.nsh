@@ -79,6 +79,7 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
+!if ${NT4} == 0
 !insertmacro NeedsSPHandler "W2KSP4"  "Win2000"   2
 !insertmacro NeedsSPHandler "XPSP1a"  "WinXP2002" 0
 !insertmacro NeedsSPHandler "XPSP3"   "WinXP2002" 2
@@ -86,7 +87,6 @@ FunctionEnd
 !insertmacro NeedsSPHandler "2003SP2" "WinXP2003" 1
 
 !insertmacro NeedsFileVersionHandler "KB835732" "kernel32.dll" "5.00.2195.6897"
-!insertmacro NeedsFileVersionHandler "IE6"      "mshtml.dll"   "6.0.2600.0"
 
 !insertmacro PatchHandler "W2KSP4"   "Windows 2000 $(SP) 4"            "-u -z"
 !insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 $(Update)" "/passive /norestart"
@@ -94,29 +94,37 @@ FunctionEnd
 !insertmacro PatchHandler "XPSP3"    "Windows XP $(SP) 3"              "/passive /norestart"
 !insertmacro PatchHandler "2003SP2"  "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" "/passive /norestart"
 !insertmacro PatchHandler "XPESP3"   "Windows XP $(EMB) $(SP) 3"       "/passive /norestart"
+!endif
 
-Function DownloadIE6
-	${If} ${NeedsPatch} IE6
-		StrCpy $Patch.Key   "W2KIE6"
-		StrCpy $Patch.File  "ie6sp1.cab"
-		StrCpy $Patch.Title "$(IE) 6 $(SP) 1 $(Setup)"
+!insertmacro NeedsFileVersionHandler "IE6"      "mshtml.dll"   "6.0.2600.0"
+
+!macro DownloadIE ver title
+	${If} ${NeedsPatch} IE${ver}
+		StrCpy $Patch.Key   "IE${ver}"
+		StrCpy $Patch.File  "ie${ver}setup.exe"
+		StrCpy $Patch.Title "${title} $(Setup)"
 		Call -PatchHandler
 
-		${IfNot} ${FileExists} "$PLUGINSDIR\W2KIE6\ie6setup.exe"
-			${DetailPrint} "$(Extracting)$(IE) 6 $(SP) 1 $(Setup)..."
-			CreateDirectory "$PLUGINSDIR\W2KIE6"
-			!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$WINDIR\system32\expand.exe" -F:* ie6sp1.cab "$PLUGINSDIR\W2KIE6"'
-			${DetailPrint} "$(Downloading)$(IE) 6 $(SP) 1..."
-			!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\W2KIE6\ie6setup.exe" /c:"ie6wzd.exe /q /d /s:""#e"""'
+		${IfNot} ${FileExists} "$PLUGINSDIR\IE${ver}\ie${ver}setup.exe"
+			${DetailPrint} "$(Downloading)${title}..."
+			!insertmacro ExecWithErrorHandling '${title}' '"$PLUGINSDIR\IE${ver}\ie${ver}setup.exe" /c:"ie${ver}wzd.exe /q /d /s:""#e"""'
 		${EndIf}
 	${EndIf}
+!macroend
+
+!macro InstallIE ver title
+	${If} ${NeedsPatch} IE${ver}
+		Call DownloadIE${ver}
+		${DetailPrint} "$(Installing)${title}..."
+		!insertmacro ExecWithErrorHandling '${title}' '"$PLUGINSDIR\IE${ver}\ie${ver}setup.exe" /c:"ie${ver}wzd.exe /q /r:n /s:""#e"""'
+		RMDir /r /REBOOTOK "$WINDIR\Windows Update Setup Files"
+	${EndIf}
+!macroend
+
+Function DownloadIE6
+	!insertmacro DownloadIE 6 "$(IE) 6 $(SP) 1"
 FunctionEnd
 
 Function InstallIE6
-	${If} ${NeedsPatch} IE6
-		Call DownloadIE6
-		${DetailPrint} "$(Installing)$(IE) 6 $(SP) 1..."
-		!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\W2KIE6\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
-		RMDir /r /REBOOTOK "$WINDIR\Windows Update Setup Files"
-	${EndIf}
+	!insertmacro InstallIE 6 "$(IE) 6 $(SP) 1"
 FunctionEnd

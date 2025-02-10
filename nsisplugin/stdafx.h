@@ -4,8 +4,8 @@
 #define STRICT
 #endif
 
-#define WINVER       _WIN32_WINNT_WIN2K
-#define _WIN32_WINNT _WIN32_WINNT_WIN2K
+#define WINVER       _WIN32_WINNT_NT4
+#define _WIN32_WINNT _WIN32_WINNT_NT4
 
 // Use msvcrt stdio functions
 #define __USE_MINGW_ANSI_STDIO 0

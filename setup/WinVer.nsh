@@ -8,6 +8,7 @@
 !define OSVERSIONINFOW_SIZE      276
 !define OSVERSIONINFOEXW_SIZE    284
 
+!define WINVER_NT4               0x0400 ;  4.0.1381
 !define WINVER_2000              0x0500 ;  5.0.2195
 !define WINVER_XP                0x0501 ;  5.1.2600
 !define WINVER_XP2002            0x0501 ;  5.1.2600
@@ -28,6 +29,7 @@
 !define WINVER_SERVER_2012R2     ${WINVER_8.1}
 !define WINVER_SERVER_2016       ${WINVER_10}
 
+!define WINVER_BUILD_NT4         1381
 !define WINVER_BUILD_2000        2195
 !define WINVER_BUILD_XP2002      2600
 !define WINVER_BUILD_XP2003      3790
@@ -178,6 +180,7 @@
 	!define AtMostWin${os}   `<= _WinVer_TestBuild ${WINVER_BUILD_${os}}`
 !macroend
 
+!insertmacro __WinVer_DefineClient NT4
 !insertmacro __WinVer_DefineClient 2000
 !insertmacro __WinVer_DefineClient XP2002
 !insertmacro __WinVer_DefineClient XP2003

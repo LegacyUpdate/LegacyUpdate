@@ -40,6 +40,12 @@ LangString MsgBoxOldWinVersion ${LANG_ENGLISH} \
 	You might be interested in Windows Update Restored instead.$\r$\n\
 	Would you like to go to ${WUR_WEBSITE} now?"
 
+LangString MsgBoxNeedsNT4 ${LANG_ENGLISH} \
+	"Legacy Update NT is intended only for use on Windows NT 4.0.$\r$\n\
+	$\r$\n\
+	For other versions of Windows, use the regular version of Legacy Update.$\r$\n\
+	Would you like to go to ${WEBSITE} now?"
+
 LangString MsgBoxBetaOS ${LANG_ENGLISH} \
 	"The current version of Windows is a beta build. Legacy Update may not work correctly on this version of Windows.$\r$\n\
 	$\r$\n\
@@ -107,22 +113,37 @@ LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update servi
 LangString StatusCheckingSSL    ${LANG_ENGLISH} "Checking SSL connectivity..."
 LangString StatusCbsInstalling  ${LANG_ENGLISH} "Waiting for updates to install..."
 
-; Sections
-LangString Setup    ${LANG_ENGLISH} "Setup"
+; Products
+LangString DX       ${LANG_ENGLISH} "DirectX"
 LangString IE       ${LANG_ENGLISH} "Internet Explorer"
+LangString MSI      ${LANG_ENGLISH} "Windows Installer"
+LangString VB       ${LANG_ENGLISH} "Visual Basic"
+LangString VC       ${LANG_ENGLISH} "Visual C/C++"
+LangString WMP      ${LANG_ENGLISH} "Windows Media Player"
+LangString Runtime  ${LANG_ENGLISH} "Runtime"
+LangString Runtimes ${LANG_ENGLISH} "Runtimes"
+
+; Editions
 LangString PRO      ${LANG_ENGLISH} "Professional"
 LangString P64      ${LANG_ENGLISH} "Professional x64 Edition"
 LangString EMB      ${LANG_ENGLISH} "Embedded"
 LangString SRV      ${LANG_ENGLISH} "Server"
+
+; Update types
+LangString Setup    ${LANG_ENGLISH} "Setup"
+LangString Update   ${LANG_ENGLISH} "Update"
+LangString Updates  ${LANG_ENGLISH} "Updates"
 LangString SP       ${LANG_ENGLISH} "Service Pack"
+LangString PostSP   ${LANG_ENGLISH} "Post-Service Pack"
+LangString SecUpd   ${LANG_ENGLISH} "Security Update"
 LangString SSU      ${LANG_ENGLISH} "Servicing Stack Update"
 LangString WUA      ${LANG_ENGLISH} "Windows Update Agent"
-LangString SecUpd   ${LANG_ENGLISH} "Security Update"
-LangString Update   ${LANG_ENGLISH} "Update"
 LangString PrepTool ${LANG_ENGLISH} "Preparation Tool"
 LangString PUS      ${LANG_ENGLISH} "Platform Update Supplement"
+LangString SRP      ${LANG_ENGLISH} "Security Rollup Package"
 LangString SHA2     ${LANG_ENGLISH} "SHA-2 Code Signing Support Update"
 LangString CTL      ${LANG_ENGLISH} "Certificate Trust List"
+LangString Unofficial ${LANG_ENGLISH} "(Unofficial)"
 
 LangString SectionWES09     ${LANG_ENGLISH} "Enable Windows Embedded 2009 updates"
 LangString SectionWHS2011U4 ${LANG_ENGLISH} "Windows Home Server 2011 Update Rollup 4"
@@ -188,3 +209,45 @@ LangString SectionActiveXWin10Desc ${LANG_ENGLISH} \
 ; 	"Installs Legacy Update, enabling access to Windows Update."
 ; LangString SectionWUServerDesc     ${LANG_ENGLISH} \
 ; 	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service."
+
+; NT 4.0
+LangString MsgBoxNT4PostInstall ${LANG_ENGLISH} \
+	"Legacy Update is complete. Windows is up to date."
+
+LangString SectionWDU           ${LANG_ENGLISH} \
+	"Windows Desktop Update"
+LangString SectionWDUYes        ${LANG_ENGLISH} \
+	"Install Windows 98-style Explorer"
+LangString SectionWDUNo         ${LANG_ENGLISH} \
+	"Keep Windows 95-style Explorer"
+
+LangString SectionSPCleanup     ${LANG_ENGLISH} \
+	"Delete update uninstall data"
+
+LangString SectionNT4WDUDesc ${LANG_ENGLISH} \
+	"Installs the updated Windows 98-style Explorer experience. This choice can not be changed later. Requires installing Internet Explorer 6."
+LangString SectionNT4WDUYesDesc ${LANG_ENGLISH} \
+	"$(SectionNT4WDUDesc)"
+LangString SectionNT4WDUNoDesc  ${LANG_ENGLISH} \
+	"Keeps the Windows 95-style Explorer experience. This choice can not be changed later."
+
+LangString SectionNT4SP6ADesc   ${LANG_ENGLISH} \
+	"Updates Windows NT 4.0 to Service Pack 6a with 128-bit encryption support.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+LangString SectionNT4RollupDesc ${LANG_ENGLISH} \
+	"Installs Windows NT 4.0 Service Pack 6a Security Rollup Package.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+LangString SectionNT4PostSPDesc ${LANG_ENGLISH} \
+	"Installs Windows NT 4.0 updates released after the Security Rollup Package.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+
+LangString SectionNT4MSIDesc    ${LANG_ENGLISH} \
+	"Installs Windows Installer, required to install newer applications.$\r$\n$(SectionSupEULA)"
+LangString SectionNT4VCRTDesc   ${LANG_ENGLISH} \
+	"Installs updated versions of the Microsoft Visual C, Visual C++, and Visual Basic runtimes, required to run newer applications.$\r$\n$(SectionSupEULA)"
+LangString SectionNT4IE6SP1Desc ${LANG_ENGLISH} \
+	"Installs Internet Explorer 6. Required for Windows Desktop Update.$\r$\n$(SectionSupEULA)"
+LangString SectionNT4WMP64Desc  ${LANG_ENGLISH} \
+	"Installs Windows Media Player 6.4.$\r$\n$(SectionSupEULA)"
+LangString SectionNT4DX5Desc    ${LANG_ENGLISH} \
+	"Installs DirectX 5. This is an unofficial patch. Microsoft officially supports only up to DirectX 3 on Windows NT 4.0.$\r$\n$(SectionSupEULA)"
+
+LangString SectionSPCleanupDesc ${LANG_ENGLISH} \
+	"Deletes backup files created during installation of updates. This frees up disk space, but you will not be able to uninstall updates."

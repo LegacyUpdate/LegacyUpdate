@@ -280,7 +280,31 @@ FunctionEnd
 	Call InstallMSU
 !macroend
 
-!macro EnsureAdminRights
+Function InitChecks
+	${If} ${IsHelp}
+		MessageBox MB_USERICON "$(MsgBoxUsage)"
+		Quit
+	${EndIf}
+
+	SetShellVarContext all
+	${If} ${IsVerbose}
+		SetDetailsPrint both
+	${Else}
+		SetDetailsPrint listonly
+	${EndIf}
+	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"
+		SetRegView 64
+	${EndIf}
+
+!if ${NT4} == 1
+	${IfNot} ${IsWinNT4}
+		MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxNeedsNT4)" /SD IDCANCEL \
+			IDCANCEL +2
+		ExecShell "" "${WEBSITE}"
+		SetErrorLevel ${ERROR_OLD_WIN_VERSION}
+		Quit
+	${EndIf}
+!else
 	${IfNot} ${AtLeastWin2000}
 		MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxOldWinVersion)" /SD IDCANCEL \
 			IDCANCEL +2
@@ -288,6 +312,7 @@ FunctionEnd
 		SetErrorLevel ${ERROR_OLD_WIN_VERSION}
 		Quit
 	${EndIf}
+!endif
 
 	LegacyUpdateNSIS::IsAdmin
 	Pop $0
@@ -296,7 +321,69 @@ FunctionEnd
 		SetErrorLevel ${ERROR_ELEVATION_REQUIRED}
 		Quit
 	${EndIf}
-!macroend
+
+	${If} ${IsRunOnce}
+	${OrIf} ${IsPostInstall}
+		Call OnRunOnceLogon
+	${ElseIfNot} ${AtLeastWin10}
+		GetWinVer $0 Build
+		ReadRegDword $1 HKLM "${REGPATH_CONTROL_WINDOWS}" "CSDVersion"
+		IntOp $1 $1 & 0xFF
+		${If} $1 != 0
+			${VerbosePrint} "Unexpected service pack: $1"
+			StrCpy $1 1
+		${EndIf}
+
+!if ${NT4} == 1
+		${If} $0 != ${WINVER_BUILD_NT4}
+!else
+		${If} $0 != ${WINVER_BUILD_2000}
+		${AndIf} $0 != ${WINVER_BUILD_XP2002}
+		${AndIf} $0 != ${WINVER_BUILD_XP2003}
+		${AndIf} $0 != ${WINVER_BUILD_VISTA}
+		${AndIf} $0 != ${WINVER_BUILD_VISTA_SP1}
+		${AndIf} $0 != ${WINVER_BUILD_VISTA_SP2}
+		${AndIf} $0 != ${WINVER_BUILD_VISTA_ESU}
+		${AndIf} $0 != ${WINVER_BUILD_7}
+		${AndIf} $0 != ${WINVER_BUILD_7_SP1}
+		${AndIf} $0 != ${WINVER_BUILD_8}
+		${AndIf} $0 != ${WINVER_BUILD_8.1}
+!endif
+			${VerbosePrint} "Unexpected build: $0"
+			StrCpy $1 1
+		${EndIf}
+
+		${If} $1 == 1
+			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxBetaOS)" /SD IDOK \
+				IDOK +2
+			Quit
+		${EndIf}
+	${EndIf}
+
+!if ${NT4} == 0
+	; Check for compatibility mode (GetVersionEx() and RtlGetNtVersionNumbers() disagreeing)
+	GetWinVer $0 Major
+	GetWinVer $1 Minor
+	GetWinVer $2 Build
+	System::Call '${RtlGetNtVersionNumbers}(.r3, .r4, .r5)'
+	IntOp $5 $5 & 0xFFFF
+
+	; Detect NNN4NT5
+	ReadEnvStr $6 "_COMPAT_VER_NNN"
+	${If} $6 != ""
+		StrCpy $3 "?"
+	${EndIf}
+
+	; Windows 2000 lacks RtlGetNtVersionNumbers(), but there is no compatibility mode anyway.
+	${If} "$3.$4.$5" != "0.0.0"
+	${AndIf} "$0.$1.$2" != "$3.$4.$5"
+		${VerbosePrint} "Compatibility mode detected. Fake: $0.$1.$2, Actual: $3.$4.$5"
+		MessageBox MB_USERICON "$(MsgBoxCompatMode)" /SD IDOK
+		SetErrorLevel 1
+		Quit
+	${EndIf}
+!endif
+FunctionEnd
 
 !macro InhibitSleep state
 !if ${state} == 1

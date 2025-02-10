@@ -163,6 +163,7 @@ FunctionEnd
 	Pop $0
 !macroend
 
+!if ${NT4} == 0
 Function PollCbsInstall
 	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
 	${If} $0 <= 0
@@ -200,6 +201,7 @@ Function PollCbsInstall
 	; Revert progress bar
 	!insertmacro SetMarquee 0
 FunctionEnd
+!endif
 
 Function OnRunOnceDone
 	${If} ${IsRunOnce}
