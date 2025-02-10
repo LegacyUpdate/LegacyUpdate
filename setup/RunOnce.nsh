@@ -174,6 +174,7 @@ FunctionEnd
 	Pop $0
 !macroend
 
+!if ${NT4} == 0
 Function PollCbsInstall
 	${IfNot} ${AtLeastWinVista}
 		Return
@@ -215,6 +216,7 @@ Function PollCbsInstall
 	; Revert progress bar
 	!insertmacro SetMarquee 0
 FunctionEnd
+!endif
 
 Function RebootIfCbsRebootPending
 	${IfNot} ${AtLeastWinVista}

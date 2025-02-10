@@ -112,6 +112,8 @@ Legacy Update was started and is primarily developed by [Adam Demasi (@kirb)](ht
 * [@stdin82](https://github.com/stdin82): Helped us find some patches on the Windows Update server, and other general help on the issue trackerf
 * The [Windows Update Restored](https://windowsupdaterestored.com/) team: [@CaptainTER06](https://github.com/CaptainTER06), [@TheOneGoofAli](https://github.com/TheOneGoofAli), [et al.](https://windowsupdaterestored.com/)
 
+Legacy Update NT is built thanks to the great research and documentation on Windows NT 4.0 updates by [ZCM Services](https://nt4ref.zcm.com.au/), [Bear Windows](https://bearwindows.zcm.com.au/), [MDGx](https://www.mdgx.com/), and members of [MSFN](https://msfn.org/).
+
 We make use of some portions of the Windows SDK, [MinGW-w64](https://www.mingw-w64.org/), and [NSIS](https://nsis.sourceforge.io/).
 
 ## License

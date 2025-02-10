@@ -223,28 +223,3 @@ FunctionEnd
 	StrCpy $Exec.Name '${name} (${kbid})'
 	Call InstallMSU
 !macroend
-
-!macro EnsureAdminRights
-	${IfNot} ${AtLeastWin2000}
-		MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxOldWinVersion)" /SD IDCANCEL \
-			IDCANCEL +2
-		ExecShell "" "${WUR_WEBSITE}"
-		SetErrorLevel ${ERROR_OLD_WIN_VERSION}
-		Quit
-	${EndIf}
-
-	ClearErrors
-	LegacyUpdateNSIS::IsAdmin
-	${If} ${Errors}
-		MessageBox MB_USERICON "$(MsgBoxPluginFailed)" /SD IDOK
-		SetErrorLevel 1
-		Quit
-	${EndIf}
-
-	Pop $0
-	${If} $0 == 0
-		MessageBox MB_USERICON "$(MsgBoxElevationRequired)" /SD IDOK
-		SetErrorLevel ${ERROR_ELEVATION_REQUIRED}
-		Quit
-	${EndIf}
-!macroend

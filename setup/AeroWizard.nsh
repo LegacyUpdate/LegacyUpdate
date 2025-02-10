@@ -76,9 +76,11 @@ Function AeroWizardOnShow
 	!insertmacro -AeroWizardOnShow
 FunctionEnd
 
+!if ${NT4} == 0
 Function un.AeroWizardOnShow
 	!insertmacro -AeroWizardOnShow
 FunctionEnd
+!endif
 
 !macro -AeroWizardDialogControl hwnd
 	SendMessage ${hwnd} ${WM_SETFONT} $AeroWizard.Font 0
