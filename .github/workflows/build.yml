@@ -63,10 +63,11 @@ jobs:
       run: |
         export PATH=/opt/gcc-14.2-binutils-2.43.1-mingw-v12.0.0-i686/bin:$PATH
         export PATH=/opt/gcc-14.2-binutils-2.43.1-mingw-v12.0.0-x86_64/bin:$PATH
-        make CI=1 DEBUG=0
-        echo "out=$(echo setup/LegacyUpdate-*.exe)" >> "$(wslpath -u "$GITHUB_OUTPUT")"
+        make CI=1 DEBUG=0 all nt4
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
-        path: '${{ steps.build.outputs.out }}'
+        path: |
+          setup/LegacyUpdate-*.exe
+          setup/LegacyUpdateNT-*.exe
