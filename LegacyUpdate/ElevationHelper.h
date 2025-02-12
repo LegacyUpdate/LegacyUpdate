@@ -19,6 +19,8 @@ public:
 
 	virtual ~CElevationHelper();
 
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
+
 private:
 	LONG m_refCount;
 

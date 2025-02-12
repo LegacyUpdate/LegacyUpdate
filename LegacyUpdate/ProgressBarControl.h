@@ -77,6 +77,8 @@ public:
 
 	virtual ~CProgressBarControl();
 
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
+
 public:
 	CProgressBarControl_IOleObject m_IOleObject;
 	CProgressBarControl_IViewObjectEx m_IViewObjectEx;
@@ -104,7 +106,7 @@ public:
 	STDMETHODIMP put_Value(SHORT value);
 
 	// Helpers
-	HRESULT CreateControlWindow(HWND hParent, const RECT *pRect);
-	HRESULT DestroyControlWindow();
+	STDMETHODIMP CreateControlWindow(HWND hParent, const RECT *pRect);
+	STDMETHODIMP DestroyControlWindow();
 	STDMETHODIMP OnDraw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd, HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds, BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue);
 };

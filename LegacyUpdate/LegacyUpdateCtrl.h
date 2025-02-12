@@ -39,6 +39,8 @@ public:
 
 	virtual ~CLegacyUpdateCtrl();
 
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
+
 private:
 	CLegacyUpdateCtrl_IOleObject m_IOleObject;
 	LONG m_refCount;

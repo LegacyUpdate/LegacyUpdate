@@ -2,16 +2,19 @@
 
 #include "LegacyUpdate_i.h"
 #include "dllmain.h"
-#include <strsafe.h>
-
 #include "dlldatax.h"
-#include "Registry.h"
-#include "LegacyUpdate.h"
-#include "../shared/LegacyUpdate.h"
 #include "ClassFactory.h"
-#include "LegacyUpdateCtrl.h"
 #include "ElevationHelper.h"
+#include "ElevationHelper.h"
+#include "LegacyUpdate.h"
+#include "LegacyUpdateCtrl.h"
 #include "ProgressBarControl.h"
+#include "Registry.h"
+#include "VersionInfo.h"
+#include <strsafe.h>
+#include <shlwapi.h>
+
+static LPCWSTR APPID_LegacyUpdateLib = L"{D0A82CD0-B6F0-4101-83ED-DA47D0D04830}";
 
 HINSTANCE g_hInstance = NULL;
 LONG g_serverLocks = 0;
@@ -90,71 +93,212 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) {
 
 // DllRegisterServer - Adds entries to the system registry
 STDAPI DllRegisterServer(void) {
-	// registers object, typelib and all interfaces in typelib
-	// TODO
-	HRESULT hr = S_OK;
-
-	// Fix the icon path
-	HKEY subkey = NULL;
-	hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CLASSES_ROOT, L"CLSID\\{84F517AD-6438-478F-BEA8-F0B808DC257F}\\Elevation", 0, KEY_WRITE, &subkey));
-	if (!SUCCEEDED(hr)) {
+	HRESULT hr = OleInitialize(NULL);
+	BOOL oleInitialized = SUCCEEDED(hr);
+	if (!SUCCEEDED(hr) && hr != RPC_E_CHANGED_MODE && hr != CO_E_ALREADYINITIALIZED) {
 		return hr;
 	}
 
-	LPWSTR installPath = NULL;
+	LPWSTR installPath;
 	hr = GetInstallPath(&installPath);
 	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
 		return hr;
 	}
 
-	WCHAR iconRef[512];
-	hr = StringCchPrintf((LPWSTR)&iconRef, ARRAYSIZE(iconRef), L"@%ls\\LegacyUpdate.exe,-100", installPath);
-	LocalFree(installPath);
+	LPWSTR filename;
+	GetOwnFileName(&filename);
+
+	// Register type library
+	CComPtr<ITypeLib> typeLib;
+	hr = LoadTypeLib(filename, &typeLib);
 	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
 		return hr;
 	}
 
-	hr = HRESULT_FROM_WIN32(RegSetValueEx(subkey, L"IconReference", 0, REG_SZ, (LPBYTE)iconRef, (DWORD)(lstrlen(iconRef) + 1) * sizeof(TCHAR)));
+	hr = RegisterTypeLib(typeLib, filename, NULL);
 	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
 		return hr;
 	}
 
-	hr = HRESULT_FROM_WIN32(RegCloseKey(subkey));
+	// Get IDs
+	LPWSTR appid, libid, clsidCtrl, clsidElevationHelper, clsidProgressBar;
+	if (!SUCCEEDED(StringFromCLSID(LIBID_LegacyUpdateLib, &libid)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_LegacyUpdateCtrl, &clsidCtrl)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_ElevationHelper, &clsidElevationHelper)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_ProgressBarControl, &clsidProgressBar))) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return E_FAIL;
+	}
+
+	// Set vars used for expansions
+	SetEnvironmentVariable(L"APPID", APPID_LegacyUpdateLib);
+	SetEnvironmentVariable(L"LIBID", libid);
+	SetEnvironmentVariable(L"CLSID_LegacyUpdateCtrl", clsidCtrl);
+	SetEnvironmentVariable(L"CLSID_ElevationHelper", clsidElevationHelper);
+	SetEnvironmentVariable(L"CLSID_ProgressBarControl", clsidProgressBar);
+	SetEnvironmentVariable(L"MODULE", filename);
+	SetEnvironmentVariable(L"INSTALLPATH", installPath);
+
+	// Main
+	RegistryEntry mainEntries[] = {
+		{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", L"DllSurrogate", REG_SZ, (LPVOID)L""},
+		{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", REG_SZ, (LPVOID)L""},
+		{}
+	};
+	hr = SetRegistryEntries(mainEntries, TRUE);
 	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
 		return hr;
 	}
 
-	return PrxDllRegisterServer();
-}
-
-// DllUnregisterServer - Removes entries from the system registry
-STDAPI DllUnregisterServer(void) {
-	// TODO
-	HRESULT hr = S_OK;
+	// Register classes
+	hr = CLegacyUpdateCtrl::UpdateRegistry(TRUE);
 	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return hr;
+	}
+
+	hr = CElevationHelper::UpdateRegistry(TRUE);
+	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return hr;
+	}
+
+	hr = CProgressBarControl::UpdateRegistry(TRUE);
+	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
 		return hr;
 	}
 
 	hr = PrxDllRegisterServer();
-	if (!SUCCEEDED(hr)) {
+	if (oleInitialized) {
+		OleUninitialize();
+	}
+	return hr;
+}
+
+// DllUnregisterServer - Removes entries from the system registry
+STDAPI DllUnregisterServer(void) {
+	HRESULT hr = OleInitialize(NULL);
+	BOOL oleInitialized = SUCCEEDED(hr);
+	if (!SUCCEEDED(hr) && hr != RPC_E_CHANGED_MODE && hr != CO_E_ALREADYINITIALIZED) {
 		return hr;
 	}
 
-	return PrxDllUnregisterServer();
+	// Unregister type library
+	CComPtr<ITypeLib> typeLib;
+	hr = LoadRegTypeLib(LIBID_LegacyUpdateLib, 1, 0, LOCALE_NEUTRAL, &typeLib);
+	if (!SUCCEEDED(hr) && hr != TYPE_E_LIBNOTREGISTERED) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return hr;
+	}
+
+	if (hr != TYPE_E_LIBNOTREGISTERED) {
+		TLIBATTR *attrs;
+		hr = typeLib->GetLibAttr(&attrs);
+		if (!SUCCEEDED(hr)) {
+			if (oleInitialized) {
+				OleUninitialize();
+			}
+			return hr;
+		}
+
+		hr = UnRegisterTypeLib(attrs->guid, attrs->wMajorVerNum, attrs->wMinorVerNum, attrs->lcid, attrs->syskind);
+		typeLib->ReleaseTLibAttr(attrs);
+		if (!SUCCEEDED(hr)) {
+			if (oleInitialized) {
+				OleUninitialize();
+			}
+			return hr;
+		}
+	}
+
+	// Get IDs
+	LPWSTR clsidCtrl, clsidElevationHelper, clsidProgressBar;
+	if (!SUCCEEDED(StringFromCLSID(CLSID_LegacyUpdateCtrl, &clsidCtrl)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_ElevationHelper, &clsidElevationHelper)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_ProgressBarControl, &clsidProgressBar))) {
+			TRACE(L"fail StringFromCLSID %08x", hr);
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return E_FAIL;
+	}
+
+	// Set vars used for expansions
+	SetEnvironmentVariable(L"APPID", APPID_LegacyUpdateLib);
+	SetEnvironmentVariable(L"CLSID_LegacyUpdateCtrl", clsidCtrl);
+	SetEnvironmentVariable(L"CLSID_ElevationHelper", clsidElevationHelper);
+	SetEnvironmentVariable(L"CLSID_ProgressBarControl", clsidProgressBar);
+
+	// Delete registry entries
+	RegistryEntry entries[] = {
+		{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", NULL, 0, DELETE_KEY},
+		{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", NULL, 0, DELETE_KEY},
+		{}
+	};
+	hr = SetRegistryEntries(entries, TRUE);
+	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return hr;
+	}
+
+	// Unregister classes
+	hr = CLegacyUpdateCtrl::UpdateRegistry(FALSE);
+	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return hr;
+	}
+
+	hr = CElevationHelper::UpdateRegistry(FALSE);
+	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return hr;
+	}
+
+	hr = CProgressBarControl::UpdateRegistry(FALSE);
+	if (!SUCCEEDED(hr)) {
+		if (oleInitialized) {
+			OleUninitialize();
+		}
+		return hr;
+	}
+
+	hr = PrxDllUnregisterServer();
+	if (oleInitialized) {
+		OleUninitialize();
+	}
+	return hr;
 }
 
 // DllInstall - Adds/Removes entries to the system registry per machine only.
 STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
-	HRESULT hr = E_FAIL;
-
-	if (bInstall) {
-		hr = DllRegisterServer();
-		if (!SUCCEEDED(hr)) {
-			DllUnregisterServer();
-		}
-	} else {
-		hr = DllUnregisterServer();
-	}
-
-	return hr;
+	return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
 }

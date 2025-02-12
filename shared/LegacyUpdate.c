@@ -10,7 +10,7 @@ EXTERN_C HRESULT GetInstallPath(LPWSTR *path) {
 
 	if (!_installPath) {
 		DWORD size = 0;
-		hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\LegacyUpdate", L"InstallLocation", KEY_WOW64_64KEY, &_installPath, &size);
+		hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Legacy Update", L"InstallLocation", KEY_WOW64_64KEY, &_installPath, &size);
 		if (SUCCEEDED(hr)) {
 			lstrcpy(*path, _installPath);
 			return S_OK;

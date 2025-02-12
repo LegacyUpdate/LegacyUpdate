@@ -3,8 +3,11 @@
 #include "ElevationHelper.h"
 #include "Compat.h"
 #include "HResult.h"
+#include "LegacyUpdate.h"
 #include "NGen.h"
+#include "Registry.h"
 #include "Utils.h"
+#include "VersionInfo.h"
 #include <strsafe.h>
 #include <ccomptr.h>
 #include <new>
@@ -68,6 +71,40 @@ STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv)
 CElevationHelper::~CElevationHelper() {
 }
 
+STDMETHODIMP CElevationHelper::UpdateRegistry(BOOL bRegister) {
+	if (bRegister) {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper", NULL, REG_SZ, (LPVOID)L"Legacy Update Elevation Helper"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper\\CurVer", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.ElevationHelper.1"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper.1", NULL, REG_SZ, (LPVOID)L"Legacy Update Elevation Helper"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper.1\\CLSID", NULL, REG_SZ, (LPVOID)L"%CLSID_ElevationHelper%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%", NULL, REG_SZ, (LPVOID)L"Legacy Update Elevation Helper"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%", L"AppID", REG_SZ, (LPVOID)L"%APPID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%", L"LocalizedString", REG_SZ, (LPVOID)L"@%MODULE%,-1"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\ProgID", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.ElevationHelper.1"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\VersionIndependentProgID", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.ElevationHelper"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\InprocServer32", NULL, REG_SZ, (LPVOID)L"%MODULE%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\InprocServer32", L"ThreadingModel", REG_SZ, (LPVOID)L"Apartment"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\TypeLib", NULL, REG_SZ, (LPVOID)L"%LIBID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\Version", NULL, REG_SZ, (LPVOID)L"1.0"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\Elevation", L"Enabled", REG_DWORD, (LPVOID)1},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\Elevation", L"IconReference", REG_SZ, (LPVOID)L"@%INSTALLPATH%\\LegacyUpdate.exe,-100"},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	} else {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper", NULL, 0, DELETE_KEY},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper.1", NULL, 0, DELETE_KEY},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%", NULL, 0, DELETE_KEY},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	}
+}
+
+#pragma mark - IUnknown
+
 STDMETHODIMP CElevationHelper::QueryInterface(REFIID riid, void **ppvObject) {
 	if (ppvObject == NULL) {
 		return E_POINTER;
@@ -90,6 +127,8 @@ STDMETHODIMP_(ULONG) CElevationHelper::Release() {
 	}
 	return count;
 }
+
+#pragma mark - IElevationHelper
 
 STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
 	if (progID == NULL || retval == NULL) {

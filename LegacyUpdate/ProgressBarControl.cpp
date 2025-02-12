@@ -4,8 +4,11 @@
 #include <commctrl.h>
 #include <new>
 #include "Compat.h"
+#include "Registry.h"
 #include "resource.h"
 #include "VersionInfo.h"
+
+#define PROGRESSBARCONTROL_MISCSTATUS (OLEMISC_RECOMPOSEONRESIZE | OLEMISC_CANTLINKINSIDE | OLEMISC_INSIDEOUT | OLEMISC_ACTIVATEWHENVISIBLE | OLEMISC_SETCLIENTSITEFIRST)
 
 DEFINE_UUIDOF(CProgressBarControl, CLSID_ProgressBarControl);
 
@@ -30,6 +33,40 @@ CProgressBarControl::~CProgressBarControl() {
 	DestroyControlWindow();
 	if (m_clientSite) {
 		m_clientSite->Release();
+	}
+}
+
+STDMETHODIMP CProgressBarControl::UpdateRegistry(BOOL bRegister) {
+	if (bRegister) {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar", NULL, REG_SZ, (LPVOID)L"Legacy Update Progress Bar Control"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar\\CurVer", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.ProgressBar.1"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar.1", NULL, REG_SZ, (LPVOID)L"Legacy Update Progress Bar Control"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar.1\\CLSID", NULL, REG_SZ, (LPVOID)L"%CLSID_ProgressBarControl%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%", NULL, REG_SZ, (LPVOID)L"Legacy Update Progress Bar Control"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%", L"AppID", REG_SZ, (LPVOID)L"%APPID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\ProgID", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.ProgressBar.1"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\VersionIndependentProgID", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.ProgressBar"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Programmable", NULL, REG_SZ, (LPVOID)L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\InprocServer32", NULL, REG_SZ, (LPVOID)L"%MODULE%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\InprocServer32", L"ThreadingModel", REG_SZ, (LPVOID)L"Apartment"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Control", NULL, REG_SZ, (LPVOID)L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\TypeLib", NULL, REG_SZ, (LPVOID)L"%LIBID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Version", NULL, REG_SZ, (LPVOID)L"1.0"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\MiscStatus", NULL, REG_DWORD, (LPVOID)PROGRESSBARCONTROL_MISCSTATUS},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Implemented Categories\\{7DD95801-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, (LPVOID)L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Implemented Categories\\{7DD95802-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, (LPVOID)L""},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	} else {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar", NULL, 0, DELETE_KEY},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar.1", NULL, 0, DELETE_KEY},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%", NULL, 0, DELETE_KEY},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
 	}
 }
 
@@ -185,7 +222,7 @@ STDMETHODIMP CProgressBarControl_IOleObject::GetMiscStatus(DWORD dwAspect, DWORD
 	}
 
 	if (dwAspect == DVASPECT_CONTENT) {
-		*pdwStatus = OLEMISC_RECOMPOSEONRESIZE | OLEMISC_CANTLINKINSIDE | OLEMISC_INSIDEOUT | OLEMISC_ACTIVATEWHENVISIBLE | OLEMISC_SETCLIENTSITEFIRST;
+		*pdwStatus = PROGRESSBARCONTROL_MISCSTATUS;
 		return S_OK;
 	}
 
@@ -198,7 +235,7 @@ STDMETHODIMP CProgressBarControl_IOleObject::Close(DWORD dwSaveOption) {
 	return S_OK;
 }
 
-HRESULT CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *pRect) {
+STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *pRect) {
 	m_width = pRect->right - pRect->left;
 	m_height = pRect->bottom - pRect->top;
 
@@ -252,7 +289,7 @@ HRESULT CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *pRect
 	return put_Value(-1);
 }
 
-HRESULT CProgressBarControl::DestroyControlWindow() {
+STDMETHODIMP CProgressBarControl::DestroyControlWindow() {
 	if (m_innerHwnd) {
 		DestroyWindow(m_innerHwnd);
 		m_innerHwnd = NULL;
