@@ -161,7 +161,7 @@ FunctionEnd
 	${NSD_AddStyle} $0 ${PBS_MARQUEE}
 	SendMessage $0 ${PBM_SETMARQUEE} 1 100
 !else
-	${NSD_RemoveExStyle} $1 ${PBS_MARQUEE}
+	${NSD_RemoveExStyle} $0 ${PBS_MARQUEE}
 	${NSD_AddStyle} $0 ${PBS_SMOOTH}
 !endif
 	Pop $0
@@ -176,22 +176,21 @@ Function PollCbsInstall
 
 	${VerbosePrint} "Packages are still installing [$0]"
 	${DetailPrint} "$(StatusCbsInstalling)"
-
 	; Set marquee progress bar
 	!insertmacro SetMarquee 1
 
-	; Are we in a RebootInProgress phase?
-	ClearErrors
-	EnumRegKey $1 HKLM "${REGPATH_CBS_REBOOTINPROGRESS}" 0
-	${IfNot} ${Errors}
-		; Spin forever. TrustedInstaller will reboot on its own.
-		${While} 1 == 1
-			Sleep 10000
-		${EndWhile}
-	${EndIf}
-
 	; Poll ExecuteState, waiting for TrustedInstaller to be done.
 	${While} 1 == 1
+		; Are we in a RebootInProgress phase?
+		ClearErrors
+		EnumRegKey $1 HKLM "${REGPATH_CBS_REBOOTINPROGRESS}" 0
+		${IfNot} ${Errors}
+			; Spin forever. TrustedInstaller will reboot on its own.
+			${While} 1 == 1
+				Sleep 10000
+			${EndWhile}
+		${EndIf}
+
 		ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
 		${If} $0 <= 0
 		${OrIf} $0 == 0xffffffff
