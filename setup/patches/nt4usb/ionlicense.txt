@@ -1,0 +1,113 @@
+Inside Out Networks Edgeport for NT 4.0
+License Agreement
+
+IMPORTANT - READ CAREFULLY:  This Inside Out Networks Edgeport License 
+Agreement ("Agreement") is a legal agreement between you (either an 
+individual or a single entity) and Inside Out Networks Incorporated 
+("IONETWORKS") for IONETWORKS' computer software and associated media 
+(collectively, the "Licensed Software").  By continuing to use the Licensed 
+Software, you agree to be bound by the terms of this Agreement.
+
+1. GRANT OF LICENSE EXTENSION
+
+You may use the Licensed Software in conjunction with an Edgeport USB to 
+serial converter hardware device connected to a single NT 4.0 computer system.
+
+
+2.      COPYRIGHT
+
+The Licensed Software is owned by IONETWORKS and is protected by United 
+States copyright laws and international treaty provisions.  Therefore, you must 
+treat the Licensed Software like any other copyrighted material (e.g., a book or 
+musical recording), except that you may either (i) make one copy of the Licensed 
+Software solely for backup or archival purposes, provided you reproduce and 
+include IONETWORKS' copyright and trademark notices contained on the original
+disk labels on such backup copy, or (ii) transfer the Licensed Software to a 
+single hard disk, provided you keep the original solely for backup or archival 
+purposes.  You may not copy the written materials accompanying the Licensed 
+Software.
+
+3.      OTHER RESTRICTIONS
+
+You may not use, copy, or modify the files containing the licensed software, or 
+any backup copy, in whole or in part, or translate such files into any other 
+file format or language, except as expressly provided for in this agreement.  
+You may not rent, lease or sublicense the Licensed Software, but you may 
+transfer the Licensed Software and accompanying written materials on a permanent 
+basis, provided you retain no copies, the recipient agrees to the terms of this 
+License Agreement, immediately contacts IONETWORKS to inform IONETWORKS 
+of such transfer and pays to IONETWORKS a transfer fee in an amount to be 
+determined by IONETWORKS and in effect at the time in question.  Upon such 
+transfer, your license under this License Agreement is automatically terminated.
+
+You may not reverse engineer, decompile or disassemble the Licensed Software for 
+any purpose whatsoever.
+
+4.      TERM
+
+Your license is effective upon your acceptance of this agreement and
+installing the Licensed Software.  You may terminate it at any time by 
+destroying the Licensed Software together with all copies.  It will also 
+terminate upon conditions set forth elsewhere in this Agreement or if you 
+fail to comply with any term or condition of this Agreement.  You agree upon 
+such termination to destroy all copies of the Licensed Software in any form 
+in your possession or under your control.
+
+5.      WARRANTY
+
+IONETWORKS OFFERS NO WARRANTY OF PERFORMANCE, EXPRESS OR 
+IMPLIED, WITH REGARD TO THE LICENSED SOFTWARE AND ALL 
+ACCOMPANYING MATERIALS.
+IONETWORKS FURTHER DISCLAIMS ALL OTHER WARRANTIES, EXPRESS 
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES 
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, WITH 
+REGARD TO THE LICENSED SOFTWARE AND ALL ACCOMPANYING MATERIALS.
+ 
+6.      CUSTOMER REMEDY
+
+IONETWORKS DISCLAIMS ALL LIABILITY AND OFFERS NO CUSTOMER 
+REMEDY WITH REGARD TO THE LICENSED SOFTWARE AND ALL 
+ACCOMPANYING MATERIALS 
+
+7.      DISCLAIMER OF DAMAGES
+
+You assume responsibility for, among other things, (i) the selection of 
+the Licensed Software to achieve your intended results, (ii) the acquisition of 
+other software (including any programming or operating system software) and/or 
+equipment compatible with the Licensed Software, and (iii) the installation, use 
+and results obtained from the Licensed Software.  Further, for the express 
+purpose of limiting the liability against IONETWORKS, you agree that, to 
+the maximum extent permitted by law, IONETWORKS SHALL 
+IN NO EVENT BE LIABLE FOR ANY DAMAGES WHATSOEVER 
+(INCLUDING WITHOUT LIMITATION, DAMAGES FOR LOSS OF 
+BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF 
+BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) 
+ARISING OUT OF THE USE OR INABILITY TO USE THE LICENSED 
+SOFTWARE, WHETHER DIRECT, INDIRECT, INCIDENTAL, 
+CONSEQUENTIAL, SPECIAL OR OTHERWISE, REGARDLESS OF THE 
+FORM OF ACTION, EVEN IF IONETWORKS HAS BEEN 
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+8.      UPDATES & TECHNICAL SUPPORT
+
+IONETWORKS will make available to you Technical Support for
+this copy of the Licensed Software.  IONETWORKS may, from 
+time to time, revise or update the Licensed Software.  In so doing, 
+IONETWORKS incurs no obligation to furnish such revision or 
+updates to you.
+
+9.      GENERAL
+
+This License is personal between you and IONETWORKS.  It is not transferable 
+and any attempt by you to rent, lease, sublicense, assign or transfer any of 
+the rights, duties or obligations hereunder, except as provided in Section 3, 
+above, is void.  This Agreement and the conduct of the parties hereto shall be 
+governed by the laws of the State of Texas.
+
+YOU ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT, UNDERSTAND IT 
+AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.  YOU FURTHER 
+AGREE THAT IT IS THE COMPLETE AND EXCLUSIVE STATEMENT OF THE 
+AGREEMENT BETWEEN YOU AND IONETWORKS WHICH SUPERSEDES ANY 
+PROPOSAL OR PRIOR AGREEMENT, ORAL OR WRITTEN, AND ANY OTHER 
+COMMUNICATIONS BETWEEN YOU AND IONETWORKS OR IONETWORKS'
+AGENT(S) RELATING TO THE LICENSED SOFTWARE.
