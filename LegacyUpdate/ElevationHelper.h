@@ -19,8 +19,6 @@ class ATL_NO_VTABLE CElevationHelper :
 public:
 	CElevationHelper();
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_ELEVATIONHELPER)
-
 	BEGIN_COM_MAP(CElevationHelper)
 		COM_INTERFACE_ENTRY(IElevationHelper)
 		COM_INTERFACE_ENTRY(IDispatch)
@@ -37,6 +35,8 @@ public:
 
 	HRESULT FinalConstruct() { return S_OK; }
 	void FinalRelease() {}
+
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
 
 	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
 	STDMETHODIMP Reboot(void);

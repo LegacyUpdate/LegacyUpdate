@@ -45,8 +45,6 @@ public:
 		OLEMISC_RECOMPOSEONRESIZE
 	)
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_LEGACYUPDATECTRL)
-
 	BEGIN_COM_MAP(CLegacyUpdateCtrl)
 		COM_INTERFACE_ENTRY(ILegacyUpdateCtrl)
 		COM_INTERFACE_ENTRY(IDispatch)
@@ -97,6 +95,7 @@ private:
 	STDMETHODIMP GetElevatedHelper(CComPtr<IElevationHelper> &retval);
 
 public:
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
 	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite);
 
 	STDMETHODIMP CheckControl(VARIANT_BOOL *retval);

@@ -1,9 +1,13 @@
 // ElevationHelper.cpp : Implementation of CElevationHelper
 #include "stdafx.h"
 #include "Compat.h"
+#include "dllmain.h"
 #include "ElevationHelper.h"
 #include "HResult.h"
+#include "LegacyUpdate.h"
+#include "Registry.h"
 #include "Utils.h"
+#include "VersionInfo.h"
 #include <strsafe.h>
 
 const BSTR permittedProgIDs[] = {
@@ -45,6 +49,38 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, __in REFCLSID rclsid, __in REFII
 
 CElevationHelper::CElevationHelper() {
 	BecomeDPIAware();
+}
+
+STDMETHODIMP CElevationHelper::UpdateRegistry(BOOL bRegister) {
+	if (bRegister) {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper", NULL, REG_SZ, L"Legacy Update Elevation Helper"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper\\CurVer", NULL, REG_SZ, L"LegacyUpdate.ElevationHelper.1"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper.1", NULL, REG_SZ, L"Legacy Update Elevation Helper"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper.1\\CLSID", NULL, REG_SZ, L"%CLSID_ElevationHelper%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%", NULL, REG_SZ, L"Legacy Update Elevation Helper"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%", L"AppID", REG_SZ, L"%APPID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%", L"LocalizedString", REG_SZ, L"@%MODULE%,-1"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\ProgID", NULL, REG_SZ, L"LegacyUpdate.ElevationHelper.1"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\VersionIndependentProgID", NULL, REG_SZ, L"LegacyUpdate.ElevationHelper"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\InprocServer32", NULL, REG_SZ, L"%MODULE%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\InprocServer32", L"ThreadingModel", REG_SZ, L"Apartment"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\TypeLib", NULL, REG_SZ, L"%LIBID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\Version", NULL, REG_SZ, L"1.0"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\Elevation", L"Enabled", REG_DWORD, (LPVOID)1},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%\\Elevation", L"IconReference", REG_SZ, L"@%INSTALLPATH%\\LegacyUpdate.exe,-100"},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	} else {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper", NULL, REG_SZ, DELETE_THIS},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper.1", NULL, REG_SZ, DELETE_THIS},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ElevationHelper%", NULL, REG_SZ, DELETE_THIS},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	}
 }
 
 STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {

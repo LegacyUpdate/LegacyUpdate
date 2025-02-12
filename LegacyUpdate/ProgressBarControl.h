@@ -33,8 +33,6 @@ public:
 		OLEMISC_SETCLIENTSITEFIRST
 	)
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_PROGRESSBARCONTROL)
-
 	BEGIN_COM_MAP(CProgressBarControl)
 		COM_INTERFACE_ENTRY(IProgressBarControl)
 		COM_INTERFACE_ENTRY(IDispatch)
@@ -66,6 +64,8 @@ public:
 
 	HRESULT FinalConstruct() { return S_OK; }
 	void FinalRelease() {}
+
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
 
 	LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled);
 	STDMETHODIMP SetObjectRects(LPCRECT prcPos, LPCRECT prcClip);

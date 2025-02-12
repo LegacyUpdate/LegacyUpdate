@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "Registry.h"
 #include "VersionInfo.h"
-#include <malloc.h>
+
+LPVOID DELETE_THIS = (LPVOID)INT_MIN;
 
 static ALWAYS_INLINE REGSAM GetWow64Flag(REGSAM options) {
 #ifdef _WIN64
@@ -90,4 +91,47 @@ end:
 		RegCloseKey(subkey);
 	}
 	return hr;
+}
+
+HRESULT SetRegistryEntries(RegistryEntry entries[], BOOL expandEnv) {
+	for (int i = 0; entries[i].hKey != NULL; i++) {
+		RegistryEntry entry = entries[i];
+		if (expandEnv && entry.lpSubKey) {
+			WCHAR expanded[1024];
+			ExpandEnvironmentStrings(entry.lpSubKey, expanded, ARRAYSIZE(expanded));
+			entry.lpSubKey = expanded;
+		}
+
+		HKEY key;
+		HRESULT hr = HRESULT_FROM_WIN32(RegCreateKeyEx(entry.hKey, entry.lpSubKey, 0, NULL, 0, GetWow64Flag(KEY_WRITE | entry.samDesired), NULL, &key, NULL));
+		if (!SUCCEEDED(hr)) {
+			return hr;
+		}
+
+		if (entry.lpData == DELETE_THIS) {
+			hr = HRESULT_FROM_WIN32(RegDeleteValue(key, entry.lpValueName));
+		} else {
+			if (entry.dwType == REG_SZ) {
+				if (expandEnv) {
+					WCHAR expanded[1024];
+					ExpandEnvironmentStrings((LPCWSTR)entry.lpData, expanded, ARRAYSIZE(expanded));
+					entry.lpData = expanded;
+				}
+
+				entry.dataSize = (DWORD)(lstrlen((LPCWSTR)entry.lpData) + 1) * sizeof(WCHAR);
+			} else {
+				entry.dataSize = sizeof(entry.lpData);
+				entry.lpData = (LPVOID)&entry.lpData;
+			}
+
+			hr = HRESULT_FROM_WIN32(RegSetValueEx(key, entry.lpValueName, 0, entry.dwType, (const BYTE *)entry.lpData, entry.dataSize));
+		}
+
+		RegCloseKey(key);
+		if (!SUCCEEDED(hr)) {
+			return hr;
+		}
+	}
+
+	return S_OK;
 }

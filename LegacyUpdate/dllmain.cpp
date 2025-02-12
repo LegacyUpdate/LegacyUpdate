@@ -3,12 +3,13 @@
 #include "stdafx.h"
 #include "LegacyUpdate_i.h"
 #include "dllmain.h"
-
-#include <strsafe.h>
-
 #include "dlldatax.h"
-#include "Registry.h"
+#include "ElevationHelper.h"
 #include "LegacyUpdate.h"
+#include "LegacyUpdateCtrl.h"
+#include "ProgressBarControl.h"
+#include "Registry.h"
+#include "VersionInfo.h"
 
 CLegacyUpdateModule _AtlModule;
 HINSTANCE g_hInstance;
@@ -16,8 +17,9 @@ HINSTANCE g_hInstance;
 // DLL Entry Point
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 #ifdef _MERGE_PROXYSTUB
-	if (!PrxDllMain(hInstance, dwReason, lpReserved))
+	if (!PrxDllMain(hInstance, dwReason, lpReserved)) {
 		return FALSE;
+	}
 #endif
 
 	switch (dwReason) {
@@ -59,38 +61,71 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) {
 
 // DllRegisterServer - Adds entries to the system registry
 STDAPI DllRegisterServer(void) {
-	// registers object, typelib and all interfaces in typelib
-	HRESULT hr = _AtlModule.DllRegisterServer();
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	// Fix the icon path
-	HKEY subkey;
-	hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CLASSES_ROOT, L"CLSID\\{84F517AD-6438-478F-BEA8-F0B808DC257F}\\Elevation", 0, KEY_WRITE, &subkey));
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
 	LPWSTR installPath;
-	hr = GetInstallPath(&installPath);
+	HRESULT hr = GetInstallPath(&installPath);
+	if (!SUCCEEDED(hr)) {
+			return hr;
+	}
+
+	LPWSTR filename;
+	GetOwnFileName(&filename);
+
+	// Register type library
+	CComPtr<ITypeLib> typeLib;
+	hr = LoadTypeLib(filename, &typeLib);
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
 
-	WCHAR iconRef[512];
-	hr = StringCchPrintf((LPWSTR)&iconRef, ARRAYSIZE(iconRef), L"@%ls\\LegacyUpdate.exe,-100", installPath);
-	LocalFree(installPath);
+	hr = RegisterTypeLib(typeLib, filename, NULL);
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
 
-	hr = HRESULT_FROM_WIN32(RegSetValueEx(subkey, L"IconReference", 0, REG_SZ, (LPBYTE)iconRef, (DWORD)(lstrlen(iconRef) + 1) * sizeof(TCHAR)));
+	// Get IDs
+	LPWSTR libid, clsidCtrl, clsidElevationHelper, clsidProgressBar;
+	if (!SUCCEEDED(StringFromCLSID(LIBID_LegacyUpdateLib, &libid)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_LegacyUpdateCtrl, &clsidCtrl)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_ElevationHelper, &clsidElevationHelper)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_ProgressBarControl, &clsidProgressBar))) {
+		return E_FAIL;
+	}
+
+	// Set vars used for expansions
+	SetEnvironmentVariable(L"APPID", CLegacyUpdateModule::GetAppId());
+	SetEnvironmentVariable(L"LIBID", libid);
+	SetEnvironmentVariable(L"CLSID_LegacyUpdateCtrl", clsidCtrl);
+	SetEnvironmentVariable(L"CLSID_ElevationHelper", clsidElevationHelper);
+	SetEnvironmentVariable(L"CLSID_ProgressBarControl", clsidProgressBar);
+	SetEnvironmentVariable(L"MODULE", filename);
+	SetEnvironmentVariable(L"INSTALLPATH", installPath);
+
+	// Main
+	RegistryEntry mainEntries[] = {
+		{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", L"DllSurrogate", REG_SZ, L""},
+		{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", REG_SZ, L""},
+		{}
+	};
+	hr = SetRegistryEntries(mainEntries, TRUE);
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
 
-	hr = RegCloseKey(subkey);
+	// Register classes
+	hr = CLegacyUpdateCtrl::UpdateRegistry(TRUE);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	hr = CElevationHelper::UpdateRegistry(TRUE);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	hr = CProgressBarControl::UpdateRegistry(TRUE);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
 
 #ifdef _MERGE_PROXYSTUB
 	if (!SUCCEEDED(hr)) {
@@ -105,40 +140,81 @@ STDAPI DllRegisterServer(void) {
 
 // DllUnregisterServer - Removes entries from the system registry
 STDAPI DllUnregisterServer(void) {
-	HRESULT hr = _AtlModule.DllUnregisterServer();
+	LPWSTR filename;
+	GetOwnFileName(&filename);
+
+	// Unregister type library
+	CComPtr<ITypeLib> typeLib;
+	HRESULT hr = LoadTypeLib(filename, &typeLib);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	TLIBATTR *attrs;
+	hr = typeLib->GetLibAttr(&attrs);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	hr = UnRegisterTypeLib(attrs->guid, attrs->wMajorVerNum, attrs->wMinorVerNum, attrs->lcid, attrs->syskind);
+	typeLib->ReleaseTLibAttr(attrs);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	// Get IDs
+	LPWSTR clsidCtrl, clsidElevationHelper, clsidProgressBar;
+	if (!SUCCEEDED(StringFromCLSID(CLSID_LegacyUpdateCtrl, &clsidCtrl)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_ElevationHelper, &clsidElevationHelper)) ||
+		!SUCCEEDED(StringFromCLSID(CLSID_ProgressBarControl, &clsidProgressBar))) {
+		return E_FAIL;
+	}
+
+	// Set vars used for expansions
+	SetEnvironmentVariable(L"APPID", CLegacyUpdateModule::GetAppId());
+	SetEnvironmentVariable(L"CLSID_LegacyUpdateCtrl", clsidCtrl);
+	SetEnvironmentVariable(L"CLSID_ElevationHelper", clsidElevationHelper);
+	SetEnvironmentVariable(L"CLSID_ProgressBarControl", clsidProgressBar);
+
+	// Delete registry entries
+	RegistryEntry entries[] = {
+		{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", L"DllSurrogate", 0, DELETE_THIS},
+		{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", 0, DELETE_THIS},
+		{}
+	};
+	hr = SetRegistryEntries(entries, TRUE);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	// Unregister classes
+	hr = CLegacyUpdateCtrl::UpdateRegistry(FALSE);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	hr = CElevationHelper::UpdateRegistry(FALSE);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	hr = CProgressBarControl::UpdateRegistry(FALSE);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
 #ifdef _MERGE_PROXYSTUB
-	if (FAILED(hr)) {
-		return hr;
-	}
 	hr = PrxDllRegisterServer();
-	if (FAILED(hr)) {
+	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
+
 	hr = PrxDllUnregisterServer();
 #endif
 	return hr;
 }
 
-
 // DllInstall - Adds/Removes entries to the system registry per user per machine.
 STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
-	HRESULT hr = E_FAIL;
-	static const wchar_t szUserSwitch[] = L"user";
-
-	if (pszCmdLine != NULL) {
-		if (_wcsnicmp(pszCmdLine, szUserSwitch, _countof(szUserSwitch)) == 0) {
-			AtlSetPerUserRegistration(true);
-		}
-	}
-
-	if (bInstall) {
-		hr = DllRegisterServer();
-		if (FAILED(hr)) {
-			DllUnregisterServer();
-		}
-	} else {
-		hr = DllUnregisterServer();
-	}
-
-	return hr;
+	return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
 }

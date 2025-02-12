@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "ProgressBarControl.h"
 #include <CommCtrl.h>
+#include "Registry.h"
+#include "VersionInfo.h"
 
 #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
@@ -12,6 +14,40 @@
 #ifndef PBM_SETMARQUEE
 #define PBM_SETMARQUEE (WM_USER + 10)
 #endif
+
+STDMETHODIMP CProgressBarControl::UpdateRegistry(BOOL bRegister) {
+	if (bRegister) {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar", NULL, REG_SZ, L"Legacy Update Progress Bar Control"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar\\CurVer", NULL, REG_SZ, L"LegacyUpdate.ProgressBar.1"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar.1", NULL, REG_SZ, L"Legacy Update Progress Bar Control"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar.1\\CLSID", NULL, REG_SZ, L"%CLSID_ProgressBarControl%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%", NULL, REG_SZ, L"Legacy Update Progress Bar Control"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%", L"AppID", REG_SZ, L"%APPID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\ProgID", NULL, REG_SZ, L"LegacyUpdate.ProgressBar.1"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\VersionIndependentProgID", NULL, REG_SZ, L"LegacyUpdate.ProgressBar"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Programmable", NULL, REG_SZ, L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\InprocServer32", NULL, REG_SZ, L"%MODULE%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\InprocServer32", L"ThreadingModel", REG_SZ, L"Apartment"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Control", NULL, REG_SZ, L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\TypeLib", NULL, REG_SZ, L"%LIBID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Version", NULL, REG_SZ, L"1.0"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\MiscStatus", NULL, REG_DWORD, (LPVOID)_GetMiscStatus()},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Implemented Categories\\{7DD95801-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Implemented Categories\\{7DD95802-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, L""},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	} else {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar", NULL, REG_SZ, DELETE_THIS},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ProgressBar.1", NULL, REG_SZ, DELETE_THIS},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%", NULL, REG_SZ, DELETE_THIS},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	}
+}
 
 LRESULT CProgressBarControl::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled) {
 	RECT rc;

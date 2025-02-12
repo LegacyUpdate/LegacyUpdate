@@ -29,6 +29,39 @@ const BSTR permittedHosts[] = {
 
 // CLegacyUpdateCtrl message handlers
 
+STDMETHODIMP CLegacyUpdateCtrl::UpdateRegistry(BOOL bRegister) {
+	if (bRegister) {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control", NULL, REG_SZ, L"Legacy Update Control"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control\\CurVer", NULL, REG_SZ, L"LegacyUpdate.Control.1"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control.1", NULL, REG_SZ, L"Legacy Update Control"},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control.1\\CLSID", NULL, REG_SZ, L"%CLSID_LegacyUpdateCtrl%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%", NULL, REG_SZ, L"Legacy Update Control"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%", L"AppID", REG_SZ, L"%APPID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\ProgID", NULL, REG_SZ, L"LegacyUpdate.Control"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Programmable", NULL, REG_SZ, L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\InprocServer32", NULL, REG_SZ, L"%MODULE%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\InprocServer32", L"ThreadingModel", REG_SZ, L"Apartment"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Control", NULL, REG_SZ, L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\TypeLib", NULL, REG_SZ, L"%LIBID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Version", NULL, REG_SZ, L"1.0"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\MiscStatus", NULL, REG_DWORD, (LPVOID)_GetMiscStatus()},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Implemented Categories\\{7DD95801-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Implemented Categories\\{7DD95802-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, L""},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	} else {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control", NULL, REG_SZ, DELETE_THIS},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control.1", NULL, REG_SZ, DELETE_THIS},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%", NULL, REG_SZ, DELETE_THIS},
+			{}
+		};
+		return SetRegistryEntries(entries, TRUE);
+	}
+}
+
 IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
 	CComPtr<IOleClientSite> clientSite;
 	HRESULT hr = GetClientSite(&clientSite);
@@ -166,47 +199,17 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 
 	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
 
+	if (osField < e_SPMajor) {
+		retval->vt = VT_UI4;
+		retval->ulVal = *((DWORD *)((BYTE *)&versionInfo->dwMajorVersion + osField * sizeof(DWORD)));
+		return S_OK;
+	} else if (osField < e_systemMetric) {
+		retval->vt = VT_I4;
+		retval->lVal = *((LONG *)((BYTE *)&versionInfo->wServicePackMajor + (osField - e_SPMajor) * sizeof(LONG)));
+		return S_OK;
+	}
+
 	switch (osField) {
-	case e_majorVer:
-		retval->vt = VT_UI4;
-		retval->ulVal = versionInfo->dwMajorVersion;
-		break;
-
-	case e_minorVer:
-		retval->vt = VT_UI4;
-		retval->ulVal = versionInfo->dwMinorVersion;
-		break;
-
-	case e_buildNumber:
-		retval->vt = VT_UI4;
-		retval->ulVal = versionInfo->dwBuildNumber;
-		break;
-
-	case e_platform:
-		retval->vt = VT_UI4;
-		retval->ulVal = versionInfo->dwPlatformId;
-		break;
-
-	case e_SPMajor:
-		retval->vt = VT_I4;
-		retval->lVal = versionInfo->wServicePackMajor;
-		break;
-
-	case e_SPMinor:
-		retval->vt = VT_I4;
-		retval->lVal = versionInfo->wServicePackMinor;
-		break;
-
-	case e_productSuite:
-		retval->vt = VT_I4;
-		retval->lVal = versionInfo->wSuiteMask;
-		break;
-
-	case e_productType:
-		retval->vt = VT_I4;
-		retval->lVal = versionInfo->wProductType;
-		break;
-
 	case e_systemMetric:
 		retval->vt = VT_I4;
 		retval->lVal = GetSystemMetrics(systemMetric);
