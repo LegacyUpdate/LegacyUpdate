@@ -1280,7 +1280,7 @@ Facility     = WindowsUpdate
 Severity     = Error
 SymbolicName = WU_E_PT_HTTP_STATUS_NOT_SUPPORTED
 Language     = English
-HTTP status 500 - server does not support the functionality required to fulfill the request.
+HTTP status 501 - server does not support the functionality required to fulfill the request.
 .
 
 MessageId    = 0x4021
@@ -1304,7 +1304,7 @@ Facility     = WindowsUpdate
 Severity     = Error
 SymbolicName = WU_E_PT_HTTP_STATUS_GATEWAY_TIMEOUT
 Language     = English
-HTTP status 503 - the request was timed out waiting for a gateway.
+HTTP status 504 - the request was timed out waiting for a gateway.
 .
 
 MessageId    = 0x4024
