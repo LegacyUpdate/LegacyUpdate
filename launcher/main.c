@@ -11,11 +11,13 @@ HINSTANCE g_hInstance;
 
 extern void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow);
 extern void LaunchOptions(int nCmdShow);
+extern void LaunchLog(int nCmdShow);
 extern void RunOnce();
 
 typedef enum Action {
 	ActionLaunch,
 	ActionOptions,
+	ActionLog,
 	ActionRunOnce,
 	ActionRegServer,
 	ActionUnregServer
@@ -24,6 +26,7 @@ typedef enum Action {
 static const LPWSTR actions[] = {
 	L"/launch",
 	L"/options",
+	L"/log",
 	L"/runonce",
 	L"/regserver",
 	L"/unregserver",
@@ -75,6 +78,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		LaunchOptions(nCmdShow);
 		break;
 
+	case ActionLog:
+		LaunchLog(nCmdShow);
+		break;
+
 	case ActionRunOnce:
 		RunOnce();
 		break;
@@ -96,6 +103,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 			L"\n"
 			L"/options\n"
 			L"    Open the Windows Update Options control panel\n"
+			L"\n"
+			L"/log\n"
+			L"    Open the Windows Update log file\n"
 			L"\n"
 			L"/regserver\n"
 			L"    Register ActiveX control\n"

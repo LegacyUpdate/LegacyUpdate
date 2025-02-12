@@ -431,47 +431,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
-	DoIsPermittedCheck();
-
-	WCHAR windir[MAX_PATH];
-	HRESULT hr = SHGetFolderPath(0, CSIDL_WINDOWS, NULL, 0, windir);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(hr));
-		return hr;
-	}
-
-	LPWSTR workDir = windir;
-
-	if (AtLeastWin10()) {
-		// Windows 10 moves WU/USO logs to ETW. The ETW logs can be converted back to a plain-text .log
-		// using a cmdlet.
-		WCHAR powershell[MAX_PATH];
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", powershell, ARRAYSIZE(powershell));
-
-		DWORD code;
-		HRESULT hr = Exec(NULL, powershell, L"-Command Get-WindowsUpdateLog", windir, SW_SHOWDEFAULT, TRUE, &code);
-		if (!SUCCEEDED(hr) || code != 0) {
-			return hr;
-		}
-
-		// On success, the log is written to Desktop\WindowsUpdate.log.
-		WCHAR desktop[MAX_PATH];
-		hr = SHGetFolderPath(0, CSIDL_DESKTOP, NULL, 0, desktop);
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(hr));
-			return hr;
-		}
-
-		workDir = desktop;
-	}
-
-	return Exec(L"open", L"WindowsUpdate.log", NULL, workDir, SW_SHOWDEFAULT, FALSE, NULL);
-}
-
-STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
-	DoIsPermittedCheck();
-
+static HRESULT StartLauncher(LPWSTR params, BOOL wait) {
 	LPWSTR path;
 	HRESULT hr = GetInstallPath(&path);
 	if (!SUCCEEDED(hr)) {
@@ -481,13 +441,32 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	PathAppend(path, L"LegacyUpdate.exe");
 
 	DWORD code;
-	hr = Exec(L"open", path, L"/options", NULL, SW_SHOW, TRUE, &code);
+	hr = Exec(L"open", path, params, NULL, SW_SHOW, wait, &code);
 	if (SUCCEEDED(hr)) {
 		hr = HRESULT_FROM_WIN32(code);
 	}
 
+	return hr;
+}
+
+STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
+	DoIsPermittedCheck();
+
+	HRESULT hr = StartLauncher(L"/log", FALSE);
 	if (!SUCCEEDED(hr)) {
-		TRACE(L"OpenWindowsUpdateSettings() failed: %ls\n", GetMessageForHresult(hr));
+		// Try directly
+		hr = ::ViewWindowsUpdateLog(SW_SHOWDEFAULT);
+	}
+
+	return hr;
+}
+
+STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
+	DoIsPermittedCheck();
+
+	HRESULT hr = StartLauncher(L"/options", FALSE);
+	if (!SUCCEEDED(hr)) {
+		TRACE(L"OpenWindowsUpdateSettings() failed, falling back: %ls\n", GetMessageForHresult(hr));
 
 		// Might happen if the site isn't trusted, and the user rejected the IE medium integrity prompt.
 		// Use the basic Automatic Updates dialog directly from COM.
