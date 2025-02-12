@@ -37,9 +37,12 @@ SetPluginUnload alwaysoff
 	IfErrors `${_f}` `${_t}`
 !macroend
 
-!define IsPassive `"" HasFlag "/passive"`
-!define IsActiveX `"" HasFlag "/activex"`
-!define IsHelp    `"" HasFlag "/?"`
+!define IsPassive     `"" HasFlag "/passive"`
+!define IsActiveX     `"" HasFlag "/activex"`
+!define IsRunOnce     `"" HasFlag "/runonce"`
+!define IsPostInstall `"" HasFlag "/postinstall"`
+!define NoRestart     `"" HasFlag "/norestart"`
+!define IsHelp        `"" HasFlag "/?"`
 
 !if ${DEBUG} == 1
 !define IsVerbose   `1 == 1`
@@ -98,6 +101,7 @@ Function InitChecks
 	${EndIf}
 !endif
 
+	ClearErrors
 	LegacyUpdateNSIS::IsAdmin
 	${If} ${Errors}
 		MessageBox MB_USERICON "$(MsgBoxPluginFailed)" /SD IDOK
@@ -173,7 +177,7 @@ Function InitChecks
 		Quit
 	${EndIf}
 !endif
-FunctionEnd
+!macroend
 
 !macro InhibitSleep state
 !if ${state} == 1

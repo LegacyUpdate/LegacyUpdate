@@ -1,7 +1,3 @@
-!define IsRunOnce     `"" HasFlag "/runonce"`
-!define IsPostInstall `"" HasFlag "/postinstall"`
-!define NoRestart     `"" HasFlag "/norestart"`
-
 !macro PromptReboot
 	!insertmacro InhibitSleep 0
 	SetErrorLevel ${ERROR_SUCCESS_REBOOT_REQUIRED}

@@ -35,6 +35,18 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
+!if ${NT4} == 1
+Var /GLOBAL SPCleanup
+!endif
+
+Function SkipSPUninstall
+!if ${NT4} == 1
+	Push $SPCleanup
+!else
+	Push 0
+!endif
+FunctionEnd
+
 Var /GLOBAL Patch.Key
 Var /GLOBAL Patch.File
 Var /GLOBAL Patch.Title
@@ -92,6 +104,7 @@ FunctionEnd
 		${EndIf}
 
 		Call Download${kbid}
+		Call SkipSPUninstall
 !if ${type} == ${PATCH_FLAGS_OTHER}
 		StrCpy $R0 ""
 !endif

@@ -208,6 +208,10 @@ ${MementoSection} "$(SectionRootCerts)" ROOTCERTS
 	${EndIf}
 ${MementoSectionEnd}
 
+${MementoSection} "$(SectionNT4USB)" NT4USB
+	Call InstallNT4USB
+${MementoSectionEnd}
+
 ${MementoUnselectedSection} "$(SectionSPCleanup)" SPCLEANUP
 	Call CleanUpSPUninstall
 ${MementoSectionEnd}
@@ -257,6 +261,10 @@ Function ComponentsPageCheck
 FunctionEnd
 
 Function PreDownload
+	${If} ${SectionIsSelected} ${SPCLEANUP}
+		StrCpy $SPCleanup 1
+	${EndIf}
+
 	${If} ${SectionIsSelected} ${NT4IE6SP1}
 		Call DownloadIE6
 	${EndIf}
