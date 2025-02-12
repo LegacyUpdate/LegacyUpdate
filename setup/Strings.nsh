@@ -50,6 +50,11 @@ LangString MsgBoxCompatMode ${LANG_ENGLISH} \
 	$\r$\n\
 	Disable it in the Properties dialog of this file and try again."
 
+LangString MsgBoxPluginFailed ${LANG_ENGLISH} \
+	"Setup failed to initialize.$\r$\n\
+	$\r$\n\
+	The file may be corrupt. Try downloading Legacy Update again."
+
 ; Install errors
 FileErrorText \
 	'Unable to write to "$0".$\r$\n\
@@ -105,7 +110,7 @@ LangString MsgBoxWUA2000Datacenter ${LANG_ENGLISH} \
 LangString StatusRestarting     ${LANG_ENGLISH} "Restarting..."
 LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update service..."
 LangString StatusCheckingSSL    ${LANG_ENGLISH} "Checking SSL connectivity..."
-LangString StatusCbsInstalling  ${LANG_ENGLISH} "Waiting for updates to install..."
+LangString StatusCbsInstalling  ${LANG_ENGLISH} "Configuring updates..."
 
 ; Sections
 LangString Setup    ${LANG_ENGLISH} "Setup"

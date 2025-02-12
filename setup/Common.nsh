@@ -289,7 +289,14 @@ FunctionEnd
 		Quit
 	${EndIf}
 
+	ClearErrors
 	LegacyUpdateNSIS::IsAdmin
+	${If} ${Errors}
+		MessageBox MB_USERICON "$(MsgBoxPluginFailed)" /SD IDOK
+		SetErrorLevel 1
+		Quit
+	${EndIf}
+
 	Pop $0
 	${If} $0 == 0
 		MessageBox MB_USERICON "$(MsgBoxElevationRequired)" /SD IDOK
