@@ -69,7 +69,7 @@
 !insertmacro MSUHandler "KB2117917" "$(PUS) for Windows Vista"
 
 !insertmacro NeedsFileVersionHandler "IE9" "mshtml.dll" "9.0.8112.16421"
-!insertmacro PatchHandler "IE9" "$(IE) 9 for Windows Vista" "/passive /norestart /update-no /closeprograms"
+!insertmacro PatchHandler "IE9" "$(IE) 9 for Windows Vista" "/passive /norestart /update-no /closeprograms" ""
 
 ; Windows Vista Servicing Stack Update
 !insertmacro MSUHandler "KB4493730" "2019-04 $(SSU) for Windows $(SRV) 2008"

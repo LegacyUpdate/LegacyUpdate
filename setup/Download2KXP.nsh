@@ -35,6 +35,18 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
+!if ${NT4} == 1
+Var /GLOBAL SPCleanup
+!endif
+
+Function SkipSPUninstall
+!if ${NT4} == 1
+	Push $SPCleanup
+!else
+	Push 0
+!endif
+FunctionEnd
+
 Var /GLOBAL Patch.Key
 Var /GLOBAL Patch.File
 Var /GLOBAL Patch.Title
@@ -61,7 +73,7 @@ Function -PatchHandler
 	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" 1
 FunctionEnd
 
-!macro PatchHandler kbid title params
+!macro PatchHandler kbid title params cleanup
 	Function Download${kbid}
 		${If} ${NeedsPatch} ${kbid}
 			StrCpy $Patch.Key   "${kbid}"
@@ -74,7 +86,14 @@ FunctionEnd
 	Function Install${kbid}
 		${If} ${NeedsPatch} ${kbid}
 			Call Download${kbid}
-			!insertmacro Install "${title}" "${kbid}.exe" "${params}"
+			Call SkipSPUninstall
+			Pop $R0
+			${If} $R0 == 1
+				StrCpy $R0 "${params} ${cleanup}"
+			${Else}
+				StrCpy $R0 "${params}"
+			${EndIf}
+			!insertmacro Install "${title}" "${kbid}.exe" "$R0"
 		${EndIf}
 	FunctionEnd
 !macroend
@@ -88,12 +107,12 @@ FunctionEnd
 
 !insertmacro NeedsFileVersionHandler "KB835732" "kernel32.dll" "5.00.2195.6897"
 
-!insertmacro PatchHandler "W2KSP4"   "Windows 2000 $(SP) 4"            "-u -z"
-!insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 $(Update)" "/passive /norestart"
-!insertmacro PatchHandler "XPSP1a"   "Windows XP $(SP) 1a"             "-u -z"
-!insertmacro PatchHandler "XPSP3"    "Windows XP $(SP) 3"              "/passive /norestart"
-!insertmacro PatchHandler "2003SP2"  "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" "/passive /norestart"
-!insertmacro PatchHandler "XPESP3"   "Windows XP $(EMB) $(SP) 3"       "/passive /norestart"
+!insertmacro PatchHandler "W2KSP4"   "Windows 2000 $(SP) 4"            "-u -z" ""
+!insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 $(Update)" "/passive /norestart" ""
+!insertmacro PatchHandler "XPSP1a"   "Windows XP $(SP) 1a"             "-u -z" ""
+!insertmacro PatchHandler "XPSP3"    "Windows XP $(SP) 3"              "/passive /norestart" ""
+!insertmacro PatchHandler "2003SP2"  "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" "/passive /norestart" ""
+!insertmacro PatchHandler "XPESP3"   "Windows XP $(EMB) $(SP) 3"       "/passive /norestart" ""
 !endif
 
 !insertmacro NeedsFileVersionHandler "IE6"      "mshtml.dll"   "6.0.2600.0"

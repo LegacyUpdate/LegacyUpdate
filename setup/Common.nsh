@@ -50,10 +50,13 @@ FunctionEnd
 	IfErrors `${_f}` `${_t}`
 !macroend
 
-!define IsPassive `"" HasFlag "/passive"`
-!define IsActiveX `"" HasFlag "/activex"`
-!define IsHelp    `"" HasFlag "/?"`
-!define IsVerbose `"" HasFlag "/v"`
+!define IsPassive     `"" HasFlag "/passive"`
+!define IsActiveX     `"" HasFlag "/activex"`
+!define IsRunOnce     `"" HasFlag "/runonce"`
+!define IsPostInstall `"" HasFlag "/postinstall"`
+!define NoRestart     `"" HasFlag "/norestart"`
+!define IsHelp        `"" HasFlag "/?"`
+!define IsVerbose     `"" HasFlag "/v"`
 
 !macro _NeedsPatch _a _b _t _f
 	!insertmacro _LOGICLIB_TEMP
@@ -280,7 +283,7 @@ FunctionEnd
 	Call InstallMSU
 !macroend
 
-Function InitChecks
+!macro InitChecks
 	${If} ${IsHelp}
 		MessageBox MB_USERICON "$(MsgBoxUsage)"
 		Quit
@@ -314,7 +317,14 @@ Function InitChecks
 	${EndIf}
 !endif
 
+	ClearErrors
 	LegacyUpdateNSIS::IsAdmin
+	${If} ${Errors}
+		MessageBox MB_USERICON "$(MsgBoxPluginFailed)" /SD IDOK
+		SetErrorLevel 1
+		Quit
+	${EndIf}
+
 	Pop $0
 	${If} $0 == 0
 		MessageBox MB_USERICON "$(MsgBoxElevationRequired)" /SD IDOK
@@ -383,7 +393,7 @@ Function InitChecks
 		Quit
 	${EndIf}
 !endif
-FunctionEnd
+!macroend
 
 !macro InhibitSleep state
 !if ${state} == 1

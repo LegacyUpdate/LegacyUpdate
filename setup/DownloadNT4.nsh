@@ -4,7 +4,34 @@
 	FunctionEnd
 !macroend
 
-!insertmacro TODO "NT4SP6A"
+!include "NT4USB.nsh"
+
+!insertmacro NeedsSPHandler "NT4SP6a" "WinNT4" 6
+
+Function NeedsNT4SP6a-clt
+	Call NeedsNT4SP6a
+FunctionEnd
+
+Function NeedsNT4SP6a-wts
+	; TODO: Is it Terminal Server?
+	Call NeedsNT4SP6a
+FunctionEnd
+
+!insertmacro PatchHandler "NT4SP6a-clt" "Windows NT 4.0 $(SP) 6a"        "-u -z" "-n -o"
+!insertmacro PatchHandler "NT4SP6a-wts" "Windows NT 4.0 $(WTS) $(SP) 6a" "-u -z" "-n -o"
+
+Function InstallNT4SP6a
+	${If} ${NeedsPatch} NT4SP6a
+		DetailPrint "$(Installing)Windows NT 4.0 $(SP) 6a..."
+		; TODO: Is it Terminal Server?
+		${If} ${NeedsPatch} NT4SP6a-wts
+			Call InstallNT4SP6a-wts
+		${Else}
+			Call InstallNT4SP6a-clt
+		${EndIf}
+	${EndIf}
+FunctionEnd
+
 !insertmacro TODO "NT4Rollup"
 
 ; Workstation/Server

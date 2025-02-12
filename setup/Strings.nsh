@@ -128,6 +128,7 @@ LangString PRO      ${LANG_ENGLISH} "Professional"
 LangString P64      ${LANG_ENGLISH} "Professional x64 Edition"
 LangString EMB      ${LANG_ENGLISH} "Embedded"
 LangString SRV      ${LANG_ENGLISH} "Server"
+LangString WTS      ${LANG_ENGLISH} "Terminal Server"
 
 ; Update types
 LangString Setup    ${LANG_ENGLISH} "Setup"
@@ -221,6 +222,8 @@ LangString SectionWDUYes        ${LANG_ENGLISH} \
 LangString SectionWDUNo         ${LANG_ENGLISH} \
 	"Keep Windows 95-style Explorer"
 
+LangString SectionNT4USB        ${LANG_ENGLISH} \
+	"Inside Out Networks USB Peripheral Drivers"
 LangString SectionSPCleanup     ${LANG_ENGLISH} \
 	"Delete update uninstall data"
 
@@ -249,5 +252,7 @@ LangString SectionNT4WMP64Desc  ${LANG_ENGLISH} \
 LangString SectionNT4DX5Desc    ${LANG_ENGLISH} \
 	"Installs DirectX 5. This is an unofficial patch. Microsoft officially supports only up to DirectX 3 on Windows NT 4.0.$\r$\n$(SectionSupEULA)"
 
+LangString SectionNT4USBDesc    ${LANG_ENGLISH} \
+	"Installs the Inside Out Networks USB Peripheral Drivers, enabling access to USB devices.$\r$\nBy installing, you are agreeing to the Inside Out Networks Edgeport for NT 4.0 License Agreement."
 LangString SectionSPCleanupDesc ${LANG_ENGLISH} \
 	"Deletes backup files created during installation of updates. This frees up disk space, but you will not be able to uninstall updates."
