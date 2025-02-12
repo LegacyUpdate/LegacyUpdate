@@ -1,4 +1,5 @@
-; USB
+; TODO: Check whether machine will support the USB stack, via LegacyUpdateNSIS::IsMultiCPU
+
 Function InstallNT4USB
 	Call InstallNT4USBStack
 	Call InstallNT4USBHID
