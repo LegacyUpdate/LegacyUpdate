@@ -11,8 +11,8 @@
 #include "User.h"
 #include "Utils.h"
 #include "VersionInfo.h"
+#include "WULog.h"
 #include <atlbase.h>
-#include <ShellAPI.h>
 #include <ShlObj.h>
 #include <wuapi.h>
 #include "IUpdateInstaller4.h"
