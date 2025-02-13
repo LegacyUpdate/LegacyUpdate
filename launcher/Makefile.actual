@@ -1,7 +1,6 @@
 FILES    = \
 	$(wildcard *.c) \
 	../shared/Exec.c \
-	../shared/Gdip.c \
 	../shared/HResult.c \
 	../shared/LegacyUpdate.c \
 	../shared/LoadImage.c \
@@ -79,7 +78,6 @@ LDFLAGS = \
 	-lshell32 \
 	-lversion \
 	-lgdi32 \
-	-lgdiplus \
 	-lmsimg32
 
 RCFLAGS = \

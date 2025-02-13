@@ -57,8 +57,8 @@ typedef enum Theme {
 	ThemeAeroDark
 } Theme;
 
-static GpBitmap *g_bannerWordmark;
-static GpBitmap *g_bannerWordmarkGlow;
+static HBITMAP g_bannerWordmark;
+static HBITMAP g_bannerWordmarkGlow;
 static HTHEME g_aeroTheme;
 static Theme g_theme = ThemeUnknown;
 
@@ -162,38 +162,46 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		blendFunc.AlphaFormat = AC_SRC_ALPHA;
 
 		// Draw wordmark with alpha blending
-		GpGraphics *graphics;
-		if (GdipCreateFromHDC(hdc, &graphics) == Ok) {
-			GpRectF destRect;
-			UINT width, height;
-			GdipGetImageWidth(g_bannerWordmark, &width);
-			GdipGetImageHeight(g_bannerWordmark, &height);
+		if (g_bannerWordmarkGlow) {
+			HDC hdcMem = CreateCompatibleDC(hdc);
+			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_bannerWordmarkGlow);
 
-			float scale = (float)GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
-			destRect.X = (rect.right - rect.left - width * scale) / 2;
-			destRect.Y = ((rect.bottom - rect.top - height * scale) / 2) - (1 * scale);
-			destRect.Width = width * scale;
-			destRect.Height = height * scale;
+			BITMAP bitmap;
+			GetObject(g_bannerWordmarkGlow, sizeof(bitmap), &bitmap);
 
-			UINT glowWidth, glowHeight;
-			if (g_bannerWordmarkGlow) {
-				GdipGetImageWidth(g_bannerWordmarkGlow, &glowWidth);
-				GdipGetImageHeight(g_bannerWordmarkGlow, &glowHeight);
-				GdipDrawImageRectRect(graphics, g_bannerWordmarkGlow,
-					destRect.X, destRect.Y, destRect.Width, destRect.Height,
-					0, 0, glowWidth, glowHeight,
-					UnitPixel, NULL, NULL, NULL);
-			}
+			LONG width = bitmap.bmWidth * scale;
+			LONG height = bitmap.bmHeight * scale;
+			LONG x = (rect.right - rect.left - width) / 2;
+			LONG y = (rect.bottom - rect.top - height) / 2;
 
-			UINT wordmarkWidth, wordmarkHeight;
-			GdipGetImageWidth(g_bannerWordmark, &wordmarkWidth);
-			GdipGetImageHeight(g_bannerWordmark, &wordmarkHeight);
-			GdipDrawImageRectRect(graphics, g_bannerWordmark,
-				destRect.X, destRect.Y, destRect.Width, destRect.Height,
-				0, 0, wordmarkWidth, wordmarkHeight,
-				UnitPixel, NULL, NULL, NULL);
+			SetStretchBltMode(hdc, HALFTONE);
+			AlphaBlend(hdc,
+				x, y, width, height, hdcMem,
+				0, 0, bitmap.bmWidth, bitmap.bmHeight, blendFunc);
 
-			GdipDeleteGraphics(graphics);
+			SelectObject(hdcMem, hbmOld);
+			DeleteDC(hdcMem);
+		}
+
+		if (g_bannerWordmark) {
+			HDC hdcMem = CreateCompatibleDC(hdc);
+			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_bannerWordmark);
+
+			BITMAP bitmap;
+			GetObject(g_bannerWordmark, sizeof(bitmap), &bitmap);
+
+			LONG width = bitmap.bmWidth * scale;
+			LONG height = bitmap.bmHeight * scale;
+			LONG x = (rect.right - rect.left - width) / 2;
+			LONG y = ((rect.bottom - rect.top - height) / 2) - (1 * scale);
+
+			SetStretchBltMode(hdc, HALFTONE);
+			AlphaBlend(hdc,
+				x, y, width, height, hdcMem,
+				0, 0, bitmap.bmWidth, bitmap.bmHeight, blendFunc);
+
+			SelectObject(hdcMem, hbmOld);
+			DeleteDC(hdcMem);
 		}
 
 		EndPaint(hwnd, &ps);

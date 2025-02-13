@@ -1,7 +1,6 @@
 FILES   = \
 	$(wildcard *.c) \
 	../include/nsis/pluginapi.c \
-	../shared/Gdip.c \
 	../shared/HResult.c \
 	../shared/LegacyUpdate.c \
 	../shared/LoadImage.c \
@@ -70,7 +69,6 @@ LDFLAGS = \
 	-loleaut32 \
 	-ladvapi32 \
 	-lgdi32 \
-	-lgdiplus \
 	-lmsimg32 \
 	-lcrypt32
 

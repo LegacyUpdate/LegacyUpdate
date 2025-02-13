@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <gdiplus.h>
 
-GpBitmap *LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourceType);
-BOOL ScaleAndWriteToBMP(GpBitmap *bitmap, DWORD width, DWORD height, LPWSTR outputPath);
+HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourceType);
+BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outputPath);
