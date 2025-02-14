@@ -63,7 +63,6 @@
 
 ; XP POSReady hack
 !define REGPATH_POSREADY           "System\WPA\PosReady"
-!define REGPATH_WES                "System\WPA\WES"
 
 ; RunOnce
 !define REGPATH_SETUP              "System\Setup"
