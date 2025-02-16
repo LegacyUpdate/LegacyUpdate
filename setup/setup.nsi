@@ -164,6 +164,13 @@ Section -PreInstallTasks
 		Call PreDownload
 	${EndIf}
 
+!if ${DEBUG} == 1
+	${If} ${TestRunOnce}
+		SetRebootFlag true
+		Call RebootIfRequired
+	${EndIf}
+!endif
+
 	; If a reboot is already pending, do it now
 	${IfNot} ${IsRunOnce}
 		Call RebootIfCbsRebootPending

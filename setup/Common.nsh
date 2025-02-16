@@ -55,6 +55,10 @@ FunctionEnd
 !define IsHelp    `"" HasFlag "/?"`
 !define IsVerbose `"" HasFlag "/v"`
 
+!if ${DEBUG} == 1
+!define TestRunOnce   `"" HasFlag "/testrunonce"`
+!endif
+
 !macro _NeedsPatch _a _b _t _f
 	!insertmacro _LOGICLIB_TEMP
 	Call Needs${_b}
