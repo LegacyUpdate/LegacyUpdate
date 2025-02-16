@@ -21,7 +21,7 @@ LangString DownloadStatusMulti  ${LANG_ENGLISH} "{TIMEREMAINING} left - {TOTALRE
 
 ; Startup errors
 LangString MsgBoxUsage ${LANG_ENGLISH} \
-	"Usage: setup.exe [/S] [/passive] [/norestart]$\r$\n\
+	"Usage: setup.exe [/S] [/v] [/passive] [/norestart]$\r$\n\
 	$\r$\n\
 	/S$\tExecute Legacy Update setup silently.$\r$\n\
 	/v$\tDisplay verbose details during installation.$\r$\n\
