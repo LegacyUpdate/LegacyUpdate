@@ -19,9 +19,8 @@ static const WCHAR RunOnceClassName[] = L"LegacyUpdateRunOnce";
 static HANDLE g_cmdHandle;
 
 static void StartThemes() {
-	// Ask UxInit.dll to ask the Themes service to start a session for this desktop. Themes doesn't
-	// automatically start a session for the SYSTEM desktop, so we need to ask it to. This matches
-	// what msoobe.exe does on first boot.
+	// Ask UxInit.dll to ask the Themes service to start a session for this desktop. Themes doesn't automatically start a
+	// session for the SYSTEM desktop, so we need to ask it to. This matches what msoobe.exe does on first boot.
 
 	// Windows 7 moves this to UxInit.dll
 	HMODULE shsvcs = LoadLibrary(L"UxInit.dll");
@@ -94,9 +93,6 @@ static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, L
 }
 
 static void CreateRunOnceWindow() {
-	// Init COM
-	CoInitialize(NULL);
-
 	// Init common controls
 	INITCOMMONCONTROLSEX initComctl = {0};
 	initComctl.dwSize = sizeof(initComctl);
@@ -134,49 +130,55 @@ static void CreateRunOnceWindow() {
 	// Register hotkey
 	RegisterHotKey(hwnd, HK_RUNCMD, MOD_SHIFT, VK_F10);
 
-	// Set the wallpaper color
-	COLORREF color = GetSysColor(COLOR_DESKTOP);
-	if (AtLeastWin10()) {
-		color = WallpaperColorWin10;
-	} else if (AtLeastWin8()) {
-		color = WallpaperColorWin8;
-	} else if ((IsWinXP2002() || IsWinXP2003()) && color == RGB(0, 0, 0)) {
-		// XP uses a black wallpaper in fast user switching mode. Override to the default blue.
-		color = WallpaperColorWinXP;
-	}
-	SetSysColors(1, (const INT[1]){COLOR_DESKTOP}, (const COLORREF[1]){color});
-
-	DWORD width = GetSystemMetrics(SM_CXSCREEN);
-	DWORD height = GetSystemMetrics(SM_CYSCREEN);
-	HBITMAP wallpaper;
-
-	if (IsWin7()) {
-		// 7: Bitmap in oobe dir
-		WCHAR bmpPath[MAX_PATH];
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
-		wallpaper = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	} else if (IsWinVista()) {
-		// Vista: Resources in ooberesources.dll
-		WCHAR ooberesPath[MAX_PATH];
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\ooberesources.dll", ooberesPath, ARRAYSIZE(ooberesPath));
-		HMODULE ooberes = LoadLibrary(ooberesPath);
-		if (ooberes) {
-			// Width logic is the same used by Vista msoobe.dll
-			LPWSTR resource = GetSystemMetrics(SM_CXSCREEN) < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0";
-			wallpaper = LoadPNGResource(ooberes, resource, RT_RCDATA);
+	// Check if the display is 8-bit color or lower
+	HDC dc = GetDC(NULL);
+	int bpp = GetDeviceCaps(dc, BITSPIXEL);
+	ReleaseDC(NULL, dc);
+	if (bpp >= 8) {
+		// Set the wallpaper color
+		COLORREF color = GetSysColor(COLOR_DESKTOP);
+		if (AtLeastWin10()) {
+			color = WallpaperColorWin10;
+		} else if (AtLeastWin8()) {
+			color = WallpaperColorWin8;
+		} else if ((IsWinXP2002() || IsWinXP2003()) && color == RGB(0, 0, 0)) {
+			// XP uses a black wallpaper in fast user switching mode. Override to the default blue.
+			color = WallpaperColorWinXP;
 		}
-		FreeLibrary(ooberes);
-	}
+		SetSysColors(1, (const INT[1]){COLOR_DESKTOP}, (const COLORREF[1]){color});
 
-	if (wallpaper) {
-		// Write to disk
-		WCHAR tempPath[MAX_PATH];
-		ExpandEnvironmentStrings(L"%ProgramData%\\Legacy Update\\background.bmp", tempPath, ARRAYSIZE(tempPath));
-		if (GetFileAttributes(tempPath) != INVALID_FILE_ATTRIBUTES || ScaleAndWriteToBMP(wallpaper, width, height, tempPath)) {
-			SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)tempPath, SPIF_SENDWININICHANGE);
+		DWORD width = GetSystemMetrics(SM_CXSCREEN);
+		DWORD height = GetSystemMetrics(SM_CYSCREEN);
+		HBITMAP wallpaper;
+
+		if (IsWin7()) {
+			// 7: Bitmap in oobe dir
+			WCHAR bmpPath[MAX_PATH];
+			ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
+			wallpaper = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		} else if (IsWinVista()) {
+			// Vista: Resources in ooberesources.dll
+			WCHAR ooberesPath[MAX_PATH];
+			ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\ooberesources.dll", ooberesPath, ARRAYSIZE(ooberesPath));
+			HMODULE ooberes = LoadLibrary(ooberesPath);
+			if (ooberes) {
+				// Width logic is the same used by Vista msoobe.dll
+				LPWSTR resource = GetSystemMetrics(SM_CXSCREEN) < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0";
+				wallpaper = LoadPNGResource(ooberes, resource, RT_RCDATA);
+			}
+			FreeLibrary(ooberes);
 		}
 
-		DeleteObject(wallpaper);
+		if (wallpaper) {
+			// Write to disk
+			WCHAR tempPath[MAX_PATH];
+			ExpandEnvironmentStrings(L"%ProgramData%\\Legacy Update\\background.bmp", tempPath, ARRAYSIZE(tempPath));
+			if (GetFileAttributes(tempPath) != INVALID_FILE_ATTRIBUTES || ScaleAndWriteToBMP(wallpaper, width, height, tempPath)) {
+				SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)tempPath, SPIF_SENDWININICHANGE);
+			}
+
+			DeleteObject(wallpaper);
+		}
 	}
 
 	ShowWindow(hwnd, SW_SHOW);
