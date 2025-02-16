@@ -157,12 +157,10 @@ FunctionEnd
 	FindWindow $0 "#32770" "" $HWNDPARENT
 	FindWindow $0 "msctls_progress32" "" $0
 !if ${state} == 1
-	${NSD_RemoveExStyle} $0 ${PBS_SMOOTH}
 	${NSD_AddStyle} $0 ${PBS_MARQUEE}
 	SendMessage $0 ${PBM_SETMARQUEE} 1 100
 !else
-	${NSD_RemoveExStyle} $0 ${PBS_MARQUEE}
-	${NSD_AddStyle} $0 ${PBS_SMOOTH}
+	${NSD_RemoveStyle} $0 ${PBS_MARQUEE}
 !endif
 	Pop $0
 !macroend
