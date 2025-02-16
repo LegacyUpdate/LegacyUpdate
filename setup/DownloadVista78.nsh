@@ -1,5 +1,20 @@
-!macro SPHandler kbid title os sp
-	!insertmacro NeedsSPHandler "${kbid}" "${os}" "${sp}"
+Function NeedsPackage
+	Pop $0
+	ClearErrors
+	FindFirst $R0 $R1 "$WINDIR\servicing\Packages\$0~31bf3856ad364e35~*"
+	FindClose $R0
+	${If} ${Errors}
+		Push 1
+	${Else}
+		Push 0
+	${EndIf}
+FunctionEnd
+
+!macro SPHandler kbid pkg title
+	Function Needs${kbid}
+		Push ${pkg}
+		Call NeedsPackage
+	FunctionEnd
 
 	Function Download${kbid}
 		Call Needs${kbid}
@@ -14,9 +29,7 @@
 	FunctionEnd
 
 	Function Install${kbid}
-		Call Needs${kbid}
-		Pop $0
-		${If} $0 == 1
+		${If} ${NeedsPatch} ${kbid}
 			Call Download${kbid}
 			!insertmacro InstallSP "${title}" "${kbid}.exe"
 		${EndIf}
@@ -25,14 +38,8 @@
 
 !macro MSUHandler kbid title
 	Function Needs${kbid}
-		ClearErrors
-		FindFirst $1 $2 "$WINDIR\servicing\Packages\Package_for_${kbid}~31bf3856ad364e35~*"
-		FindClose $1
-		${If} ${Errors}
-			Push 1
-		${Else}
-			Push 0
-		${EndIf}
+		Push Package_for_${kbid}
+		Call NeedsPackage
 	FunctionEnd
 
 	Function Download${kbid}
@@ -54,9 +61,9 @@
 !macroend
 
 ; Service Packs
-!insertmacro SPHandler  "VistaSP1"  "Windows Vista $(SP) 1" "WinVista" 0
-!insertmacro SPHandler  "VistaSP2"  "Windows Vista $(SP) 2" "WinVista" 1
-!insertmacro SPHandler  "Win7SP1"   "Windows 7 $(SP) 1"     "Win7"     0
+!insertmacro SPHandler  "VistaSP1"  "VistaSP1-KB936330"    "Windows Vista $(SP) 1"
+!insertmacro SPHandler  "VistaSP2"  "VistaSP2-KB948465"    "Windows Vista $(SP) 2"
+!insertmacro SPHandler  "Win7SP1"   "Windows7SP1-KB976933" "Windows 7 $(SP) 1"
 
 ; Windows Vista post-SP2 update combination that fixes WU indefinitely checking for updates
 !insertmacro MSUHandler "KB3205638" "$(SecUpd) for Windows Vista"
