@@ -27,8 +27,12 @@ static const WinNT5Variant nt5Variants[] = {
 	{0x0501, OS_TABLETPC,       L"winbrand.dll", { 180, 2000}},
 	{0x0501, OS_MEDIACENTER,    L"winbrand.dll", { 180, 2001}},
 	{0x0501, OS_STARTER,        L"winbrand.dll", { 180, 2002}},
-	// {0x0501, OS_WEPOS,          L"winbrand.dll", { 180, 2003}},
+	{0x0501, OS_EMBPOS,         L"winbrand.dll", { 180, 2003}},
 	{0x0501, OS_WINFLP,         L"winbrand.dll", { 180, 2004}},
+	{0x0501, OS_EMBSTD2009,     L"winbrand.dll", { 180, 2005}},
+	{0x0501, OS_EMBPOS2009,     L"winbrand.dll", { 180, 2006}},
+	// Check for XP Embedded last as WES2009 also identifies as OS_EMBEDDED.
+	{0x0501, OS_EMBEDDED,       L"sysdm.cpl",    { 180, 189}},
 
 	// Server 2003
 	{0x0502, OS_APPLIANCE,      L"winbrand.dll", { 181, 2002}},
@@ -44,7 +48,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 
 		// Handle the absolute disaster of Windows XP/Server 2003 edition branding
 		WORD winver = GetWinVer();
-		if (LOBYTE(winver) == 5) {
+		if (HIBYTE(winver) == 5) {
 			WinNT5Variant variant;
 			for (DWORD i = 0; i < ARRAYSIZE(nt5Variants); i++) {
 				if (winver == nt5Variants[i].version && IsOS(nt5Variants[i].osFlag)) {
@@ -57,6 +61,8 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 				HMODULE brandDll = LoadLibraryEx(variant.library, NULL, LOAD_LIBRARY_AS_DATAFILE);
 				if (brandDll) {
 					WCHAR brandStr[1024];
+					ZeroMemory(brandStr, ARRAYSIZE(brandStr));
+
 					DWORD j = 0;
 					while (variant.stringIDs[j] != 0) {
 						UINT id = variant.stringIDs[j];
