@@ -168,6 +168,10 @@ FunctionEnd
 !macroend
 
 Function PollCbsInstall
+	${IfNot} ${AtLeastWinVista}
+		Return
+	${EndIf}
+
 	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
 	${If} $0 == ${CBS_EXECUTE_STATE_NONE}
 	${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
@@ -206,6 +210,10 @@ Function PollCbsInstall
 FunctionEnd
 
 Function RebootIfCbsRebootPending
+	${IfNot} ${AtLeastWinVista}
+		Return
+	${EndIf}
+
 	StrCpy $1 0
 
 	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
