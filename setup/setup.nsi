@@ -152,16 +152,21 @@ Section -BeforeInstall
 	!insertmacro InhibitSleep 1
 SectionEnd
 
-Section -WaitForCbsInstall
+Section -PreInstallTasks
+	; Wait for packages to install if needed
 	${If} ${IsRunOnce}
 		Call PollCbsInstall
 	${EndIf}
-SectionEnd
 
-Section -PreDownload
+	; Download files
 	${IfNot} ${IsRunOnce}
 	${AndIfNot} ${IsPostInstall}
 		Call PreDownload
+	${EndIf}
+
+	; If a reboot is already pending, do it now
+	${IfNot} ${IsRunOnce}
+		Call RebootIfCbsRebootPending
 	${EndIf}
 SectionEnd
 

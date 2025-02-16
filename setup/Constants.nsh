@@ -80,6 +80,8 @@
 
 ; Component keys
 !define REGPATH_CBS                "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing"
+!define REGPATH_CBS_REBOOTPENDING  "${REGPATH_CBS}\RebootPending"
+!define REGPATH_CBS_PACKAGESPENDING  "${REGPATH_CBS}\PackagesPending"
 !define REGPATH_CBS_REBOOTINPROGRESS "${REGPATH_CBS}\RebootInProgress"
 
 ; IE zone keys

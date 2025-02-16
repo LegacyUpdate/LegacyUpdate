@@ -18,7 +18,7 @@
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
 		${If} ${IsRunOnce}
 		${AndIf} $0 == "SYSTEM"
-			; Running in setup mode. Quit with success, which makes winlogon happy.
+			; Running in setup mode. Winlogon will reboot for us.
 			SetErrorLevel ${ERROR_SUCCESS}
 			Quit
 		${Else}
@@ -55,7 +55,7 @@
 Function CleanUpRunOnce
 	; Restore setup keys
 	; Be careful here. Doing this wrong can cause SYSTEM_LICENSE_VIOLATION bootloops!
-	!insertmacro RunOnceRestoreReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" ""
+	!insertmacro RunOnceRestoreReg Str   HKLM "${REGPATH_SETUP}" "CmdLine"   ""
 	!insertmacro RunOnceRestoreReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NORMAL}
 	DeleteRegValue HKLM "${REGPATH_SETUP}" "SetupShutdownRequired"
 
@@ -169,17 +169,17 @@ FunctionEnd
 
 Function PollCbsInstall
 	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
-	${If} $0 <= 0
-	${OrIf} $0 == 0xffffffff
+	${If} $0 == ${CBS_EXECUTE_STATE_NONE}
+	${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
 		Return
 	${EndIf}
 
 	${VerbosePrint} "Packages are still installing [$0]"
 	${DetailPrint} "$(StatusCbsInstalling)"
+
 	; Set marquee progress bar
 	!insertmacro SetMarquee 1
 
-	; Poll ExecuteState, waiting for TrustedInstaller to be done.
 	${While} 1 == 1
 		; Are we in a RebootInProgress phase?
 		ClearErrors
@@ -191,9 +191,10 @@ Function PollCbsInstall
 			${EndWhile}
 		${EndIf}
 
+		; Poll ExecuteState, waiting for TrustedInstaller to be done.
 		ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
-		${If} $0 <= 0
-		${OrIf} $0 == 0xffffffff
+		${If} $0 == ${CBS_EXECUTE_STATE_NONE}
+		${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
 			${Break}
 		${EndIf}
 
@@ -202,6 +203,33 @@ Function PollCbsInstall
 
 	; Revert progress bar
 	!insertmacro SetMarquee 0
+FunctionEnd
+
+Function RebootIfCbsRebootPending
+	StrCpy $1 0
+
+	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
+	${If} $0 != ${CBS_EXECUTE_STATE_NONE}
+	${AndIf} $0 != ${CBS_EXECUTE_STATE_NONE2}
+		StrCpy $1 1
+	${EndIf}
+
+	ClearErrors
+	EnumRegKey $0 HKLM "${REGPATH_CBS_REBOOTPENDING}" 0
+	${IfNot} ${Errors}
+		StrCpy $1 1
+	${EndIf}
+
+	EnumRegKey $0 HKLM "${REGPATH_CBS_PACKAGESPENDING}" 0
+	${IfNot} ${Errors}
+		StrCpy $1 1
+	${EndIf}
+
+	${If} $1 == 1
+		${VerbosePrint} "Restarting to install previously pending packages"
+		SetRebootFlag true
+		Call RebootIfRequired
+	${EndIf}
 FunctionEnd
 
 Function OnRunOnceDone
