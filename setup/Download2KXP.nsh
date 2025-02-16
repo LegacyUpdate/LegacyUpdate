@@ -61,7 +61,17 @@ Function -PatchHandler
 	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" 1
 FunctionEnd
 
-!macro PatchHandler kbid title params
+!define PATCH_FLAGS_OTHER 0
+!define PATCH_FLAGS_NT4   1
+!define PATCH_FLAGS_SHORT 2
+!define PATCH_FLAGS_LONG  3
+
+!macro -PatchHandlerFlags params cleanup
+	; NT4 branch will add a SkipSPUninstall setting. For now, we ignore the cleanup param.
+	StrCpy $R0 "${params}"
+!macroend
+
+!macro PatchHandler kbid title type params
 	Function Download${kbid}
 		${If} ${NeedsPatch} ${kbid}
 			StrCpy $Patch.Key   "${kbid}"
@@ -72,10 +82,24 @@ FunctionEnd
 	FunctionEnd
 
 	Function Install${kbid}
-		${If} ${NeedsPatch} ${kbid}
-			Call Download${kbid}
-			!insertmacro Install "${title}" "${kbid}.exe" "${params}"
+		${IfNot} ${NeedsPatch} ${kbid}
+			Return
 		${EndIf}
+
+		Call Download${kbid}
+!if ${type} == ${PATCH_FLAGS_OTHER}
+		StrCpy $R0 ""
+!endif
+!if ${type} == ${PATCH_FLAGS_NT4}
+		!insertmacro -PatchHandlerFlags "-z"    "-n -o"
+!endif
+!if ${type} == ${PATCH_FLAGS_SHORT}
+		!insertmacro -PatchHandlerFlags "-u -z" "-n -o"
+!endif
+!if ${type} == ${PATCH_FLAGS_LONG}
+		!insertmacro -PatchHandlerFlags "/passive /norestart" "/n /o"
+!endif
+		!insertmacro Install "${title}" "${kbid}.exe" "$R0 ${params}"
 	FunctionEnd
 !macroend
 
@@ -88,12 +112,12 @@ FunctionEnd
 !insertmacro NeedsFileVersionHandler "KB835732" "kernel32.dll" "5.00.2195.6897"
 !insertmacro NeedsFileVersionHandler "IE6"      "mshtml.dll"   "6.0.2600.0"
 
-!insertmacro PatchHandler "W2KSP4"   "Windows 2000 $(SP) 4"            "-u -z"
-!insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 $(Update)" "/passive /norestart"
-!insertmacro PatchHandler "XPSP1a"   "Windows XP $(SP) 1a"             "-u -z"
-!insertmacro PatchHandler "XPSP3"    "Windows XP $(SP) 3"              "/passive /norestart"
-!insertmacro PatchHandler "2003SP2"  "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" "/passive /norestart"
-!insertmacro PatchHandler "XPESP3"   "Windows XP $(EMB) $(SP) 3"       "/passive /norestart"
+!insertmacro PatchHandler "W2KSP4"   "Windows 2000 $(SP) 4"            ${PATCH_FLAGS_SHORT} ""
+!insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 $(Update)" ${PATCH_FLAGS_LONG}  ""
+!insertmacro PatchHandler "XPSP1a"   "Windows XP $(SP) 1a"             ${PATCH_FLAGS_SHORT} ""
+!insertmacro PatchHandler "XPSP3"    "Windows XP $(SP) 3"              ${PATCH_FLAGS_LONG}  ""
+!insertmacro PatchHandler "2003SP2"  "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" ${PATCH_FLAGS_LONG} ""
+!insertmacro PatchHandler "XPESP3"   "Windows XP $(EMB) $(SP) 3"       ${PATCH_FLAGS_LONG}  ""
 
 Function DownloadIE6
 	${If} ${NeedsPatch} IE6
