@@ -52,8 +52,8 @@ jobs:
 
     - name: Install MinGW toolchain
       run: |
-        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-14.2-binutils-2.43.1-mingw-v12.0.0-i686-v2.tar.xz -o /tmp/mingw32.tar.xz
-        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-14.2-binutils-2.43.1-mingw-v12.0.0-x86_64-v2.tar.xz -o /tmp/mingw64.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-14.2-binutils-2.44-mingw-v12.0.0-i686.tar.xz -o /tmp/mingw32.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-14.2-binutils-2.44-mingw-v12.0.0-x86_64.tar.xz -o /tmp/mingw64.tar.xz
         sudo tar -xf /tmp/mingw32.tar.xz -C /opt
         sudo tar -xf /tmp/mingw64.tar.xz -C /opt
         rm /tmp/mingw{32,64}.tar.xz
@@ -61,8 +61,8 @@ jobs:
     - name: Build
       id: build
       run: |
-        export PATH=/opt/gcc-14.2-binutils-2.43.1-mingw-v12.0.0-i686/bin:$PATH
-        export PATH=/opt/gcc-14.2-binutils-2.43.1-mingw-v12.0.0-x86_64/bin:$PATH
+        export PATH=/opt/gcc-14.2-binutils-2.44-mingw-v12.0.0-i686/bin:$PATH
+        export PATH=/opt/gcc-14.2-binutils-2.44-mingw-v12.0.0-x86_64/bin:$PATH
         make CI=1 DEBUG=0
         echo "out=$(echo setup/LegacyUpdate-*.exe)" >> "$(wslpath -u "$GITHUB_OUTPUT")"
 
