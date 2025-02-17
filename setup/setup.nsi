@@ -148,36 +148,27 @@ Function MakeUninstallEntry
 	${EndIf}
 FunctionEnd
 
-Section -BeforeInstall
+Section -BeforeInstall PREREQS_START
 	!insertmacro InhibitSleep 1
-SectionEnd
 
-Section -PreInstallTasks
-	; Wait for packages to install if needed
-	${If} ${IsRunOnce}
-		Call PollCbsInstall
-	${EndIf}
-
-	; Download files
 	${IfNot} ${IsRunOnce}
 	${AndIfNot} ${IsPostInstall}
+		; Download files
 		Call PreDownload
-	${EndIf}
+
+		; If a reboot is pending, do it now
+		Call RebootIfCbsRebootPending
 
 !if ${DEBUG} == 1
-	${If} ${TestRunOnce}
-		SetRebootFlag true
-		Call RebootIfRequired
-	${EndIf}
+		${If} ${TestRunOnce}
+			SetRebootFlag true
+			Call RebootIfRequired
+		${EndIf}
 !endif
-
-	; If a reboot is already pending, do it now
-	${IfNot} ${IsRunOnce}
-		Call RebootIfCbsRebootPending
+	${Else}
+		; Wait for packages to install if needed
+		Call PollCbsInstall
 	${EndIf}
-SectionEnd
-
-Section - PREREQS_START
 SectionEnd
 
 ; Win2k prerequisities
