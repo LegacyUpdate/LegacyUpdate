@@ -74,7 +74,8 @@ LDFLAGS = \
 
 RCFLAGS = \
 	-F pe-i386 \
-	-O coff
+	-O coff \
+	-I../shared
 
 all: before-all $(BIN) after-all
 ifeq ($(SIGN),1)
