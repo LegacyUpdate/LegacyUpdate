@@ -81,7 +81,8 @@ LDFLAGS = \
 	-lmsimg32
 
 RCFLAGS = \
-	-O coff
+	-O coff \
+	-I../shared
 
 ifeq ($(ARCH),64)
 	LDFLAGS += -Wl,-ewWinMain
