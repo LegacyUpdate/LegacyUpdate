@@ -109,15 +109,15 @@ FunctionEnd
 !insertmacro NeedsSPHandler "XPESP3"  "WinXP2002" 2
 !insertmacro NeedsSPHandler "2003SP2" "WinXP2003" 1
 
-!insertmacro NeedsFileVersionHandler "KB835732" "kernel32.dll" "5.00.2195.6897"
-!insertmacro NeedsFileVersionHandler "IE6"      "mshtml.dll"   "6.0.2600.0"
+!insertmacro NeedsFileVersionHandler "W2KUR1" "kernel32.dll" "5.00.2195.7006"
+!insertmacro NeedsFileVersionHandler "IE6"    "mshtml.dll"   "6.0.2600.0"
 
-!insertmacro PatchHandler "W2KSP4"   "Windows 2000 $(SP) 4"            ${PATCH_FLAGS_SHORT} ""
-!insertmacro PatchHandler "KB835732" "Windows 2000 KB835732 $(Update)" ${PATCH_FLAGS_LONG}  ""
-!insertmacro PatchHandler "XPSP1a"   "Windows XP $(SP) 1a"             ${PATCH_FLAGS_SHORT} ""
-!insertmacro PatchHandler "XPSP3"    "Windows XP $(SP) 3"              ${PATCH_FLAGS_LONG}  ""
-!insertmacro PatchHandler "2003SP2"  "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" ${PATCH_FLAGS_LONG} ""
-!insertmacro PatchHandler "XPESP3"   "Windows XP $(EMB) $(SP) 3"       ${PATCH_FLAGS_LONG}  ""
+!insertmacro PatchHandler "W2KSP4"  "Windows 2000 $(SP) 4"      ${PATCH_FLAGS_SHORT} ""
+!insertmacro PatchHandler "W2KUR1"  "$(SectionW2KUR1)"          ${PATCH_FLAGS_LONG}  ""
+!insertmacro PatchHandler "XPSP1a"  "Windows XP $(SP) 1a"       ${PATCH_FLAGS_SHORT} ""
+!insertmacro PatchHandler "XPSP3"   "Windows XP $(SP) 3"        ${PATCH_FLAGS_LONG}  ""
+!insertmacro PatchHandler "2003SP2" "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" ${PATCH_FLAGS_LONG} ""
+!insertmacro PatchHandler "XPESP3"  "Windows XP $(EMB) $(SP) 3" ${PATCH_FLAGS_LONG}  ""
 
 Function DownloadIE6
 	${If} ${NeedsPatch} IE6

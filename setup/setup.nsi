@@ -175,7 +175,7 @@ SectionEnd
 Section "Windows 2000 $(SP) 4" W2KSP4
 	SectionIn Ro
 	Call InstallW2KSP4
-	Call InstallKB835732
+	Call InstallW2KUR1
 	Call RebootIfRequired
 SectionEnd
 
@@ -666,7 +666,7 @@ Function .onInit
 	${If} ${IsWin2000}
 		; Determine whether Win2k prereqs need to be installed
 		${IfNot} ${NeedsPatch} W2KSP4
-		${AndIfNot} ${NeedsPatch} KB835732
+		${AndIfNot} ${NeedsPatch} W2KUR1
 			!insertmacro RemoveSection ${W2KSP4}
 		${EndIf}
 
@@ -844,7 +844,7 @@ Function PreDownload
 	; Win2k
 	${If} ${IsWin2000}
 		Call DownloadW2KSP4
-		Call DownloadKB835732
+		Call DownloadW2KUR1
 		Call DownloadIE6
 	${EndIf}
 
