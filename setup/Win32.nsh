@@ -5,6 +5,12 @@
 !define CBS_EXECUTE_STATE_NONE  -1
 !define CBS_EXECUTE_STATE_NONE2 0xffffffff ; Probably an underflow of -1?
 
+; hhctrl
+!define HtmlHelp                 '$WINDIR\system32\hhctrl.ocx::HtmlHelp(i, t, i, i) i'
+
+!define HH_DISPLAY_TOPIC         0x0000
+!define HH_CLOSE_ALL             0x0012
+
 ; kernel32
 !define PF_XMMI64_INSTRUCTIONS_AVAILABLE 10
 

@@ -30,6 +30,7 @@ jobs:
         sudo apt-get update -q
         sudo apt-get install -qy curl make mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
         ./build/fix-nsis.sh
+        ./build/install-hhw.sh
 
     - name: Set up Visual Studio
       run: |

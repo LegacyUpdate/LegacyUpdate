@@ -75,6 +75,7 @@ Var /GLOBAL UninstallInstalled
 !include Win32.nsh
 !include Common.nsh
 !include AeroWizard.nsh
+!include Help.nsh
 !include Download2KXP.nsh
 !include DownloadVista78.nsh
 !include DownloadWUA.nsh
@@ -121,6 +122,7 @@ Var /GLOBAL UninstallInstalled
 
 Function OnShow
 	Call AeroWizardOnShow
+	Call CloseHelp
 FunctionEnd
 
 Function un.OnShow
@@ -989,7 +991,46 @@ Function .onInstFailed
 	Call CleanUp
 FunctionEnd
 
+!macro -HelpCase section
+	${Case} ${${section}}
+		StrCpy $0 "${section}"
+		${Break}
+!macroend
+
+!define HelpCase `!insertmacro -HelpCase`
+
 Function .onSelChange
+	Pop $0
+	${Switch} $0
+		${HelpCase} W2KSP4
+		${HelpCase} IE6SP1
+		${HelpCase} XPSP3
+		${HelpCase} XPESP3
+		${HelpCase} WES09
+		${HelpCase} 2003SP2
+		${HelpCase} VISTASP2
+		${HelpCase} VISTASSU
+		${HelpCase} VISTAIE9
+		${HelpCase} WIN7SP1
+		${HelpCase} WIN7SSU
+		${HelpCase} WHS2011U4
+		${HelpCase} WIN8SSU
+		${HelpCase} WIN81U1
+		${HelpCase} WIN81SSU
+		${HelpCase} WUA
+		${HelpCase} ROOTCERTS
+		${HelpCase} WIN7MU
+		${HelpCase} ACTIVATE
+		${HelpCase} LEGACYUPDATE
+		${Default}
+			StrCpy $0 ""
+			${Break}
+	${EndSwitch}
+
+	${If} $0 != ""
+		Call ShowHelp
+	${EndIf}
+
 	${If} ${SectionIsSelected} ${WES09}
 		; Check for SSE2
 		System::Call '${IsProcessorFeaturePresent}(${PF_XMMI64_INSTRUCTIONS_AVAILABLE}) .r0'

@@ -1,0 +1,9 @@
+<h1>Root certificates store update</h1>
+<p>Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites.</p>
+
+<h2>Description</h2>
+<p>To connect to a server that uses encrypted communications (TLS or SSL), the server sends your computer its certificate. This verifies the authenticity of your connection. Certificates are issued by certificate authorities (CAs), who cryptographically sign a server's certificate using root and intermediate certificates.</p>
+<p>Over time, new CAs have entered the market. Others have issued new root certificates with better cryptographic security. Some have experienced security incidents, and have revoked compromised certificates so they can no longer be used.</p>
+<p>Microsoft periodically releases updated lists of trusted, deleted, and revoked root certificates. These match the latest lists used by Windows 10 and 11. Legacy Update downloads and installs these lists on your computer.</p>
+<p>Additionally, Legacy Update configures your computer to enable modern TLS 1.0, 1.1, and 1.2 protocols. In some versions of Windows, these are not enabled by default. Many servers have disabled the earlier SSL 2.0 and 3.0 protocols due to vulnerabilities and regulatory requirements.</p>
+<p>While this increases compatibility with some servers, results are still limited by the capabilities of the Windows TLS/SSL security provider (SChannel), such as in support for newer ciphers (encryption algorithms), and server name indication (SNI).</p>

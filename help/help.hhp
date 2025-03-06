@@ -1,0 +1,21 @@
+[OPTIONS]
+Compatibility=1.0
+Compiled file=help.chm
+Default Window=Main
+Default topic=index.html
+Display compile progress=Yes
+Language=0x409 English (United States)
+
+[WINDOWS]
+Main="Legacy Update Setup",,,,,,,,,0x2100,,0x0,[50,100,300,479],,,,,,,0
+
+
+[FILES]
+index.html
+IE6SP1.html
+RootCerts.html
+W2KSP4.html
+WES09.html
+
+[INFOTYPES]
+

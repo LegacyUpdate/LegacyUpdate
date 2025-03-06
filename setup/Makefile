@@ -7,6 +7,7 @@ NSISFLAGS = -DDEBUG=$(DEBUG) -DSIGN=$(SIGN) -DCI=$(CI)
 
 all:
 	+$(MAKE) -C ../nsisplugin
+	+$(MAKE) -C ../help
 	+$(MAKE) setup
 	+$(MAKE) activex
 

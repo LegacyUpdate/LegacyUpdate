@@ -1,0 +1,28 @@
+html {
+	border: 0;
+	overflow: auto;
+}
+
+body {
+	cursor: default;
+}
+
+body, h1, h2 {
+	font: menu;
+}
+
+h1, h2 {
+	margin: 0;
+	font-weight: bold;
+}
+
+h1 {
+	font-size: 13pt;
+	font-family: "Segoe UI", "Franklin Gothic Medium", Verdana, "MS Shell Dlg 2";
+	font-weight: normal;
+	color: #003399;
+}
+
+h2 {
+	font-size: 1.05em;
+}

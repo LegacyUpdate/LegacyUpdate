@@ -142,7 +142,7 @@ LangString SectionActivate  ${LANG_ENGLISH} "Activate Windows"
 LangString SectionReboots   ${LANG_ENGLISH} \
 	"Your computer will restart automatically to complete installation."
 LangString SectionSupEULA   ${LANG_ENGLISH} \
-	"By installing, you are agreeing to the Supplemental End User License Agreement for this update."
+	"By installing, you are agreeing to the Supplemental End-User License Agreement for this update."
 LangString SectionMSLT      ${LANG_ENGLISH} \
 	"By installing, you are agreeing to the Microsoft Software License Terms for this update."
 
