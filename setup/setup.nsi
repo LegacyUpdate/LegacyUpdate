@@ -130,6 +130,7 @@ FunctionEnd
 Function MakeUninstallEntry
 	${IfNot} $UninstallInstalled == 1
 		StrCpy $UninstallInstalled 1
+		SetOutPath $INSTDIR
 		WriteUninstaller "$INSTDIR\Uninstall.exe"
 
 		; Add uninstall entry
