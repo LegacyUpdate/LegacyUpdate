@@ -49,7 +49,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 		// Handle the absolute disaster of Windows XP/Server 2003 edition branding
 		WORD winver = GetWinVer();
 		if (HIBYTE(winver) == 5) {
-			WinNT5Variant variant;
+			WinNT5Variant variant = {};
 			for (DWORD i = 0; i < ARRAYSIZE(nt5Variants); i++) {
 				if (winver == nt5Variants[i].version && IsOS(nt5Variants[i].osFlag)) {
 					variant = nt5Variants[i];
