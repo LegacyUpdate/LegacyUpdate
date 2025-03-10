@@ -2,6 +2,7 @@ Function DetermineWUAVersion
 	; WUA refuses to install on 2000 Datacenter Server. Maybe we can hack around this in future.
 	${If} ${IsWin2000}
 	${AndIf} ${IsDatacenter}
+		StrCpy $0 ""
 		Return
 	${EndIf}
 
