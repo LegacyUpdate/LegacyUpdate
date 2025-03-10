@@ -67,8 +67,13 @@ FunctionEnd
 !define PATCH_FLAGS_LONG  3
 
 !macro -PatchHandlerFlags params cleanup
+!if ${DEBUG} == 1
+	; To make testing go faster
+	StrCpy $R0 "${params} ${cleanup}"
+!else
 	; NT4 branch will add a SkipSPUninstall setting. For now, we ignore the cleanup param.
 	StrCpy $R0 "${params}"
+!endif
 !macroend
 
 !macro PatchHandler kbid title type params
@@ -140,7 +145,7 @@ Function InstallIE6
 	${If} ${NeedsPatch} IE6
 		Call DownloadIE6
 		${DetailPrint} "$(Installing)$(IE) 6 $(SP) 1..."
+		StrCpy $RunOnce.UseFallback 1
 		!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\W2KIE6\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
-		RMDir /r /REBOOTOK "$WINDIR\Windows Update Setup Files"
 	${EndIf}
 FunctionEnd

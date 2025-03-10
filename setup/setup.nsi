@@ -74,11 +74,11 @@ Var /GLOBAL UninstallInstalled
 
 !include Win32.nsh
 !include Common.nsh
+!include RunOnce.nsh
 !include AeroWizard.nsh
 !include Download2KXP.nsh
 !include DownloadVista78.nsh
 !include DownloadWUA.nsh
-!include RunOnce.nsh
 !include UpdateRoots.nsh
 ; !include ActiveXPage.nsh
 
@@ -173,16 +173,16 @@ Section -BeforeInstall PREREQS_START
 SectionEnd
 
 ; Win2k prerequisities
+Section "$(IE) 6.0 $(SP) 1" IE6SP1
+	SectionIn Ro
+	Call InstallIE6
+	Call RebootIfRequired
+SectionEnd
+
 Section "Windows 2000 $(SP) 4" W2KSP4
 	SectionIn Ro
 	Call InstallW2KSP4
 	Call InstallW2KUR1
-	Call RebootIfRequired
-SectionEnd
-
-Section "$(IE) 6.0 $(SP) 1" IE6SP1
-	SectionIn Ro
-	Call InstallIE6
 	Call RebootIfRequired
 SectionEnd
 

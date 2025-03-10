@@ -76,6 +76,9 @@ Function CleanUpRunOnceFinal
 
 	; Delete runonce stuff
 	RMDir /r /REBOOTOK "${RUNONCEDIR}"
+
+	; Delete IE6 temp files
+	RMDir /r /REBOOTOK "$WINDIR\Windows Update Setup Files"
 FunctionEnd
 
 Function CopyLauncher
@@ -85,6 +88,8 @@ Function CopyLauncher
 		File /ONAME=LegacyUpdate.exe "..\launcher\obj\LegacyUpdate32.exe"
 	${EndIf}
 FunctionEnd
+
+Var /GLOBAL RunOnce.UseFallback
 
 Function PrepareRunOnce
 	${If} ${RebootFlag}
@@ -99,12 +104,16 @@ Function PrepareRunOnce
 			Delete "${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier"
 		${EndIf}
 
-		; Somewhat documented in KB939857:
-		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
-		; See also Wine winternl.h
-		!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce'
-		!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
-		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
+		${If} $RunOnce.UseFallback == 1
+			WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdateRunOnce" '"${RUNONCEDIR}\LegacyUpdateSetup.exe" /runonce'
+		${Else}
+			; Somewhat documented in KB939857:
+			; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
+			; See also Wine winternl.h
+			!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce'
+			!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
+			WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
+		${EndIf}
 
 		; Temporarily disable Security Center first run if needed
 		${If} ${IsWinXP2002}
