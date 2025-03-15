@@ -183,6 +183,7 @@ Section "Windows 2000 $(SP) 4" W2KSP4
 	SectionIn Ro
 	Call InstallW2KSP4
 	Call InstallW2KUR1
+	Call FixW2KUR1
 	Call RebootIfRequired
 SectionEnd
 

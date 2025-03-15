@@ -149,3 +149,8 @@ Function InstallIE6
 		!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$PLUGINSDIR\W2KIE6\ie6setup.exe" /c:"ie6wzd.exe /q /r:n /s:""#e"""'
 	${EndIf}
 FunctionEnd
+
+Function FixW2KUR1
+	; Fix freezing on multi-CPU systems when Update Rollup 1 is installed
+	WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\HAL" "14140000FFFFFFFF" 0x10
+FunctionEnd
