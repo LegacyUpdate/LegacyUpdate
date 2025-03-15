@@ -692,6 +692,11 @@ Function .onInit
 		${IfNot} ${NeedsPatch} IE6
 			!insertmacro RemoveSection ${IE6SP1}
 		${EndIf}
+
+		; Handle 2000 Datacenter Server
+		${If} ${IsDatacenter}
+			!insertmacro UnselectSection ${LEGACYUPDATE}
+		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${W2KSP4}
 		!insertmacro RemoveSection ${IE6SP1}
