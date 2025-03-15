@@ -441,9 +441,13 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppPath" "$OUTDIR"
 	WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppName" "LegacyUpdate.exe"
 
-	WriteRegDword HKCU "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "Policy"  3
-	WriteRegStr   HKCU "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppPath" "$OUTDIR"
-	WriteRegStr   HKCU "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppName" "LegacyUpdate.exe"
+	${If} ${RunningX64}
+		SetRegView 32
+		WriteRegDword HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "Policy"  3
+		WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppPath" "$OUTDIR"
+		WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppName" "LegacyUpdate.exe"
+		SetRegView 64
+	${EndIf}
 
 	; Delete LegacyUpdate.dll in System32 from 1.0 installer
 	${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
@@ -533,7 +537,12 @@ Section "-un.Legacy Update website" un.ACTIVEX
 
 	; Remove IE elevation policy
 	DeleteRegKey HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}"
-	DeleteRegKey HKCU "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}"
+
+	${If} ${RunningX64}
+		SetRegView 32
+		DeleteRegKey HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}"
+		SetRegView 64
+	${EndIf}
 
 	; Restart service
 	!insertmacro RestartWUAUService
