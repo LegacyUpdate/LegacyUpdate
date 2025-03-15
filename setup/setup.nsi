@@ -348,6 +348,7 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
 			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
 		${EndIf}
+
 		WriteRegDword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
 
 		; Restart service
@@ -397,11 +398,18 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	${EndIf}
 
 	; Create shortcut
+	${If} ${IsWin2000}
+		; Doesn't seem to support @ syntax with an exe?
+		StrCpy $0 "Check for software and driver updates via Legacy Update."
+	${Else}
+		StrCpy $0 '@"$OUTDIR\LegacyUpdate.exe",-4'
+	${EndIf}
+
 	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
 		'"$OUTDIR\LegacyUpdate.exe"' '' \
 		"$OUTDIR\LegacyUpdate.exe" 0 \
 		SW_SHOWNORMAL "" \
-		'@"$OUTDIR\LegacyUpdate.exe",-4'
+		"$0"
 
 	; Hide WU shortcuts
 	${If} ${AtMostWinXP2003}
