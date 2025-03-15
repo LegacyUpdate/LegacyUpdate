@@ -78,7 +78,7 @@
 !define REGPATH_WUPOLICY           "Software\Policies\Microsoft\Windows\WindowsUpdate"
 !define REGPATH_WUAUPOLICY         "${REGPATH_WUPOLICY}\AU"
 
-; Component keys
+; CBS keys
 !define REGPATH_CBS                "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing"
 !define REGPATH_CBS_REBOOTPENDING  "${REGPATH_CBS}\RebootPending"
 !define REGPATH_CBS_PACKAGESPENDING  "${REGPATH_CBS}\PackagesPending"
@@ -97,3 +97,7 @@
 !define REGPATH_DOTNET             "Software\Microsoft\.NETFramework"
 !define REGPATH_DOTNET_V2          "${REGPATH_DOTNET}\v2.0.50727"
 !define REGPATH_DOTNET_V4          "${REGPATH_DOTNET}\v4.0.30319"
+
+; Roots update keys
+!define ROOTSUPDATE_GUID           "{EF289A85-8E57-408d-BE47-73B55609861A}"
+!define REGPATH_COMPONENTS         "Software\Microsoft\Active Setup\Installed Components"

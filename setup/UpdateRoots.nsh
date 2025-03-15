@@ -90,4 +90,10 @@ Function UpdateRoots
 	!insertmacro _InstallRoots /update Root roots.sst
 	!insertmacro _InstallRoots /delete AuthRoot delroots.sst
 	!insertmacro _InstallRoots /update Disallowed disallowedcert.sst
+
+	WriteRegStr   HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" ""            "RootsUpdate"
+	WriteRegDword HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" "IsInstalled" 1
+	WriteRegStr   HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" "Version"     "1337,0,2195,0"
+	WriteRegStr   HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" "Locale"      "*"
+	WriteRegStr   HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" "ComponentID" "Windows Roots Update"
 FunctionEnd
