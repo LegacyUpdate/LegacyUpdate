@@ -147,7 +147,7 @@ LangString SectionMSLT      ${LANG_ENGLISH} \
 	"By installing, you are agreeing to the Microsoft Software License Terms for this update."
 
 LangString SectionW2KSP4Desc    ${LANG_ENGLISH} \
-	"Updates Windows 2000 to Service Pack 4, as required to install the Windows Update Agent.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+	"Updates Windows 2000 to Service Pack 4 with Update Rollup 1, as required to install the Windows Update Agent.$\r$\n$(SectionReboots) $(SectionSupEULA)"
 LangString SectionIE6SP1Desc    ${LANG_ENGLISH} \
 	"Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\n$(SectionReboots) $(SectionSupEULA)"
 LangString SectionXPSP3Desc     ${LANG_ENGLISH} \
