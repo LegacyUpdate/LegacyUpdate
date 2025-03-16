@@ -26,6 +26,9 @@ SetPluginUnload alwaysoff
 
 !define IsNativeIA64 '${IsNativeMachineArchitecture} ${IMAGE_FILE_MACHINE_IA64}'
 
+!undef RunningX64
+!define RunningX64 `"$PROGRAMFILES64" != "$PROGRAMFILES32"`
+
 Function GetArch
 	Var /GLOBAL Arch
 	${If} $Arch == ""
