@@ -151,6 +151,6 @@ Function InstallIE6
 FunctionEnd
 
 Function FixW2KUR1
-	; Fix freezing on multi-CPU systems when Update Rollup 1 is installed
+	; Fix idling on multi-CPU systems when Update Rollup 1 is installed
 	WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\HAL" "14140000FFFFFFFF" 0x10
 FunctionEnd
