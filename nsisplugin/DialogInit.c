@@ -110,10 +110,10 @@ static void ConfigureWindow() {
 		ShowWindow(bannerDivider, theme >= ThemeBasic ? SW_HIDE : SW_SHOW);
 		ShowWindow(bottomDivider, theme >= ThemeBasic ? SW_HIDE : SW_SHOW);
 
-		if (g_theme >= ThemeAeroLight) {
+		if (g_theme >= ThemeBasic) {
 			DWORD wordmark = g_theme == ThemeAeroDark ? IDI_BANNER_WORDMARK_DARK : IDI_BANNER_WORDMARK_LIGHT;
 			g_bannerWordmark = LoadPNGResource(NULL, MAKEINTRESOURCE(wordmark), L"PNG");
-			if (AtMostWin7()) {
+			if (g_theme >= ThemeAeroLight && AtMostWin7()) {
 				g_bannerWordmarkGlow = LoadPNGResource(NULL, MAKEINTRESOURCE(IDI_BANNER_WORDMARK_GLOW), L"PNG");
 			}
 		} else {
