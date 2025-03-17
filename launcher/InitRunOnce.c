@@ -93,12 +93,6 @@ static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, L
 }
 
 static void CreateRunOnceWindow() {
-	// Init common controls
-	INITCOMMONCONTROLSEX initComctl = {0};
-	initComctl.dwSize = sizeof(initComctl);
-	initComctl.dwICC = ICC_WIN95_CLASSES;
-	InitCommonControlsEx(&initComctl);
-
 	// Create window
 	WNDCLASS wndClass = {0};
 	wndClass.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_NOCLOSE;
