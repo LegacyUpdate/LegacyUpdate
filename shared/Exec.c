@@ -37,6 +37,8 @@ HRESULT ExecEx(LPSHELLEXECUTEINFO execInfo, BOOL wait, LPDWORD exitCode) {
 		}
 
 		CloseHandle(execInfo->hProcess);
+	} else if (exitCode != NULL) {
+		*exitCode = 0;
 	}
 
 	return hr;
