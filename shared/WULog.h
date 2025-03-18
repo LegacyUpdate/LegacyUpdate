@@ -24,7 +24,7 @@ static inline HRESULT ViewWindowsUpdateLog(int nCmdShow) {
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", powershell, ARRAYSIZE(powershell));
 
 		DWORD code;
-		HRESULT hr = Exec(NULL, powershell, L"-Command Get-WindowsUpdateLog", windir, nCmdShow, TRUE, &code);
+		HRESULT hr = Exec(NULL, powershell, L"-NoProfile -Command Get-WindowsUpdateLog", windir, nCmdShow, TRUE, &code);
 		if (!SUCCEEDED(hr) || code != 0) {
 			return hr;
 		}
