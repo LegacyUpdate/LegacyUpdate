@@ -47,7 +47,7 @@ static inline void Startup() {
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	if (!SUCCEEDED(hr)) {
 		ExitProcess(hr);
-		return hr;
+		return;
 	}
 
 	// Init common controls
