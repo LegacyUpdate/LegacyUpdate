@@ -615,7 +615,7 @@ Function .onInit
 	${Else}
 		SetDetailsPrint listonly
 	${EndIf}
-	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"
+	${If} ${RunningX64}
 		SetRegView 64
 	${EndIf}
 	!insertmacro EnsureAdminRights
@@ -1054,8 +1054,7 @@ Function un.onInit
 		SetDetailsPrint listonly
 	${EndIf}
 
-	; Hack to avoid bundling System.dll in uninstaller
-	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"
+	${If} ${RunningX64}
 		SetRegView 64
 	${EndIf}
 FunctionEnd
