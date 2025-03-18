@@ -38,6 +38,19 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	g_hInstance = hInstance;
 	Startup();
 
+	// Init COM
+	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+	if (!SUCCEEDED(hr)) {
+		ExitProcess(hr);
+		return hr;
+	}
+
+	// Init common controls
+	INITCOMMONCONTROLSEX initComctl = {0};
+	initComctl.dwSize = sizeof(initComctl);
+	initComctl.dwICC = ICC_WIN95_CLASSES;
+	InitCommonControlsEx(&initComctl);
+
 	int argc;
 	LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
