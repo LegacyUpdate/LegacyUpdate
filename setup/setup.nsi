@@ -45,7 +45,7 @@ Var /GLOBAL UninstallInstalled
 !define MUI_CUSTOMFUNCTION_ABORT     CleanUp
 
 !define MUI_ICON                     "..\LegacyUpdate\icon.ico"
-!define MUI_UNICON                   "..\LegacyUpdate\icon.ico"
+!define MUI_UNICON                   "..\LegacyUpdate\icon_small.ico"
 
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP       "banner-wordmark-classic.bmp"
@@ -136,7 +136,7 @@ Function MakeUninstallEntry
 
 		; Add uninstall entry
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayName"          "${NAME}"
-		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon"          '"$INSTDIR\Uninstall.exe",-103'
+		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayIcon"          '"$INSTDIR\LegacyUpdate.exe",-100'
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "DisplayVersion"       "${VERSION}"
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "Publisher"            "${NAME}"
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "URLInfoAbout"         "${WEBSITE}"
