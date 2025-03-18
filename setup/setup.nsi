@@ -1047,6 +1047,7 @@ FunctionEnd
 
 Function un.onInit
 	SetShellVarContext all
+	SetAutoClose true
 	${If} ${IsVerbose}
 		SetDetailsPrint both
 	${Else}
@@ -1057,8 +1058,4 @@ Function un.onInit
 	${If} "$PROGRAMFILES64" != "$PROGRAMFILES32"
 		SetRegView 64
 	${EndIf}
-FunctionEnd
-
-Function un.onUninstSuccess
-	Quit
 FunctionEnd
