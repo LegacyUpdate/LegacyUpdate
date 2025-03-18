@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <nsis/pluginapi.h>
 #include <exdisp.h>
+#include <tlhelp32.h>
 
 const LPWSTR LegacyUpdateSiteURLHttp  = L"http://legacyupdate.net/";
 const LPWSTR LegacyUpdateSiteURLHttps = L"https://legacyupdate.net/";
@@ -64,6 +65,68 @@ PLUGIN_METHOD(CloseIEWindows) {
 		SysFreeString(location);
 		IWebBrowser2_Release(browser);
 	}
+
+	// Find and exit all dllhosts
+	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (snapshot == INVALID_HANDLE_VALUE) {
+		goto end;
+	}
+
+	PROCESSENTRY32W entry = {0};
+	entry.dwSize = sizeof(PROCESSENTRY32W);
+
+	if (Process32FirstW(snapshot, &entry)) {
+		do {
+			if (_wcsicmp(entry.szExeFile, L"dllhost.exe") != 0) {
+				continue;
+			}
+
+			// Loop over loaded modules to determine if ours is loaded
+			HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_TERMINATE, FALSE, entry.th32ProcessID);
+			if (process) {
+				HANDLE module = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, entry.th32ProcessID);
+				if (module == INVALID_HANDLE_VALUE) {
+					CloseHandle(process);
+					continue;
+				}
+
+				MODULEENTRY32W moduleEntry = {0};
+				moduleEntry.dwSize = sizeof(MODULEENTRY32W);
+
+				if (Module32FirstW(module, &moduleEntry)) {
+					do {
+						LPWSTR dllName = wcsrchr(moduleEntry.szExePath, L'\\');
+						if (!dllName) {
+							continue;
+						}
+
+						dllName += 1;
+						if (_wcsicmp(dllName, L"LegacyUpdate.dll") == 0 || _wcsicmp(dllName, L"LegacyUpdate32.dll") == 0) {
+							TerminateProcess(process, 0);
+
+							// Wait up to 5 seconds for the dllhost to close
+							DWORD start = GetTickCount();
+							while (GetTickCount() - start < 5000) {
+								Sleep(100);
+
+								DWORD exitCode;
+								if (GetExitCodeProcess(process, &exitCode) && exitCode != STILL_ACTIVE) {
+									break;
+								}
+							}
+
+							break;
+						}
+					} while (Module32NextW(module, &moduleEntry));
+				}
+
+				CloseHandle(module);
+				CloseHandle(process);
+			}
+		} while (Process32NextW(snapshot, &entry));
+	}
+
+	CloseHandle(snapshot);
 
 end:
 	if (windows) {
