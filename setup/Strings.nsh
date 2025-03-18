@@ -56,13 +56,12 @@ LangString MsgBoxPluginFailed ${LANG_ENGLISH} \
 	The file may be corrupt. Try downloading Legacy Update again."
 
 ; Install errors
-FileErrorText \
-	'Unable to write to "$0".$\r$\n\
-	$\r$\n\
-	If Internet Explorer is open, close it and click Retry.' \
+LangString MsgBoxCopyFailed ${LANG_ENGLISH} \
 	'Unable to write to "$0".$\r$\n\
 	$\r$\n\
 	If Internet Explorer is open, close it and click Retry.'
+
+FileErrorText $(MsgBoxCopyFailed) $(MsgBoxCopyFailed)
 
 LangString MsgBoxDownloadAbort ${LANG_ENGLISH} \
 	"Cancelling will terminate Legacy Update setup."
@@ -111,6 +110,7 @@ LangString StatusRestarting     ${LANG_ENGLISH} "Restarting..."
 LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update service..."
 LangString StatusCheckingSSL    ${LANG_ENGLISH} "Checking SSL connectivity..."
 LangString StatusCbsInstalling  ${LANG_ENGLISH} "Configuring updates..."
+LangString StatusClosingIE      ${LANG_ENGLISH} "Closing Internet Explorer windows..."
 
 ; Sections
 LangString Setup    ${LANG_ENGLISH} "Setup"

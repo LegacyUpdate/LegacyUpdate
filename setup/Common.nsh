@@ -68,3 +68,15 @@ SetPluginUnload alwaysoff
 	System::Call '${SetThreadExecutionState}(${ES_CONTINUOUS})'
 !endif
 !macroend
+
+!macro -DeleteWithErrorHandling file
+	ClearErrors
+	Delete "${file}"
+	IfErrors 0 +4
+		StrCpy $0 "${file}"
+		MessageBox MB_USERICON|MB_RETRYCANCEL "$(MsgBoxCopyFailed)" /SD IDCANCEL \
+			IDRETRY -4
+		Abort
+!macroend
+
+!define DeleteWithErrorHandling `!insertmacro -DeleteWithErrorHandling`

@@ -378,7 +378,7 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 	; Install DLLs
-	${VerbosePrint} "Closing IE windows"
+	${DetailPrint} "$(StatusClosingIE)"
 	LegacyUpdateNSIS::CloseIEWindows
 
 	; NOTE: Here we specifically check for amd64, because the DLL is amd64.
@@ -386,7 +386,7 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	File "..\${VSBUILD32}\LegacyUpdate.dll"
 	${If} ${IsNativeAMD64}
 		${If} ${FileExists} "LegacyUpdate32.dll"
-			Delete "LegacyUpdate32.dll"
+			${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate32.dll"
 		${EndIf}
 		Rename "LegacyUpdate.dll" "LegacyUpdate32.dll"
 		File "..\x64\${VSBUILD64}\LegacyUpdate.dll"
@@ -452,7 +452,7 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 
 	; Delete LegacyUpdate.dll in System32 from 1.0 installer
 	${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
-		Delete $WINDIR\System32\LegacyUpdate.dll
+		${DeleteWithErrorHandling} $WINDIR\System32\LegacyUpdate.dll
 	${EndIf}
 
 	; Delete LegacyUpdate.inf from 1.0 installer
@@ -519,6 +519,10 @@ Section "-un.Legacy Update website" un.ACTIVEX
 		Rename "$OUTDIR\Backup\Microsoft Update.lnk" "$COMMONSTARTMENU\Microsoft Update.lnk"
 	${EndIf}
 
+	; Close IE
+	${DetailPrint} "$(StatusClosingIE)"
+	LegacyUpdateNSIS::CloseIEWindows
+
 	; Unregister DLLs
 	ExecWait '"$OUTDIR\LegacyUpdate.exe" /unregserver $HWNDPARENT' $0
 	${If} $0 != 0
@@ -526,9 +530,9 @@ Section "-un.Legacy Update website" un.ACTIVEX
 	${EndIf}
 
 	; Delete files
-	Delete "$OUTDIR\LegacyUpdate.exe"
-	Delete "$OUTDIR\LegacyUpdate.dll"
-	Delete "$OUTDIR\LegacyUpdate32.dll"
+	${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate.exe"
+	${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate.dll"
+	${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate32.dll"
 
 	; Remove from trusted sites
 	DeleteRegKey HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
