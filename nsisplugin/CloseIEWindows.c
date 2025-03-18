@@ -49,6 +49,16 @@ PLUGIN_METHOD(CloseIEWindows) {
 
 		if (wcsstr(location, LegacyUpdateSiteURLHttp) != NULL || wcsstr(location, LegacyUpdateSiteURLHttps) != NULL) {
 			hr = IWebBrowser2_Quit(browser);
+
+			// Wait up to 5 seconds for the window to close
+			HWND hwnd = 0;
+			hr = IWebBrowser2_get_HWND(browser, (SHANDLE_PTR *)&hwnd);
+			if (SUCCEEDED(hr) && hwnd != 0) {
+				DWORD start = GetTickCount();
+				while (IsWindow(hwnd) && GetTickCount() - start < 5000) {
+					Sleep(100);
+				}
+			}
 		}
 
 		SysFreeString(location);
