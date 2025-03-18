@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "Exec.h"
 #include "HResult.h"
-#include "LegacyUpdate.h"
-#include <shellapi.h>
+#include "Utils.h"
 
 // Function signature required by Rundll32.exe.
 void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow) {
@@ -14,18 +13,7 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 	}
 
 	// This just calls LegacyUpdate.exe now for backwards compatibility.
-	hr = GetInstallPath(&path);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
-
-	PathAppend(path, L"LegacyUpdate.exe");
-
-	DWORD code;
-	hr = Exec(L"open", path, NULL, NULL, nCmdShow, TRUE, &code);
-	if (SUCCEEDED(hr)) {
-		hr = HRESULT_FROM_WIN32(code);
-	}
+	hr = StartLauncher(L"/launch", TRUE);
 
 end:
 	if (!SUCCEEDED(hr)) {

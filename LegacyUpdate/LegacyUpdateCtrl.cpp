@@ -431,24 +431,6 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	return hr;
 }
 
-static HRESULT StartLauncher(LPWSTR params, BOOL wait) {
-	LPWSTR path;
-	HRESULT hr = GetInstallPath(&path);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	PathAppend(path, L"LegacyUpdate.exe");
-
-	DWORD code;
-	hr = Exec(L"open", path, params, NULL, SW_SHOW, wait, &code);
-	if (SUCCEEDED(hr)) {
-		hr = HRESULT_FROM_WIN32(code);
-	}
-
-	return hr;
-}
-
 STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	DoIsPermittedCheck();
 

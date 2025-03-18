@@ -2,9 +2,11 @@
 #include <comdef.h>
 #include <atlstr.h>
 #include <shlwapi.h>
+#include "Exec.h"
 #include "HResult.h"
-#include "WMI.h"
+#include "LegacyUpdate.h"
 #include "VersionInfo.h"
+#include "WMI.h"
 
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "shlwapi.lib")
@@ -104,6 +106,24 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 
 	VariantCopy(productName, &_productName);
 	return S_OK;
+}
+
+HRESULT StartLauncher(LPWSTR params, BOOL wait) {
+	LPWSTR path;
+	HRESULT hr = GetInstallPath(&path);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	PathAppend(path, L"LegacyUpdate.exe");
+
+	DWORD code;
+	hr = Exec(L"open", path, params, NULL, SW_SHOW, wait, &code);
+	if (SUCCEEDED(hr)) {
+		hr = HRESULT_FROM_WIN32(code);
+	}
+
+	return hr;
 }
 
 HRESULT Reboot() {
