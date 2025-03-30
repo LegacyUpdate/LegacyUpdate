@@ -12,6 +12,13 @@ FunctionEnd
 
 !macro SPHandler kbid pkg title
 	Function Needs${kbid}
+!if "${kbid}" == "VistaSP1"
+		; Special case: Server 2008 is already SP1, but doesn't have a VistaSP1 package we can detect.
+		${If} ${IsServerOS}
+			Push 0
+			Return
+		${EndIf}
+!endif
 		Push ${pkg}
 		Call NeedsPackage
 	FunctionEnd
