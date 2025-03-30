@@ -231,10 +231,6 @@ Function RebootIfCbsRebootPending
 
 	ClearErrors
 	EnumRegKey $0 HKLM "${REGPATH_CBS_REBOOTPENDING}" 0
-	${IfNot} ${Errors}
-		StrCpy $1 1
-	${EndIf}
-
 	EnumRegKey $0 HKLM "${REGPATH_CBS_PACKAGESPENDING}" 0
 	${IfNot} ${Errors}
 		StrCpy $1 1
