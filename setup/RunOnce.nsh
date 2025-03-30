@@ -101,7 +101,7 @@ Function PrepareRunOnce
 			Call CopyLauncher
 
 			; Remove mark of the web to prevent "Open File - Security Warning" dialog
-			Delete "${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier"
+			System::Call '${DeleteFile}("${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier")'
 		${EndIf}
 
 		${If} $RunOnce.UseFallback == 1
