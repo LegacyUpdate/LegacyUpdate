@@ -151,16 +151,23 @@ static void CreateRunOnceWindow() {
 			ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
 			wallpaper = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		} else if (IsWinVista()) {
-			// Vista: Resources in ooberesources.dll
-			WCHAR ooberesPath[MAX_PATH];
-			ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\ooberesources.dll", ooberesPath, ARRAYSIZE(ooberesPath));
-			HMODULE ooberes = LoadLibrary(ooberesPath);
-			if (ooberes) {
-				// Width logic is the same used by Vista msoobe.dll
-				LPWSTR resource = GetSystemMetrics(SM_CXSCREEN) < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0";
-				wallpaper = LoadPNGResource(ooberes, resource, RT_RCDATA);
+			if (GetVersionInfo()->wProductType == VER_NT_WORKSTATION) {
+				// Vista: Resources in ooberesources.dll
+				WCHAR ooberesPath[MAX_PATH];
+				ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\ooberesources.dll", ooberesPath, ARRAYSIZE(ooberesPath));
+				HMODULE ooberes = LoadLibrary(ooberesPath);
+				if (ooberes) {
+					// Width logic is the same used by Vista msoobe.dll
+					LPWSTR resource = GetSystemMetrics(SM_CXSCREEN) < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0";
+					wallpaper = LoadPNGResource(ooberes, resource, RT_RCDATA);
+				}
+				FreeLibrary(ooberes);
+			} else {
+				// Server 2008: Bitmap in oobe dir
+				WCHAR jpegPath[MAX_PATH];
+				ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\msoobe_server.jpg", jpegPath, ARRAYSIZE(jpegPath));
+				wallpaper = LoadJPEGFile(jpegPath);
 			}
-			FreeLibrary(ooberes);
 		}
 
 		if (wallpaper) {

@@ -9,8 +9,10 @@
 // Why does loading a PNG need to be so difficult?
 
 typedef HRESULT (WINAPI *_WICConvertBitmapSource)(REFWICPixelFormatGUID dstFormat, IWICBitmapSource *pISrc, IWICBitmapSource **ppIDst);
+typedef HRESULT (WINAPI *_SHCreateStreamOnFileEx)(LPCWSTR pszFile, DWORD grfMode, DWORD dwAttributes, BOOL fCreate, IStream *pstmTemplate, IStream **ppstm);
 
 static _WICConvertBitmapSource $WICConvertBitmapSource;
+static _SHCreateStreamOnFileEx $SHCreateStreamOnFileEx;
 
 static HGLOBAL GetRawResource(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
 	HRSRC resource = FindResource(hInstance, name, type);
@@ -66,13 +68,13 @@ static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type)
 	return NULL;
 }
 
-static IWICBitmapSource *GetWICBitmap(IStream *imageStream) {
+static IWICBitmapSource *GetWICBitmap(IStream *imageStream, REFCLSID rclsid) {
 	IWICBitmapSource *bitmap;
 	IWICBitmapDecoder *decoder;
 	UINT frameCount;
 	IWICBitmapFrameDecode *frame;
 
-	if (!SUCCEEDED(CoCreateInstance(&CLSID_WICPngDecoder, NULL, CLSCTX_INPROC_SERVER, &IID_IWICBitmapDecoder, (LPVOID *)&decoder))) {
+	if (!SUCCEEDED(CoCreateInstance(rclsid, NULL, CLSCTX_INPROC_SERVER, &IID_IWICBitmapDecoder, (LPVOID *)&decoder))) {
 		return NULL;
 	}
 
@@ -144,7 +146,42 @@ HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourc
 		return NULL;
 	}
 
-	IWICBitmapSource *bitmap = GetWICBitmap(imageStream);
+	IWICBitmapSource *bitmap = GetWICBitmap(imageStream, &CLSID_WICPngDecoder);
+	if (!bitmap) {
+		TRACE(L"GetWICBitmap failed: %d", GetLastError());
+		IStream_Release(imageStream);
+		return NULL;
+	}
+
+	HBITMAP result = GetHBitmapForWICBitmap(bitmap);
+	IWICBitmapSource_Release(bitmap);
+	IStream_Release(imageStream);
+	return result;
+}
+
+HBITMAP LoadJPEGFile(LPWSTR filePath) {
+	if (!$WICConvertBitmapSource) {
+		$WICConvertBitmapSource = (_WICConvertBitmapSource)GetProcAddress(LoadLibrary(L"windowscodecs.dll"), "WICConvertBitmapSource");
+		if (!$WICConvertBitmapSource) {
+			return NULL;
+		}
+	}
+
+	if (!$SHCreateStreamOnFileEx) {
+		$SHCreateStreamOnFileEx = (_SHCreateStreamOnFileEx)GetProcAddress(LoadLibrary(L"shlwapi.dll"), "SHCreateStreamOnFileEx");
+		if (!$SHCreateStreamOnFileEx) {
+			return NULL;
+		}
+	}
+
+	IStream *imageStream;
+	HRESULT hr = $SHCreateStreamOnFileEx(filePath, STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, NULL, &imageStream);
+	if (!SUCCEEDED(hr)) {
+		TRACE(L"SHCreateStreamOnFileEx failed: 0x%08x", hr);
+		return NULL;
+	}
+
+	IWICBitmapSource *bitmap = GetWICBitmap(imageStream, &CLSID_WICJpegDecoder);
 	if (!bitmap) {
 		TRACE(L"GetWICBitmap failed: %d", GetLastError());
 		IStream_Release(imageStream);
