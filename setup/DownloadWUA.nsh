@@ -9,6 +9,19 @@ Function DetermineWUAVersion
 	GetWinVer $1 Major
 	GetWinVer $2 Minor
 	GetWinVer $3 ServicePack
+
+	; Handle scenarios where the SP will be updated by the time we install WUA.
+	${If} "$1.$2" == "5.1"
+		${If} ${SectionIsSelected} ${XPSP3}
+		${OrIf} ${SectionIsSelected} ${XPESP3}
+			StrCpy $3 "3"
+		${EndIf}
+	${ElseIf} "$1.$2" == "5.2"
+		${If} ${SectionIsSelected} ${2003SP2}
+			StrCpy $3 "2"
+		${EndIf}
+	${EndIf}
+
 	StrCpy $1 "$1.$2.$3"
 
 	; Hardcoded special case for XP Home/Embedded SP3, because the WUA 7.6.7600.256 setup SFX is seriously broken on it,
@@ -39,6 +52,15 @@ Function DetermineWUAVersion
 
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini WUA Prefix
 		StrCpy $0 "$1$0"
+	${EndIf}
+FunctionEnd
+
+Function NeedsWUA
+	Call DetermineWUAVersion
+	${If} $0 == ""
+		Push 0
+	${Else}
+		Push 1
 	${EndIf}
 FunctionEnd
 

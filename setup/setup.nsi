@@ -79,7 +79,6 @@ Var /GLOBAL UninstallInstalled
 !include AeroWizard.nsh
 !include Download2KXP.nsh
 !include DownloadVista78.nsh
-!include DownloadWUA.nsh
 !include UpdateRoots.nsh
 ; !include ActiveXPage.nsh
 
@@ -287,6 +286,8 @@ Section "$(SectionSSU)" WIN81SSU
 SectionEnd
 
 ; Shared prerequisites
+!include DownloadWUA.nsh
+
 Section "$(SectionWUA)" WUA
 	SectionIn Ro
 	Call InstallWUA
@@ -813,8 +814,7 @@ Function .onInit
 		!insertmacro RemoveSection ${WIN81SSU}
 	${EndIf}
 
-	Call DetermineWUAVersion
-	${If} $0 == ""
+	${IfNot} ${NeedsPatch} WUA
 		!insertmacro RemoveSection ${WUA}
 	${EndIf}
 
