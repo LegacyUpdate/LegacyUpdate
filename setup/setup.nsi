@@ -367,7 +367,6 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    ""                "${NAME}"
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-2'
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    "InfoTip"         '@"$OUTDIR\LegacyUpdate.exe",-4'
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon"        ""                '"$OUTDIR\LegacyUpdate.exe",-100'
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" ""                '"$OUTDIR\LegacyUpdate.exe"'
 	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder"        "Attributes"      0
@@ -375,6 +374,13 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName"             "${CPL_APPNAME}"
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory"        "5,10"
 	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl"       '"$OUTDIR\LegacyUpdate.exe",-202'
+
+	${If} ${IsWin2000}
+		; Doesn't seem to support @ syntax with an exe?
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         'Check for software and driver updates via Legacy Update.'
+	${Else}
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-4'
+	${EndIf}
 
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
