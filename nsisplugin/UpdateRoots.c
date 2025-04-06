@@ -12,7 +12,7 @@ PLUGIN_METHOD(UpdateRoots) {
 	popstring(store);
 	popstring(path);
 
-	if (!stateStr || !store || !path) {
+	if (lstrlen(stateStr) == 0 || lstrlen(store) == 0 || lstrlen(path) == 0) {
 		pushint(E_INVALIDARG);
 		return;
 	}

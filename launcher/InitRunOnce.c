@@ -9,7 +9,6 @@
 typedef DWORD (__fastcall *_ThemeWaitForServiceReady)(DWORD timeout);
 typedef DWORD (__fastcall *_ThemeWatchForStart)();
 
-static const COLORREF WallpaperColorWin2k = RGB(58, 110, 165); // #3a6ea5
 static const COLORREF WallpaperColorWinXP = RGB( 0,  78, 152); // #004e98
 static const COLORREF WallpaperColorWin8  = RGB(32, 103, 178); // #2067b2
 static const COLORREF WallpaperColorWin10 = RGB(24,   0,  82); // #180052
@@ -186,6 +185,7 @@ static void CreateRunOnceWindow() {
 	UpdateWindow(hwnd);
 }
 
+#ifndef _DEBUG
 static BOOL IsSystemUser() {
 	BOOL result = FALSE;
 	PTOKEN_USER tokenInfo;
@@ -222,6 +222,7 @@ end:
 	}
 	return result;
 }
+#endif
 
 void RunOnce() {
 #ifndef _DEBUG

@@ -18,8 +18,7 @@ static inline HRESULT ViewWindowsUpdateLog(int nCmdShow) {
 	LPWSTR workDir = windir;
 
 	if (AtLeastWin10()) {
-		// Windows 10 moves WU/USO logs to ETW. The ETW logs can be converted back to a plain-text .log
-		// using a cmdlet.
+		// Windows 10 moves WU/USO logs to ETW. The ETW logs can be converted back to a plain-text .log using a cmdlet.
 		WCHAR powershell[MAX_PATH];
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", powershell, ARRAYSIZE(powershell));
 
@@ -30,14 +29,11 @@ static inline HRESULT ViewWindowsUpdateLog(int nCmdShow) {
 		}
 
 		// On success, the log is written to Desktop\WindowsUpdate.log.
-		WCHAR desktop[MAX_PATH];
-		hr = SHGetFolderPath(0, CSIDL_DESKTOP, NULL, 0, desktop);
+		hr = SHGetFolderPath(0, CSIDL_DESKTOP, NULL, 0, workDir);
 		if (!SUCCEEDED(hr)) {
 			TRACE(L"SHGetFolderPath() failed: %ls\n", GetMessageForHresult(hr));
 			return hr;
 		}
-
-		workDir = desktop;
 	}
 
 	return Exec(L"open", L"WindowsUpdate.log", NULL, workDir, nCmdShow, FALSE, NULL);

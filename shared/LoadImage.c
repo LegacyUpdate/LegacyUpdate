@@ -215,9 +215,7 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outpu
 		goto end;
 	}
 
-	HBITMAP hOld = (HBITMAP)SelectObject(hdcMem, hBitmap);
 	HDC hdcMemScaled = CreateCompatibleDC(hdc);
-	HBITMAP hOldScaled = (HBITMAP)SelectObject(hdcMemScaled, scaledBitmap);
 	SetStretchBltMode(hdcMemScaled, HALFTONE);
 
 	if (!StretchBlt(hdcMemScaled,

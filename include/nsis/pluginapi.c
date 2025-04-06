@@ -41,7 +41,7 @@ int NSISCALL popstringn(LPTSTR str, int maxlen)
   stack_t *th;
   if (!g_stacktop || !*g_stacktop) return 1;
   th=(*g_stacktop);
-  if (str) lstrcpyn(str,th->text,maxlen?maxlen:g_stringsize);
+  if (str) lstrcpyn(str,th->text,maxlen?maxlen:(int)g_stringsize);
   *g_stacktop = th->next;
   GlobalFree((HGLOBAL)th);
   return 0;
@@ -65,7 +65,7 @@ LPTSTR NSISCALL getuservariable(const int varnum)
 
 void NSISCALL setuservariable(const int varnum, LPCTSTR var)
 {
-  if (var && isvalidnsisvarindex(varnum)) 
+  if (var && isvalidnsisvarindex(varnum))
     lstrcpy(g_variables + varnum*g_stringsize, var);
 }
 
@@ -81,7 +81,7 @@ int NSISCALL PopStringA(LPSTR ansiStr)
 
 int NSISCALL PopStringNA(LPSTR ansiStr, int maxlen)
 {
-   int realLen = maxlen ? maxlen : g_stringsize;
+   int realLen = maxlen ? maxlen : (int)g_stringsize;
    LPWSTR wideStr = (LPWSTR) GlobalAlloc(GPTR, realLen*sizeof(WCHAR));
    int rval = popstringn(wideStr, realLen);
    WideCharToMultiByte(CP_ACP, 0, wideStr, -1, ansiStr, realLen, NULL, NULL);
@@ -273,7 +273,7 @@ int NSISCALL myatoi_or(LPCTSTR s)
   }
 
   // Support for simple ORed expressions
-  if (*s == _T('|')) 
+  if (*s == _T('|'))
   {
       v |= myatoi_or(s+1);
   }

@@ -20,13 +20,6 @@ static BOOL g_isActivated = TRUE;
 PLUGIN_METHOD(IsActivated) {
 	PLUGIN_INIT();
 
-	// Get the Operating System Version information as well as the CPU architecture.
-	// We'll need this so that we activate the correct COM object on 64-bit versions
-	// of Windows XP and Windows Server 2003.
-	OSVERSIONINFOEX* versionInfo = GetVersionInfo();
-	SYSTEM_INFO systemInfo;
-	GetSystemInfo(&systemInfo);
-
 	// Activation is irrelevant prior to XP
 	if (g_loadedLicenseStatus || !AtLeastWinXP2002()) {
 		pushint(g_isActivated);
@@ -34,6 +27,11 @@ PLUGIN_METHOD(IsActivated) {
 	}
 
 	g_loadedLicenseStatus = TRUE;
+
+	// Get the CPU architecture. We'll need this so that we activate the correct COM object on 64-bit versions
+	// of Windows XP and Windows Server 2003.
+	SYSTEM_INFO systemInfo;
+	GetSystemInfo(&systemInfo);
 
 	if (AtLeastWinVista()) {
 		// Vista+: Ask the Software Licensing Service
@@ -65,7 +63,7 @@ PLUGIN_METHOD(IsActivated) {
 
 		// Iterate through all statuses until we find one in Licensed status.
 		g_isActivated = FALSE;
-		for (int i = 0; i < count; i++) {
+		for (UINT i = 0; i < count; i++) {
 			if (status[i].eStatus == SL_LICENSING_STATUS_LICENSED) {
 				g_isActivated = TRUE;
 				break;

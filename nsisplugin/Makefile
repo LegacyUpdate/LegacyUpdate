@@ -37,7 +37,11 @@ CFLAGS = \
 	-fno-asynchronous-unwind-tables \
 	-fno-exceptions \
 	-flto \
-	-Wno-write-strings \
+	-Wall \
+	-Wextra \
+	-Wno-unused-parameter \
+	-Wno-unknown-pragmas \
+	-Wno-cast-function-type \
 	-I../include \
 	-I../shared \
 	-include stdafx.h

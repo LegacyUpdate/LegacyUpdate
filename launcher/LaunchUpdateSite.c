@@ -18,7 +18,7 @@ const LPWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
 DEFINE_GUID(IID_ILegacyUpdateCtrl,  0xC33085BB, 0xC3E1, 0x4D27, 0xA2, 0x14, 0xAF, 0x01, 0x95, 0x3D, 0xF5, 0xE5);
 DEFINE_GUID(CLSID_LegacyUpdateCtrl, 0xAD28E0DF, 0x5F5A, 0x40B5, 0x94, 0x32, 0x85, 0xEF, 0xD9, 0x7D, 0x1F, 0x9F);
 
-static const LPWSTR GetUpdateSiteURL() {
+static LPWSTR GetUpdateSiteURL() {
 	// Fallback: Use SSL only on Vista and up
 	BOOL useHTTPS = AtLeastWinVista();
 
@@ -87,8 +87,6 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	hr = CoCreateInstance(&CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, &IID_IWebBrowser2, (void **)&browser);
 	if (hr == REGDB_E_CLASSNOTREG) {
 		// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
-		OSVERSIONINFOEX *versionInfo = GetVersionInfo();
-
 		// Windows 8+: Directly prompt to reinstall IE using Fondue.exe.
 		if (AtLeastWin8()) {
 			SYSTEM_INFO systemInfo;

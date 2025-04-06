@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Exec.h"
 
-HRESULT Exec(LPWSTR verb, LPWSTR file, LPWSTR params, LPWSTR workingDir, WORD show, BOOL wait, LPDWORD exitCode) {
+HRESULT Exec(LPWSTR verb, LPWSTR file, LPWSTR params, LPWSTR workingDir, int show, BOOL wait, LPDWORD exitCode) {
 	SHELLEXECUTEINFO execInfo = {0};
 	execInfo.cbSize = sizeof(execInfo);
 	execInfo.lpVerb = verb;

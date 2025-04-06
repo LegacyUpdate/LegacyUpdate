@@ -289,9 +289,11 @@ params:
   // Got all the params off the stack.
 
   {
-    STARTUPINFO si = { sizeof(si), };
-    SECURITY_ATTRIBUTES sa = { sizeof(sa), };
-    SECURITY_DESCRIPTOR sd = { 0, };
+    STARTUPINFO si = {0};
+    si.cb = sizeof(si);
+    SECURITY_ATTRIBUTES sa = {0};
+    sa.nLength = sizeof(sa);
+    SECURITY_DESCRIPTOR sd = {0};
     PROCESS_INFORMATION pi;
     const BOOL isNT = sizeof(void*) > 4 || (GetVersion() < 0x80000000);
     HANDLE newstdout = 0, read_stdout = 0;
