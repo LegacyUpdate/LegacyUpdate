@@ -26,7 +26,7 @@ apt-get install -qy curl p7zip-full
 mkdir /tmp/nsis
 cd /tmp/nsis
 
-curl -fSL https://prdownloads.sourceforge.net/nsis/NSIS%203/3.10/nsis-3.10-setup.exe -o nsis.exe
+curl -fSL https://prdownloads.sourceforge.net/nsis/NSIS%203/3.11/nsis-3.11-setup.exe -o nsis.exe
 7z x nsis.exe
 
 mv /usr/share/nsis/Stubs{,_old}
