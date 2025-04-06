@@ -40,10 +40,12 @@ SetPluginUnload alwaysoff
 !define IsPassive `"" HasFlag "/passive"`
 !define IsActiveX `"" HasFlag "/activex"`
 !define IsHelp    `"" HasFlag "/?"`
-!define IsVerbose `"" HasFlag "/v"`
 
 !if ${DEBUG} == 1
+!define IsVerbose   `1 == 1`
 !define TestRunOnce `"" HasFlag "/testrunonce"`
+!else
+!define IsVerbose   `"" HasFlag "/v"`
 !endif
 
 !macro -DetailPrint level text
