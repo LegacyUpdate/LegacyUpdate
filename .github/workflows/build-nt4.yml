@@ -1,4 +1,4 @@
-name: Build Legacy Update
+name: Build Legacy Update NT
 
 on:
   push:
@@ -9,46 +9,17 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2022
-    defaults:
-      run:
-        shell: wsl-bash {0}
-    env:
-      WSLENV: GITHUB_OUTPUT
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Install WSL
-      uses: Vampire/setup-wsl@v4
-      with:
-        distribution: Ubuntu-22.04
-
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up WSL
+    - name: Set up
       run: |
         sudo apt-get update -q
         sudo apt-get install -qy curl make mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
         ./build/fix-nsis.sh
-
-    - name: Set up Visual Studio
-      run: |
-        PATH='/mnt/c/Program Files (x86)/Microsoft Visual Studio/Installer':$PATH
-        vs="$(vswhere.exe -latest -property installationPath | tr -d '\r')"
-        if ! vs_installer.exe modify \
-          --quiet --norestart --noUpdateInstaller \
-          --installPath "$vs" \
-          --config .vsconfig; then
-          cd /tmp
-          curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
-          chmod +x vscollect.exe
-          ./vscollect.exe -zip:vslogs.zip
-          unzip -o vslogs.zip
-          for i in Temp/*.log; do
-            printf '\n==== %s ====\n' "$i"
-            cat "$i"
-          done
-        fi
 
     - name: Install MinGW toolchain
       run: |
@@ -63,10 +34,10 @@ jobs:
       run: |
         export PATH=/opt/gcc-14.2-binutils-2.44-mingw-v12.0.0-i686/bin:$PATH
         export PATH=/opt/gcc-14.2-binutils-2.44-mingw-v12.0.0-x86_64/bin:$PATH
-        make CI=1 DEBUG=0
+        make CI=1 DEBUG=0 nt4
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
         path: |
-          setup/LegacyUpdate-*.exe
+          setup/LegacyUpdateNT-*.exe
