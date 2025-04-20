@@ -38,7 +38,9 @@ CFLAGS = \
 	-fno-exceptions \
 	-flto \
 	-Wall \
+	-Werror \
 	-Wextra \
+	-Wpedantic \
 	-Wno-unused-parameter \
 	-Wno-unknown-pragmas \
 	-Wno-cast-function-type \
