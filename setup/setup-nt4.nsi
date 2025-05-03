@@ -242,7 +242,7 @@ ${MementoSectionDone}
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInit
-	!insertmacro InitChecks
+	Call InitChecks
 
 	${MementoSectionRestore}
 

@@ -14,8 +14,6 @@
 !insertmacro PatchHandler "2003SP2" "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" ${PATCH_FLAGS_LONG} ""
 !insertmacro PatchHandler "XPESP3"  "Windows XP $(EMB) $(SP) 3" ${PATCH_FLAGS_LONG}  ""
 
-!insertmacro NeedsFileVersionHandler "IE6"      "mshtml.dll"   "6.0.2600.0"
-
 !macro DownloadIE ver title
 	${If} ${NeedsPatch} IE${ver}
 		StrCpy $Patch.Key   "IE${ver}"

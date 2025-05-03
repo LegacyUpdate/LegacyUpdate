@@ -177,7 +177,7 @@ Function InitChecks
 		Quit
 	${EndIf}
 !endif
-!macroend
+FunctionEnd
 
 !macro InhibitSleep state
 !if ${state} == 1
