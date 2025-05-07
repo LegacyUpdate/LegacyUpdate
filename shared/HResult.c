@@ -15,7 +15,7 @@ EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
 			g_loadedHModule = TRUE;
 
 			// Load messages table from main dll
-			LPWSTR installPath;
+			LPWSTR installPath = NULL;
 			if (GetInstallPath(&installPath)) {
 				WCHAR path[MAX_PATH];
 				wsprintf(path, L"%ls\\LegacyUpdate.dll", installPath);

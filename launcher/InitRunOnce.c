@@ -73,7 +73,7 @@ static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, L
 	case WM_HOTKEY: {
 		// Shift-F10 to run cmd
 		if (wParam == HK_RUNCMD) {
-			DWORD exitCode;
+			DWORD exitCode = 0;
 			if (!g_cmdHandle || (GetExitCodeProcess(g_cmdHandle, &exitCode) && exitCode != STILL_ACTIVE)) {
 				PROCESS_INFORMATION processInfo;
 				RunCmd(&processInfo);
@@ -142,7 +142,7 @@ static void CreateRunOnceWindow() {
 
 		DWORD width = GetSystemMetrics(SM_CXSCREEN);
 		DWORD height = GetSystemMetrics(SM_CYSCREEN);
-		HBITMAP wallpaper;
+		HBITMAP wallpaper = NULL;
 
 		if (IsWin7()) {
 			// 7: Bitmap in oobe dir
@@ -188,14 +188,14 @@ static void CreateRunOnceWindow() {
 #ifndef _DEBUG
 static BOOL IsSystemUser() {
 	BOOL result = FALSE;
-	PTOKEN_USER tokenInfo;
-	PSID systemSid;
-	HANDLE token;
+	PTOKEN_USER tokenInfo = NULL;
+	PSID systemSid = NULL;
+	HANDLE token = NULL;
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
 		goto end;
 	}
 
-	DWORD tokenInfoLen;
+	DWORD tokenInfoLen = 0;
 	GetTokenInformation(token, TokenUser, NULL, 0, &tokenInfoLen);
 	tokenInfo = (PTOKEN_USER)LocalAlloc(LPTR, tokenInfoLen);
 	if (!GetTokenInformation(token, TokenUser, tokenInfo, tokenInfoLen, &tokenInfoLen)) {
@@ -275,7 +275,7 @@ void RunOnce() {
 	CloseHandle(processInfo.hThread);
 
 	// Wait for it to finish, while running a message loop
-	MSG msg;
+	MSG msg = {0};
 	while (WaitForSingleObject(processInfo.hProcess, 100) == WAIT_TIMEOUT) {
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);

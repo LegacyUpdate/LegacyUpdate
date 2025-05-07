@@ -4,7 +4,7 @@
 #include "VersionInfo.h"
 
 HRESULT SelfElevate(LPWSTR args, LPDWORD code) {
-	LPWSTR fileName;
+	LPWSTR fileName = NULL;
 	GetOwnFileName(&fileName);
 	HRESULT hr = Exec(L"runas", fileName, args, NULL, SW_SHOWDEFAULT, TRUE, code);
 	LocalFree(fileName);

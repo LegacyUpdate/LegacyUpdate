@@ -104,8 +104,8 @@ PLUGIN_METHOD(InitTaskbarProgress) {
 
 	HWND innerWindow = FindWindowEx(g_hwndParent, NULL, L"#32770", NULL);
 	HWND progressBar = FindWindowEx(innerWindow, NULL, L"msctls_progress32", NULL);
-	PBRANGE range;
-	HRESULT hr;
+	PBRANGE range = {0};
+	HRESULT hr = E_FAIL;
 
 	if (!progressBar) {
 		goto fail;

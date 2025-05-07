@@ -36,7 +36,7 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, __in REFCLSID rclsid, __in REFII
 	}
 
 	BIND_OPTS3 bindOpts;
-	memset(&bindOpts, 0, sizeof(bindOpts));
+	ZeroMemory(&bindOpts, sizeof(bindOpts));
 	bindOpts.cbStruct = sizeof(bindOpts);
 	bindOpts.hwnd = hwnd;
 	bindOpts.dwClassContext = CLSCTX_LOCAL_SERVER;
@@ -48,18 +48,20 @@ CElevationHelper::CElevationHelper() {
 }
 
 STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
-	if (progID == NULL) {
+	if (progID == NULL || retval == NULL) {
 		return E_INVALIDARG;
 	}
 
+	*retval = NULL;
 	HRESULT hr = S_OK;
 	CComPtr<IDispatch> object;
+	CLSID clsid = {0};
+
 	if (!ProgIDIsPermitted(progID)) {
 		hr = E_ACCESSDENIED;
 		goto end;
 	}
 
-	CLSID clsid;
 	hr = CLSIDFromProgID(progID, &clsid);
 	if (!SUCCEEDED(hr)) {
 		goto end;

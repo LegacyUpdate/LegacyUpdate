@@ -17,7 +17,7 @@ EXTERN_C HRESULT GetInstallPath(LPWSTR *path) {
 		}
 
 		// Do our best to guess where it should be
-		LPWSTR programFiles;
+		LPWSTR programFiles = NULL;
 		hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows\\CurrentVersion", L"ProgramFilesDir", KEY_WOW64_64KEY, &programFiles, &size);
 		if (SUCCEEDED(hr)) {
 			_installPath = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));

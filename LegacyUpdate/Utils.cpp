@@ -109,7 +109,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 }
 
 HRESULT StartLauncher(LPWSTR params, BOOL wait) {
-	LPWSTR path;
+	LPWSTR path = NULL;
 	HRESULT hr = GetInstallPath(&path);
 	if (!SUCCEEDED(hr)) {
 		return hr;
@@ -117,7 +117,7 @@ HRESULT StartLauncher(LPWSTR params, BOOL wait) {
 
 	PathAppend(path, L"LegacyUpdate.exe");
 
-	DWORD code;
+	DWORD code = 0;
 	hr = Exec(L"open", path, params, NULL, SW_SHOW, wait, &code);
 	if (SUCCEEDED(hr)) {
 		hr = HRESULT_FROM_WIN32(code);
@@ -129,15 +129,17 @@ HRESULT StartLauncher(LPWSTR params, BOOL wait) {
 HRESULT Reboot() {
 	HRESULT hr = E_FAIL;
 
+	HANDLE token = NULL;
+	TOKEN_PRIVILEGES privileges = {0};
+	LUID shutdownLuid = {0};
+
 	// Make sure we have permission to shut down
-	HANDLE token;
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token)) {
 		hr = AtlHresultFromLastError();
 		TRACE("OpenProcessToken() failed: %ls\n", GetMessageForHresult(hr));
 		goto end;
 	}
 
-	LUID shutdownLuid;
 	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &shutdownLuid)) {
 		hr = AtlHresultFromLastError();
 		TRACE("LookupPrivilegeValue() failed: %ls\n", GetMessageForHresult(hr));
@@ -145,10 +147,10 @@ HRESULT Reboot() {
 	}
 
 	// Ask the system nicely to give us shutdown privilege
-	TOKEN_PRIVILEGES privileges;
 	privileges.PrivilegeCount = 1;
 	privileges.Privileges[0].Luid = shutdownLuid;
 	privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
 	if (!AdjustTokenPrivileges(token, FALSE, &privileges, 0, NULL, NULL)) {
 		hr = AtlHresultFromLastError();
 		TRACE("AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(hr));

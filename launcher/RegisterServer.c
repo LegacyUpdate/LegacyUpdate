@@ -39,7 +39,7 @@ static HRESULT RegisterDllExternal(LPWSTR path, BOOL state) {
 	LPWSTR args = (LPWSTR)LocalAlloc(LPTR, (lstrlen(path) + 6) * sizeof(WCHAR));
 	wsprintf(args, L"/s %ls\"%ls\"", state ? L"" : L"/u ", path);
 
-	DWORD status;
+	DWORD status = 0;
 	HRESULT hr = Exec(NULL, regsvr32, args, NULL, SW_HIDE, TRUE, &status);
 	if (!SUCCEEDED(hr)) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
@@ -58,13 +58,14 @@ static HRESULT RegisterDllExternal(LPWSTR path, BOOL state) {
 HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	// Ensure elevation
 	HRESULT hr = S_OK;
-	LPWSTR installPath;
-	LPWSTR dllPath;
+	LPWSTR installPath = NULL;
+	LPWSTR dllPath = NULL;
 
 	if (!IsUserAdmin()) {
 		LPWSTR args = (LPWSTR)LocalAlloc(LPTR, 512 * sizeof(WCHAR));
 		wsprintf(args, L"%ls %i", state ? L"/regserver" : L"/unregserver", hwnd);
-		DWORD code;
+
+		DWORD code = 0;
 		hr = SelfElevate(args, &code);
 		if (!SUCCEEDED(hr)) {
 			// Ignore error on cancelling UAC dialog
@@ -88,7 +89,7 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 
 #ifdef _DEBUG
 	// Warn if registration path differs, to help with debugging
-	LPWSTR currentPath;
+	LPWSTR currentPath = NULL;
 	hr = GetRegistryString(HKEY_CLASSES_ROOT, L"CLSID\\{AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F}\\InprocServer32", NULL, KEY_WOW64_64KEY, &currentPath, NULL);
 	if (SUCCEEDED(hr) && wcscmp(currentPath, dllPath) != 0) {
 		if (MsgBox(hwnd, L"DEBUG: Native dll currently registered at a different path. Override?", currentPath, MB_YESNO) != IDYES) {

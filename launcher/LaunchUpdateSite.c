@@ -23,8 +23,8 @@ static LPWSTR GetUpdateSiteURL() {
 	BOOL useHTTPS = AtLeastWinVista();
 
 	// Get the Windows Update website URL set by Legacy Update setup
-	LPWSTR data;
-	DWORD size;
+	LPWSTR data = NULL;
+	DWORD size = 0;
 	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate", L"URL", KEY_WOW64_64KEY, &data, &size);
 	if (SUCCEEDED(hr)) {
 		// Return based on the URL value
@@ -41,12 +41,12 @@ static LPWSTR GetUpdateSiteURL() {
 
 void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	HRESULT hr = S_OK;
-	IWebBrowser2 *browser;
-	VARIANT url;
-	VARIANT flags;
-	VARIANT nullVariant;
-	LPTSTR siteURL;
-	HMONITOR monitor;
+	IWebBrowser2 *browser = NULL;
+	VARIANT url = {0};
+	VARIANT flags = {0};
+	VARIANT nullVariant = {0};
+	LPTSTR siteURL = NULL;
+	HMONITOR monitor = NULL;
 
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
 	if (!AtLeastWinVista() && !IsUserAdmin()) {
@@ -89,7 +89,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
 		// Windows 8+: Directly prompt to reinstall IE using Fondue.exe.
 		if (AtLeastWin8()) {
-			SYSTEM_INFO systemInfo;
+			SYSTEM_INFO systemInfo = {0};
 			GetSystemInfo(&systemInfo);
 			LPCTSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";
 
@@ -143,7 +143,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		goto end;
 	}
 
-	HWND ieHwnd;
+	HWND ieHwnd = NULL;
 	hr = IWebBrowser2_get_HWND(browser, (SHANDLE_PTR *)&ieHwnd);
 	if (!SUCCEEDED(hr)) {
 		goto end;
@@ -151,7 +151,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 
 	// Are we on a small display? If so, resize and maximise the window.
 	monitor = MonitorFromWindow(ieHwnd, MONITOR_DEFAULTTONEAREST);
-	MONITORINFO monitorInfo;
+	MONITORINFO monitorInfo = {0};
 	monitorInfo.cbSize = sizeof(MONITORINFO);
 
 	if (GetMonitorInfo(monitor, &monitorInfo) > 0) {

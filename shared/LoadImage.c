@@ -53,7 +53,7 @@ static HGLOBAL GetRawResource(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
 }
 
 static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
-	IStream *stream;
+	IStream *stream = NULL;
 	HGLOBAL resource = GetRawResource(hInstance, name, type);
 	if (!resource) {
 		TRACE(L"GetResource failed: %d", GetLastError());
@@ -69,10 +69,10 @@ static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type)
 }
 
 static IWICBitmapSource *GetWICBitmap(IStream *imageStream, REFCLSID rclsid) {
-	IWICBitmapSource *bitmap;
-	IWICBitmapDecoder *decoder;
-	UINT frameCount;
-	IWICBitmapFrameDecode *frame;
+	IWICBitmapSource *bitmap = NULL;
+	IWICBitmapDecoder *decoder = NULL;
+	UINT frameCount = 0;
+	IWICBitmapFrameDecode *frame = NULL;
 
 	if (!SUCCEEDED(CoCreateInstance(rclsid, NULL, CLSCTX_INPROC_SERVER, &IID_IWICBitmapDecoder, (LPVOID *)&decoder))) {
 		return NULL;
@@ -99,13 +99,13 @@ end:
 }
 
 static HBITMAP GetHBitmapForWICBitmap(IWICBitmapSource *bitmap) {
-	HBITMAP hBitmap;
-	UINT width, height;
+	HBITMAP hBitmap = NULL;
+	UINT width = 0, height = 0;
 	if (!SUCCEEDED(IWICBitmapSource_GetSize(bitmap, &width, &height)) || width == 0 || height == 0) {
 		return NULL;
 	}
 
-	BITMAPINFO bminfo;
+	BITMAPINFO bminfo = {0};
 	ZeroMemory(&bminfo, sizeof(bminfo));
 	bminfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	bminfo.bmiHeader.biWidth = width;
@@ -114,7 +114,7 @@ static HBITMAP GetHBitmapForWICBitmap(IWICBitmapSource *bitmap) {
 	bminfo.bmiHeader.biBitCount = 32;
 	bminfo.bmiHeader.biCompression = BI_RGB;
 
-	void *imageBits;
+	void *imageBits = NULL;
 	HDC screenDC = GetDC(NULL);
 	hBitmap = CreateDIBSection(screenDC, &bminfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
 	ReleaseDC(NULL, screenDC);
@@ -174,7 +174,7 @@ HBITMAP LoadJPEGFile(LPWSTR filePath) {
 		}
 	}
 
-	IStream *imageStream;
+	IStream *imageStream = NULL;
 	HRESULT hr = $SHCreateStreamOnFileEx(filePath, STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, NULL, &imageStream);
 	if (!SUCCEEDED(hr)) {
 		TRACE(L"SHCreateStreamOnFileEx failed: 0x%08x", hr);
@@ -203,19 +203,23 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outpu
 
 	HDC hdc = GetDC(NULL);
 	HDC hdcMem = CreateCompatibleDC(hdc);
+	HDC hdcMemScaled = NULL;
+	HGLOBAL handle = NULL;
+	HANDLE file = INVALID_HANDLE_VALUE;
+
 	HBITMAP scaledBitmap = CreateCompatibleBitmap(hdc, width, height);
 	if (!scaledBitmap) {
 		TRACE(L"CreateCompatibleBitmap failed: %d", GetLastError());
 		goto end;
 	}
 
-	BITMAP bmp;
+	BITMAP bmp = {0};
 	if (!GetObject(hBitmap, sizeof(BITMAP), &bmp)) {
 		TRACE(L"GetObject failed: %d", GetLastError());
 		goto end;
 	}
 
-	HDC hdcMemScaled = CreateCompatibleDC(hdc);
+	hdcMemScaled = CreateCompatibleDC(hdc);
 	SetStretchBltMode(hdcMemScaled, HALFTONE);
 
 	if (!StretchBlt(hdcMemScaled,
@@ -239,7 +243,7 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outpu
 	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 	bmfh.bfSize = bmfh.bfOffBits + bmih.biSizeImage;
 
-	HGLOBAL handle = GlobalAlloc(GMEM_MOVEABLE, bmih.biSizeImage);
+	handle = GlobalAlloc(GMEM_MOVEABLE, bmih.biSizeImage);
 	if (!handle) {
 		TRACE(L"GlobalAlloc failed: %d", GetLastError());
 		goto end;
@@ -256,13 +260,13 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outpu
 		goto end;
 	}
 
-	HANDLE file = CreateFile(outputPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	file = CreateFile(outputPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file == INVALID_HANDLE_VALUE) {
 		TRACE(L"CreateFile failed: %d", GetLastError());
 		goto end;
 	}
 
-	DWORD written;
+	DWORD written = 0;
 	if (!WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &written, NULL) ||
 		!WriteFile(file, &bmih, sizeof(BITMAPINFOHEADER), &written, NULL) ||
 		!WriteFile(file, bitmapData, bmih.biSizeImage, &written, NULL)) {
@@ -273,7 +277,7 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outpu
 	result = TRUE;
 
 end:
-	if (file && file != INVALID_HANDLE_VALUE) {
+	if (file != INVALID_HANDLE_VALUE) {
 		CloseHandle(file);
 	}
 	if (scaledBitmap) {
@@ -283,9 +287,15 @@ end:
 		GlobalUnlock(handle);
 		GlobalFree(handle);
 	}
-	ReleaseDC(NULL, hdc);
-	DeleteDC(hdcMem);
-	DeleteDC(hdcMemScaled);
+	if (hdc) {
+		ReleaseDC(NULL, hdc);
+	}
+	if (hdcMem) {
+		DeleteDC(hdcMem);
+	}
+	if (hdcMemScaled) {
+		DeleteDC(hdcMemScaled);
+	}
 
 	return result;
 }

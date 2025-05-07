@@ -40,12 +40,10 @@
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
-static BOOL _loadedVersionInfo = FALSE;
-static OSVERSIONINFOEX _versionInfo;
+static OSVERSIONINFOEX _versionInfo = {0};
 
 static OSVERSIONINFOEX *GetVersionInfo() {
-	if (!_loadedVersionInfo) {
-		_loadedVersionInfo = TRUE;
+	if (_versionInfo.dwOSVersionInfoSize == 0) {
 		ZeroMemory(&_versionInfo, sizeof(OSVERSIONINFOEX));
 		_versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 		GetVersionEx((LPOSVERSIONINFO)&_versionInfo);

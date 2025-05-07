@@ -30,7 +30,7 @@ PLUGIN_METHOD(IsActivated) {
 
 	// Get the CPU architecture. We'll need this so that we activate the correct COM object on 64-bit versions
 	// of Windows XP and Windows Server 2003.
-	SYSTEM_INFO systemInfo;
+	SYSTEM_INFO systemInfo = {0};
 	GetSystemInfo(&systemInfo);
 
 	if (AtLeastWinVista()) {
@@ -48,9 +48,9 @@ PLUGIN_METHOD(IsActivated) {
 			return;
 		}
 
-		HSLC slc;
+		HSLC slc = NULL;
 		SL_LICENSING_STATUS *status;
-		UINT count;
+		UINT count = 0;
 		HRESULT hr = $SLOpen(&slc);
 		if (!SUCCEEDED(hr)) {
 			goto end_slc;
@@ -80,7 +80,7 @@ end_slc:
 	} else {
 		// XP: Use private API
 		ICOMLicenseAgent *agent;
-		HRESULT hr;
+		HRESULT hr = E_FAIL;
 
 		// On XP and Server 2003 x64, we need to pass a different argument to CoCreateInstance.
 		if (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) {
@@ -94,14 +94,14 @@ end_slc:
 			goto end_xp;
 		}
 
-		ULONG result;
+		ULONG result = 0;
 		hr = ICOMLicenseAgent_Initialize(agent, 0xC475, 3, NULL, &result);
 		if (!SUCCEEDED(hr) || result != 0) {
 			TRACE(L"COMLicenseAgent init failed: %x", hr);
 			goto end_xp;
 		}
 
-		ULONG wpaLeft, evalLeft;
+		ULONG wpaLeft = 0, evalLeft = 0;
 		hr = ICOMLicenseAgent_GetExpirationInfo(agent, &wpaLeft, &evalLeft);
 		if (!SUCCEEDED(hr)) {
 			TRACE(L"COMLicenseAgent GetExpirationInfo failed: %x", hr);

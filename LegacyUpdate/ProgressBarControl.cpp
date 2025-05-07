@@ -14,7 +14,7 @@
 #endif
 
 LRESULT CProgressBarControl::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled) {
-	RECT rc;
+	RECT rc = {0};
 	GetWindowRect(&rc);
 	rc.right -= rc.left;
 	rc.bottom -= rc.top;
@@ -52,7 +52,7 @@ STDMETHODIMP CProgressBarControl::put_Value(SHORT value) {
 		m_ctl.SendMessage(PBM_SETMARQUEE, TRUE, 100);
 	} else {
 		// Normal style
-		SHORT oldValue;
+		SHORT oldValue = -1;
 		get_Value(&oldValue);
 		if (oldValue == -1) {
 			m_ctl.SetWindowLongPtr(GWL_STYLE, m_ctl.GetWindowLongPtr(GWL_STYLE) & ~PBS_MARQUEE);

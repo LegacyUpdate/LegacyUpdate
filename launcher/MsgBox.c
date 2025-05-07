@@ -29,7 +29,7 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 			wsprintf(finalBody, L"%s\n\n%s", instruction, body);
 		}
 
-		MSGBOXPARAMS params = { 0 };
+		MSGBOXPARAMS params = {0};
 		params.cbSize = sizeof(MSGBOXPARAMS);
 		params.hwndOwner = hwnd;
 		params.hInstance = GetModuleHandle(NULL);
@@ -46,7 +46,7 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 		return result;
 	}
 
-	TASKDIALOG_COMMON_BUTTON_FLAGS buttons;
+	TASKDIALOG_COMMON_BUTTON_FLAGS buttons = 0;
 	DWORD flags = TDF_POSITION_RELATIVE_TO_WINDOW;
 
 	switch (type & 0x0000000F) {
@@ -65,7 +65,7 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 		break;
 	}
 
-	TASKDIALOGCONFIG config = { 0 };
+	TASKDIALOGCONFIG config = {0};
 	config.cbSize = sizeof(TASKDIALOGCONFIG);
 	config.hwndParent = hwnd;
 	config.hInstance = GetModuleHandle(NULL);
@@ -76,7 +76,7 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 	config.pszContent = body;
 	config.pszMainIcon = MAKEINTRESOURCE(IDI_APPICON);
 
-	int button;
+	int button = 0;
 	$TaskDialogIndirect(&config, &button, NULL, NULL);
 	return button;
 }

@@ -17,10 +17,6 @@
 #include <wuapi.h>
 #include "IUpdateInstaller4.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
-
 const BSTR permittedHosts[] = {
 	L"legacyupdate.net",
 	L"test.legacyupdate.net",
@@ -61,7 +57,7 @@ HWND CLegacyUpdateCtrl::GetIEWindowHWND() {
 		goto end;
 	}
 
-	HWND hwnd;
+	HWND hwnd = NULL;
 	hr = oleWindow->GetWindow(&hwnd);
 	if (!SUCCEEDED(hr)) {
 		goto end;
@@ -213,8 +209,8 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		break;
 
 	case e_SPVersionString: {
-		LPWSTR data;
-		DWORD size;
+		LPWSTR data = NULL;
+		DWORD size = 0;
 		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", 0, &data, &size);
 		retval->vt = VT_BSTR;
 		retval->bstrVal = SUCCEEDED(hr)
@@ -228,7 +224,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	}
 
 	case e_controlVersionString: {
-		LPWSTR data;
+		LPWSTR data = NULL;
 		HRESULT hr = GetOwnVersion(&data);
 		if (!SUCCEEDED(hr)) {
 			return hr;
@@ -239,7 +235,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	}
 
 	case e_VistaProductType: {
-		DWORD productType;
+		DWORD productType = 0;
 		GetVistaProductInfo(versionInfo->dwMajorVersion, versionInfo->dwMinorVersion, versionInfo->wServicePackMajor, versionInfo->wServicePackMinor, &productType);
 		retval->vt = VT_UI4;
 		retval->ulVal = productType;
@@ -249,8 +245,8 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_productName: {
 		HRESULT hr = GetOSProductName(retval);
 		if (!SUCCEEDED(hr)) {
-			LPWSTR data;
-			DWORD size;
+			LPWSTR data = NULL;
+			DWORD size = 0;
 			hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", 0, &data, &size);
 			if (SUCCEEDED(hr)) {
 				retval->vt = VT_BSTR;
@@ -261,8 +257,8 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	}
 
 	case e_displayVersion: {
-		LPWSTR data;
-		DWORD size;
+		LPWSTR data = NULL;
+		DWORD size = 0;
 		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", 0, &data, &size);
 		if (SUCCEEDED(hr)) {
 			retval->vt = VT_BSTR;
@@ -366,7 +362,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	}
 
 	// Check reboot flag in registry
-	HKEY subkey;
+	HKEY subkey = NULL;
 	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", KEY_WOW64_64KEY, KEY_READ, &subkey));
 	if (SUCCEEDED(hr)) {
 		RegCloseKey(subkey);
@@ -383,7 +379,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval
 
 	// Future note: These are in HKCU on NT; HKLM on 9x.
 	// Remove links and access to Windows Update
-	DWORD value;
+	DWORD value = 0;
 	HRESULT hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", KEY_WOW64_64KEY, &value);
 	if (SUCCEEDED(hr) && value == 1) {
 		*retval = VARIANT_TRUE;
@@ -405,7 +401,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	DoIsPermittedCheck();
 
 	HRESULT hr = S_OK;
-	VARIANT_BOOL isRebootRequired;
+	VARIANT_BOOL isRebootRequired = NULL;
 	if (SUCCEEDED(get_IsRebootRequired(&isRebootRequired)) && isRebootRequired == VARIANT_TRUE) {
 		// Calling Commit() is recommended on Windows 10, to ensure feature updates are properly prepared
 		// prior to the reboot. If IUpdateInstaller4 doesn't exist, we can skip this.
@@ -470,7 +466,7 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
-	DWORD useWUServer;
+	DWORD useWUServer = 0;
 	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", 0, &useWUServer);
 	*retval = SUCCEEDED(hr) && useWUServer == 1 ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
@@ -479,8 +475,8 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 	DoIsPermittedCheck();
 
-	LPWSTR data;
-	DWORD size;
+	LPWSTR data = NULL;
+	DWORD size = 0;
 	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", 0, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	if (data) {
@@ -492,8 +488,8 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 	DoIsPermittedCheck();
 
-	LPWSTR data;
-	DWORD size;
+	LPWSTR data = NULL;
+	DWORD size = 0;
 	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", 0, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	if (data) {

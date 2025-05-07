@@ -4,7 +4,7 @@
 
 static inline BOOL IsUserAdmin() {
 	SID_IDENTIFIER_AUTHORITY authority = SECURITY_NT_AUTHORITY;
-	PSID adminsSid;
+	PSID adminsSid = NULL;
 	BOOL result = FALSE;
 
 	if (!AllocateAndInitializeSid(&authority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &adminsSid)) {

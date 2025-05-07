@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Registry.h"
 #include "VersionInfo.h"
-#include <malloc.h>
 
 static ALWAYS_INLINE REGSAM GetWow64Flag(REGSAM options) {
 #ifdef _WIN64
@@ -17,7 +16,7 @@ static ALWAYS_INLINE REGSAM GetWow64Flag(REGSAM options) {
 }
 
 HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSAM options, LPWSTR *data, LPDWORD size) {
-	HKEY subkey;
+	HKEY subkey = NULL;
 	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, GetWow64Flag(KEY_READ | options), &subkey));
 	if (!SUCCEEDED(hr)) {
 		goto end;
@@ -31,7 +30,7 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSA
 			goto end;
 		}
 
-		LSTATUS status;
+		LSTATUS status = 0;
 		do {
 			status = RegQueryValueEx(subkey, valueName, NULL, NULL, (BYTE *)buffer, &length);
 			if (status == ERROR_MORE_DATA) {
@@ -74,7 +73,7 @@ end:
 }
 
 HRESULT GetRegistryDword(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSAM options, LPDWORD data) {
-	HKEY subkey;
+	HKEY subkey = NULL;
 	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, GetWow64Flag(KEY_READ | options), &subkey));
 	if (!SUCCEEDED(hr)) {
 		goto end;

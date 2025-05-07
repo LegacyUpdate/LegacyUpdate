@@ -17,7 +17,7 @@ PLUGIN_METHOD(UpdateRoots) {
 		return;
 	}
 
-	BOOL add;
+	BOOL add = FALSE;
 	if (lstrcmpi(stateStr, L"/update") == 0) {
 		add = TRUE;
 	} else if (lstrcmpi(stateStr, L"/delete") == 0) {
@@ -28,13 +28,14 @@ PLUGIN_METHOD(UpdateRoots) {
 	}
 
 	HCERTSTORE srcStore = CertOpenStore(CERT_STORE_PROV_FILENAME_W, 0, 0, CERT_STORE_READONLY_FLAG, path);
+	HCERTSTORE dstStore = NULL;
 	if (!srcStore) {
 		TRACE(L"CertOpenStore for %ls failed: %08x", path, hr);
 		hr = HRESULT_FROM_WIN32(GetLastError());
 		goto end;
 	}
 
-	HCERTSTORE dstStore = CertOpenStore(CERT_STORE_PROV_SYSTEM_REGISTRY_W, 0, 0, CERT_SYSTEM_STORE_LOCAL_MACHINE, store);
+	dstStore = CertOpenStore(CERT_STORE_PROV_SYSTEM_REGISTRY_W, 0, 0, CERT_SYSTEM_STORE_LOCAL_MACHINE, store);
 	if (!dstStore) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
 		TRACE(L"CertOpenStore for %ls failed: %08x", store, hr);

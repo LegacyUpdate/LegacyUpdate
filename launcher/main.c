@@ -60,7 +60,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	}
 
 	// All remaining args past the action
-	LPWSTR *flags = {0};
+	LPWSTR *flags = NULL;
 	int flagsCount = 0;
 	if (argc > 2) {
 		flags = &argv[2];
@@ -127,7 +127,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	}
 	}
 
-	MSG msg;
+	MSG msg = {0};
 	while (GetMessage(&msg, NULL, 0, 0) == 1) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);

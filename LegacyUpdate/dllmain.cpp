@@ -16,8 +16,9 @@ HINSTANCE g_hInstance;
 // DLL Entry Point
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 #ifdef _MERGE_PROXYSTUB
-	if (!PrxDllMain(hInstance, dwReason, lpReserved))
+	if (!PrxDllMain(hInstance, dwReason, lpReserved)) {
 		return FALSE;
+	}
 #endif
 
 	switch (dwReason) {
@@ -42,6 +43,7 @@ STDAPI DllCanUnloadNow(void) {
 		return hr;
 	}
 #endif
+
 	return _AtlModule.DllCanUnloadNow();
 }
 
@@ -53,6 +55,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) {
 		return S_OK;
 	}
 #endif
+
 	return _AtlModule.DllGetClassObject(rclsid, riid, ppv);
 }
 
@@ -66,13 +69,13 @@ STDAPI DllRegisterServer(void) {
 	}
 
 	// Fix the icon path
-	HKEY subkey;
+	HKEY subkey = NULL;
 	hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CLASSES_ROOT, L"CLSID\\{84F517AD-6438-478F-BEA8-F0B808DC257F}\\Elevation", 0, KEY_WRITE, &subkey));
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
 
-	LPWSTR installPath;
+	LPWSTR installPath = NULL;
 	hr = GetInstallPath(&installPath);
 	if (!SUCCEEDED(hr)) {
 		return hr;
@@ -107,33 +110,32 @@ STDAPI DllRegisterServer(void) {
 STDAPI DllUnregisterServer(void) {
 	HRESULT hr = _AtlModule.DllUnregisterServer();
 #ifdef _MERGE_PROXYSTUB
-	if (FAILED(hr)) {
+	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
+
 	hr = PrxDllRegisterServer();
-	if (FAILED(hr)) {
+	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
+
 	hr = PrxDllUnregisterServer();
 #endif
 	return hr;
 }
 
 
-// DllInstall - Adds/Removes entries to the system registry per user per machine.
+// DllInstall - Adds/Removes entries to the system registry per machine only.
 STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
 	HRESULT hr = E_FAIL;
-	static const wchar_t szUserSwitch[] = L"user";
 
-	if (pszCmdLine != NULL) {
-		if (_wcsnicmp(pszCmdLine, szUserSwitch, _countof(szUserSwitch)) == 0) {
-			AtlSetPerUserRegistration(true);
-		}
-	}
+	// Prevent per-user registration (regsvr32 /i:user)
+	AtlSetPerUserRegistration(false);
 
 	if (bInstall) {
 		hr = DllRegisterServer();
-		if (FAILED(hr)) {
+
+		if (!SUCCEEDED(hr)) {
 			DllUnregisterServer();
 		}
 	} else {

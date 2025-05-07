@@ -67,7 +67,7 @@ static WNDPROC g_bannerOrigWndProc;
 static WNDPROC g_bottomOrigWndProc;
 
 static Theme GetTheme() {
-	BOOL enabled;
+	BOOL enabled = FALSE;
 	if (!$DwmIsCompositionEnabled || !$IsThemeActive || !SUCCEEDED($DwmIsCompositionEnabled(&enabled))) {
 		return ThemeClassic;
 	}
@@ -98,7 +98,7 @@ static void ConfigureWindow() {
 
 		if (theme >= ThemeAeroLight) {
 			// Set glass area
-			RECT rect;
+			RECT rect = {0};
 			GetWindowRect(bannerWindow, &rect);
 			margins.cyTopHeight = rect.bottom - rect.top;
 		}
@@ -139,9 +139,9 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 
 	switch (uMsg) {
 	case WM_PAINT: {
-		PAINTSTRUCT ps;
+		PAINTSTRUCT ps = {0};
 		HDC hdc = BeginPaint(hwnd, &ps);
-		RECT rect;
+		RECT rect = {0};
 		GetClientRect(hwnd, &rect);
 
 		// Draw base color for glass area
@@ -155,7 +155,7 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 
 		float scale = (float)GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
 
-		BLENDFUNCTION blendFunc;
+		BLENDFUNCTION blendFunc = {0};
 		blendFunc.BlendOp = AC_SRC_OVER;
 		blendFunc.BlendFlags = 0;
 		blendFunc.SourceConstantAlpha = 0xFF;
@@ -166,7 +166,7 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 			HDC hdcMem = CreateCompatibleDC(hdc);
 			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_bannerWordmarkGlow);
 
-			BITMAP bitmap;
+			BITMAP bitmap = {0};
 			GetObject(g_bannerWordmarkGlow, sizeof(bitmap), &bitmap);
 
 			LONG width = bitmap.bmWidth * scale;
@@ -187,7 +187,7 @@ static LRESULT CALLBACK BannerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 			HDC hdcMem = CreateCompatibleDC(hdc);
 			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_bannerWordmark);
 
-			BITMAP bitmap;
+			BITMAP bitmap = {0};
 			GetObject(g_bannerWordmark, sizeof(bitmap), &bitmap);
 
 			LONG width = bitmap.bmWidth * scale;
@@ -231,10 +231,10 @@ static LRESULT CALLBACK BottomWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 			break;
 		}
 
-		PAINTSTRUCT ps;
+		PAINTSTRUCT ps = {0};
 		HDC hdc = BeginPaint(hwnd, &ps);
 
-		RECT rect;
+		RECT rect = {0};
 		GetClientRect(hwnd, &rect);
 		$DrawThemeBackground(g_aeroTheme, hdc, AW_COMMANDAREA, 0, &rect, NULL);
 
@@ -286,7 +286,7 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		POINT hit = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
 		ScreenToClient(hwnd, &hit);
 
-		RECT rect;
+		RECT rect = {0};
 		GetWindowRect(bannerWindow, &rect);
 		rect.right -= rect.left;
 		rect.bottom -= rect.top;

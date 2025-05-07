@@ -2,16 +2,16 @@
 #include "VersionInfo.h"
 
 static BOOL _loadedOwnVersion = FALSE;
-static LPWSTR _version;
+static LPWSTR _version = NULL;
 
 HRESULT GetOwnVersion(LPWSTR *version) {
 	if (!_loadedOwnVersion) {
 		_loadedOwnVersion = TRUE;
 
-		LPWSTR filename;
+		LPWSTR filename = NULL;
 		GetOwnFileName(&filename);
 
-		DWORD verHandle;
+		DWORD verHandle = 0;
 		DWORD verInfoSize = GetFileVersionInfoSize(filename, &verHandle);
 		if (verInfoSize == 0) {
 			LocalFree(filename);
@@ -27,8 +27,8 @@ HRESULT GetOwnVersion(LPWSTR *version) {
 
 		LocalFree(filename);
 
-		LPWSTR value;
-		UINT size;
+		LPWSTR value = NULL;
+		UINT size = 0;
 		if (!VerQueryValue(verInfo, L"\\StringFileInfo\\040904B0\\ProductVersion", (LPVOID *)&value, &size)) {
 			LocalFree(verInfo);
 			return HRESULT_FROM_WIN32(GetLastError());

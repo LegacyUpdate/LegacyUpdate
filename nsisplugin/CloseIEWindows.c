@@ -16,7 +16,7 @@ PLUGIN_METHOD(CloseIEWindows) {
 		goto end;
 	}
 
-	long count;
+	long count = 0;
 	hr = IShellWindows_get_Count(windows, &count);
 	if (!SUCCEEDED(hr)) {
 		goto end;
@@ -26,7 +26,7 @@ PLUGIN_METHOD(CloseIEWindows) {
 	index.vt = VT_I4;
 
 	for (long i = 0; i <= count; i++) {
-		IDispatch *item;
+		IDispatch *item = NULL;
 		index.lVal = i;
 
 		hr = IShellWindows_Item(windows, index, &item);
@@ -34,14 +34,14 @@ PLUGIN_METHOD(CloseIEWindows) {
 			continue;
 		}
 
-		IWebBrowser2 *browser;
+		IWebBrowser2 *browser = NULL;
 		hr = IDispatch_QueryInterface(item, &IID_IWebBrowser2, (void **)&browser);
 		IDispatch_Release(item);
 		if (!SUCCEEDED(hr)) {
 			continue;
 		}
 
-		BSTR location;
+		BSTR location = NULL;
 		hr = IWebBrowser2_get_LocationURL(browser, &location);
 		if (!SUCCEEDED(hr)) {
 			IWebBrowser2_Release(browser);
@@ -109,7 +109,7 @@ PLUGIN_METHOD(CloseIEWindows) {
 							while (GetTickCount() - start < 5000) {
 								Sleep(100);
 
-								DWORD exitCode;
+								DWORD exitCode = 0;
 								if (GetExitCodeProcess(process, &exitCode) && exitCode != STILL_ACTIVE) {
 									break;
 								}

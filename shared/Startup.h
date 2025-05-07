@@ -7,20 +7,23 @@ typedef BOOL (WINAPI *_SetDllDirectoryW)(LPWSTR);
 
 static inline void HardenDllSearchPaths() {
 	// Try our best to secure DLL search paths to just system32
-	WCHAR path[MAX_PATH];
+	WCHAR windir[MAX_PATH];
+	WCHAR sysdir[MAX_PATH];
+
+	GetWindowsDirectory(windir, ARRAYSIZE(windir));
+	GetSystemDirectory(sysdir, ARRAYSIZE(sysdir));
 
 	// Reset %windir% and %SystemRoot%
-	GetWindowsDirectory(path, ARRAYSIZE(path));
-	SetEnvironmentVariable(L"WINDIR", path);
-	SetEnvironmentVariable(L"SystemRoot", path);
+	SetEnvironmentVariable(L"WINDIR", windir);
+	SetEnvironmentVariable(L"SystemRoot", windir);
 
 	// Reset %PATH% to just system32
-	ZeroMemory(path, sizeof(path));
-	GetSystemDirectory(path, ARRAYSIZE(path));
+	WCHAR path[MAX_PATH];
+	wsprintf(path, L"%ls;%ls", sysdir, windir);
 	SetEnvironmentVariable(L"PATH", path);
 
-	wcscat(path, L"\\kernel32.dll");
-	HMODULE kernel32 = GetModuleHandle(path);
+	wcscat(sysdir, L"\\kernel32.dll");
+	HMODULE kernel32 = GetModuleHandle(windir);
 	if (!kernel32) {
 		return;
 	}

@@ -8,11 +8,11 @@ void LaunchOptions(int nCmdShow) {
 	// Some issues arise from the working directory being SysWOW64 rather than System32. Notably,
 	// Windows Vista - 8.1 don't have wuauclt.exe in SysWOW64. Disable WOW64 redirection temporarily
 	// to work around this.
-	PVOID oldValue;
+	PVOID oldValue = NULL;
 	BOOL isRedirected = DisableWow64FsRedirection(&oldValue);
 #endif
 
-	HRESULT hr;
+	HRESULT hr = E_FAIL;
 
 	if (AtLeastWin10()) {
 		// Windows 10+: Open Settings app
