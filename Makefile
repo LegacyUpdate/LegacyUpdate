@@ -13,7 +13,7 @@ endif
 
 nt4:
 ifeq ($(DEBUG),0)
-	+$(MAKE) clean
+	+$(MAKE) clean-nt4
 endif
 
 	+$(MAKE) -C setup nt4
@@ -23,4 +23,7 @@ clean:
 	+$(MAKE) -C launcher clean
 	+$(MAKE) -C setup clean
 
-.PHONY: all nt4 clean
+clean-nt4:
+	+$(MAKE) -C setup clean
+
+.PHONY: all nt4 clean clean-nt4
