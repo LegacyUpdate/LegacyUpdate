@@ -20,7 +20,6 @@ jobs:
         sudo apt-get update -q
         sudo apt-get install -qy curl make mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
         sudo ./build/fix-nsis.sh
-        ./build/get-nt4-patches.sh
 
     - name: Install MinGW toolchain
       run: |
@@ -29,6 +28,10 @@ jobs:
         sudo tar -xf /tmp/mingw32.tar.xz -C /opt
         sudo tar -xf /tmp/mingw64.tar.xz -C /opt
         rm /tmp/mingw{32,64}.tar.xz
+
+    - name: Download patches
+      run: |
+        ./build/get-nt4-patches.sh
 
     - name: Build
       id: build
