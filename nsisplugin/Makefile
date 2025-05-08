@@ -4,7 +4,8 @@ FILES   = \
 	../shared/HResult.c \
 	../shared/LegacyUpdate.c \
 	../shared/LoadImage.c \
-	../shared/Registry.c
+	../shared/Registry.c \
+	../shared/Wow64.c
 RCFILES = resource.rc
 
 TAG     = i686

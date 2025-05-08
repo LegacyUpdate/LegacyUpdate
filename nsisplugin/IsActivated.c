@@ -1,8 +1,8 @@
 #include <windows.h>
 #include <nsis/pluginapi.h>
 #include "main.h"
-#include "WMI.h"
 #include "VersionInfo.h"
+#include "Wow64.h"
 #include "licdll.h"
 #include <slpublic.h>
 
@@ -31,7 +31,7 @@ PLUGIN_METHOD(IsActivated) {
 	// Get the CPU architecture. We'll need this so that we activate the correct COM object on 64-bit versions
 	// of Windows XP and Windows Server 2003.
 	SYSTEM_INFO systemInfo = {0};
-	GetSystemInfo(&systemInfo);
+	OurGetNativeSystemInfo(&systemInfo);
 
 	if (AtLeastWinVista()) {
 		// Vista+: Ask the Software Licensing Service
