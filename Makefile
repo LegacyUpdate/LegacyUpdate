@@ -11,9 +11,16 @@ endif
 	+$(MAKE) -C launcher
 	+$(MAKE) -C setup
 
+nt4:
+ifeq ($(DEBUG),0)
+	+$(MAKE) clean
+endif
+
+	+$(MAKE) -C setup nt4
+
 clean:
 	+$(MAKE) -C LegacyUpdate clean
 	+$(MAKE) -C launcher clean
 	+$(MAKE) -C setup clean
 
-.PHONY: all clean
+.PHONY: all nt4 clean
