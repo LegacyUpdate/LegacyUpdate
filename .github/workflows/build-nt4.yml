@@ -20,6 +20,7 @@ jobs:
         sudo apt-get update -q
         sudo apt-get install -qy curl make mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
         sudo ./build/fix-nsis.sh
+        ./build/get-nt4-patches.sh
 
     - name: Install MinGW toolchain
       run: |
