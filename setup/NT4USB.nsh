@@ -6,6 +6,8 @@ Function InstallNT4USB
 	Call InstallNT4USBEdgeport
 	Call InstallNT4USBMassStorage
 	Call InstallNT4USBImaging
+
+	SetOutPath "${RUNONCEDIR}"
 FunctionEnd
 
 Function InstallNT4USBStack
@@ -14,8 +16,10 @@ Function InstallNT4USBStack
 	; Files
 	SetOutPath "$PROGRAMFILES\Inside Out Networks\Inside Out Networks' USB Peripheral Drivers"
 	File "patches\nt4\usb\ReadMe.txt"
+
 	SetOutPath "$WINDIR"
 	File "patches\nt4\usb\ionlicense.txt"
+
 	SetOutPath "$WINDIR\system32"
 	; File "patches\nt4\usb\awusbcfg.exe"
 	File "patches\nt4\usb\UsbTray.exe"
@@ -30,7 +34,7 @@ Function InstallNT4USBStack
 	CreateShortcut "$SMSTARTUP\USB Status Utility.lnk" "$WINDIR\system32\UsbTray.exe"
 
 	; Register services
-	SetOutPath "${RUNONCEDIR}"
+	SetOutPath "$PLUGINSDIR"
 	File "patches\nt4\usb\ionsvc.dll"
 	${DetailPrint} "$(Installing)USBD service..."
 	System::Call 'ionsvc::CreateUSBDSrvc(i 0, i 0, s "$WINDIR\system32\usbd.sys") i .r0'
