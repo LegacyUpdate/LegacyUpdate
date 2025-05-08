@@ -448,6 +448,14 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
     </ClCompile>
+    <ClCompile Include="..\shared\HResult.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
     <ClCompile Include="..\shared\LegacyUpdate.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
@@ -472,7 +480,7 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
     </ClCompile>
-    <ClCompile Include="..\shared\HResult.c">
+    <ClCompile Include="..\shared\WMI.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
@@ -480,7 +488,7 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|x64'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
     </ClCompile>
-    <ClCompile Include="..\shared\WMI.c">
+    <ClCompile Include="..\shared\Wow64.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC17|Win32'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
