@@ -17,8 +17,8 @@ Function NeedsNT4SP6a-wts
 	Call NeedsNT4SP6a
 FunctionEnd
 
-!insertmacro PatchHandler "NT4SP6a-clt" "Windows NT 4.0 $(SP) 6a"        "-u -z" "-n -o"
-!insertmacro PatchHandler "NT4SP6a-wts" "Windows NT 4.0 $(WTS) $(SP) 6a" "-u -z" "-n -o"
+!insertmacro PatchHandler "NT4SP6a-clt" "Windows NT 4.0 $(SP) 6a"        ${PATCH_FLAGS_NT4} ""
+!insertmacro PatchHandler "NT4SP6a-wts" "Windows NT 4.0 $(WTS) $(SP) 6a" ${PATCH_FLAGS_NT4} ""
 
 Function InstallNT4SP6a
 	${If} ${NeedsPatch} NT4SP6a
@@ -75,7 +75,7 @@ FunctionEnd
 Function InstallMSI
 	${If} ${NeedsPatch} MSI
 		${DetailPrint} "$(Installing)$(MSI)..."
-		File "patches\instmsiw.exe"
+		File "patches\redist\instmsiw.exe"
 		!insertmacro ExecWithErrorHandling '$(MSI)' '"$PLUGINSDIR\instmsiw.exe" /c:"msiinst.exe /delayrebootq"'
 	${EndIf}
 FunctionEnd

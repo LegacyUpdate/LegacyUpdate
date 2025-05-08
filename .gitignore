@@ -120,10 +120,3 @@ ServiceFabricBackup/
 *.msix
 *.msm
 *.msp
-
-# Patches we do want to commit
-!setup/patches/**/*.exe
-!setup/patches/**/*.dll
-!setup/patches/**/*.cab
-!setup/patches/**/*.msi
-!setup/patches/**/*.msp

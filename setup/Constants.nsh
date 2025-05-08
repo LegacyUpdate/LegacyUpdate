@@ -20,7 +20,15 @@
 !define NSIS_TARGET        "${NSIS_CPU}-${NSIS_CHARSET}"
 
 ; Version
-!getdllversion "..\${VSBUILD32}\LegacyUpdate.dll" DLLVersion_
+!if ${NT4} == 1
+	!define DLLVersion_1 1
+	!define DLLVersion_2 11
+	!define DLLVersion_3 1
+	!define DLLVersion_4 0
+!else
+	!getdllversion "..\${VSBUILD32}\LegacyUpdate.dll" DLLVersion_
+!endif
+
 !define LONGVERSION        "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}.${DLLVersion_4}"
 !define VERSION            "${LONGVERSION}"
 

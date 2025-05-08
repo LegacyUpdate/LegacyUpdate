@@ -77,6 +77,7 @@ Function CleanUpRunOnceFinal
 	RMDir /r /REBOOTOK "$WINDIR\Windows Update Setup Files"
 FunctionEnd
 
+!if ${NT4} == 0
 Function CopyLauncher
 	${If} ${IsNativeAMD64}
 		File /ONAME=LegacyUpdate.exe "..\launcher\obj\LegacyUpdate64.exe"
@@ -84,11 +85,13 @@ Function CopyLauncher
 		File /ONAME=LegacyUpdate.exe "..\launcher\obj\LegacyUpdate32.exe"
 	${EndIf}
 FunctionEnd
+!endif
 
 Var /GLOBAL RunOnce.UseFallback
 
 Function PrepareRunOnce
 	${If} ${RebootFlag}
+		!if ${NT4} == 0
 		${IfNot} ${IsRunOnce}
 			; Copy to runonce path to ensure installer is accessible by the temp user
 			CreateDirectory "${RUNONCEDIR}"
@@ -99,6 +102,7 @@ Function PrepareRunOnce
 			; Remove mark of the web to prevent "Open File - Security Warning" dialog
 			System::Call '${DeleteFile}("${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier")'
 		${EndIf}
+		!endif
 
 		${If} $RunOnce.UseFallback == 1
 			WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdateRunOnce" '"${RUNONCEDIR}\LegacyUpdateSetup.exe" /runonce'
@@ -106,7 +110,13 @@ Function PrepareRunOnce
 			; Somewhat documented in KB939857:
 			; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
 			; See also Wine winternl.h
-			!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce'
+			!if ${NT4} == 1
+				StrCpy $0 "${RUNONCEDIR}\LegacyUpdateSetup.exe"
+			!else
+				StrCpy $0 "${RUNONCEDIR}\LegacyUpdate.exe"
+			!endif
+
+			!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"$0" /runonce'
 			!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 			WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
 		${EndIf}

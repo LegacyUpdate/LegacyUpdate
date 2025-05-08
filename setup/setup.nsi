@@ -78,6 +78,7 @@ Var /GLOBAL UninstallInstalled
 !include RunOnce.nsh
 !include AeroWizard.nsh
 !include Download2KXP.nsh
+!include DownloadIE.nsh
 !include DownloadVista78.nsh
 !include UpdateRoots.nsh
 ; !include ActiveXPage.nsh

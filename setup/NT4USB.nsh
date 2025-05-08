@@ -13,25 +13,25 @@ Function InstallNT4USBStack
 
 	; Files
 	SetOutPath "$PROGRAMFILES\Inside Out Networks\Inside Out Networks' USB Peripheral Drivers"
-	File "patches\nt4usb\ReadMe.txt"
+	File "patches\nt4\usb\ReadMe.txt"
 	SetOutPath "$WINDIR"
-	File "patches\nt4usb\ionlicense.txt"
+	File "patches\nt4\usb\ionlicense.txt"
 	SetOutPath "$WINDIR\system32"
-	; File "patches\nt4usb\awusbcfg.exe"
-	File "patches\nt4usb\UsbTray.exe"
-	File "patches\nt4usb\ionusb.exe"
-	File "patches\nt4usb\UsbShare.dll"
+	; File "patches\nt4\usb\awusbcfg.exe"
+	File "patches\nt4\usb\UsbTray.exe"
+	File "patches\nt4\usb\ionusb.exe"
+	File "patches\nt4\usb\UsbShare.dll"
 	SetOutPath "$WINDIR\system32\drivers"
-	File "patches\nt4usb\usbd.sys"
-	File "patches\nt4usb\usbhub.sys"
-	File "patches\nt4usb\vusbd.sys"
+	File "patches\nt4\usb\usbd.sys"
+	File "patches\nt4\usb\usbhub.sys"
+	File "patches\nt4\usb\vusbd.sys"
 
 	; Startup shortcut
 	CreateShortcut "$SMSTARTUP\USB Status Utility.lnk" "$WINDIR\system32\UsbTray.exe"
 
 	; Register services
 	SetOutPath "${RUNONCEDIR}"
-	File "patches\nt4usb\ionsvc.dll"
+	File "patches\nt4\usb\ionsvc.dll"
 	${DetailPrint} "$(Installing)USBD service..."
 	System::Call 'ionsvc::CreateUSBDSrvc(i 0, i 0, s "$WINDIR\system32\usbd.sys") i .r0'
 	${If} $0 != 0
@@ -63,16 +63,16 @@ FunctionEnd
 
 ; TODO: The rest of the files
 
-; File "patches\nt4usb\edgeport.exe"
-; File "patches\nt4usb\edgeser.sys"
-; File "patches\nt4usb\ionflash.exe"
-; File "patches\nt4usb\usbhid.sys"
-; File "patches\nt4usb\usbms.sys"
-; File "patches\nt4usb\UsbMsDll.dll"
-; File "patches\nt4usb\usbprint.sys"
-; File "patches\nt4usb\usbrm.sys"
-; File "patches\nt4usb\vcusbnt4.sys"
-; File "patches\nt4usb\vicam_32.dll"
+; File "patches\nt4\usb\edgeport.exe"
+; File "patches\nt4\usb\edgeser.sys"
+; File "patches\nt4\usb\ionflash.exe"
+; File "patches\nt4\usb\usbhid.sys"
+; File "patches\nt4\usb\usbms.sys"
+; File "patches\nt4\usb\UsbMsDll.dll"
+; File "patches\nt4\usb\usbprint.sys"
+; File "patches\nt4\usb\usbrm.sys"
+; File "patches\nt4\usb\vcusbnt4.sys"
+; File "patches\nt4\usb\vicam_32.dll"
 
 Function InstallNT4USBHID
 	${DetailPrint} "$(Installing)Inside Out Networks USB HID Driver..."
@@ -89,5 +89,5 @@ FunctionEnd
 Function InstallNT4USBEdgeport
 	${DetailPrint} "$(Installing)Inside Out Networks USB to Serial (Edgeport) Drivers..."
 	SetOutPath "$WINDIR\inf"
-	File "patches\nt4usb\rp_mdm.inf"
+	File "patches\nt4\usb\rp_mdm.inf"
 FunctionEnd

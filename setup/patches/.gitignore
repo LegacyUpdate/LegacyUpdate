@@ -1,0 +1,5 @@
+# Only commit redists
+**/*
+!.gitignore
+!redist
+!redist/**/*

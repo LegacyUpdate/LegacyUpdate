@@ -69,10 +69,11 @@ ReserveFile "PatchesNT4.ini"
 
 !include Win32.nsh
 !include Common.nsh
-!include AeroWizard.nsh
-!include Download2KXP.nsh
-!include DownloadNT4.nsh
+!include PatchInstall.nsh
 !include RunOnce.nsh
+!include AeroWizard.nsh
+!include DownloadIE.nsh
+!include DownloadNT4.nsh
 !include UpdateRoots.nsh
 ; !include ActiveXPage.nsh
 
