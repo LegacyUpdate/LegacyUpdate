@@ -10,6 +10,7 @@
 #include "SelfElevate.h"
 #include "User.h"
 #include "VersionInfo.h"
+#include "Wow64.h"
 
 const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
 const LPWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
@@ -37,6 +38,44 @@ static LPWSTR GetUpdateSiteURL() {
 	}
 
 	return useHTTPS ? UpdateSiteURLHttps : UpdateSiteURLHttp;
+}
+
+HRESULT HandleIENotInstalled() {
+	// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
+	if (AtLeastWin8() && !AtLeastWin10_1703()) {
+		// Windows 8 - 10 1607: Directly prompt to reinstall IE using Fondue.exe.
+		SYSTEM_INFO systemInfo = {0};
+		OurGetNativeSystemInfo(&systemInfo);
+		LPCTSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";
+
+		WCHAR fondue[MAX_PATH];
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\fondue.exe", fondue, ARRAYSIZE(fondue));
+
+		WCHAR fondueArgs[256];
+		wsprintf(fondueArgs, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
+
+		HRESULT hr = Exec(NULL, fondue, fondueArgs, NULL, SW_SHOWDEFAULT, FALSE, NULL);
+		if (SUCCEEDED(hr)) {
+			return S_OK;
+		}
+	}
+
+	// Tell the user what they need to do, then open the Optional Features dialog.
+	WCHAR message[4096];
+	LoadString(GetModuleHandle(NULL), IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
+	MsgBox(NULL, message, NULL, MB_OK | MB_ICONEXCLAMATION);
+
+	if (AtLeastWin10_1703()) {
+		// Windows 10 1703+: IE is moved to a WindowsCapability, handled by the Settings app.
+		Exec(NULL, L"ms-settings:optionalfeatures", NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
+	} else {
+		// Windows 7: Optional Features dialog
+		WCHAR optionalFeatures[MAX_PATH];
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\OptionalFeatures.exe", optionalFeatures, ARRAYSIZE(optionalFeatures));
+		Exec(NULL, optionalFeatures, NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
+	}
+
+	return S_OK;
 }
 
 void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
@@ -86,33 +125,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
 	hr = CoCreateInstance(&CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, &IID_IWebBrowser2, (void **)&browser);
 	if (hr == REGDB_E_CLASSNOTREG) {
-		// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
-		// Windows 8+: Directly prompt to reinstall IE using Fondue.exe.
-		if (AtLeastWin8()) {
-			SYSTEM_INFO systemInfo = {0};
-			GetSystemInfo(&systemInfo);
-			LPCTSTR archSuffix = systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ? L"amd64" : L"x86";
-
-			WCHAR fondue[MAX_PATH];
-			ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\fondue.exe", fondue, ARRAYSIZE(fondue));
-
-			WCHAR fondueArgs[256];
-			wsprintf(fondueArgs, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
-			hr = Exec(NULL, fondue, fondueArgs, NULL, SW_SHOWDEFAULT, FALSE, NULL);
-			if (SUCCEEDED(hr)) {
-				goto end;
-			}
-		}
-
-		// Tell the user what they need to do, then open the Optional Features dialog.
-		WCHAR message[4096];
-		LoadString(GetModuleHandle(NULL), IDS_IENOTINSTALLED, message, ARRAYSIZE(message));
-		MsgBox(NULL, message, NULL, MB_OK | MB_ICONEXCLAMATION);
-
-		WCHAR optionalFeatures[MAX_PATH];
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\OptionalFeatures.exe", optionalFeatures, ARRAYSIZE(optionalFeatures));
-		Exec(NULL, optionalFeatures, NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
-		hr = S_OK;
+		hr = HandleIENotInstalled();
 		goto end;
 	} else if (!SUCCEEDED(hr)) {
 		goto end;
