@@ -68,13 +68,14 @@ typedef struct {
 
 #define STR_STORAGESERVER_1  30
 #define STR_STORAGESERVER_2  31
+#define STR_UDSSERVER_2      32
 
-#define STR_COMPUTECLUSTER_1 32
-#define STR_COMPUTECLUSTER_2 33
-#define STR_COMPUTECLUSTER_3 34
+#define STR_COMPUTECLUSTER_1 33
+#define STR_COMPUTECLUSTER_2 34
+#define STR_COMPUTECLUSTER_3 35
 
-#define STR_HOMESERVER_1     35
-#define STR_HOMESERVER_2     36
+#define STR_HOMESERVER_1     36
+#define STR_HOMESERVER_2     37
 
 static const WinNT5BrandString nt5BrandStrings[] = {
 	// Base editions
@@ -124,6 +125,7 @@ static const WinNT5BrandString nt5BrandStrings[] = {
 	// Storage Server
 	{L"wssbrand.dll",  1101}, // "Microsoft"
 	{L"wssbrand.dll",  1102}, // "Windows Storage Server 2003 R2"
+	{L"wssbrand.dll",  1104}, // "Windows UDS Server 2003"
 
 	// Compute Cluster
 	{L"hpcbrand.dll",  1101}, // "Microsoft"
@@ -157,6 +159,7 @@ static const WinNT5Variant nt5Variants[] = {
 	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_IA64,  {STR_DATACENTERIA64}},           // "Microsoft(R) Windows(R) Server 2003, Datacenter Edition for 64-Bit Itanium-based Systems"
 	{0x0502, OS_APPLIANCE,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_APPLIANCE}},     // "Microsoft Windows Server 2003 Appliance Server"
 	{0x0502, OS_STORAGESERVER,  PROCESSOR_ARCHITECTURE_INTEL, {STR_STORAGESERVER_1, STR_STORAGESERVER_2}}, // "Microsoft Windows Storage Server 2003 R2"
+	// TODO: How do we detect UDS Server?
 	{0x0502, OS_COMPUTECLUSTER, PROCESSOR_ARCHITECTURE_INTEL, {STR_COMPUTECLUSTER_1, STR_COMPUTECLUSTER_2, STR_COMPUTECLUSTER_3}}, // "Microsoft Windows Server 2003 Compute Cluster Edition"
 	{0x0502, OS_HOMESERVER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_HOMESERVER_1, STR_HOMESERVER_2}}, // "Microsoft Windows Home Server"
 	// I don't think any of the above editions identify as OS_SERVER, but just in case
