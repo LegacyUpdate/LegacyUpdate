@@ -111,12 +111,12 @@ Function PrepareRunOnce
 			; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
 			; See also Wine winternl.h
 			!if ${NT4} == 1
-				StrCpy $0 "${RUNONCEDIR}\LegacyUpdateSetup.exe"
+				StrCpy $1 "${RUNONCEDIR}\LegacyUpdateSetup.exe"
 			!else
-				StrCpy $0 "${RUNONCEDIR}\LegacyUpdate.exe"
+				StrCpy $1 "${RUNONCEDIR}\LegacyUpdate.exe"
 			!endif
 
-			!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"$0" /runonce'
+			!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"$1" /runonce'
 			!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 			WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
 		${EndIf}
