@@ -19,15 +19,20 @@ jobs:
       run: |
         sudo apt-get update -q
         sudo apt-get install -qy curl make mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
-        sudo ./build/fix-nsis.sh
 
     - name: Install MinGW toolchain
       run: |
-        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-14.2-binutils-2.44-mingw-v12.0.0-i686.tar.xz -o /tmp/mingw32.tar.xz
-        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-14.2-binutils-2.44-mingw-v12.0.0-x86_64.tar.xz -o /tmp/mingw64.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-15.1-binutils-2.44-mingw-v12.0.0-i686.tar.xz -o /tmp/mingw32.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-15.1-binutils-2.44-mingw-v12.0.0-x86_64.tar.xz -o /tmp/mingw64.tar.xz
         sudo tar -xf /tmp/mingw32.tar.xz -C /opt
         sudo tar -xf /tmp/mingw64.tar.xz -C /opt
         rm /tmp/mingw{32,64}.tar.xz
+
+    - name: Install custom NSIS package
+      run: |
+        curl -fsSL https://linuxfromscratch.org/~renodr/nsis-3.11-ubuntu24.tar.xz -o /tmp/nsis-3.11.tar.xz
+        sudo tar -xf /tmp/nsis-3.11.tar.xz -C /opt
+        rm /tmp/nsis-3.11.tar.xz
 
     - name: Download patches
       run: |
@@ -36,8 +41,9 @@ jobs:
     - name: Build
       id: build
       run: |
-        export PATH=/opt/gcc-14.2-binutils-2.44-mingw-v12.0.0-i686/bin:$PATH
-        export PATH=/opt/gcc-14.2-binutils-2.44-mingw-v12.0.0-x86_64/bin:$PATH
+        export PATH=/opt/gcc-15.1-binutils-2.44-mingw-v12.0.0-i686/bin:$PATH
+        export PATH=/opt/gcc-15.1-binutils-2.44-mingw-v12.0.0-x86_64/bin:$PATH
+        export PATH=/opt/nsis-3.11/bin:$PATH
         make CI=1 DEBUG=0 nt4
 
     - name: Upload Build Artifact
