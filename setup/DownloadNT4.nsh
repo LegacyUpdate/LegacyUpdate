@@ -9,12 +9,19 @@
 !insertmacro NeedsSPHandler "NT4SP6a" "WinNT4" 6
 
 Function NeedsNT4SP6a-clt
-	Call NeedsNT4SP6a
+	${If} ${IsTerminalServer}
+		Push 0
+	${Else}
+		Call NeedsNT4SP6a
+	${EndIf}
 FunctionEnd
 
 Function NeedsNT4SP6a-wts
-	; TODO: Is it Terminal Server?
-	Call NeedsNT4SP6a
+	${If} ${IsTerminalServer}
+		Call NeedsNT4SP6a
+	${Else}
+		Push 0
+	${EndIf}
 FunctionEnd
 
 !insertmacro PatchHandler "NT4SP6a-clt" "Windows NT 4.0 $(SP) 6a"        ${PATCH_FLAGS_NT4} ""
@@ -23,8 +30,7 @@ FunctionEnd
 Function InstallNT4SP6a
 	${If} ${NeedsPatch} NT4SP6a
 		DetailPrint "$(Installing)Windows NT 4.0 $(SP) 6a..."
-		; TODO: Is it Terminal Server?
-		${If} ${NeedsPatch} NT4SP6a-wts
+		${If} ${IsTerminalServer}
 			Call InstallNT4SP6a-wts
 		${Else}
 			Call InstallNT4SP6a-clt

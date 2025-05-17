@@ -66,8 +66,9 @@
 
 ; System
 !define REGPATH_HARDWARE_SYSTEM    "Hardware\Description\System"
-!define REGPATH_CONTROL_LANGUAGE   "System\CurrentControlSet\Control\Nls\Language"
-!define REGPATH_CONTROL_WINDOWS    "System\CurrentControlSet\Control\Windows"
+!define REGPATH_CONTROL            "System\CurrentControlSet\Control"
+!define REGPATH_CONTROL_LANGUAGE   "${REGPATH_CONTROL}\Nls\Language"
+!define REGPATH_CONTROL_WINDOWS    "${REGPATH_CONTROL}\Windows"
 
 ; XP POSReady hack
 !define REGPATH_POSREADY           "System\WPA\PosReady"

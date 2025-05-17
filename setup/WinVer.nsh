@@ -57,7 +57,7 @@
 !define VER_SUITE_SMALLBUSINESS  0x00000001 ; Small Business Server
 !define VER_SUITE_SMALLBUSINESS_RESTRICTED 0x00000020 ; Small Business Server (restrictive client license)
 !define VER_SUITE_STORAGE_SERVER 0x00002000 ; Windows Storage Server 2003
-!define VER_SUITE_TERMINAL       0x00000010 ; Terminal Services (always true)
+!define VER_SUITE_TERMINAL       0x00000010 ; Terminal Services (always true since XP)
 !define VER_SUITE_WH_SERVER      0x00008000 ; Windows Home Server
 !define VER_SUITE_MULTIUSERTS    0x00020000 ; Multi-user Remote Desktop
 
@@ -154,6 +154,7 @@
 !define IsHomeEdition      `"" _WinVer_TestSuite ${VER_SUITE_PERSONAL}`
 !define IsEmbedded         `"" _WinVer_TestSuite ${VER_SUITE_EMBEDDEDNT}`
 !define IsDatacenter       `"" _WinVer_TestSuite ${VER_SUITE_DATACENTER}`
+!define IsTerminalServer   `"" _WinVer_TestSuite ${VER_SUITE_TERMINAL}`
 !define IsHomeServer       `"" _WinVer_TestSuite ${VER_SUITE_WH_SERVER}`
 
 !define IsSafeMode         `!= _WinVer_TestSystemMetric ${SM_CLEANBOOT}`
