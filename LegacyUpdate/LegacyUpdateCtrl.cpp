@@ -363,7 +363,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 
 	// Check reboot flag in registry
 	HKEY subkey = NULL;
-	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", KEY_WOW64_64KEY, KEY_READ, &subkey));
+	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, KEY_READ | KEY_WOW64_64KEY, &subkey));
 	if (SUCCEEDED(hr)) {
 		RegCloseKey(subkey);
 		*retval = VARIANT_TRUE;
@@ -413,7 +413,6 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 				return hr;
 			}
 		}
-
 
 		CComPtr<IElevationHelper> elevatedHelper;
 		hr = GetElevatedHelper(elevatedHelper);
@@ -496,4 +495,28 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 		LocalFree(data);
 	}
 	return S_OK;
+}
+
+STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate() {
+	DoIsPermittedCheck();
+
+	CComPtr<IElevationHelper> elevatedHelper;
+	HRESULT hr = GetElevatedHelper(elevatedHelper);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	return elevatedHelper->BeforeUpdate();
+}
+
+STDMETHODIMP CLegacyUpdateCtrl::AfterUpdate() {
+	DoIsPermittedCheck();
+
+	CComPtr<IElevationHelper> elevatedHelper;
+	HRESULT hr = GetElevatedHelper(elevatedHelper);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	return elevatedHelper->AfterUpdate();
 }

@@ -3,6 +3,7 @@
 #include "Compat.h"
 #include "ElevationHelper.h"
 #include "HResult.h"
+#include "NGen.h"
 #include "Utils.h"
 #include <strsafe.h>
 
@@ -83,4 +84,12 @@ end:
 
 STDMETHODIMP CElevationHelper::Reboot(void) {
 	return ::Reboot();
+}
+
+STDMETHODIMP CElevationHelper::BeforeUpdate(void) {
+	return PauseResumeNGenQueue(FALSE);
+}
+
+STDMETHODIMP CElevationHelper::AfterUpdate(void) {
+	return PauseResumeNGenQueue(TRUE);
 }

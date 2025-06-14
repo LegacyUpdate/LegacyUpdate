@@ -114,6 +114,8 @@ public:
 	STDMETHODIMP get_IsUsingWsusServer(VARIANT_BOOL *retval);
 	STDMETHODIMP get_WsusServerUrl(BSTR *retval);
 	STDMETHODIMP get_WsusStatusServerUrl(BSTR *retval);
+	STDMETHODIMP BeforeUpdate(void);
+	STDMETHODIMP AfterUpdate(void);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LegacyUpdateCtrl), CLegacyUpdateCtrl)

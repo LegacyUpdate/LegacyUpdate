@@ -499,6 +499,7 @@
     <ClCompile Include="ElevationHelper.cpp" />
     <ClCompile Include="LaunchUpdateSite.cpp" />
     <ClCompile Include="LegacyUpdateCtrl.cpp" />
+    <ClCompile Include="NGen.cpp" />
     <ClCompile Include="Compat.cpp" />
     <ClCompile Include="ProgressBarControl.cpp" />
     <ClCompile Include="stdafx.cpp">

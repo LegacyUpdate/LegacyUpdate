@@ -40,6 +40,8 @@ public:
 
 	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
 	STDMETHODIMP Reboot(void);
+	STDMETHODIMP BeforeUpdate(void);
+	STDMETHODIMP AfterUpdate(void);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(ElevationHelper), CElevationHelper)

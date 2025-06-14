@@ -53,6 +53,8 @@ interface ILegacyUpdateCtrl : IDispatch {
 	[id(8)]  HRESULT RebootIfRequired(void);
 	[id(9)]  HRESULT ViewWindowsUpdateLog(void);
 	[id(13)] HRESULT OpenWindowsUpdateSettings(void);
+	[id(16)] HRESULT BeforeUpdate(void);
+	[id(17)] HRESULT AfterUpdate(void);
 
 	[id(6),  propget] HRESULT IsRebootRequired([out, retval] VARIANT_BOOL *retval);
 	[id(7),  propget] HRESULT IsWindowsUpdateDisabled([out, retval] VARIANT_BOOL *retval);
@@ -86,6 +88,8 @@ interface IElevationHelper : IDispatch
 {
 	[id(1)] HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
 	[id(2)] HRESULT Reboot(void);
+	[id(3)] HRESULT BeforeUpdate(void);
+	[id(4)] HRESULT AfterUpdate(void);
 };
 
 [
