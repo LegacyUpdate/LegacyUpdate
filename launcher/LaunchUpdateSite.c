@@ -68,7 +68,7 @@ HRESULT HandleIENotInstalled() {
 	if (AtLeastWin10_1703()) {
 		// Windows 10 1703+: IE is moved to a WindowsCapability, handled by the Settings app.
 		Exec(NULL, L"ms-settings:optionalfeatures", NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
-	} else {
+	} else if (AtLeastWin7()) {
 		// Windows 7: Optional Features dialog
 		WCHAR optionalFeatures[MAX_PATH];
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\OptionalFeatures.exe", optionalFeatures, ARRAYSIZE(optionalFeatures));
@@ -124,7 +124,11 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	// on Windows 11 (iexplore.exe redirects to Edge, but COM still works). Same strategy as used by
 	// Wupdmgr.exe and Muweb.dll,LaunchMUSite.
 	hr = CoCreateInstance(&CLSID_InternetExplorer, NULL, CLSCTX_LOCAL_SERVER, &IID_IWebBrowser2, (void **)&browser);
-	if (hr == REGDB_E_CLASSNOTREG) {
+
+	// An install of IE can be "broken" in two ways:
+	//  - Class not registered: mshtml.dll unregistered, deleted, or uninstalled in Optional Features.
+	//  - Path not found: iexplore.exe is not present.
+	if (hr == REGDB_E_CLASSNOTREG || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)) {
 		hr = HandleIENotInstalled();
 		goto end;
 	} else if (!SUCCEEDED(hr)) {
