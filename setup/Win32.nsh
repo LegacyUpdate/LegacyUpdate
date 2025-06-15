@@ -2,8 +2,7 @@
 !define GetUserName              'advapi32::GetUserName(t, *i) i'
 
 ; cbscore
-!define CBS_EXECUTE_STATE_NONE  -1
-!define CBS_EXECUTE_STATE_NONE2 0xffffffff ; Probably an underflow of -1?
+!define CBS_EXECUTE_STATE_NONE 0xffffffff
 
 ; kernel32
 !define PF_XMMI64_INSTRUCTIONS_AVAILABLE 10
