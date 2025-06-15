@@ -380,7 +380,7 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 		; Doesn't seem to support @ syntax with an exe?
 		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         'Check for software and driver updates via Legacy Update.'
 	${Else}
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-4'
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         '@"$OUTDIR\LegacyUpdate.exe",-4'
 	${EndIf}
 
 	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
