@@ -246,7 +246,7 @@ HRESULT StartLauncher(LPWSTR params, BOOL wait) {
 	PathAppend(path, L"LegacyUpdate.exe");
 
 	DWORD code = 0;
-	hr = Exec(L"open", path, params, NULL, SW_SHOW, wait, &code);
+	hr = Exec(NULL, path, params, NULL, SW_SHOWDEFAULT, wait, &code);
 	if (SUCCEEDED(hr)) {
 		hr = HRESULT_FROM_WIN32(code);
 	}

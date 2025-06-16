@@ -37,6 +37,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	g_hInstance = hInstance;
 	Startup();
 
+	// nCmdShow seems to give us garbage values. Get it from the startup info struct.
+	STARTUPINFO startupInfo;
+	GetStartupInfo(&startupInfo);
+	nCmdShow = (startupInfo.dwFlags & STARTF_USESHOWWINDOW) ? startupInfo.wShowWindow : SW_SHOWDEFAULT;
+
 	// Init COM
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	if (!SUCCEEDED(hr)) {
