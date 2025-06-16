@@ -139,14 +139,14 @@ end:
 		LocalFree(dllPath);
 	}
 
-	if (!SUCCEEDED(hr)) {
-		LPWSTR title = state
-			? L"Failed to register Legacy Update ActiveX control"
-			: L"Failed to unregister Legacy Update ActiveX control";
-		MsgBox(hwnd, title, GetMessageForHresult(hr), MB_ICONERROR);
-	}
-
 	if (!forLaunch) {
+		if (!SUCCEEDED(hr)) {
+			LPWSTR title = state
+				? L"Failed to register Legacy Update ActiveX control"
+				: L"Failed to unregister Legacy Update ActiveX control";
+			MsgBox(hwnd, title, GetMessageForHresult(hr), MB_ICONERROR);
+		}
+
 		PostQuitMessage(hr);
 	}
 
