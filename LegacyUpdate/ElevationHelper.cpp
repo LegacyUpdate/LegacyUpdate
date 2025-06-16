@@ -8,8 +8,7 @@
 #include <strsafe.h>
 
 const BSTR permittedProgIDs[] = {
-	L"Microsoft.Update.",
-	NULL
+	L"Microsoft.Update."
 };
 
 BOOL ProgIDIsPermitted(PWSTR progID) {
@@ -17,7 +16,7 @@ BOOL ProgIDIsPermitted(PWSTR progID) {
 		return FALSE;
 	}
 
-	for (int i = 0; permittedProgIDs[i] != NULL; i++) {
+	for (DWORD i = 0; i < ARRAYSIZE(permittedProgIDs); i++) {
 		if (wcsncmp(progID, permittedProgIDs[i], wcslen(permittedProgIDs[i])) == 0) {
 			return TRUE;
 		}

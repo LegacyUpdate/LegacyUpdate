@@ -19,8 +19,7 @@
 
 const BSTR permittedHosts[] = {
 	L"legacyupdate.net",
-	L"test.legacyupdate.net",
-	NULL
+	L"test.legacyupdate.net"
 };
 
 // CLegacyUpdateCtrl message handlers
@@ -96,7 +95,7 @@ BOOL CLegacyUpdateCtrl::IsPermitted(void) {
 		goto end;
 	}
 
-	for (int i = 0; permittedHosts[i] != NULL; i++) {
+	for (DWORD i = 0; i < ARRAYSIZE(permittedHosts); i++) {
 		if (wcscmp(host, permittedHosts[i]) == 0) {
 			return TRUE;
 		}

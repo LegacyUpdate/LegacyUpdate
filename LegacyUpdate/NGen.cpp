@@ -18,7 +18,7 @@ STDMETHODIMP PauseResumeNGenQueue(BOOL state) {
 
 	HRESULT hr = S_OK;
 
-	for (int i = 0; i < ARRAYSIZE(versions); i++) {
+	for (DWORD i = 0; i < ARRAYSIZE(versions); i++) {
 		for (int j = 0; j < 2; j++) {
 			if (j == 1 && !hasFramework64) {
 				break;

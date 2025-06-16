@@ -29,8 +29,7 @@ static const LPWSTR actions[] = {
 	L"/log",
 	L"/runonce",
 	L"/regserver",
-	L"/unregserver",
-	NULL
+	L"/unregserver"
 };
 
 EXTERN_C __declspec(dllexport)
@@ -69,7 +68,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	Action action = -1;
 
-	for (int i = 0; actions[i] != NULL; i++) {
+	for (DWORD i = 0; i < ARRAYSIZE(actions); i++) {
 		if (wcscmp(actionFlag, actions[i]) == 0) {
 			action = i;
 			break;
