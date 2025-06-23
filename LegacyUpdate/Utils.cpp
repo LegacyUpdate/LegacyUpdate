@@ -41,13 +41,13 @@ HRESULT Reboot() {
 	// Make sure we have permission to shut down
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token)) {
 		hr = AtlHresultFromLastError();
-		TRACE("OpenProcessToken() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"OpenProcessToken() failed: %ls\n", GetMessageForHresult(hr));
 		goto end;
 	}
 
 	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &shutdownLuid)) {
 		hr = AtlHresultFromLastError();
-		TRACE("LookupPrivilegeValue() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"LookupPrivilegeValue() failed: %ls\n", GetMessageForHresult(hr));
 		goto end;
 	}
 
@@ -58,7 +58,7 @@ HRESULT Reboot() {
 
 	if (!AdjustTokenPrivileges(token, FALSE, &privileges, 0, NULL, NULL)) {
 		hr = AtlHresultFromLastError();
-		TRACE("AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(hr));
 		goto end;
 	}
 
@@ -71,18 +71,18 @@ HRESULT Reboot() {
 
 	// Try InitiateSystemShutdownEx (2k/XP)
 	if (!SUCCEEDED(hr)) {
-		TRACE("InitiateShutdown() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"InitiateShutdown() failed: %ls\n", GetMessageForHresult(hr));
 
 		if (InitiateSystemShutdownEx(NULL, NULL, 0, FALSE, TRUE, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX) == 0) {
 			hr = AtlHresultFromLastError();
-			TRACE("InitiateSystemShutdownExW() failed: %ls\n", GetMessageForHresult(hr));
+			TRACE(L"InitiateSystemShutdownExW() failed: %ls\n", GetMessageForHresult(hr));
 		}
 	}
 
 	// Last-ditch attempt ExitWindowsEx (only guaranteed to work for the current logged in user)
 	if (!ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
 		hr = AtlHresultFromLastError();
-		TRACE("ExitWindowsEx() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"ExitWindowsEx() failed: %ls\n", GetMessageForHresult(hr));
 	}
 
 end:

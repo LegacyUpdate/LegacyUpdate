@@ -76,7 +76,7 @@ STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
 
 end:
 	if (!SUCCEEDED(hr)) {
-		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(hr));
+		TRACE(L"CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(hr));
 	}
 	return hr;
 }

@@ -29,21 +29,21 @@ IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
 	CComPtr<IOleClientSite> clientSite;
 	HRESULT hr = GetClientSite(&clientSite);
 	if (!SUCCEEDED(hr) || clientSite == NULL) {
-		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"GetDocument() failed: %ls\n", GetMessageForHresult(hr));
 		return NULL;
 	}
 
 	CComPtr<IOleContainer> container;
 	hr = clientSite->GetContainer(&container);
 	if (!SUCCEEDED(hr) || container == NULL) {
-		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"GetDocument() failed: %ls\n", GetMessageForHresult(hr));
 		return NULL;
 	}
 
 	CComPtr<IHTMLDocument2> document;
 	hr = container->QueryInterface(IID_IHTMLDocument2, (void **)&document);
 	if (!SUCCEEDED(hr) || document == NULL) {
-		TRACE("GetDocument() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"GetDocument() failed: %ls\n", GetMessageForHresult(hr));
 		return NULL;
 	}
 
@@ -67,7 +67,7 @@ HWND CLegacyUpdateCtrl::GetIEWindowHWND() {
 
 end:
 	if (!SUCCEEDED(hr)) {
-		TRACE("GetIEWindowHWND() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"GetIEWindowHWND() failed: %ls\n", GetMessageForHresult(hr));
 	}
 	return 0;
 }
@@ -77,7 +77,7 @@ BOOL CLegacyUpdateCtrl::IsPermitted(void) {
 	if (document == NULL) {
 #ifdef _DEBUG
 		// Allow debugging outside of IE (e.g. via PowerShell)
-		TRACE("GetHTMLDocument() failed - allowing anyway due to debug build\n");
+		TRACE(L"GetHTMLDocument() failed - allowing anyway due to debug build\n");
 		return TRUE;
 #else
 		return FALSE;
@@ -104,7 +104,7 @@ BOOL CLegacyUpdateCtrl::IsPermitted(void) {
 
 end:
 	if (!SUCCEEDED(hr)) {
-		TRACE("IsPermitted() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"IsPermitted() failed: %ls\n", GetMessageForHresult(hr));
 	}
 	return FALSE;
 }
@@ -282,7 +282,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
 	// https://learn.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker
 	HRESULT hr = CoCreateInstanceAsAdmin(GetIEWindowHWND(), CLSID_ElevationHelper, IID_IElevationHelper, (void**)&m_elevatedHelper);
 	if (!SUCCEEDED(hr)) {
-		TRACE("RequestElevation() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"RequestElevation() failed: %ls\n", GetMessageForHresult(hr));
 	}
 	return hr;
 }
@@ -311,7 +311,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 
 end:
 	if (!SUCCEEDED(hr)) {
-		TRACE("CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(hr));
+		TRACE(L"CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(hr));
 	}
 	return hr;
 }

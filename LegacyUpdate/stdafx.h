@@ -18,11 +18,9 @@
 #define ISOLATION_AWARE_ENABLED 1 // Enable comctl 6.0 (visual styles)
 
 #include "resource.h"
-#include <atltrace.h>
+#include "Trace.h"
 #include <atlbase.h>
 #include <atlcom.h>
 #include <atlctl.h>
 
 using namespace ATL;
-
-#define TRACE ATLTRACE
