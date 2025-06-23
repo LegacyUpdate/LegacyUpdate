@@ -142,6 +142,7 @@ static const WinNT5Variant nt5Variants[] = {
 	// Check for XP Embedded last as WES2009 also identifies as OS_EMBEDDED.
 	{0x0501, OS_EMBEDDED,       PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_EMBEDDED}},      // "Microsoft Windows XP Embedded"
 	{0x0501, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_PRO}},           // "Microsoft Windows XP Professional"
+	{0x0501, MAXDWORD,          MAXWORD,                      {STR_WINXP}},                    // "Microsoft Windows XP"
 
 	// Server 2003
 	{0x0502, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_IA64,  {STR_WINXP, STR_PRO, STR_IA64}}, // "Microsoft Windows XP Professional 64-Bit Edition"
@@ -159,6 +160,7 @@ static const WinNT5Variant nt5Variants[] = {
 	{0x0502, OS_WEBSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_BLADE}},         // "Microsoft Windows Server 2003 Web Edition"
 	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_DATACENTER}},    // "Microsoft Windows Server 2003 Datacenter Edition"
 	{0x0502, OS_SMALLBUSINESSSERVER, PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_SBS}},      // "Microsoft Windows Server 2003 for Small Business Server"
+	{0x0502, MAXDWORD,          MAXWORD,                      {STR_SRV03}},                    // "Microsoft Windows Server 2003"
 };
 
 HRESULT GetOSProductName(LPVARIANT productName) {
@@ -174,7 +176,9 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 			WinNT5Variant variant = {0};
 			for (DWORD i = 0; i < ARRAYSIZE(nt5Variants); i++) {
 				WinNT5Variant thisVariant = nt5Variants[i];
-				if (winver == thisVariant.version && systemInfo.wProcessorArchitecture == thisVariant.archFlag && IsOS(thisVariant.osFlag)) {
+				if (thisVariant.version == winver &&
+					(thisVariant.archFlag == MAXWORD || thisVariant.archFlag == systemInfo.wProcessorArchitecture) &&
+					(thisVariant.osFlag == MAXDWORD || IsOS(thisVariant.osFlag))) {
 					variant = thisVariant;
 					break;
 				}
