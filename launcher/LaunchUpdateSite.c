@@ -135,7 +135,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		goto end;
 	}
 
-	// Can we connect with https? WinInet will throw an error if not.
+	// Get the URL we want to launch
 	siteURL = GetUpdateSiteURL();
 
 	// Is this a first run launch? Append first run flag if so.
@@ -166,6 +166,9 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		goto end;
 	}
 
+	// Pass through our nCmdShow flag
+	ShowWindow(ieHwnd, nCmdShow);
+
 	// Are we on a small display? If so, resize and maximise the window.
 	monitor = MonitorFromWindow(ieHwnd, MONITOR_DEFAULTTONEAREST);
 	MONITORINFO monitorInfo = {0};
@@ -175,7 +178,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		LONG workWidth = monitorInfo.rcWork.right - monitorInfo.rcWork.left;
 		LONG workHeight = monitorInfo.rcWork.bottom - monitorInfo.rcWork.top;
 
-		LONG width, height;
+		LONG width = 0, height = 0;
 		IWebBrowser2_get_Width(browser, &width);
 		IWebBrowser2_get_Height(browser, &height);
 
@@ -188,7 +191,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 			IWebBrowser2_put_Height(browser, height);
 		}
 
-		LONG left, top;
+		LONG left = 0, top = 0;
 		IWebBrowser2_get_Left(browser, &left);
 		IWebBrowser2_get_Top(browser, &top);
 
@@ -199,11 +202,13 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 			IWebBrowser2_put_Top(browser, 0);
 		}
 
-		if (workWidth <= 1152) {
+		// Maximize if below 1152x864, if not already overridden by user
+		if (workWidth <= 1152 && nCmdShow == SW_SHOWDEFAULT) {
 			ShowWindow(ieHwnd, SW_MAXIMIZE);
 		}
 	}
 
+	// IE window won't be fully initialized until we make it visible.
 	IWebBrowser2_put_Visible(browser, TRUE);
 
 	// Focus the window, since it seems to not always get focus as it should.
