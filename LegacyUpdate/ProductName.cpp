@@ -199,6 +199,11 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 						id = STR_SRV03R2;
 					}
 
+					// If XP Tablet PC SP2, override to 2005 string
+					if (id == STR_TABLETPC && GetVersionInfo()->wServicePackMajor >= 2) {
+						id = STR_TABLETPC2005;
+					}
+
 					WinNT5BrandString brandString = nt5BrandStrings[id];
 					WCHAR str[340];
 					HMODULE dll = LoadLibraryEx(brandString.library, NULL, LOAD_LIBRARY_AS_DATAFILE);
