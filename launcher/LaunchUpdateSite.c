@@ -103,7 +103,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 
 	// Can we instantiate our own ActiveX control? If not, try to register it.
 	hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_LOCAL_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
-	if (hr == REGDB_E_CLASSNOTREG) {
+	if (hr == REGDB_E_CLASSNOTREG || hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND) || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)) {
 		TRACE(L"LegacyUpdateCtrl not registered");
 		hr = RegisterServer(0, TRUE, TRUE);
 		if (!SUCCEEDED(hr)) {
@@ -131,7 +131,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	// An install of IE can be "broken" in two ways:
 	//  - Class not registered: mshtml.dll unregistered, deleted, or uninstalled in Optional Features.
 	//  - Path not found: iexplore.exe is not present.
-	if (hr == REGDB_E_CLASSNOTREG || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)) {
+	if (hr == REGDB_E_CLASSNOTREG || hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND) || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)) {
 		TRACE(L"IE not installed (%8x)", hr);
 		hr = HandleIENotInstalled();
 		goto end;
