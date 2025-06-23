@@ -510,6 +510,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ProductName.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="dlldatax.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-VC08|Win32'">
@@ -588,6 +589,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ProductName.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="dlldatax.h" />
     <ClInclude Include="dllmain.h" />

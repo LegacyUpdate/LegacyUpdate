@@ -7,6 +7,7 @@
 #include "Exec.h"
 #include "HResult.h"
 #include "LegacyUpdate.h"
+#include "ProductName.h"
 #include "Registry.h"
 #include "User.h"
 #include "Utils.h"
