@@ -20,55 +20,58 @@ typedef struct {
 	UINT stringIDs[3];
 } WinNT5Variant;
 
-#define STR_WINXP             0
-#define STR_SRV03             1
-#define STR_IA64              2
-#define STR_EMBEDDED          3
-#define STR_HOME              4
-#define STR_PRO               5
-#define STR_STANDARD          6
-#define STR_ENTERPRISE        7
-#define STR_DATACENTER        8
-#define STR_BLADE             9
-#define STR_SBS              10
+#define STR_WINXP             1
+#define STR_SRV03             2
+#define STR_IA64              3
+#define STR_EMBEDDED          4
+#define STR_HOME              5
+#define STR_PRO               6
+#define STR_STANDARD          7
+#define STR_ENTERPRISE        8
+#define STR_DATACENTER        9
+#define STR_BLADE            10
+#define STR_SBS              11
 
-#define STR_TABLETPC2005     11
+#define STR_TABLETPC2005     12
 
-#define STR_WIN              12
+#define STR_WIN              13
 
-#define STR_TABLETPC         13
-#define STR_MEDIACENTER      14
-#define STR_STARTER          15
-#define STR_EMBPOS           16
-#define STR_WINFLP           17
-#define STR_EMBSTD2009       18
-#define STR_EMBPOS2009       19
+#define STR_TABLETPC         14
+#define STR_MEDIACENTER      15
+#define STR_STARTER          16
+#define STR_EMBPOS           17
+#define STR_WINFLP           18
+#define STR_EMBSTD2009       19
+#define STR_EMBPOS2009       20
 
-#define STR_PROIA64          20
-#define STR_STANDARDIA64     21
-#define STR_ENTERPRISEIA64   22
-#define STR_DATACENTERIA64   23
-#define STR_PROX64           24
-#define STR_STANDARDX64      25
-#define STR_ENTERPRISEX64    26
-#define STR_DATACENTERX64    27
+#define STR_PROIA64          21
+#define STR_STANDARDIA64     22
+#define STR_ENTERPRISEIA64   23
+#define STR_DATACENTERIA64   24
+#define STR_PROX64           25
+#define STR_STANDARDX64      26
+#define STR_ENTERPRISEX64    27
+#define STR_DATACENTERX64    28
 
-#define STR_SRV03R2          28
+#define STR_SRV03R2          29
 
-#define STR_APPLIANCE        29
+#define STR_APPLIANCE        30
 
-#define STR_STORAGESERVER_1  30
-#define STR_STORAGESERVER_2  31
-#define STR_UDSSERVER_2      32
+#define STR_STORAGESERVER_1  31
+#define STR_STORAGESERVER_2  32
+#define STR_UDSSERVER_2      33
 
-#define STR_COMPUTECLUSTER_1 33
-#define STR_COMPUTECLUSTER_2 34
-#define STR_COMPUTECLUSTER_3 35
+#define STR_COMPUTECLUSTER_1 34
+#define STR_COMPUTECLUSTER_2 35
+#define STR_COMPUTECLUSTER_3 36
 
-#define STR_HOMESERVER_1     36
-#define STR_HOMESERVER_2     37
+#define STR_HOMESERVER_1     37
+#define STR_HOMESERVER_2     38
 
 static const WinNT5BrandString nt5BrandStrings[] = {
+	// Skip index 0
+	{},
+
 	// Base editions
 	{L"sysdm.cpl",      180}, // "Microsoft Windows XP"
 	{L"sysdm.cpl",      181}, // "Microsoft Windows Server 2003"
