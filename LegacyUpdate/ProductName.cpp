@@ -149,19 +149,23 @@ static const WinNT5Variant nt5Variants[] = {
 
 	// Server 2003
 	{0x0502, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_IA64,  {STR_WINXP, STR_PRO, STR_IA64}}, // "Microsoft Windows XP Professional 64-Bit Edition"
+	{0x0502, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_AMD64, {STR_WINXP, STR_PROX64}},        // "Microsoft Windows XP Professional x64 Edition"
 	{0x0502, OS_SERVER,         PROCESSOR_ARCHITECTURE_IA64,  {STR_STANDARDIA64}},             // "Microsoft(R) Windows(R) Server 2003, Standard Edition for 64-Bit Itanium-based Systems"
 	{0x0502, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_IA64,  {STR_ENTERPRISEIA64}},           // "Microsoft(R) Windows(R) Server 2003, Enterprise Edition for 64-Bit Itanium-based Systems"
 	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_IA64,  {STR_DATACENTERIA64}},           // "Microsoft(R) Windows(R) Server 2003, Datacenter Edition for 64-Bit Itanium-based Systems"
-	{0x0502, OS_APPLIANCE,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_APPLIANCE}},     // "Microsoft Windows Server 2003 Appliance Server"
-	{0x0502, OS_STORAGESERVER,  PROCESSOR_ARCHITECTURE_INTEL, {STR_STORAGESERVER_1, STR_STORAGESERVER_2}}, // "Microsoft Windows Storage Server 2003 R2"
+	{0x0502, OS_APPLIANCE,      MAXWORD,                      {STR_SRV03, STR_APPLIANCE}},     // "Microsoft Windows Server 2003 Appliance Server"
+	{0x0502, OS_STORAGESERVER,  MAXWORD,                      {STR_STORAGESERVER_1, STR_STORAGESERVER_2}}, // "Microsoft Windows Storage Server 2003 R2"
 	// TODO: How do we detect UDS Server?
-	{0x0502, OS_COMPUTECLUSTER, PROCESSOR_ARCHITECTURE_INTEL, {STR_COMPUTECLUSTER_1, STR_COMPUTECLUSTER_2, STR_COMPUTECLUSTER_3}}, // "Microsoft Windows Server 2003 Compute Cluster Edition"
-	{0x0502, OS_HOMESERVER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_HOMESERVER_1, STR_HOMESERVER_2}}, // "Microsoft Windows Home Server"
+	{0x0502, OS_COMPUTECLUSTER, MAXWORD,                      {STR_COMPUTECLUSTER_1, STR_COMPUTECLUSTER_2, STR_COMPUTECLUSTER_3}}, // "Microsoft Windows Server 2003 Compute Cluster Edition"
+	{0x0502, OS_HOMESERVER,     MAXWORD,                      {STR_HOMESERVER_1, STR_HOMESERVER_2}}, // "Microsoft Windows Home Server"
 	// I don't think any of the above editions identify as OS_SERVER, but just in case
 	{0x0502, OS_SERVER,         PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_STANDARD}},      // "Microsoft Windows Server 2003 Standard Edition"
 	{0x0502, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_ENTERPRISE}},    // "Microsoft Windows Server 2003 Enterprise Edition"
 	{0x0502, OS_WEBSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_BLADE}},         // "Microsoft Windows Server 2003 Web Edition"
-	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_DATACENTER}},    // "Microsoft Windows Server 2003 Datacenter Edition"
+	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_DATACENTER}},    // "Microsoft Windows Server 2003 Datacenter Edition"
+	{0x0502, OS_SERVER,         PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_STANDARDX64}},   // "Microsoft Windows Server 2003 Standard x64 Edition"
+	{0x0502, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_ENTERPRISEX64}}, // "Microsoft Windows Server 2003 Enterprise x64 Edition"
+	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_DATACENTERX64}}, // "Microsoft Windows Server 2003 Datacenter x64 Edition"
 	{0x0502, OS_SMALLBUSINESSSERVER, PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_SBS}},      // "Microsoft Windows Server 2003 for Small Business Server"
 	{0x0502, MAXDWORD,          MAXWORD,                      {STR_SRV03}},                    // "Microsoft Windows Server 2003"
 };
