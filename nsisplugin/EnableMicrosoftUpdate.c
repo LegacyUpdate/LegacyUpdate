@@ -16,6 +16,10 @@ PLUGIN_METHOD(EnableMicrosoftUpdate) {
 		goto end;
 	}
 
+	BSTR clientID = SysAllocString(L"Legacy Update");
+	IUpdateServiceManager2_put_ClientApplicationID(serviceManager, clientID);
+	SysFreeString(clientID);
+
 	BSTR serviceID = SysAllocString(MicrosoftUpdateServiceID);
 	BSTR serviceCab = SysAllocString(L"");
 	hr = IUpdateServiceManager2_AddService2(serviceManager, serviceID, asfAllowPendingRegistration | asfAllowOnlineRegistration | asfRegisterServiceWithAU, serviceCab, &registration);
