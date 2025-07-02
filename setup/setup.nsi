@@ -302,7 +302,7 @@ ${MementoSection} "$(SectionRootCerts)" ROOTCERTS
 	${EndIf}
 ${MementoSectionEnd}
 
-${MementoSection} "$(SectionEnableMU)" WIN7MU
+${MementoSection} "$(SectionEnableMU)" ENABLEMU
 	LegacyUpdateNSIS::EnableMicrosoftUpdate
 	Pop $0
 	${If} $0 != 0
@@ -594,7 +594,7 @@ SectionEnd
 	!insertmacro DESCRIPTION_STRING WHS2011U4
 	!insertmacro DESCRIPTION_STRING WUA
 	!insertmacro DESCRIPTION_STRING ROOTCERTS
-	!insertmacro DESCRIPTION_STRING WIN7MU
+	!insertmacro DESCRIPTION_STRING ENABLEMU
 	!insertmacro DESCRIPTION_STRING ACTIVATE
 	; !insertmacro DESCRIPTION_STRING LEGACYUPDATE
 	; !insertmacro DESCRIPTION_STRING WUSERVER
@@ -713,17 +713,10 @@ Function .onInit
 		${IfNot} ${NeedsPatch} Win7PostSP1
 			!insertmacro RemoveSection ${WIN7SSU}
 		${EndIf}
-
-		ClearErrors
-		EnumRegKey $0 HKLM "${REGPATH_WU_SERVICES}\${WU_MU_SERVICE_ID}" 0
-		${IfNot} ${Errors}
-			!insertmacro RemoveSection ${WIN7MU}
-		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN7SP1}
 		!insertmacro RemoveSection ${WHS2011U4}
 		!insertmacro RemoveSection ${WIN7SSU}
-		!insertmacro RemoveSection ${WIN7MU}
 	${EndIf}
 
 	${If} ${IsWin8}
@@ -763,6 +756,17 @@ Function .onInit
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${ACTIVATE}
+	${EndIf}
+
+	${If} ${AtLeastWin7}
+	${AndIf} ${AtMostWin8.1}
+		ClearErrors
+		EnumRegKey $0 HKLM "${REGPATH_WU_SERVICES}\${WU_MU_SERVICE_ID}" 0
+		${IfNot} ${Errors}
+			!insertmacro RemoveSection ${ENABLEMU}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${ENABLEMU}
 	${EndIf}
 
 	; ${IfNot} ${AtMostWinVista}

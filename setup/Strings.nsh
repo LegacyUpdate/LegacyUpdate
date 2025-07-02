@@ -202,7 +202,7 @@ LangString SectionWUADesc       ${LANG_ENGLISH} \
 	"Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 LangString SectionRootCertsDesc ${LANG_ENGLISH} \
 	"Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
-LangString SectionWin7MUDesc    ${LANG_ENGLISH} \
+LangString SectionEnableMUDesc  ${LANG_ENGLISH} \
 	"Configures Windows Update to receive updates for Microsoft Office and other Microsoft software."
 LangString SectionActivateDesc  ${LANG_ENGLISH} \
 	"Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
