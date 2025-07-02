@@ -2,7 +2,8 @@
 !define GetUserName              'advapi32::GetUserName(t, *i) i'
 
 ; cbscore
-!define CBS_EXECUTE_STATE_NONE 0xffffffff
+!define CBS_EXECUTE_STATE_NONE  -1         ; Officially -1 in cbscore.dll, but underflows in the registry.
+!define CBS_EXECUTE_STATE_NONE2 0xffffffff ; We can get one or the other depending on the OS.
 
 ; kernel32
 !define PF_XMMI64_INSTRUCTIONS_AVAILABLE 10

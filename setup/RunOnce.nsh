@@ -188,6 +188,7 @@ Function PollCbsInstall
 
 	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
 	${If} $0 == ${CBS_EXECUTE_STATE_NONE}
+	${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
 		Return
 	${EndIf}
 
@@ -211,6 +212,7 @@ Function PollCbsInstall
 		; Poll ExecuteState, waiting for TrustedInstaller to be done.
 		ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
 		${If} $0 == ${CBS_EXECUTE_STATE_NONE}
+		${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
 			${Break}
 		${EndIf}
 
@@ -231,6 +233,7 @@ Function RebootIfCbsRebootPending
 
 	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
 	${If} $0 != ${CBS_EXECUTE_STATE_NONE}
+	${AndIf} $0 != ${CBS_EXECUTE_STATE_NONE2}
 		StrCpy $1 1
 	${EndIf}
 
