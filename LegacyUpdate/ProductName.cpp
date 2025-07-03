@@ -162,10 +162,10 @@ static const WinNT5Variant nt5Variants[] = {
 	{0x0502, OS_SERVER,         PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_STANDARD}},      // "Microsoft Windows Server 2003 Standard Edition"
 	{0x0502, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_ENTERPRISE}},    // "Microsoft Windows Server 2003 Enterprise Edition"
 	{0x0502, OS_WEBSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_BLADE}},         // "Microsoft Windows Server 2003 Web Edition"
-	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_DATACENTER}},    // "Microsoft Windows Server 2003 Datacenter Edition"
+	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_DATACENTER}},    // "Microsoft Windows Server 2003 Datacenter Edition"
 	{0x0502, OS_SERVER,         PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_STANDARDX64}},   // "Microsoft Windows Server 2003 Standard x64 Edition"
 	{0x0502, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_ENTERPRISEX64}}, // "Microsoft Windows Server 2003 Enterprise x64 Edition"
-	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_DATACENTERX64}}, // "Microsoft Windows Server 2003 Datacenter x64 Edition"
+	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_DATACENTERX64}}, // "Microsoft Windows Server 2003 Datacenter x64 Edition"
 	{0x0502, OS_SMALLBUSINESSSERVER, PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_SBS}},      // "Microsoft Windows Server 2003 for Small Business Server"
 	{0x0502, MAXDWORD,          MAXWORD,                      {STR_SRV03}},                    // "Microsoft Windows Server 2003"
 };
