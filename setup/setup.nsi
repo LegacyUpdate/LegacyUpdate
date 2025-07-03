@@ -159,7 +159,9 @@ Section -BeforeInstall PREREQS_START
 		Call PreDownload
 
 		; If a reboot is pending, do it now
-		Call RebootIfCbsRebootPending
+		${IfNot} ${AtLeastWin10}
+			Call RebootIfCbsRebootPending
+		${EndIf}
 
 !if ${DEBUG} == 1
 		${If} ${TestRunOnce}
