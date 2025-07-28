@@ -24,12 +24,12 @@ STDMETHODIMP PauseResumeNGenQueue(BOOL state) {
 				break;
 			}
 
-			WCHAR path[MAX_PATH];
+			WCHAR path[MAX_PATH], expandedPath[MAX_PATH];
 			wsprintf(path, L"%%SystemRoot%%\\Microsoft.NET\\Framework%ls\\%ls\\ngen.exe", j == 1 ? L"64": L"", versions[i]);
-			ExpandEnvironmentStrings(path, path, ARRAYSIZE(path));
+			ExpandEnvironmentStrings(path, expandedPath, ARRAYSIZE(expandedPath));
 
-			if (PathFileExists(path)) {
-				hr = Exec(NULL, path, state ? L"queue pause" : L"queue continue", NULL, SW_HIDE, TRUE, NULL);
+			if (PathFileExists(expandedPath)) {
+				hr = Exec(NULL, expandedPath, state ? L"queue pause" : L"queue continue", NULL, SW_HIDE, TRUE, NULL);
 
 				if (SUCCEEDED(hr)) {
 					break;
