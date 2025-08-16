@@ -2,76 +2,58 @@
 
 // ProgressBarControl.h : Declaration of the CProgressBarControl class.
 
-#include <atlctl.h>
 #include "resource.h"
 #include "LegacyUpdate_i.h"
 
-// CProgressBarControl
-class ATL_NO_VTABLE CProgressBarControl :
-	public CComObjectRootEx<CComSingleThreadModel>,
-	public IDispatchImpl<IProgressBarControl, &IID_IProgressBarControl, &LIBID_LegacyUpdateLib, /*wMajor =*/ 1, /*wMinor =*/ 0>,
-	public IOleControlImpl<CProgressBarControl>,
-	public IOleObjectImpl<CProgressBarControl>,
-	public IOleInPlaceActiveObjectImpl<CProgressBarControl>,
-	public IViewObjectExImpl<CProgressBarControl>,
-	public IOleInPlaceObjectWindowlessImpl<CProgressBarControl>,
-	public CComCoClass<CProgressBarControl, &CLSID_ProgressBarControl>,
-	public CComControl<CProgressBarControl>
-{
-public:
-	CContainedWindow m_ctl;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	CProgressBarControl() : m_ctl(L"msctls_progress32", this, 1) {
-		m_bWindowOnly = TRUE;
-	}
+STDMETHODIMP CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
-	DECLARE_OLEMISC_STATUS(
-		OLEMISC_RECOMPOSEONRESIZE |
-		OLEMISC_CANTLINKINSIDE |
-		OLEMISC_INSIDEOUT |
-		OLEMISC_ACTIVATEWHENVISIBLE |
-		OLEMISC_SETCLIENTSITEFIRST
-	)
+typedef struct CProgressBarControl CProgressBarControl;
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_PROGRESSBARCONTROL)
+typedef struct CProgressBarControlVtbl {
+	// IUnknown
+	HRESULT (STDMETHODCALLTYPE *QueryInterface)(CProgressBarControl *This, REFIID riid, void **ppvObject);
+	ULONG   (STDMETHODCALLTYPE *AddRef)(CProgressBarControl *This);
+	ULONG   (STDMETHODCALLTYPE *Release)(CProgressBarControl *This);
 
-	BEGIN_COM_MAP(CProgressBarControl)
-		COM_INTERFACE_ENTRY(IProgressBarControl)
-		COM_INTERFACE_ENTRY(IDispatch)
-		COM_INTERFACE_ENTRY(IViewObjectEx)
-		COM_INTERFACE_ENTRY(IViewObject2)
-		COM_INTERFACE_ENTRY(IViewObject)
-		COM_INTERFACE_ENTRY(IOleInPlaceObjectWindowless)
-		COM_INTERFACE_ENTRY(IOleInPlaceObject)
-		COM_INTERFACE_ENTRY2(IOleWindow, IOleInPlaceObjectWindowless)
-		COM_INTERFACE_ENTRY(IOleInPlaceActiveObject)
-		COM_INTERFACE_ENTRY(IOleControl)
-		COM_INTERFACE_ENTRY(IOleObject)
-	END_COM_MAP()
-
-	BEGIN_PROP_MAP(CProgressBarControl)
-	END_PROP_MAP()
-
-	BEGIN_MSG_MAP(CProgressBarControl)
-		MESSAGE_HANDLER(WM_CREATE, OnCreate)
-		CHAIN_MSG_MAP(CComControl<CProgressBarControl>)
-		ALT_MSG_MAP(1)
-	END_MSG_MAP()
-
-	// IViewObjectEx
-	DECLARE_VIEW_STATUS(VIEWSTATUS_SOLIDBKGND | VIEWSTATUS_OPAQUE)
+	// IDispatch
+	HRESULT (STDMETHODCALLTYPE *GetTypeInfoCount)(CProgressBarControl *This, UINT *pctinfo);
+	HRESULT (STDMETHODCALLTYPE *GetTypeInfo)(CProgressBarControl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
+	HRESULT (STDMETHODCALLTYPE *GetIDsOfNames)(CProgressBarControl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
+	HRESULT (STDMETHODCALLTYPE *Invoke)(CProgressBarControl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
 
 	// IProgressBarControl
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	HRESULT (STDMETHODCALLTYPE *get_Value)(CProgressBarControl *This, SHORT *pValue);
+	HRESULT (STDMETHODCALLTYPE *put_Value)(CProgressBarControl *This, SHORT value);
+} CProgressBarControlVtbl;
 
-	HRESULT FinalConstruct() { return S_OK; }
-	void FinalRelease() {}
+struct CProgressBarControl {
+	CProgressBarControlVtbl *lpVtbl;
+	LONG refCount;
 
-	LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled);
-	STDMETHODIMP SetObjectRects(LPCRECT prcPos, LPCRECT prcClip);
-
-	STDMETHODIMP get_Value(SHORT *pValue);
-	STDMETHODIMP put_Value(SHORT value);
+	HWND hwnd;
+	HWND progressHwnd;
+	BOOL windowOnly;
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(ProgressBarControl), CProgressBarControl)
+// IUnknown
+STDMETHODIMP ProgressBarControl_QueryInterface(CProgressBarControl *This, REFIID riid, void **ppvObject);
+ULONG STDMETHODCALLTYPE ProgressBarControl_AddRef(CProgressBarControl *This);
+ULONG STDMETHODCALLTYPE ProgressBarControl_Release(CProgressBarControl *This);
+
+// IDispatch
+STDMETHODIMP ProgressBarControl_GetTypeInfoCount(CProgressBarControl *This, UINT *pctinfo);
+STDMETHODIMP ProgressBarControl_GetTypeInfo(CProgressBarControl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
+STDMETHODIMP ProgressBarControl_GetIDsOfNames(CProgressBarControl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
+STDMETHODIMP ProgressBarControl_Invoke(CProgressBarControl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
+
+// IProgressBarControl
+STDMETHODIMP ProgressBarControl_get_Value(CProgressBarControl *This, SHORT *pValue);
+STDMETHODIMP ProgressBarControl_put_Value(CProgressBarControl *This, SHORT value);
+
+#ifdef __cplusplus
+}
+#endif

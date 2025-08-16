@@ -1,19 +1,22 @@
 #include "stdafx.h"
-#include <comdef.h>
-#include <atlstr.h>
+#include <shlwapi.h>
 #include "Exec.h"
-#include "HResult.h"
 #include "LegacyUpdate.h"
-#include "VersionInfo.h"
-#include "Wow64.h"
+#include "../shared/LegacyUpdate.h"
+#include "WULog.h"
 
-#pragma comment(lib, "advapi32.lib")
-#pragma comment(lib, "shlwapi.lib")
-#pragma comment(lib, "version.lib")
+// Define missing constants for mingw
+#ifndef SHUTDOWN_RESTART
+#define SHUTDOWN_RESTART 0x00000004
+#endif
+
+#ifndef SHUTDOWN_INSTALL_UPDATES
+#define SHUTDOWN_INSTALL_UPDATES 0x00000040
+#endif
 
 typedef DWORD (WINAPI *_InitiateShutdownW)(LPWSTR lpMachineName, LPWSTR lpMessage, DWORD dwGracePeriod, DWORD dwShutdownFlags, DWORD dwReason);
 
-HRESULT StartLauncher(LPWSTR params, BOOL wait) {
+HRESULT StartLauncher(LPCWSTR params, BOOL wait) {
 	LPWSTR path = NULL;
 	HRESULT hr = GetInstallPath(&path);
 	if (!SUCCEEDED(hr)) {
@@ -35,18 +38,19 @@ HRESULT Reboot() {
 	HRESULT hr = E_FAIL;
 
 	HANDLE token = NULL;
-	TOKEN_PRIVILEGES privileges = {0};
-	LUID shutdownLuid = {0};
+	TOKEN_PRIVILEGES privileges;
+	LUID shutdownLuid;
+	_InitiateShutdownW $InitiateShutdownW = (_InitiateShutdownW)GetProcAddress(GetModuleHandle(L"advapi32.dll"), "InitiateShutdownW");
 
 	// Make sure we have permission to shut down
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token)) {
-		hr = AtlHresultFromLastError();
+		hr = HRESULT_FROM_WIN32(GetLastError());
 		TRACE(L"OpenProcessToken() failed: %ls\n", GetMessageForHresult(hr));
 		goto end;
 	}
 
 	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &shutdownLuid)) {
-		hr = AtlHresultFromLastError();
+		hr = HRESULT_FROM_WIN32(GetLastError());
 		TRACE(L"LookupPrivilegeValue() failed: %ls\n", GetMessageForHresult(hr));
 		goto end;
 	}
@@ -57,14 +61,13 @@ HRESULT Reboot() {
 	privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
 	if (!AdjustTokenPrivileges(token, FALSE, &privileges, 0, NULL, NULL)) {
-		hr = AtlHresultFromLastError();
+		hr = HRESULT_FROM_WIN32(GetLastError());
 		TRACE(L"AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(hr));
 		goto end;
 	}
 
 	// Reboot with reason "Operating System: Security fix (Unplanned)", ensuring to install updates.
 	// Try InitiateShutdown first (Vista+)
-	_InitiateShutdownW $InitiateShutdownW = (_InitiateShutdownW)GetProcAddress(GetModuleHandle(L"advapi32.dll"), "InitiateShutdownW");
 	if ($InitiateShutdownW) {
 		hr = HRESULT_FROM_WIN32($InitiateShutdownW(NULL, NULL, 0, SHUTDOWN_RESTART | SHUTDOWN_INSTALL_UPDATES, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX));
 	}
@@ -74,14 +77,14 @@ HRESULT Reboot() {
 		TRACE(L"InitiateShutdown() failed: %ls\n", GetMessageForHresult(hr));
 
 		if (InitiateSystemShutdownEx(NULL, NULL, 0, FALSE, TRUE, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX) == 0) {
-			hr = AtlHresultFromLastError();
+			hr = HRESULT_FROM_WIN32(GetLastError());
 			TRACE(L"InitiateSystemShutdownExW() failed: %ls\n", GetMessageForHresult(hr));
 		}
 	}
 
 	// Last-ditch attempt ExitWindowsEx (only guaranteed to work for the current logged in user)
-	if (!ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
-		hr = AtlHresultFromLastError();
+	if (!SUCCEEDED(hr) && !ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
+		hr = HRESULT_FROM_WIN32(GetLastError());
 		TRACE(L"ExitWindowsEx() failed: %ls\n", GetMessageForHresult(hr));
 	}
 
@@ -91,4 +94,8 @@ end:
 	}
 
 	return hr;
+}
+
+void operator delete(void *ptr) {
+	free(ptr);
 }

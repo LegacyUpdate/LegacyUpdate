@@ -4,118 +4,100 @@
 
 // CLegacyUpdateCtrl : See LegacyUpdateCtrl.cpp for implementation.
 
-#include <atlctl.h>
-#include <MsHTML.h>
+#include <mshtml.h>
 #include <wuapi.h>
 #include "resource.h"
 #include "LegacyUpdate_i.h"
+#include "ccomptr.h"
 
-// CLegacyUpdateCtrl
-class ATL_NO_VTABLE CLegacyUpdateCtrl :
-	public CComObjectRootEx<CComSingleThreadModel>,
-	public IDispatchImpl<ILegacyUpdateCtrl, &IID_ILegacyUpdateCtrl, &LIBID_LegacyUpdateLib, /*wMajor =*/ 1, /*wMinor =*/ 0>,
-	public IPersistStreamInitImpl<CLegacyUpdateCtrl>,
-	public IOleControlImpl<CLegacyUpdateCtrl>,
-	public IOleObjectImpl<CLegacyUpdateCtrl>,
-	public IOleInPlaceActiveObjectImpl<CLegacyUpdateCtrl>,
-	public IViewObjectExImpl<CLegacyUpdateCtrl>,
-	public IOleInPlaceObjectWindowlessImpl<CLegacyUpdateCtrl>,
-	public ISupportErrorInfo,
-	public IObjectWithSiteImpl<CLegacyUpdateCtrl>,
-	public IPersistStorageImpl<CLegacyUpdateCtrl>,
-	public IQuickActivateImpl<CLegacyUpdateCtrl>,
-	public IProvideClassInfo2Impl<&CLSID_LegacyUpdateCtrl, NULL, &LIBID_LegacyUpdateLib>,
-	public CComCoClass<CLegacyUpdateCtrl, &CLSID_LegacyUpdateCtrl>,
-	public CComControl<CLegacyUpdateCtrl> {
-private:
-	CComPtr<IElevationHelper> m_elevatedHelper;
-	CComPtr<IElevationHelper> m_nonElevatedHelper;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-public:
-	CLegacyUpdateCtrl() {
-		m_bWindowOnly = TRUE;
-	}
+STDMETHODIMP CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
-	DECLARE_OLEMISC_STATUS(
-		OLEMISC_INVISIBLEATRUNTIME |
-		OLEMISC_ACTIVATEWHENVISIBLE |
-		OLEMISC_SETCLIENTSITEFIRST |
-		OLEMISC_INSIDEOUT |
-		OLEMISC_CANTLINKINSIDE |
-		OLEMISC_RECOMPOSEONRESIZE
-	)
+typedef struct CLegacyUpdateCtrl CLegacyUpdateCtrl;
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_LEGACYUPDATECTRL)
+typedef struct CLegacyUpdateCtrlVtbl {
+	// IUnknown
+	HRESULT (STDMETHODCALLTYPE *QueryInterface)(CLegacyUpdateCtrl *This, REFIID riid, void **ppvObject);
+	ULONG   (STDMETHODCALLTYPE *AddRef)(CLegacyUpdateCtrl *This);
+	ULONG   (STDMETHODCALLTYPE *Release)(CLegacyUpdateCtrl *This);
 
-	BEGIN_COM_MAP(CLegacyUpdateCtrl)
-		COM_INTERFACE_ENTRY(ILegacyUpdateCtrl)
-		COM_INTERFACE_ENTRY(IDispatch)
-		COM_INTERFACE_ENTRY(IViewObjectEx)
-		COM_INTERFACE_ENTRY(IViewObject2)
-		COM_INTERFACE_ENTRY(IViewObject)
-		COM_INTERFACE_ENTRY(IOleInPlaceObjectWindowless)
-		COM_INTERFACE_ENTRY(IOleInPlaceObject)
-		COM_INTERFACE_ENTRY2(IOleWindow, IOleInPlaceObjectWindowless)
-		COM_INTERFACE_ENTRY(IOleInPlaceActiveObject)
-		COM_INTERFACE_ENTRY(IOleControl)
-		COM_INTERFACE_ENTRY(IOleObject)
-		COM_INTERFACE_ENTRY(IPersistStreamInit)
-		COM_INTERFACE_ENTRY2(IPersist, IPersistStreamInit)
-		COM_INTERFACE_ENTRY(ISupportErrorInfo)
-		COM_INTERFACE_ENTRY(IQuickActivate)
-		COM_INTERFACE_ENTRY(IPersistStorage)
-		COM_INTERFACE_ENTRY(IProvideClassInfo)
-		COM_INTERFACE_ENTRY(IProvideClassInfo2)
-	END_COM_MAP()
-
-	BEGIN_PROP_MAP(CLegacyUpdateCtrl)
-	END_PROP_MAP()
-
-	BEGIN_MSG_MAP(CLegacyUpdateCtrl)
-		CHAIN_MSG_MAP(CComControl<CLegacyUpdateCtrl>)
-		DEFAULT_REFLECTION_HANDLER()
-	END_MSG_MAP()
-
-	// ISupportsErrorInfo
-	STDMETHOD(InterfaceSupportsErrorInfo)(REFIID riid) {
-		return IsEqualGUID(riid, IID_ILegacyUpdateCtrl) ? S_OK : S_FALSE;
-	}
-
-	// IViewObjectEx
-	DECLARE_VIEW_STATUS(VIEWSTATUS_SOLIDBKGND | VIEWSTATUS_OPAQUE)
+	// IDispatch
+	HRESULT (STDMETHODCALLTYPE *GetTypeInfoCount)(CLegacyUpdateCtrl *This, UINT *pctinfo);
+	HRESULT (STDMETHODCALLTYPE *GetTypeInfo)(CLegacyUpdateCtrl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
+	HRESULT (STDMETHODCALLTYPE *GetIDsOfNames)(CLegacyUpdateCtrl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
+	HRESULT (STDMETHODCALLTYPE *Invoke)(CLegacyUpdateCtrl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
 
 	// ILegacyUpdateCtrl
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	HRESULT (STDMETHODCALLTYPE *CheckControl)(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
+	HRESULT (STDMETHODCALLTYPE *MessageForHresult)(CLegacyUpdateCtrl *This, LONG inHresult, BSTR *retval);
+	HRESULT (STDMETHODCALLTYPE *GetOSVersionInfo)(CLegacyUpdateCtrl *This, OSVersionField osField, LONG systemMetric, VARIANT *retval);
+	HRESULT (STDMETHODCALLTYPE *RequestElevation)(CLegacyUpdateCtrl *This);
+	HRESULT (STDMETHODCALLTYPE *CreateObject)(CLegacyUpdateCtrl *This, BSTR progID, IDispatch **retval);
+	HRESULT (STDMETHODCALLTYPE *SetBrowserHwnd)(CLegacyUpdateCtrl *This, IUpdateInstaller *installer);
+	HRESULT (STDMETHODCALLTYPE *GetUserType)(CLegacyUpdateCtrl *This, UserType *retval);
+	HRESULT (STDMETHODCALLTYPE *get_IsRebootRequired)(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
+	HRESULT (STDMETHODCALLTYPE *get_IsWindowsUpdateDisabled)(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
+	HRESULT (STDMETHODCALLTYPE *RebootIfRequired)(CLegacyUpdateCtrl *This);
+	HRESULT (STDMETHODCALLTYPE *ViewWindowsUpdateLog)(CLegacyUpdateCtrl *This);
+	HRESULT (STDMETHODCALLTYPE *OpenWindowsUpdateSettings)(CLegacyUpdateCtrl *This);
+	HRESULT (STDMETHODCALLTYPE *get_IsUsingWsusServer)(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
+	HRESULT (STDMETHODCALLTYPE *get_WsusServerUrl)(CLegacyUpdateCtrl *This, BSTR *retval);
+	HRESULT (STDMETHODCALLTYPE *get_WsusStatusServerUrl)(CLegacyUpdateCtrl *This, BSTR *retval);
+	HRESULT (STDMETHODCALLTYPE *BeforeUpdate)(CLegacyUpdateCtrl *This);
+	HRESULT (STDMETHODCALLTYPE *AfterUpdate)(CLegacyUpdateCtrl *This);
+} CLegacyUpdateCtrlVtbl;
 
-	HRESULT FinalConstruct() { return S_OK; }
-	void FinalRelease() {}
+struct CLegacyUpdateCtrl {
+	CLegacyUpdateCtrlVtbl *lpVtbl;
+	LONG refCount;
 
-private:
-	IHTMLDocument2 *GetHTMLDocument();
-	HWND GetIEWindowHWND();
-	BOOL IsPermitted();
-	STDMETHODIMP GetElevatedHelper(CComPtr<IElevationHelper> &retval);
+	IOleClientSite *clientSite;
+	IOleInPlaceSite *inPlaceSite;
+	IOleContainer *container;
 
-public:
-	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite);
+	CComPtr<IElevationHelper> elevatedHelper;
+	CComPtr<IElevationHelper> nonElevatedHelper;
 
-	STDMETHODIMP CheckControl(VARIANT_BOOL *retval);
-	STDMETHODIMP MessageForHresult(LONG inHresult, BSTR *retval);
-	STDMETHODIMP GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
-	STDMETHODIMP RequestElevation();
-	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
-	STDMETHODIMP SetBrowserHwnd(IUpdateInstaller *installer);
-	STDMETHODIMP GetUserType(UserType *retval);
-	STDMETHODIMP get_IsRebootRequired(VARIANT_BOOL *retval);
-	STDMETHODIMP get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);
-	STDMETHODIMP RebootIfRequired(void);
-	STDMETHODIMP ViewWindowsUpdateLog(void);
-	STDMETHODIMP OpenWindowsUpdateSettings(void);
-	STDMETHODIMP get_IsUsingWsusServer(VARIANT_BOOL *retval);
-	STDMETHODIMP get_WsusServerUrl(BSTR *retval);
-	STDMETHODIMP get_WsusStatusServerUrl(BSTR *retval);
-	STDMETHODIMP BeforeUpdate(void);
-	STDMETHODIMP AfterUpdate(void);
+	HWND hwnd;
+	BOOL windowOnly;
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(LegacyUpdateCtrl), CLegacyUpdateCtrl)
+// IUnknown
+STDMETHODIMP LegacyUpdateCtrl_QueryInterface(CLegacyUpdateCtrl *This, REFIID riid, void **ppvObject);
+ULONG STDMETHODCALLTYPE LegacyUpdateCtrl_AddRef(CLegacyUpdateCtrl *This);
+ULONG STDMETHODCALLTYPE LegacyUpdateCtrl_Release(CLegacyUpdateCtrl *This);
+
+// IDispatch
+STDMETHODIMP LegacyUpdateCtrl_GetTypeInfoCount(CLegacyUpdateCtrl *This, UINT *pctinfo);
+STDMETHODIMP LegacyUpdateCtrl_GetTypeInfo(CLegacyUpdateCtrl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
+STDMETHODIMP LegacyUpdateCtrl_GetIDsOfNames(CLegacyUpdateCtrl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
+STDMETHODIMP LegacyUpdateCtrl_Invoke(CLegacyUpdateCtrl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
+
+// IOleObject
+STDMETHODIMP LegacyUpdateCtrl_SetClientSite(CLegacyUpdateCtrl *This, IOleClientSite *pClientSite);
+
+// ILegacyUpdateCtrl
+STDMETHODIMP LegacyUpdateCtrl_CheckControl(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
+STDMETHODIMP LegacyUpdateCtrl_MessageForHresult(CLegacyUpdateCtrl *This, LONG inHresult, BSTR *retval);
+STDMETHODIMP LegacyUpdateCtrl_GetOSVersionInfo(CLegacyUpdateCtrl *This, OSVersionField osField, LONG systemMetric, VARIANT *retval);
+STDMETHODIMP LegacyUpdateCtrl_RequestElevation(CLegacyUpdateCtrl *This);
+STDMETHODIMP LegacyUpdateCtrl_CreateObject(CLegacyUpdateCtrl *This, BSTR progID, IDispatch **retval);
+STDMETHODIMP LegacyUpdateCtrl_SetBrowserHwnd(CLegacyUpdateCtrl *This, IUpdateInstaller *installer);
+STDMETHODIMP LegacyUpdateCtrl_GetUserType(CLegacyUpdateCtrl *This, UserType *retval);
+STDMETHODIMP LegacyUpdateCtrl_get_IsRebootRequired(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
+STDMETHODIMP LegacyUpdateCtrl_get_IsWindowsUpdateDisabled(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
+STDMETHODIMP LegacyUpdateCtrl_RebootIfRequired(CLegacyUpdateCtrl *This);
+STDMETHODIMP LegacyUpdateCtrl_ViewWindowsUpdateLog(CLegacyUpdateCtrl *This);
+STDMETHODIMP LegacyUpdateCtrl_OpenWindowsUpdateSettings(CLegacyUpdateCtrl *This);
+STDMETHODIMP LegacyUpdateCtrl_get_IsUsingWsusServer(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
+STDMETHODIMP LegacyUpdateCtrl_get_WsusServerUrl(CLegacyUpdateCtrl *This, BSTR *retval);
+STDMETHODIMP LegacyUpdateCtrl_get_WsusStatusServerUrl(CLegacyUpdateCtrl *This, BSTR *retval);
+STDMETHODIMP LegacyUpdateCtrl_BeforeUpdate(CLegacyUpdateCtrl *This);
+STDMETHODIMP LegacyUpdateCtrl_AfterUpdate(CLegacyUpdateCtrl *This);
+
+#ifdef __cplusplus
+}
+#endif

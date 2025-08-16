@@ -13,28 +13,137 @@
 #include "Utils.h"
 #include "VersionInfo.h"
 #include "WULog.h"
-#include <atlbase.h>
-#include <ShlObj.h>
+#include <oleidl.h>
+#include <shlobj.h>
 #include <wuapi.h>
 #include "IUpdateInstaller4.h"
 
-const BSTR permittedHosts[] = {
+const WCHAR *permittedHosts[] = {
 	L"legacyupdate.net",
 	L"test.legacyupdate.net"
 };
 
-// CLegacyUpdateCtrl message handlers
+static CLegacyUpdateCtrlVtbl CLegacyUpdateCtrlVtable = {
+	LegacyUpdateCtrl_QueryInterface,
+	LegacyUpdateCtrl_AddRef,
+	LegacyUpdateCtrl_Release,
+	LegacyUpdateCtrl_GetTypeInfoCount,
+	LegacyUpdateCtrl_GetTypeInfo,
+	LegacyUpdateCtrl_GetIDsOfNames,
+	LegacyUpdateCtrl_Invoke,
+	LegacyUpdateCtrl_CheckControl,
+	LegacyUpdateCtrl_MessageForHresult,
+	LegacyUpdateCtrl_GetOSVersionInfo,
+	LegacyUpdateCtrl_RequestElevation,
+	LegacyUpdateCtrl_CreateObject,
+	LegacyUpdateCtrl_SetBrowserHwnd,
+	LegacyUpdateCtrl_GetUserType,
+	LegacyUpdateCtrl_get_IsRebootRequired,
+	LegacyUpdateCtrl_get_IsWindowsUpdateDisabled,
+	LegacyUpdateCtrl_RebootIfRequired,
+	LegacyUpdateCtrl_ViewWindowsUpdateLog,
+	LegacyUpdateCtrl_OpenWindowsUpdateSettings,
+	LegacyUpdateCtrl_get_IsUsingWsusServer,
+	LegacyUpdateCtrl_get_WsusServerUrl,
+	LegacyUpdateCtrl_get_WsusStatusServerUrl,
+	LegacyUpdateCtrl_BeforeUpdate,
+	LegacyUpdateCtrl_AfterUpdate
+};
 
-IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
-	CComPtr<IOleClientSite> clientSite;
-	HRESULT hr = GetClientSite(&clientSite);
-	if (!SUCCEEDED(hr) || clientSite == NULL) {
-		TRACE(L"GetDocument() failed: %ls\n", GetMessageForHresult(hr));
+EXTERN_C HRESULT CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+	if (pUnkOuter != NULL) {
+		return CLASS_E_NOAGGREGATION;
+	}
+
+	CLegacyUpdateCtrl *pThis = (CLegacyUpdateCtrl *)CoTaskMemAlloc(sizeof(CLegacyUpdateCtrl));
+	if (pThis == NULL) {
+		return E_OUTOFMEMORY;
+	}
+
+	ZeroMemory(pThis, sizeof(CLegacyUpdateCtrl));
+	pThis->lpVtbl = &CLegacyUpdateCtrlVtable;
+	pThis->refCount = 1;
+	pThis->windowOnly = TRUE;
+
+	HRESULT hr = LegacyUpdateCtrl_QueryInterface(pThis, riid, ppv);
+	LegacyUpdateCtrl_Release(pThis);
+
+	return hr;
+}
+
+STDMETHODIMP LegacyUpdateCtrl_QueryInterface(CLegacyUpdateCtrl *This, REFIID riid, void **ppvObject) {
+	if (ppvObject == NULL) {
+		return E_POINTER;
+	}
+
+	if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IDispatch) || IsEqualIID(riid, IID_ILegacyUpdateCtrl) ||
+		IsEqualIID(riid, IID_IOleObject) || IsEqualIID(riid, IID_IOleWindow)) {
+		*ppvObject = This;
+		LegacyUpdateCtrl_AddRef(This);
+		return S_OK;
+	}
+
+	*ppvObject = NULL;
+	return E_NOINTERFACE;
+}
+
+ULONG STDMETHODCALLTYPE LegacyUpdateCtrl_AddRef(CLegacyUpdateCtrl *This) {
+	return InterlockedIncrement(&This->refCount);
+}
+
+ULONG STDMETHODCALLTYPE LegacyUpdateCtrl_Release(CLegacyUpdateCtrl *This) {
+	ULONG refCount = InterlockedDecrement(&This->refCount);
+
+	if (refCount == 0) {
+		if (This->clientSite) {
+			This->clientSite->Release();
+		}
+		if (This->inPlaceSite) {
+			This->inPlaceSite->Release();
+		}
+		if (This->container) {
+			This->container->Release();
+		}
+		if (This->elevatedHelper) {
+			This->elevatedHelper.Release();
+		}
+		if (This->nonElevatedHelper) {
+			This->nonElevatedHelper.Release();
+		}
+		CoTaskMemFree(This);
+	}
+
+	return refCount;
+}
+
+STDMETHODIMP LegacyUpdateCtrl_GetTypeInfoCount(CLegacyUpdateCtrl *This, UINT *pctinfo) {
+	if (pctinfo == NULL) {
+		return E_POINTER;
+	}
+	*pctinfo = 0;
+	return S_OK;
+}
+
+STDMETHODIMP LegacyUpdateCtrl_GetTypeInfo(CLegacyUpdateCtrl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+	return E_NOTIMPL;
+}
+
+STDMETHODIMP LegacyUpdateCtrl_GetIDsOfNames(CLegacyUpdateCtrl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) {
+	return E_NOTIMPL;
+}
+
+STDMETHODIMP LegacyUpdateCtrl_Invoke(CLegacyUpdateCtrl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+	return E_NOTIMPL;
+}
+
+static CComPtr<IHTMLDocument2> GetHTMLDocument(CLegacyUpdateCtrl *This) {
+	if (This->clientSite == NULL) {
+		TRACE(L"GetDocument() failed: no client site\n");
 		return NULL;
 	}
 
 	CComPtr<IOleContainer> container;
-	hr = clientSite->GetContainer(&container);
+	HRESULT hr = This->clientSite->GetContainer(&container);
 	if (!SUCCEEDED(hr) || container == NULL) {
 		TRACE(L"GetDocument() failed: %ls\n", GetMessageForHresult(hr));
 		return NULL;
@@ -47,17 +156,17 @@ IHTMLDocument2 *CLegacyUpdateCtrl::GetHTMLDocument() {
 		return NULL;
 	}
 
-	return document.Detach();
+	return document;
 }
 
-HWND CLegacyUpdateCtrl::GetIEWindowHWND() {
+static HWND GetIEWindowHWND(CLegacyUpdateCtrl *This) {
 	CComPtr<IOleWindow> oleWindow;
-	HRESULT hr = QueryInterface(IID_IOleWindow, (void **)&oleWindow);
+	HWND hwnd = NULL;
+	HRESULT hr = LegacyUpdateCtrl_QueryInterface(This, IID_IOleWindow, (void **)&oleWindow);
 	if (!SUCCEEDED(hr) || !oleWindow) {
 		goto end;
 	}
 
-	HWND hwnd = NULL;
 	hr = oleWindow->GetWindow(&hwnd);
 	if (!SUCCEEDED(hr)) {
 		goto end;
@@ -72,8 +181,8 @@ end:
 	return 0;
 }
 
-BOOL CLegacyUpdateCtrl::IsPermitted(void) {
-	CComPtr<IHTMLDocument2> document = GetHTMLDocument();
+static BOOL IsPermitted(CLegacyUpdateCtrl *This) {
+	CComPtr<IHTMLDocument2> document = GetHTMLDocument(This);
 	if (document == NULL) {
 #ifdef _DEBUG
 		// Allow debugging outside of IE (e.g. via PowerShell)
@@ -85,7 +194,7 @@ BOOL CLegacyUpdateCtrl::IsPermitted(void) {
 	}
 
 	CComPtr<IHTMLLocation> location;
-	CComBSTR host;
+	BSTR host;
 	HRESULT hr = document->get_location(&location);
 	if (!SUCCEEDED(hr) || location == NULL) {
 		goto end;
@@ -98,28 +207,32 @@ BOOL CLegacyUpdateCtrl::IsPermitted(void) {
 
 	for (DWORD i = 0; i < ARRAYSIZE(permittedHosts); i++) {
 		if (wcscmp(host, permittedHosts[i]) == 0) {
+			SysFreeString(host);
 			return TRUE;
 		}
 	}
 
 end:
+	if (host) {
+		SysFreeString(host);
+	}
 	if (!SUCCEEDED(hr)) {
 		TRACE(L"IsPermitted() failed: %ls\n", GetMessageForHresult(hr));
 	}
 	return FALSE;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(CComPtr<IElevationHelper> &retval) {
-	CComPtr<IElevationHelper> elevatedHelper = m_elevatedHelper ? m_elevatedHelper : m_nonElevatedHelper;
+static HRESULT GetElevatedHelper(CLegacyUpdateCtrl *This, CComPtr<IElevationHelper> &retval) {
+	CComPtr<IElevationHelper> elevatedHelper = This->elevatedHelper ? This->elevatedHelper : This->nonElevatedHelper;
 	if (elevatedHelper == NULL) {
 		// Use the helper directly, without elevation. It's the responsibility of the caller to ensure it
 		// is already running as admin on 2k/XP, or that it has requested elevation on Vista+.
-		HRESULT hr = m_nonElevatedHelper.CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER);
+		HRESULT hr = This->nonElevatedHelper.CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER);
 		if (!SUCCEEDED(hr)) {
 			return hr;
 		}
 
-		elevatedHelper = m_nonElevatedHelper;
+		elevatedHelper = This->nonElevatedHelper;
 	}
 
 	retval = elevatedHelper;
@@ -127,21 +240,24 @@ STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(CComPtr<IElevationHelper> &ret
 }
 
 #define DoIsPermittedCheck() \
-	if (!IsPermitted()) { \
+	if (!IsPermitted(This)) { \
 		return E_ACCESSDENIED; \
 	}
 
-STDMETHODIMP CLegacyUpdateCtrl::SetClientSite(IOleClientSite *pClientSite) {
-	HRESULT hr = IOleObjectImpl::SetClientSite(pClientSite);
-	if (!SUCCEEDED(hr)) {
-		return hr;
+STDMETHODIMP LegacyUpdateCtrl_SetClientSite(CLegacyUpdateCtrl *This, IOleClientSite *pClientSite) {
+	if (This->clientSite) {
+		This->clientSite->Release();
+	}
+	This->clientSite = pClientSite;
+	if (This->clientSite) {
+		This->clientSite->AddRef();
 	}
 
 	DoIsPermittedCheck();
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
+STDMETHODIMP LegacyUpdateCtrl_CheckControl(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	// Just return true so the site can confirm the control is working.
@@ -149,13 +265,13 @@ STDMETHODIMP CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::MessageForHresult(LONG inHresult, BSTR *retval) {
+STDMETHODIMP LegacyUpdateCtrl_MessageForHresult(CLegacyUpdateCtrl *This, LONG inHresult, BSTR *retval) {
 	DoIsPermittedCheck();
 	*retval = SysAllocString(GetMessageForHresult(inHresult));
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval) {
+STDMETHODIMP LegacyUpdateCtrl_GetOSVersionInfo(CLegacyUpdateCtrl *This, OSVersionField osField, LONG systemMetric, VARIANT *retval) {
 	DoIsPermittedCheck();
 
 	VariantInit(retval);
@@ -272,22 +388,22 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
+STDMETHODIMP LegacyUpdateCtrl_RequestElevation(CLegacyUpdateCtrl *This) {
 	DoIsPermittedCheck();
 
-	if (m_elevatedHelper != NULL || !AtLeastWinVista()) {
+	if (This->elevatedHelper != NULL || !AtLeastWinVista()) {
 		return S_OK;
 	}
 
 	// https://learn.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker
-	HRESULT hr = CoCreateInstanceAsAdmin(GetIEWindowHWND(), CLSID_ElevationHelper, IID_IElevationHelper, (void**)&m_elevatedHelper);
+	HRESULT hr = CoCreateInstanceAsAdmin(GetIEWindowHWND(This), CLSID_ElevationHelper, IID_IElevationHelper, (void**)&This->elevatedHelper);
 	if (!SUCCEEDED(hr)) {
 		TRACE(L"RequestElevation() failed: %ls\n", GetMessageForHresult(hr));
 	}
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
+STDMETHODIMP LegacyUpdateCtrl_CreateObject(CLegacyUpdateCtrl *This, BSTR progID, IDispatch **retval) {
 	DoIsPermittedCheck();
 
 	HRESULT hr = S_OK;
@@ -302,7 +418,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 		goto end;
 	}
 
-	hr = GetElevatedHelper(elevatedHelper);
+	hr = GetElevatedHelper(This, elevatedHelper);
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
@@ -316,7 +432,7 @@ end:
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
+STDMETHODIMP LegacyUpdateCtrl_SetBrowserHwnd(CLegacyUpdateCtrl *This, IUpdateInstaller *installer) {
 	DoIsPermittedCheck();
 
 	if (installer == NULL) {
@@ -329,17 +445,17 @@ STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
 		return hr;
 	}
 
-	updateInstaller->put_ParentHwnd(GetIEWindowHWND());
+	updateInstaller->put_ParentHwnd(GetIEWindowHWND(This));
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
+STDMETHODIMP LegacyUpdateCtrl_GetUserType(CLegacyUpdateCtrl *This, UserType *retval) {
 	DoIsPermittedCheck();
 
 	if (IsUserAdmin()) {
 		// Entire process is elevated.
 		*retval = e_admin;
-	} else if (m_elevatedHelper != NULL) {
+	} else if (This->elevatedHelper != NULL) {
 		// Our control has successfully received elevation.
 		*retval = e_elevated;
 	} else {
@@ -350,7 +466,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
+STDMETHODIMP LegacyUpdateCtrl_get_IsRebootRequired(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	// Ask WU itself whether a reboot is required
@@ -374,7 +490,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval) {
+STDMETHODIMP LegacyUpdateCtrl_get_IsWindowsUpdateDisabled(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	// Future note: These are in HKCU on NT; HKLM on 9x.
@@ -397,12 +513,12 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
+STDMETHODIMP LegacyUpdateCtrl_RebootIfRequired(CLegacyUpdateCtrl *This) {
 	DoIsPermittedCheck();
 
 	HRESULT hr = S_OK;
-	VARIANT_BOOL isRebootRequired = NULL;
-	if (SUCCEEDED(get_IsRebootRequired(&isRebootRequired)) && isRebootRequired == VARIANT_TRUE) {
+	VARIANT_BOOL isRebootRequired = VARIANT_FALSE;
+	if (SUCCEEDED(LegacyUpdateCtrl_get_IsRebootRequired(This, &isRebootRequired)) && isRebootRequired == VARIANT_TRUE) {
 		// Calling Commit() is recommended on Windows 10, to ensure feature updates are properly prepared
 		// prior to the reboot. If IUpdateInstaller4 doesn't exist, we can skip this.
 		CComPtr<IUpdateInstaller4> installer;
@@ -415,7 +531,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 		}
 
 		CComPtr<IElevationHelper> elevatedHelper;
-		hr = GetElevatedHelper(elevatedHelper);
+		hr = GetElevatedHelper(This, elevatedHelper);
 		if (!SUCCEEDED(hr)) {
 			return hr;
 		}
@@ -426,7 +542,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
+STDMETHODIMP LegacyUpdateCtrl_ViewWindowsUpdateLog(CLegacyUpdateCtrl *This) {
 	DoIsPermittedCheck();
 
 	HRESULT hr = StartLauncher(L"/log", FALSE);
@@ -438,7 +554,7 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
+STDMETHODIMP LegacyUpdateCtrl_OpenWindowsUpdateSettings(CLegacyUpdateCtrl *This) {
 	DoIsPermittedCheck();
 
 	HRESULT hr = StartLauncher(L"/options", FALSE);
@@ -462,7 +578,7 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
+STDMETHODIMP LegacyUpdateCtrl_get_IsUsingWsusServer(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	DWORD useWUServer = 0;
@@ -471,7 +587,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
+STDMETHODIMP LegacyUpdateCtrl_get_WsusServerUrl(CLegacyUpdateCtrl *This, BSTR *retval) {
 	DoIsPermittedCheck();
 
 	LPWSTR data = NULL;
@@ -484,7 +600,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
+STDMETHODIMP LegacyUpdateCtrl_get_WsusStatusServerUrl(CLegacyUpdateCtrl *This, BSTR *retval) {
 	DoIsPermittedCheck();
 
 	LPWSTR data = NULL;
@@ -497,11 +613,11 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate() {
+STDMETHODIMP LegacyUpdateCtrl_BeforeUpdate(CLegacyUpdateCtrl *This) {
 	DoIsPermittedCheck();
 
 	CComPtr<IElevationHelper> elevatedHelper;
-	HRESULT hr = GetElevatedHelper(elevatedHelper);
+	HRESULT hr = GetElevatedHelper(This, elevatedHelper);
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}
@@ -509,11 +625,11 @@ STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate() {
 	return elevatedHelper->BeforeUpdate();
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::AfterUpdate() {
+STDMETHODIMP LegacyUpdateCtrl_AfterUpdate(CLegacyUpdateCtrl *This) {
 	DoIsPermittedCheck();
 
 	CComPtr<IElevationHelper> elevatedHelper;
-	HRESULT hr = GetElevatedHelper(elevatedHelper);
+	HRESULT hr = GetElevatedHelper(This, elevatedHelper);
 	if (!SUCCEEDED(hr)) {
 		return hr;
 	}

@@ -29,7 +29,6 @@ CFLAGS = \
 	-DUNICODE \
 	-D_UNICODE \
 	$(if $(filter 1,$(DEBUG)),-D_DEBUG -g,-DNDEBUG -Os) \
-	-D_USRDLL \
 	-s \
 	-fPIE \
 	-ffunction-sections \

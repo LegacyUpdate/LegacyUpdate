@@ -1,15 +1,16 @@
 #include "stdafx.h"
 #include <comdef.h>
-#include <atlstr.h>
 #include <shlwapi.h>
 #include "VersionInfo.h"
 #include "WMI.h"
 #include "Wow64.h"
 
-static CComVariant _productName;
+typedef WINBOOL (__fastcall *_IsOS)(DWORD dwOS);
+
+static VARIANT _productName;
 
 typedef struct {
-	LPWSTR library;
+	LPCWSTR library;
 	UINT stringID;
 } WinNT5BrandString;
 
@@ -177,15 +178,17 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 		// Handle the absolute disaster of Windows XP/Server 2003 edition branding
 		WORD winver = GetWinVer();
 		if (HIBYTE(winver) == 5) {
-			SYSTEM_INFO systemInfo = {0};
+			_IsOS $IsOS = (_IsOS)GetProcAddress(LoadLibrary(L"shlwapi.dll"), MAKEINTRESOURCEA(437));
+
+			SYSTEM_INFO systemInfo;
 			OurGetNativeSystemInfo(&systemInfo);
 
-			WinNT5Variant variant = {0};
+			WinNT5Variant variant;
 			for (DWORD i = 0; i < ARRAYSIZE(nt5Variants); i++) {
 				WinNT5Variant thisVariant = nt5Variants[i];
 				if (thisVariant.version == winver &&
 					(thisVariant.archFlag == MAXWORD || thisVariant.archFlag == systemInfo.wProcessorArchitecture) &&
-					(thisVariant.osFlag == MAXDWORD || IsOS(thisVariant.osFlag))) {
+					(thisVariant.osFlag == MAXDWORD || $IsOS(thisVariant.osFlag))) {
 					variant = thisVariant;
 					break;
 				}
@@ -199,7 +202,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 					UINT id = variant.stringIDs[i];
 
 					// If Server 2003 R2, override to R2 string
-					if (id == STR_SRV03 && IsOS(OS_SERVERR2)) {
+					if (id == STR_SRV03 && $IsOS(OS_SERVERR2)) {
 						id = STR_SRV03R2;
 					}
 
@@ -219,7 +222,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 					// If Server 2003 (except SBS), add comma
 					if (i == 1) {
 						UINT lastID = variant.stringIDs[i - 1];
-						if (lastID == STR_SRV03 && !IsOS(OS_SMALLBUSINESSSERVER)) {
+						if (lastID == STR_SRV03 && !$IsOS(OS_SMALLBUSINESSSERVER)) {
 							wcscat(brandStr, L",");
 						}
 					}

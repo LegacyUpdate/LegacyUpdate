@@ -20,17 +20,20 @@
 	#define our_IID_IWbemLocator  &IID_IWbemLocator
 #endif
 
-HRESULT QueryWMIProperty(LPWSTR query, LPWSTR property, LPVARIANT value) {
+HRESULT QueryWMIProperty(LPCWSTR query, LPCWSTR property, LPVARIANT value) {
 	IWbemLocator *locator = NULL;
 	IWbemServices *services = NULL;
 	IEnumWbemClassObject *enumerator = NULL;
 	IWbemClassObject *object = NULL;
+	BSTR server, wql, queryBstr, propBstr;
+	ULONG uReturn = 0;
+
 	HRESULT hr = CoCreateInstance(our_CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, our_IID_IWbemLocator, (void **)&locator);
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
-	BSTR server = SysAllocString(L"ROOT\\CIMV2");
+	server = SysAllocString(L"ROOT\\CIMV2");
 	hr = IWbemLocator_ConnectServer(locator, server, NULL, NULL, NULL, 0, NULL, NULL, &services);
 	SysFreeString(server);
 	if (!SUCCEEDED(hr)) {
@@ -42,8 +45,8 @@ HRESULT QueryWMIProperty(LPWSTR query, LPWSTR property, LPVARIANT value) {
 		goto end;
 	}
 
-	BSTR wql = SysAllocString(L"WQL");
-	BSTR queryBstr = SysAllocString(query);
+	wql = SysAllocString(L"WQL");
+	queryBstr = SysAllocString(query);
 	hr = IWbemServices_ExecQuery(services, wql, queryBstr, WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &enumerator);
 	SysFreeString(wql);
 	SysFreeString(queryBstr);
@@ -51,13 +54,13 @@ HRESULT QueryWMIProperty(LPWSTR query, LPWSTR property, LPVARIANT value) {
 		goto end;
 	}
 
-	ULONG uReturn = 0;
-	hr = IEnumWbemClassObject_Next(enumerator, WBEM_INFINITE, 1, &object, &uReturn);
+	uReturn = 0;
+	hr = IEnumWbemClassObject_Next(enumerator, (LONG)WBEM_INFINITE, 1, &object, &uReturn);
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
-	BSTR propBstr = SysAllocString(property);
+	propBstr = SysAllocString(property);
 	hr = IWbemClassObject_Get(object, propBstr, 0, value, NULL, NULL);
 	SysFreeString(propBstr);
 

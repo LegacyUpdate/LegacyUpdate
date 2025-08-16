@@ -9,45 +9,16 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2025
-    defaults:
-      run:
-        shell: wsl-bash {0}
-    env:
-      WSLENV: GITHUB_OUTPUT
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Install WSL
-      uses: Vampire/setup-wsl@v5
-      with:
-        distribution: Ubuntu-24.04
-
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up WSL
+    - name: Set up
       run: |
         sudo apt-get update -q
-        sudo apt-get install -qy curl make mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
-
-    - name: Set up Visual Studio
-      run: |
-        PATH='/mnt/c/Program Files (x86)/Microsoft Visual Studio/Installer':$PATH
-        vs="$(vswhere.exe -latest -property installationPath | tr -d '\r')"
-        if ! vs_installer.exe modify \
-          --quiet --norestart --noUpdateInstaller \
-          --installPath "$vs" \
-          --config .vsconfig; then
-          cd /tmp
-          curl -fsSL https://aka.ms/vscollect.exe -o vscollect.exe
-          chmod +x vscollect.exe
-          ./vscollect.exe -zip:vslogs.zip
-          unzip -o vslogs.zip
-          for i in Temp/*.log; do
-            printf '\n==== %s ====\n' "$i"
-            cat "$i"
-          done
-        fi
+        sudo apt-get install -qy curl make mingw-w64-tools mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
 
     - name: Install MinGW toolchain
       run: |

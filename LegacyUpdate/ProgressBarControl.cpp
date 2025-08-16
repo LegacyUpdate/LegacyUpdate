@@ -1,7 +1,7 @@
 // ProgressBarControl.cpp : Implementation of CProgressBarControl
 #include "stdafx.h"
 #include "ProgressBarControl.h"
-#include <CommCtrl.h>
+#include <commctrl.h>
 
 #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
@@ -13,53 +13,133 @@
 #define PBM_SETMARQUEE (WM_USER + 10)
 #endif
 
-LRESULT CProgressBarControl::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled) {
-	RECT rc = {0};
-	GetWindowRect(&rc);
-	rc.right -= rc.left;
-	rc.bottom -= rc.top;
-	rc.left = 0;
-	rc.top = 0;
-	m_ctl.Create(m_hWnd, rc, PROGRESS_CLASS, WS_CHILD | WS_VISIBLE, WS_EX_CLIENTEDGE);
-	put_Value(-1);
-	return 0;
+static CProgressBarControlVtbl CProgressBarControlVtable = {
+	ProgressBarControl_QueryInterface,
+	ProgressBarControl_AddRef,
+	ProgressBarControl_Release,
+	ProgressBarControl_GetTypeInfoCount,
+	ProgressBarControl_GetTypeInfo,
+	ProgressBarControl_GetIDsOfNames,
+	ProgressBarControl_Invoke,
+	ProgressBarControl_get_Value,
+	ProgressBarControl_put_Value
+};
+
+EXTERN_C HRESULT CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+	if (pUnkOuter != NULL) {
+		return CLASS_E_NOAGGREGATION;
+	}
+
+	CProgressBarControl *pThis = (CProgressBarControl *)CoTaskMemAlloc(sizeof(CProgressBarControl));
+	if (pThis == NULL) {
+		return E_OUTOFMEMORY;
+	}
+
+	ZeroMemory(pThis, sizeof(CProgressBarControl));
+	pThis->lpVtbl = &CProgressBarControlVtable;
+	pThis->refCount = 1;
+	pThis->windowOnly = TRUE;
+
+	HRESULT hr = ProgressBarControl_QueryInterface(pThis, riid, ppv);
+	ProgressBarControl_Release(pThis);
+
+	return hr;
 }
 
-STDMETHODIMP CProgressBarControl::SetObjectRects(LPCRECT prcPos, LPCRECT prcClip) {
-	IOleInPlaceObjectWindowlessImpl<CProgressBarControl>::SetObjectRects(prcPos, prcClip);
-	::SetWindowPos(m_ctl.m_hWnd, NULL, 0, 0,
-		prcPos->right - prcPos->left,
-		prcPos->bottom - prcPos->top,
-		SWP_NOZORDER | SWP_NOACTIVATE);
+STDMETHODIMP ProgressBarControl_QueryInterface(CProgressBarControl *This, REFIID riid, void **ppvObject) {
+	if (ppvObject == NULL) {
+		return E_POINTER;
+	}
+
+	if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IDispatch) || IsEqualIID(riid, IID_IProgressBarControl)) {
+		*ppvObject = This;
+		ProgressBarControl_AddRef(This);
+		return S_OK;
+	}
+
+	*ppvObject = NULL;
+	return E_NOINTERFACE;
+}
+
+ULONG STDMETHODCALLTYPE ProgressBarControl_AddRef(CProgressBarControl *This) {
+	return InterlockedIncrement(&This->refCount);
+}
+
+ULONG STDMETHODCALLTYPE ProgressBarControl_Release(CProgressBarControl *This) {
+	ULONG refCount = InterlockedDecrement(&This->refCount);
+
+	if (refCount == 0) {
+		if (This->progressHwnd) {
+			DestroyWindow(This->progressHwnd);
+		}
+
+		CoTaskMemFree(This);
+	}
+
+	return refCount;
+}
+
+STDMETHODIMP ProgressBarControl_GetTypeInfoCount(CProgressBarControl *This, UINT *pctinfo) {
+	if (pctinfo == NULL) {
+		return E_POINTER;
+	}
+	*pctinfo = 0;
 	return S_OK;
 }
 
-STDMETHODIMP CProgressBarControl::get_Value(SHORT *pValue) {
-	if (m_ctl.GetWindowLongPtr(GWL_STYLE) & PBS_MARQUEE) {
+STDMETHODIMP ProgressBarControl_GetTypeInfo(CProgressBarControl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+	return E_NOTIMPL;
+}
+
+STDMETHODIMP ProgressBarControl_GetIDsOfNames(CProgressBarControl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) {
+	return E_NOTIMPL;
+}
+
+STDMETHODIMP ProgressBarControl_Invoke(CProgressBarControl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) {
+	return E_NOTIMPL;
+}
+
+STDMETHODIMP ProgressBarControl_get_Value(CProgressBarControl *This, SHORT *pValue) {
+	if (pValue == NULL) {
+		return E_POINTER;
+	}
+
+	if (This->progressHwnd == NULL) {
+		*pValue = 0;
+		return S_OK;
+	}
+
+	if (GetWindowLongPtr(This->progressHwnd, GWL_STYLE) & PBS_MARQUEE) {
 		// Marquee - no value
 		*pValue = -1;
 	} else {
 		// Normal - return PBM_GETPOS
-		*pValue = (SHORT)m_ctl.SendMessage(PBM_GETPOS, 0, 0);
+		*pValue = (SHORT)SendMessage(This->progressHwnd, PBM_GETPOS, 0, 0);
 	}
+
 	return S_OK;
 }
 
-STDMETHODIMP CProgressBarControl::put_Value(SHORT value) {
+STDMETHODIMP ProgressBarControl_put_Value(CProgressBarControl *This, SHORT value) {
+	if (This->progressHwnd == NULL) {
+		return E_FAIL;
+	}
+
 	if (value == -1) {
 		// Marquee style
-		m_ctl.SetWindowLongPtr(GWL_STYLE, m_ctl.GetWindowLongPtr(GWL_STYLE) | PBS_MARQUEE);
-		m_ctl.SendMessage(PBM_SETMARQUEE, TRUE, 100);
+		SetWindowLongPtr(This->progressHwnd, GWL_STYLE, GetWindowLongPtr(This->progressHwnd, GWL_STYLE) | PBS_MARQUEE);
+		SendMessage(This->progressHwnd, PBM_SETMARQUEE, TRUE, 100);
 	} else {
 		// Normal style
 		SHORT oldValue = -1;
-		get_Value(&oldValue);
+		ProgressBarControl_get_Value(This, &oldValue);
 		if (oldValue == -1) {
-			m_ctl.SetWindowLongPtr(GWL_STYLE, m_ctl.GetWindowLongPtr(GWL_STYLE) & ~PBS_MARQUEE);
-			m_ctl.SendMessage(PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+			SendMessage(This->progressHwnd, PBM_SETMARQUEE, FALSE, 0);
+			SetWindowLongPtr(This->progressHwnd, GWL_STYLE, GetWindowLongPtr(This->progressHwnd, GWL_STYLE) & ~PBS_MARQUEE);
+			SendMessage(This->progressHwnd, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
 		}
-
-		m_ctl.SendMessage(PBM_SETPOS, value, 0);
+		SendMessage(This->progressHwnd, PBM_SETPOS, value, 0);
 	}
+
 	return S_OK;
 }

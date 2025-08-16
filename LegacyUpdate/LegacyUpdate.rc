@@ -1,19 +1,8 @@
-// Microsoft Visual C++ generated resource script.
-//
 #include "resource.h"
-#include "Version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 2 resource.
-//
-#ifndef APSTUDIO_INVOKED
-#include "targetver.h"
-#endif
-#include "winres.h"
-
-/////////////////////////////////////////////////////////////////////////////
+#include <windows.h>
+#include "Version.h"
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
@@ -93,20 +82,6 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// REGISTRY
-//
-
-IDR_LEGACYUPDATEOCX     REGISTRY                "LegacyUpdate.rgs"
-
-IDR_LEGACYUPDATECTRL    REGISTRY                "LegacyUpdateCtrl.rgs"
-
-IDR_PROGRESSBARCONTROL  REGISTRY                "ProgressBarControl.rgs"
-
-IDR_ELEVATIONHELPER     REGISTRY                "ElevationHelper.rgs"
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // String Table
 //
 
@@ -118,17 +93,6 @@ END
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
-
-
-#ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
 1 TYPELIB "LegacyUpdate.tlb"
 
 #include "wuerror.rc"
-
-/////////////////////////////////////////////////////////////////////////////
-#endif    // not APSTUDIO_INVOKED
-

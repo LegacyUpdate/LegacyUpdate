@@ -1,7 +1,10 @@
 #pragma once
 
 #include <windows.h>
-#include "stdafx.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #if _WIN64
 	#define OurGetNativeSystemInfo(lpSystemInfo) GetNativeSystemInfo(lpSystemInfo)
@@ -11,4 +14,8 @@
 	void OurGetNativeSystemInfo(LPSYSTEM_INFO lpSystemInfo);
 	BOOL DisableWow64FsRedirection(PVOID *OldValue);
 	BOOL RevertWow64FsRedirection(PVOID OldValue);
+#endif
+
+#ifdef __cplusplus
+}
 #endif

@@ -40,7 +40,7 @@
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
-static OSVERSIONINFOEX _versionInfo = {0};
+static OSVERSIONINFOEX _versionInfo;
 
 static OSVERSIONINFOEX *GetVersionInfo() {
 	if (_versionInfo.dwOSVersionInfoSize == 0) {

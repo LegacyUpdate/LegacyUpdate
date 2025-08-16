@@ -2,46 +2,61 @@
 
 // ElevationHelper.h : Declaration of the CElevationHelper class.
 
-#include <atlctl.h>
 #include "resource.h"
 #include "LegacyUpdate_i.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv);
+
 BOOL ProgIDIsPermitted(PWSTR progID);
-STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, __in REFCLSID rclsid, __in REFIID riid, __deref_out void **ppv);
+STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, void **ppv);
 
-// CElevationHelper
-class ATL_NO_VTABLE CElevationHelper :
-	public CComObjectRootEx<CComSingleThreadModel>,
-	public CComCoClass<CElevationHelper, &CLSID_ElevationHelper>,
-	public ISupportErrorInfo,
-	public IDispatchImpl<IElevationHelper, &IID_IElevationHelper, &LIBID_LegacyUpdateLib, /*wMajor =*/ 1, /*wMinor =*/ 0> {
+typedef struct CElevationHelper CElevationHelper;
 
-public:
-	CElevationHelper();
+typedef struct CElevationHelperVtbl {
+	// IUnknown
+	HRESULT (STDMETHODCALLTYPE *QueryInterface)(CElevationHelper *This, REFIID riid, void **ppvObject);
+	ULONG   (STDMETHODCALLTYPE *AddRef)(CElevationHelper *This);
+	ULONG   (STDMETHODCALLTYPE *Release)(CElevationHelper *This);
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_ELEVATIONHELPER)
-
-	BEGIN_COM_MAP(CElevationHelper)
-		COM_INTERFACE_ENTRY(IElevationHelper)
-		COM_INTERFACE_ENTRY(IDispatch)
-		COM_INTERFACE_ENTRY(ISupportErrorInfo)
-	END_COM_MAP()
-
-	// ISupportsErrorInfo
-	STDMETHOD(InterfaceSupportsErrorInfo)(REFIID riid) {
-		return IsEqualGUID(riid, IID_IElevationHelper) ? S_OK : S_FALSE;
-	}
+	// IDispatch
+	HRESULT (STDMETHODCALLTYPE *GetTypeInfoCount)(CElevationHelper *This, UINT *pctinfo);
+	HRESULT (STDMETHODCALLTYPE *GetTypeInfo)(CElevationHelper *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
+	HRESULT (STDMETHODCALLTYPE *GetIDsOfNames)(CElevationHelper *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
+	HRESULT (STDMETHODCALLTYPE *Invoke)(CElevationHelper *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
 
 	// IElevationHelper
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	HRESULT (STDMETHODCALLTYPE *CreateObject)(CElevationHelper *This, BSTR progID, IDispatch **retval);
+	HRESULT (STDMETHODCALLTYPE *Reboot)(CElevationHelper *This);
+	HRESULT (STDMETHODCALLTYPE *BeforeUpdate)(CElevationHelper *This);
+	HRESULT (STDMETHODCALLTYPE *AfterUpdate)(CElevationHelper *This);
+} CElevationHelperVtbl;
 
-	HRESULT FinalConstruct() { return S_OK; }
-	void FinalRelease() {}
-
-	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
-	STDMETHODIMP Reboot(void);
-	STDMETHODIMP BeforeUpdate(void);
-	STDMETHODIMP AfterUpdate(void);
+struct CElevationHelper {
+	CElevationHelperVtbl *lpVtbl;
+	LONG refCount;
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(ElevationHelper), CElevationHelper)
+// IUnknown
+STDMETHODIMP ElevationHelper_QueryInterface(CElevationHelper *This, REFIID riid, void **ppvObject);
+ULONG STDMETHODCALLTYPE ElevationHelper_AddRef(CElevationHelper *This);
+ULONG STDMETHODCALLTYPE ElevationHelper_Release(CElevationHelper *This);
+
+// IDispatch
+STDMETHODIMP ElevationHelper_GetTypeInfoCount(CElevationHelper *This, UINT *pctinfo);
+STDMETHODIMP ElevationHelper_GetTypeInfo(CElevationHelper *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
+STDMETHODIMP ElevationHelper_GetIDsOfNames(CElevationHelper *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
+STDMETHODIMP ElevationHelper_Invoke(CElevationHelper *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
+
+// IElevationHelper
+STDMETHODIMP ElevationHelper_CreateObject(CElevationHelper *This, BSTR progID, IDispatch **retval);
+STDMETHODIMP ElevationHelper_Reboot(CElevationHelper *This);
+STDMETHODIMP ElevationHelper_BeforeUpdate(CElevationHelper *This);
+STDMETHODIMP ElevationHelper_AfterUpdate(CElevationHelper *This);
+
+#ifdef __cplusplus
+}
+#endif

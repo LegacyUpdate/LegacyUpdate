@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include <comdef.h>
-#include "Utils.h"
 
 #ifndef PROCESS_PER_MONITOR_DPI_AWARE
 typedef int PROCESS_DPI_AWARENESS;

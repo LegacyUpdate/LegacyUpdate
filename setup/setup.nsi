@@ -29,8 +29,8 @@ ReserveFile "${NSIS_TARGET}\NSxfer.dll"
 ReserveFile "${NSIS_TARGET}\LegacyUpdateNSIS.dll"
 ReserveFile "banner-wordmark-classic.bmp"
 ReserveFile "Patches.ini"
-ReserveFile "..\${VSBUILD32}\LegacyUpdate.dll"
-ReserveFile "..\x64\${VSBUILD64}\LegacyUpdate.dll"
+ReserveFile "..\LegacyUpdate\obj\LegacyUpdate32.dll"
+ReserveFile "..\LegacyUpdate\obj\LegacyUpdate64.dll"
 ReserveFile "..\launcher\obj\LegacyUpdate32.exe"
 ReserveFile "..\launcher\obj\LegacyUpdate64.exe"
 
@@ -393,13 +393,13 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 
 	; NOTE: Here we specifically check for amd64, because the DLL is amd64.
 	; We still install to native Program Files on IA64, but with x86 binaries.
-	File "..\${VSBUILD32}\LegacyUpdate.dll"
+	File /ONAME=LegacyUpdate.dll "..\LegacyUpdate\obj\LegacyUpdate32.dll"
 	${If} ${IsNativeAMD64}
 		${If} ${FileExists} "LegacyUpdate32.dll"
 			${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate32.dll"
 		${EndIf}
 		Rename "LegacyUpdate.dll" "LegacyUpdate32.dll"
-		File "..\x64\${VSBUILD64}\LegacyUpdate.dll"
+		File /ONAME=LegacyUpdate.dll "..\LegacyUpdate\obj\LegacyUpdate64.dll"
 	${EndIf}
 	Call CopyLauncher
 

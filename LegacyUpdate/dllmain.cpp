@@ -3,27 +3,114 @@
 #include "stdafx.h"
 #include "LegacyUpdate_i.h"
 #include "dllmain.h"
-
 #include <strsafe.h>
-
-#include "dlldatax.h"
 #include "Registry.h"
 #include "LegacyUpdate.h"
+#include "../shared/LegacyUpdate.h"
+#include "LegacyUpdateCtrl.h"
+#include "ElevationHelper.h"
+#include "ProgressBarControl.h"
 
-CLegacyUpdateModule _AtlModule;
-HINSTANCE g_hInstance;
-
-// DLL Entry Point
-extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
-#ifdef _MERGE_PROXYSTUB
-	if (!PrxDllMain(hInstance, dwReason, lpReserved)) {
-		return FALSE;
-	}
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+HINSTANCE g_hInstance = NULL;
+LONG g_serverLocks = 0;
+
+typedef struct ClassEntry {
+	const GUID *clsid;
+	STDMETHODIMP (*createFunc)(IUnknown *pUnkOuter, REFIID riid, void **ppv);
+} ClassEntry;
+
+static ClassEntry g_classEntries[] = {
+	{&CLSID_LegacyUpdateCtrl,   CreateLegacyUpdateCtrl},
+	{&CLSID_ElevationHelper,    CreateElevationHelper},
+	{&CLSID_ProgressBarControl, CreateProgressBarControl}
+};
+
+// Class factory
+typedef struct CClassFactory {
+	const struct CClassFactoryVtbl *lpVtbl;
+	LONG refCount;
+	STDMETHODIMP (*createFunc)(IUnknown *pUnkOuter, REFIID riid, void **ppv);
+	const GUID *clsid;
+} CClassFactory;
+
+typedef struct CClassFactoryVtbl {
+	// IUnknown
+	HRESULT (STDMETHODCALLTYPE *QueryInterface)(CClassFactory *This, REFIID riid, void **ppvObject);
+	ULONG   (STDMETHODCALLTYPE *AddRef)(CClassFactory *This);
+	ULONG   (STDMETHODCALLTYPE *Release)(CClassFactory *This);
+
+	// IClassFactory
+	HRESULT (STDMETHODCALLTYPE *CreateInstance)(CClassFactory *This, IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
+	HRESULT (STDMETHODCALLTYPE *LockServer)(CClassFactory *This, BOOL fLock);
+} CClassFactoryVtbl;
+
+static STDMETHODIMP ClassFactory_QueryInterface(CClassFactory *This, REFIID riid, void **ppvObject);
+static ULONG STDMETHODCALLTYPE ClassFactory_AddRef(CClassFactory *This);
+static ULONG STDMETHODCALLTYPE ClassFactory_Release(CClassFactory *This);
+static STDMETHODIMP ClassFactory_CreateInstance(CClassFactory *This, IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
+static STDMETHODIMP ClassFactory_LockServer(CClassFactory *This, BOOL fLock);
+
+static CClassFactoryVtbl CClassFactoryVtable = {
+	ClassFactory_QueryInterface,
+	ClassFactory_AddRef,
+	ClassFactory_Release,
+	ClassFactory_CreateInstance,
+	ClassFactory_LockServer
+};
+
+static STDMETHODIMP ClassFactory_QueryInterface(CClassFactory *This, REFIID riid, void **ppvObject) {
+	if (ppvObject == NULL) {
+		return E_POINTER;
+	}
+
+	if (IsEqualIID(riid, IID_IUnknown) ||
+		IsEqualIID(riid, IID_IClassFactory)) {
+		*ppvObject = This;
+		ClassFactory_AddRef(This);
+		return S_OK;
+	}
+
+	*ppvObject = NULL;
+	return E_NOINTERFACE;
+}
+
+static ULONG STDMETHODCALLTYPE ClassFactory_AddRef(CClassFactory *This) {
+	return InterlockedIncrement(&This->refCount);
+}
+
+static ULONG STDMETHODCALLTYPE ClassFactory_Release(CClassFactory *This) {
+	ULONG refCount = InterlockedDecrement(&This->refCount);
+
+	if (refCount == 0) {
+		CoTaskMemFree(This);
+	}
+
+	return refCount;
+}
+
+static STDMETHODIMP ClassFactory_CreateInstance(CClassFactory *This, IUnknown *pUnkOuter, REFIID riid, void **ppvObject) {
+	return This->createFunc(pUnkOuter, riid, ppvObject);
+}
+
+static STDMETHODIMP ClassFactory_LockServer(CClassFactory *This, BOOL fLock) {
+	if (fLock) {
+		InterlockedIncrement(&g_serverLocks);
+	} else {
+		InterlockedDecrement(&g_serverLocks);
+	}
+	return S_OK;
+}
+
+// DLL Entry Point
+BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 	switch (dwReason) {
 	case DLL_PROCESS_ATTACH:
 		g_hInstance = hInstance;
+		DisableThreadLibraryCalls(hInstance);
 		break;
 
 	case DLL_PROCESS_DETACH:
@@ -31,42 +118,48 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpRes
 		break;
 	}
 
-	return _AtlModule.DllMain(dwReason, lpReserved);
+	return TRUE;
 }
-
 
 // Used to determine whether the DLL can be unloaded by OLE
 STDAPI DllCanUnloadNow(void) {
-#ifdef _MERGE_PROXYSTUB
-	HRESULT hr = PrxDllCanUnloadNow();
-	if (hr != S_OK) {
-		return hr;
-	}
-#endif
-
-	return _AtlModule.DllCanUnloadNow();
+	return g_serverLocks == 0 ? S_OK : S_FALSE;
 }
-
 
 // Returns a class factory to create an object of the requested type
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) {
-#ifdef _MERGE_PROXYSTUB
-	if (PrxDllGetClassObject(rclsid, riid, ppv) == S_OK) {
-		return S_OK;
+	if (ppv == NULL) {
+		return E_POINTER;
 	}
-#endif
 
-	return _AtlModule.DllGetClassObject(rclsid, riid, ppv);
+	*ppv = NULL;
+
+	for (DWORD i = 0; i < ARRAYSIZE(g_classEntries); i++) {
+		if (IsEqualCLSID(rclsid, *g_classEntries[i].clsid)) {
+			CClassFactory *pFactory = (CClassFactory *)CoTaskMemAlloc(sizeof(CClassFactory));
+			if (pFactory == NULL) {
+				return E_OUTOFMEMORY;
+			}
+
+			pFactory->lpVtbl = &CClassFactoryVtable;
+			pFactory->refCount = 1;
+			pFactory->createFunc = g_classEntries[i].createFunc;
+			pFactory->clsid = g_classEntries[i].clsid;
+
+			HRESULT hr = ClassFactory_QueryInterface(pFactory, riid, ppv);
+			ClassFactory_Release(pFactory);
+			return hr;
+		}
+	}
+
+	return CLASS_E_CLASSNOTAVAILABLE;
 }
-
 
 // DllRegisterServer - Adds entries to the system registry
 STDAPI DllRegisterServer(void) {
 	// registers object, typelib and all interfaces in typelib
-	HRESULT hr = _AtlModule.DllRegisterServer();
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
+	// TODO
+	HRESULT hr = S_OK;
 
 	// Fix the icon path
 	HKEY subkey = NULL;
@@ -93,48 +186,22 @@ STDAPI DllRegisterServer(void) {
 		return hr;
 	}
 
-	hr = RegCloseKey(subkey);
-
-#ifdef _MERGE_PROXYSTUB
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	hr = PrxDllRegisterServer();
-#endif
+	hr = HRESULT_FROM_WIN32(RegCloseKey(subkey));
 	return hr;
 }
-
 
 // DllUnregisterServer - Removes entries from the system registry
 STDAPI DllUnregisterServer(void) {
-	HRESULT hr = _AtlModule.DllUnregisterServer();
-#ifdef _MERGE_PROXYSTUB
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	hr = PrxDllRegisterServer();
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	hr = PrxDllUnregisterServer();
-#endif
-	return hr;
+	// TODO
+	return S_OK;
 }
-
 
 // DllInstall - Adds/Removes entries to the system registry per machine only.
 STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
 	HRESULT hr = E_FAIL;
 
-	// Prevent per-user registration (regsvr32 /i:user)
-	AtlSetPerUserRegistration(false);
-
 	if (bInstall) {
 		hr = DllRegisterServer();
-
 		if (!SUCCEEDED(hr)) {
 			DllUnregisterServer();
 		}
@@ -144,3 +211,7 @@ STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
 
 	return hr;
 }
+
+#ifdef __cplusplus
+}
+#endif

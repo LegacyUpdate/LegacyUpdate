@@ -1,18 +1,14 @@
 // wrapper for dlldata.c
 
-#ifdef _MERGE_PROXYSTUB // merge proxy stub DLL
+#include <rpc.h>
+#include <rpcproxy.h>
 
-#define REGISTER_PROXY_DLL //DllRegisterServer, etc.
+#define REGISTER_PROXY_DLL	// DllRegisterServer, etc.
+#define USE_STUBLESS_PROXY	// defined only with MIDL switch /Oicf
 
-#define _WIN32_WINNT _WIN32_WINNT_WIN2K	//for WinNT 4.0 or Win95 with DCOM
-#define USE_STUBLESS_PROXY	//defined only with MIDL switch /Oicf
+#undef ENTRY_PREFIX
+#define ENTRY_PREFIX Prx
 
-#pragma comment(lib, "rpcns4.lib")
-#pragma comment(lib, "rpcrt4.lib")
-
-#define ENTRY_PREFIX	Prx
-
-#include "dlldata.c"
+#include "LegacyUpdate_i.h"
+#include "LegacyUpdate_dlldata.c"
 #include "LegacyUpdate_p.c"
-
-#endif //_MERGE_PROXYSTUB
