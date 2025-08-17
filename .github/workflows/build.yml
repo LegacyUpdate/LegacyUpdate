@@ -18,7 +18,7 @@ jobs:
     - name: Set up
       run: |
         sudo apt-get update -q
-        sudo apt-get install -qy curl make mingw-w64-tools mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
+        sudo apt-get install -qy curl libwine make mingw-w64-tools mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
 
     - name: Install MinGW toolchain
       run: |

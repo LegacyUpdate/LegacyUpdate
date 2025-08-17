@@ -1,13 +1,13 @@
 // wrapper for dlldata.c
 
-#include <rpc.h>
-#include <rpcproxy.h>
+#include <windows.h>
 
-#define REGISTER_PROXY_DLL	// DllRegisterServer, etc.
-#define USE_STUBLESS_PROXY	// defined only with MIDL switch /Oicf
-
-#undef ENTRY_PREFIX
+#define REGISTER_PROXY_DLL
+#define USE_STUBLESS_PROXY
+#define PROXY_DELEGATION
 #define ENTRY_PREFIX Prx
+
+#include <rpcproxy.h>
 
 #include "LegacyUpdate_i.h"
 #include "LegacyUpdate_dlldata.c"

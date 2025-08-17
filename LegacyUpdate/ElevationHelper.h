@@ -5,9 +5,7 @@
 #include "resource.h"
 #include "LegacyUpdate_i.h"
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
@@ -57,6 +55,4 @@ STDMETHODIMP ElevationHelper_Reboot(CElevationHelper *This);
 STDMETHODIMP ElevationHelper_BeforeUpdate(CElevationHelper *This);
 STDMETHODIMP ElevationHelper_AfterUpdate(CElevationHelper *This);
 
-#ifdef __cplusplus
 }
-#endif

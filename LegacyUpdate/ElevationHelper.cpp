@@ -6,6 +6,7 @@
 #include "NGen.h"
 #include "Utils.h"
 #include <strsafe.h>
+#include <ccomptr.h>
 
 const WCHAR *permittedProgIDs[] = {
 	L"Microsoft.Update."
@@ -75,7 +76,6 @@ EXTERN_C HRESULT CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **
 
 	HRESULT hr = ElevationHelper_QueryInterface(pThis, riid, ppv);
 	ElevationHelper_Release(pThis);
-
 	return hr;
 }
 
@@ -100,11 +100,9 @@ ULONG STDMETHODCALLTYPE ElevationHelper_AddRef(CElevationHelper *This) {
 
 ULONG STDMETHODCALLTYPE ElevationHelper_Release(CElevationHelper *This) {
 	ULONG refCount = InterlockedDecrement(&This->refCount);
-
 	if (refCount == 0) {
 		CoTaskMemFree(This);
 	}
-
 	return refCount;
 }
 
@@ -135,7 +133,7 @@ STDMETHODIMP ElevationHelper_CreateObject(CElevationHelper *This, BSTR progID, I
 
 	*retval = NULL;
 	HRESULT hr = S_OK;
-	IDispatch *object;
+	CComPtr<IDispatch> object;
 	CLSID clsid;
 
 	if (!ProgIDIsPermitted(progID)) {
@@ -148,12 +146,12 @@ STDMETHODIMP ElevationHelper_CreateObject(CElevationHelper *This, BSTR progID, I
 		goto end;
 	}
 
-	hr = CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, IID_IDispatch, (void **)&object);
+	hr = object.CoCreateInstance(clsid, IID_IDispatch, NULL, CLSCTX_INPROC_SERVER);
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
 
-	*retval = object;
+	*retval = object.Detach();
 
 end:
 	if (!SUCCEEDED(hr)) {

@@ -4,16 +4,14 @@
 #include "LegacyUpdate_i.h"
 #include "dllmain.h"
 #include <strsafe.h>
+
+#include "dlldatax.h"
 #include "Registry.h"
 #include "LegacyUpdate.h"
 #include "../shared/LegacyUpdate.h"
 #include "LegacyUpdateCtrl.h"
 #include "ElevationHelper.h"
 #include "ProgressBarControl.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 HINSTANCE g_hInstance = NULL;
 LONG g_serverLocks = 0;
@@ -67,8 +65,7 @@ static STDMETHODIMP ClassFactory_QueryInterface(CClassFactory *This, REFIID riid
 		return E_POINTER;
 	}
 
-	if (IsEqualIID(riid, IID_IUnknown) ||
-		IsEqualIID(riid, IID_IClassFactory)) {
+	if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IClassFactory)) {
 		*ppvObject = This;
 		ClassFactory_AddRef(This);
 		return S_OK;
@@ -107,6 +104,10 @@ static STDMETHODIMP ClassFactory_LockServer(CClassFactory *This, BOOL fLock) {
 
 // DLL Entry Point
 BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
+	if (!PrxDllMain(hInstance, dwReason, lpReserved)) {
+		return FALSE;
+	}
+
 	switch (dwReason) {
 	case DLL_PROCESS_ATTACH:
 		g_hInstance = hInstance;
@@ -123,11 +124,20 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 
 // Used to determine whether the DLL can be unloaded by OLE
 STDAPI DllCanUnloadNow(void) {
+	HRESULT hr = PrxDllCanUnloadNow();
+	if (hr != S_OK) {
+		return hr;
+	}
+
 	return g_serverLocks == 0 ? S_OK : S_FALSE;
 }
 
 // Returns a class factory to create an object of the requested type
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) {
+	if (PrxDllGetClassObject(rclsid, riid, ppv) == S_OK) {
+		return S_OK;
+	}
+
 	if (ppv == NULL) {
 		return E_POINTER;
 	}
@@ -187,13 +197,27 @@ STDAPI DllRegisterServer(void) {
 	}
 
 	hr = HRESULT_FROM_WIN32(RegCloseKey(subkey));
-	return hr;
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	return PrxDllRegisterServer();
 }
 
 // DllUnregisterServer - Removes entries from the system registry
 STDAPI DllUnregisterServer(void) {
 	// TODO
-	return S_OK;
+	HRESULT hr = S_OK;
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	hr = PrxDllRegisterServer();
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	return PrxDllUnregisterServer();
 }
 
 // DllInstall - Adds/Removes entries to the system registry per machine only.
@@ -211,7 +235,3 @@ STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
 
 	return hr;
 }
-
-#ifdef __cplusplus
-}
-#endif

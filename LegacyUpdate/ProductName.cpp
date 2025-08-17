@@ -183,7 +183,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 			SYSTEM_INFO systemInfo;
 			OurGetNativeSystemInfo(&systemInfo);
 
-			WinNT5Variant variant;
+			WinNT5Variant variant = {};
 			for (DWORD i = 0; i < ARRAYSIZE(nt5Variants); i++) {
 				WinNT5Variant thisVariant = nt5Variants[i];
 				if (thisVariant.version == winver &&

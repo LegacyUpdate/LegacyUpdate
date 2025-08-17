@@ -10,9 +10,7 @@
 #include "LegacyUpdate_i.h"
 #include "ccomptr.h"
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 STDMETHODIMP CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
@@ -98,6 +96,4 @@ STDMETHODIMP LegacyUpdateCtrl_get_WsusStatusServerUrl(CLegacyUpdateCtrl *This, B
 STDMETHODIMP LegacyUpdateCtrl_BeforeUpdate(CLegacyUpdateCtrl *This);
 STDMETHODIMP LegacyUpdateCtrl_AfterUpdate(CLegacyUpdateCtrl *This);
 
-#ifdef __cplusplus
 }
-#endif

@@ -77,6 +77,10 @@ public:
 	HRESULT CoCreateInstance(REFCLSID rclsid, LPUNKNOWN pUnkOuter = NULL, DWORD dwClsContext = CLSCTX_ALL) throw() {
 		return ::CoCreateInstance(rclsid, pUnkOuter, dwClsContext, __uuidof(TInterface), (void **)&this->pointer);
 	}
+
+	HRESULT CoCreateInstance(REFCLSID rclsid, REFIID riid, LPUNKNOWN pUnkOuter = NULL, DWORD dwClsContext = CLSCTX_ALL) throw() {
+		return ::CoCreateInstance(rclsid, pUnkOuter, dwClsContext, riid, (void **)&this->pointer);
+	}
 };
 
 #endif

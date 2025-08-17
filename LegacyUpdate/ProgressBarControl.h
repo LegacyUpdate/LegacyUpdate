@@ -5,9 +5,7 @@
 #include "resource.h"
 #include "LegacyUpdate_i.h"
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 STDMETHODIMP CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
@@ -54,6 +52,4 @@ STDMETHODIMP ProgressBarControl_Invoke(CProgressBarControl *This, DISPID dispIdM
 STDMETHODIMP ProgressBarControl_get_Value(CProgressBarControl *This, SHORT *pValue);
 STDMETHODIMP ProgressBarControl_put_Value(CProgressBarControl *This, SHORT value);
 
-#ifdef __cplusplus
 }
-#endif
