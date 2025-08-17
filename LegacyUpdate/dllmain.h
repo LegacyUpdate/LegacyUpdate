@@ -1,3 +1,4 @@
 // dllmain.h : Declaration of module class.
 
-EXTERN_C HINSTANCE g_hInstance;
+extern HINSTANCE g_hInstance;
+extern LONG g_serverLocks;

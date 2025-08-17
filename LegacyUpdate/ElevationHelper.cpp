@@ -1,6 +1,7 @@
 // ElevationHelper.cpp : Implementation of CElevationHelper
 #include "stdafx.h"
 #include "Compat.h"
+#include "Dispatch.h"
 #include "ElevationHelper.h"
 #include "HResult.h"
 #include "NGen.h"
@@ -58,7 +59,7 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, vo
 	return CoGetObject(monikerName, (BIND_OPTS *)&bindOpts, riid, ppv);
 }
 
-EXTERN_C HRESULT CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
 	if (pUnkOuter != NULL) {
 		return CLASS_E_NOAGGREGATION;
 	}
@@ -110,20 +111,20 @@ STDMETHODIMP ElevationHelper_GetTypeInfoCount(CElevationHelper *This, UINT *pcti
 	if (pctinfo == NULL) {
 		return E_POINTER;
 	}
-	*pctinfo = 0;
+	*pctinfo = 1;
 	return S_OK;
 }
 
 STDMETHODIMP ElevationHelper_GetTypeInfo(CElevationHelper *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-	return E_NOTIMPL;
+	return Dispatch_GetTypeInfo((IDispatch *)This, IID_IElevationHelper, iTInfo, lcid, ppTInfo);
 }
 
 STDMETHODIMP ElevationHelper_GetIDsOfNames(CElevationHelper *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) {
-	return E_NOTIMPL;
+	return Dispatch_GetIDsOfNames((IDispatch *)This, riid, rgszNames, cNames, lcid, rgDispId);
 }
 
 STDMETHODIMP ElevationHelper_Invoke(CElevationHelper *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-	return E_NOTIMPL;
+	return Dispatch_Invoke((IDispatch *)This, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
 }
 
 STDMETHODIMP ElevationHelper_CreateObject(CElevationHelper *This, BSTR progID, IDispatch **retval) {

@@ -5,8 +5,6 @@
 #include "resource.h"
 #include "LegacyUpdate_i.h"
 
-extern "C" {
-
 STDMETHODIMP CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
 typedef struct CProgressBarControl CProgressBarControl;
@@ -51,5 +49,3 @@ STDMETHODIMP ProgressBarControl_Invoke(CProgressBarControl *This, DISPID dispIdM
 // IProgressBarControl
 STDMETHODIMP ProgressBarControl_get_Value(CProgressBarControl *This, SHORT *pValue);
 STDMETHODIMP ProgressBarControl_put_Value(CProgressBarControl *This, SHORT value);
-
-}

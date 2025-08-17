@@ -7,10 +7,8 @@
 #include <mshtml.h>
 #include <wuapi.h>
 #include "resource.h"
-#include "LegacyUpdate_i.h"
 #include "ccomptr.h"
-
-extern "C" {
+#include "LegacyUpdate_i.h"
 
 STDMETHODIMP CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
@@ -56,8 +54,8 @@ struct CLegacyUpdateCtrl {
 	IOleInPlaceSite *inPlaceSite;
 	IOleContainer *container;
 
-	CComPtr<IElevationHelper> elevatedHelper;
-	CComPtr<IElevationHelper> nonElevatedHelper;
+	IElevationHelper *elevatedHelper;
+	IElevationHelper *nonElevatedHelper;
 
 	HWND hwnd;
 	BOOL windowOnly;
@@ -95,5 +93,3 @@ STDMETHODIMP LegacyUpdateCtrl_get_WsusServerUrl(CLegacyUpdateCtrl *This, BSTR *r
 STDMETHODIMP LegacyUpdateCtrl_get_WsusStatusServerUrl(CLegacyUpdateCtrl *This, BSTR *retval);
 STDMETHODIMP LegacyUpdateCtrl_BeforeUpdate(CLegacyUpdateCtrl *This);
 STDMETHODIMP LegacyUpdateCtrl_AfterUpdate(CLegacyUpdateCtrl *This);
-
-}

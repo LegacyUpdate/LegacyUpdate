@@ -5,8 +5,6 @@
 #include "resource.h"
 #include "LegacyUpdate_i.h"
 
-extern "C" {
-
 STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
 BOOL ProgIDIsPermitted(PWSTR progID);
@@ -54,5 +52,3 @@ STDMETHODIMP ElevationHelper_CreateObject(CElevationHelper *This, BSTR progID, I
 STDMETHODIMP ElevationHelper_Reboot(CElevationHelper *This);
 STDMETHODIMP ElevationHelper_BeforeUpdate(CElevationHelper *This);
 STDMETHODIMP ElevationHelper_AfterUpdate(CElevationHelper *This);
-
-}

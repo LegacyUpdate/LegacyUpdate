@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "LegacyUpdateCtrl.h"
 #include "Compat.h"
+#include "Dispatch.h"
 #include "ElevationHelper.h"
 #include "Exec.h"
 #include "HResult.h"
@@ -50,7 +51,7 @@ static CLegacyUpdateCtrlVtbl CLegacyUpdateCtrlVtable = {
 	LegacyUpdateCtrl_AfterUpdate
 };
 
-EXTERN_C HRESULT CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+STDMETHODIMP CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
 	if (pUnkOuter != NULL) {
 		return CLASS_E_NOAGGREGATION;
 	}
@@ -76,8 +77,7 @@ STDMETHODIMP LegacyUpdateCtrl_QueryInterface(CLegacyUpdateCtrl *This, REFIID rii
 		return E_POINTER;
 	}
 
-	if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IDispatch) || IsEqualIID(riid, IID_ILegacyUpdateCtrl) ||
-		IsEqualIID(riid, IID_IOleObject) || IsEqualIID(riid, IID_IOleWindow)) {
+	if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IDispatch) || IsEqualIID(riid, IID_ILegacyUpdateCtrl) || IsEqualIID(riid, IID_IOleObject) || IsEqualIID(riid, IID_IOleWindow)) {
 		*ppvObject = This;
 		LegacyUpdateCtrl_AddRef(This);
 		return S_OK;
@@ -105,10 +105,10 @@ ULONG STDMETHODCALLTYPE LegacyUpdateCtrl_Release(CLegacyUpdateCtrl *This) {
 			This->container->Release();
 		}
 		if (This->elevatedHelper) {
-			This->elevatedHelper.Release();
+			// IDispatch_Release(This->elevatedHelper);
 		}
 		if (This->nonElevatedHelper) {
-			This->nonElevatedHelper.Release();
+			// IDispatch_Release(This->nonElevatedHelper);
 		}
 		CoTaskMemFree(This);
 	}
@@ -120,25 +120,24 @@ STDMETHODIMP LegacyUpdateCtrl_GetTypeInfoCount(CLegacyUpdateCtrl *This, UINT *pc
 	if (pctinfo == NULL) {
 		return E_POINTER;
 	}
-	*pctinfo = 0;
+	*pctinfo = 1;
 	return S_OK;
 }
 
 STDMETHODIMP LegacyUpdateCtrl_GetTypeInfo(CLegacyUpdateCtrl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-	return E_NOTIMPL;
+	return Dispatch_GetTypeInfo((IDispatch *)This, IID_ILegacyUpdateCtrl, iTInfo, lcid, ppTInfo);
 }
 
 STDMETHODIMP LegacyUpdateCtrl_GetIDsOfNames(CLegacyUpdateCtrl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) {
-	return E_NOTIMPL;
+	return Dispatch_GetIDsOfNames((IDispatch *)This, riid, rgszNames, cNames, lcid, rgDispId);
 }
 
 STDMETHODIMP LegacyUpdateCtrl_Invoke(CLegacyUpdateCtrl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-	return E_NOTIMPL;
+	return Dispatch_Invoke((IDispatch *)This, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
 }
 
 static CComPtr<IHTMLDocument2> GetHTMLDocument(CLegacyUpdateCtrl *This) {
 	if (This->clientSite == NULL) {
-		TRACE(L"GetDocument() failed: no client site\n");
 		return NULL;
 	}
 
@@ -223,16 +222,19 @@ end:
 }
 
 static HRESULT GetElevatedHelper(CLegacyUpdateCtrl *This, CComPtr<IElevationHelper> &retval) {
-	CComPtr<IElevationHelper> elevatedHelper = This->elevatedHelper ? This->elevatedHelper : This->nonElevatedHelper;
+	IElevationHelper *elevatedHelper = This->elevatedHelper ? This->elevatedHelper : This->nonElevatedHelper;
 	if (elevatedHelper == NULL) {
 		// Use the helper directly, without elevation. It's the responsibility of the caller to ensure it
 		// is already running as admin on 2k/XP, or that it has requested elevation on Vista+.
-		HRESULT hr = This->nonElevatedHelper.CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER);
+		HRESULT hr = CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER, IID_IElevationHelper, (void **)&elevatedHelper);
 		if (!SUCCEEDED(hr)) {
 			return hr;
 		}
+		if (elevatedHelper == NULL) {
+			return E_POINTER;
+		}
 
-		elevatedHelper = This->nonElevatedHelper;
+		This->nonElevatedHelper = elevatedHelper;
 	}
 
 	retval = elevatedHelper;
@@ -423,7 +425,7 @@ STDMETHODIMP LegacyUpdateCtrl_CreateObject(CLegacyUpdateCtrl *This, BSTR progID,
 		goto end;
 	}
 
-	return elevatedHelper->CreateObject(progID, retval);
+ 	return elevatedHelper->CreateObject(progID, retval);
 
 end:
 	if (!SUCCEEDED(hr)) {

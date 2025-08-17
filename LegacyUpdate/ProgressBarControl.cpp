@@ -1,6 +1,7 @@
 // ProgressBarControl.cpp : Implementation of CProgressBarControl
 #include "stdafx.h"
 #include "ProgressBarControl.h"
+#include "Dispatch.h"
 #include <commctrl.h>
 
 #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -25,7 +26,7 @@ static CProgressBarControlVtbl CProgressBarControlVtable = {
 	ProgressBarControl_put_Value
 };
 
-EXTERN_C HRESULT CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+STDMETHODIMP CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
 	if (pUnkOuter != NULL) {
 		return CLASS_E_NOAGGREGATION;
 	}
@@ -83,20 +84,20 @@ STDMETHODIMP ProgressBarControl_GetTypeInfoCount(CProgressBarControl *This, UINT
 	if (pctinfo == NULL) {
 		return E_POINTER;
 	}
-	*pctinfo = 0;
+	*pctinfo = 1;
 	return S_OK;
 }
 
 STDMETHODIMP ProgressBarControl_GetTypeInfo(CProgressBarControl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-	return E_NOTIMPL;
+	return Dispatch_GetTypeInfo((IDispatch *)This, IID_IProgressBarControl, iTInfo, lcid, ppTInfo);
 }
 
 STDMETHODIMP ProgressBarControl_GetIDsOfNames(CProgressBarControl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) {
-	return E_NOTIMPL;
+	return Dispatch_GetIDsOfNames((IDispatch *)This, riid, rgszNames, cNames, lcid, rgDispId);
 }
 
 STDMETHODIMP ProgressBarControl_Invoke(CProgressBarControl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-	return E_NOTIMPL;
+	return Dispatch_Invoke((IDispatch *)This, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
 }
 
 STDMETHODIMP ProgressBarControl_get_Value(CProgressBarControl *This, SHORT *pValue) {

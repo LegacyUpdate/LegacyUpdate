@@ -168,7 +168,7 @@ obj/$(TAG)/%_p.c: %.idl
 obj/$(TAG)/%_dlldata.c: %.idl
 	$(WIDL) $(IDLFLAGS) --dlldata-only -o $@ $(notdir $(basename $<))
 
-$(OBJ): stdafx.h
+$(OBJ): obj/$(TAG)/LegacyUpdate_i.h stdafx.h
 
 $(RES): $(MSG)
 

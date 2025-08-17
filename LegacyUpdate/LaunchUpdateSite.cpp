@@ -4,7 +4,8 @@
 #include "Utils.h"
 
 // Function signature required by Rundll32.exe.
-EXTERN_C void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow) {
+EXTERN_C __declspec(dllexport)
+void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow) {
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	if (!SUCCEEDED(hr)) {
 		goto end;

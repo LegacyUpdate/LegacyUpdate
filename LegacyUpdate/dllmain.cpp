@@ -9,6 +9,7 @@
 #include "Registry.h"
 #include "LegacyUpdate.h"
 #include "../shared/LegacyUpdate.h"
+#include "ClassFactory.h"
 #include "LegacyUpdateCtrl.h"
 #include "ElevationHelper.h"
 #include "ProgressBarControl.h"
@@ -26,81 +27,6 @@ static ClassEntry g_classEntries[] = {
 	{&CLSID_ElevationHelper,    CreateElevationHelper},
 	{&CLSID_ProgressBarControl, CreateProgressBarControl}
 };
-
-// Class factory
-typedef struct CClassFactory {
-	const struct CClassFactoryVtbl *lpVtbl;
-	LONG refCount;
-	STDMETHODIMP (*createFunc)(IUnknown *pUnkOuter, REFIID riid, void **ppv);
-	const GUID *clsid;
-} CClassFactory;
-
-typedef struct CClassFactoryVtbl {
-	// IUnknown
-	HRESULT (STDMETHODCALLTYPE *QueryInterface)(CClassFactory *This, REFIID riid, void **ppvObject);
-	ULONG   (STDMETHODCALLTYPE *AddRef)(CClassFactory *This);
-	ULONG   (STDMETHODCALLTYPE *Release)(CClassFactory *This);
-
-	// IClassFactory
-	HRESULT (STDMETHODCALLTYPE *CreateInstance)(CClassFactory *This, IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
-	HRESULT (STDMETHODCALLTYPE *LockServer)(CClassFactory *This, BOOL fLock);
-} CClassFactoryVtbl;
-
-static STDMETHODIMP ClassFactory_QueryInterface(CClassFactory *This, REFIID riid, void **ppvObject);
-static ULONG STDMETHODCALLTYPE ClassFactory_AddRef(CClassFactory *This);
-static ULONG STDMETHODCALLTYPE ClassFactory_Release(CClassFactory *This);
-static STDMETHODIMP ClassFactory_CreateInstance(CClassFactory *This, IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
-static STDMETHODIMP ClassFactory_LockServer(CClassFactory *This, BOOL fLock);
-
-static CClassFactoryVtbl CClassFactoryVtable = {
-	ClassFactory_QueryInterface,
-	ClassFactory_AddRef,
-	ClassFactory_Release,
-	ClassFactory_CreateInstance,
-	ClassFactory_LockServer
-};
-
-static STDMETHODIMP ClassFactory_QueryInterface(CClassFactory *This, REFIID riid, void **ppvObject) {
-	if (ppvObject == NULL) {
-		return E_POINTER;
-	}
-
-	if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IClassFactory)) {
-		*ppvObject = This;
-		ClassFactory_AddRef(This);
-		return S_OK;
-	}
-
-	*ppvObject = NULL;
-	return E_NOINTERFACE;
-}
-
-static ULONG STDMETHODCALLTYPE ClassFactory_AddRef(CClassFactory *This) {
-	return InterlockedIncrement(&This->refCount);
-}
-
-static ULONG STDMETHODCALLTYPE ClassFactory_Release(CClassFactory *This) {
-	ULONG refCount = InterlockedDecrement(&This->refCount);
-
-	if (refCount == 0) {
-		CoTaskMemFree(This);
-	}
-
-	return refCount;
-}
-
-static STDMETHODIMP ClassFactory_CreateInstance(CClassFactory *This, IUnknown *pUnkOuter, REFIID riid, void **ppvObject) {
-	return This->createFunc(pUnkOuter, riid, ppvObject);
-}
-
-static STDMETHODIMP ClassFactory_LockServer(CClassFactory *This, BOOL fLock) {
-	if (fLock) {
-		InterlockedIncrement(&g_serverLocks);
-	} else {
-		InterlockedDecrement(&g_serverLocks);
-	}
-	return S_OK;
-}
 
 // DLL Entry Point
 BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
@@ -146,18 +72,16 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) {
 
 	for (DWORD i = 0; i < ARRAYSIZE(g_classEntries); i++) {
 		if (IsEqualCLSID(rclsid, *g_classEntries[i].clsid)) {
-			CClassFactory *pFactory = (CClassFactory *)CoTaskMemAlloc(sizeof(CClassFactory));
+			CClassFactory *pFactory;
+			HRESULT hr = CreateClassFactory(NULL, riid, (void **)&pFactory);
 			if (pFactory == NULL) {
 				return E_OUTOFMEMORY;
 			}
 
-			pFactory->lpVtbl = &CClassFactoryVtable;
-			pFactory->refCount = 1;
 			pFactory->createFunc = g_classEntries[i].createFunc;
 			pFactory->clsid = g_classEntries[i].clsid;
 
-			HRESULT hr = ClassFactory_QueryInterface(pFactory, riid, ppv);
-			ClassFactory_Release(pFactory);
+			*ppv = pFactory;
 			return hr;
 		}
 	}
