@@ -1,6 +1,5 @@
 // dllmain.cpp : Implementation of DLL Exports.
 
-#include "stdafx.h"
 #include "LegacyUpdate_i.h"
 #include "dllmain.h"
 #include <strsafe.h>

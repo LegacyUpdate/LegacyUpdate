@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Exec.h"
 #include "HResult.h"
 #include "Utils.h"

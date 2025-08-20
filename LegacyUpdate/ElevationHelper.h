@@ -3,6 +3,7 @@
 // ElevationHelper.h : Declaration of the CElevationHelper class.
 
 #include "resource.h"
+#include "com.h"
 #include "LegacyUpdate_i.h"
 
 STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv);
@@ -10,45 +11,26 @@ STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv)
 BOOL ProgIDIsPermitted(PWSTR progID);
 STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, void **ppv);
 
-typedef struct CElevationHelper CElevationHelper;
+class DECLSPEC_NOVTABLE CElevationHelper :
+	public IDispatchImpl<IElevationHelper, &LIBID_LegacyUpdateLib> {
+public:
+	CElevationHelper() :
+		m_refCount(1) {}
 
-typedef struct CElevationHelperVtbl {
+	virtual ~CElevationHelper();
+
+private:
+	LONG m_refCount;
+
+public:
 	// IUnknown
-	HRESULT (STDMETHODCALLTYPE *QueryInterface)(CElevationHelper *This, REFIID riid, void **ppvObject);
-	ULONG   (STDMETHODCALLTYPE *AddRef)(CElevationHelper *This);
-	ULONG   (STDMETHODCALLTYPE *Release)(CElevationHelper *This);
-
-	// IDispatch
-	HRESULT (STDMETHODCALLTYPE *GetTypeInfoCount)(CElevationHelper *This, UINT *pctinfo);
-	HRESULT (STDMETHODCALLTYPE *GetTypeInfo)(CElevationHelper *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
-	HRESULT (STDMETHODCALLTYPE *GetIDsOfNames)(CElevationHelper *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
-	HRESULT (STDMETHODCALLTYPE *Invoke)(CElevationHelper *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
+	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
+	STDMETHODIMP_(ULONG) AddRef();
+	STDMETHODIMP_(ULONG) Release();
 
 	// IElevationHelper
-	HRESULT (STDMETHODCALLTYPE *CreateObject)(CElevationHelper *This, BSTR progID, IDispatch **retval);
-	HRESULT (STDMETHODCALLTYPE *Reboot)(CElevationHelper *This);
-	HRESULT (STDMETHODCALLTYPE *BeforeUpdate)(CElevationHelper *This);
-	HRESULT (STDMETHODCALLTYPE *AfterUpdate)(CElevationHelper *This);
-} CElevationHelperVtbl;
-
-struct CElevationHelper {
-	CElevationHelperVtbl *lpVtbl;
-	LONG refCount;
+	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
+	STDMETHODIMP Reboot();
+	STDMETHODIMP BeforeUpdate();
+	STDMETHODIMP AfterUpdate();
 };
-
-// IUnknown
-STDMETHODIMP ElevationHelper_QueryInterface(CElevationHelper *This, REFIID riid, void **ppvObject);
-ULONG STDMETHODCALLTYPE ElevationHelper_AddRef(CElevationHelper *This);
-ULONG STDMETHODCALLTYPE ElevationHelper_Release(CElevationHelper *This);
-
-// IDispatch
-STDMETHODIMP ElevationHelper_GetTypeInfoCount(CElevationHelper *This, UINT *pctinfo);
-STDMETHODIMP ElevationHelper_GetTypeInfo(CElevationHelper *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
-STDMETHODIMP ElevationHelper_GetIDsOfNames(CElevationHelper *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
-STDMETHODIMP ElevationHelper_Invoke(CElevationHelper *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
-
-// IElevationHelper
-STDMETHODIMP ElevationHelper_CreateObject(CElevationHelper *This, BSTR progID, IDispatch **retval);
-STDMETHODIMP ElevationHelper_Reboot(CElevationHelper *This);
-STDMETHODIMP ElevationHelper_BeforeUpdate(CElevationHelper *This);
-STDMETHODIMP ElevationHelper_AfterUpdate(CElevationHelper *This);

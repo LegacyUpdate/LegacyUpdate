@@ -1,31 +1,19 @@
 // ElevationHelper.cpp : Implementation of CElevationHelper
-#include "stdafx.h"
-#include "Compat.h"
-#include "Dispatch.h"
+
 #include "ElevationHelper.h"
+#include "Compat.h"
 #include "HResult.h"
 #include "NGen.h"
 #include "Utils.h"
 #include <strsafe.h>
 #include <ccomptr.h>
+#include <new>
 
 const WCHAR *permittedProgIDs[] = {
 	L"Microsoft.Update."
 };
 
-static CElevationHelperVtbl CElevationHelperVtable = {
-	ElevationHelper_QueryInterface,
-	ElevationHelper_AddRef,
-	ElevationHelper_Release,
-	ElevationHelper_GetTypeInfoCount,
-	ElevationHelper_GetTypeInfo,
-	ElevationHelper_GetIDsOfNames,
-	ElevationHelper_Invoke,
-	ElevationHelper_CreateObject,
-	ElevationHelper_Reboot,
-	ElevationHelper_BeforeUpdate,
-	ElevationHelper_AfterUpdate
-};
+DEFINE_UUIDOF(CElevationHelper, CLSID_ElevationHelper);
 
 BOOL ProgIDIsPermitted(PWSTR progID) {
 	if (progID == NULL) {
@@ -69,65 +57,52 @@ STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv)
 		return E_OUTOFMEMORY;
 	}
 
-	ZeroMemory(pThis, sizeof(CElevationHelper));
-	pThis->lpVtbl = &CElevationHelperVtable;
-	pThis->refCount = 1;
-
+	new(pThis) CElevationHelper();
+	// TODO: Only do this if we're in dllhost
 	BecomeDPIAware();
-
-	HRESULT hr = ElevationHelper_QueryInterface(pThis, riid, ppv);
-	ElevationHelper_Release(pThis);
+	HRESULT hr = pThis->QueryInterface(riid, ppv);
+	pThis->Release();
 	return hr;
 }
 
-STDMETHODIMP ElevationHelper_QueryInterface(CElevationHelper *This, REFIID riid, void **ppvObject) {
+CElevationHelper::~CElevationHelper() {
+}
+
+STDMETHODIMP CElevationHelper::QueryInterface(REFIID riid, void **ppvObject) {
 	if (ppvObject == NULL) {
 		return E_POINTER;
 	}
 
-	if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IDispatch) || IsEqualIID(riid, IID_IElevationHelper)) {
-		*ppvObject = This;
-		ElevationHelper_AddRef(This);
+	*ppvObject = NULL;
+
+	if (IsEqualIID(riid, IID_IUnknown)) {
+		*ppvObject = (IUnknown *)(IElevationHelper *)this;
+		AddRef();
 		return S_OK;
 	}
 
-	*ppvObject = NULL;
+	HRESULT hr = IDispatchImpl<IElevationHelper, &LIBID_LegacyUpdateLib>::QueryInterface(riid, ppvObject);
+	if (SUCCEEDED(hr)) {
+		return hr;
+	}
+
 	return E_NOINTERFACE;
 }
 
-ULONG STDMETHODCALLTYPE ElevationHelper_AddRef(CElevationHelper *This) {
-	return InterlockedIncrement(&This->refCount);
+STDMETHODIMP_(ULONG) CElevationHelper::AddRef() {
+	return InterlockedIncrement(&m_refCount);
 }
 
-ULONG STDMETHODCALLTYPE ElevationHelper_Release(CElevationHelper *This) {
-	ULONG refCount = InterlockedDecrement(&This->refCount);
-	if (refCount == 0) {
-		CoTaskMemFree(This);
+STDMETHODIMP_(ULONG) CElevationHelper::Release() {
+	ULONG count = InterlockedDecrement(&m_refCount);
+	if (count == 0) {
+		this->~CElevationHelper();
+		CoTaskMemFree(this);
 	}
-	return refCount;
+	return count;
 }
 
-STDMETHODIMP ElevationHelper_GetTypeInfoCount(CElevationHelper *This, UINT *pctinfo) {
-	if (pctinfo == NULL) {
-		return E_POINTER;
-	}
-	*pctinfo = 1;
-	return S_OK;
-}
-
-STDMETHODIMP ElevationHelper_GetTypeInfo(CElevationHelper *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-	return Dispatch_GetTypeInfo((IDispatch *)This, IID_IElevationHelper, iTInfo, lcid, ppTInfo);
-}
-
-STDMETHODIMP ElevationHelper_GetIDsOfNames(CElevationHelper *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId) {
-	return Dispatch_GetIDsOfNames((IDispatch *)This, riid, rgszNames, cNames, lcid, rgDispId);
-}
-
-STDMETHODIMP ElevationHelper_Invoke(CElevationHelper *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr) {
-	return Dispatch_Invoke((IDispatch *)This, dispIdMember, riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
-}
-
-STDMETHODIMP ElevationHelper_CreateObject(CElevationHelper *This, BSTR progID, IDispatch **retval) {
+STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
 	if (progID == NULL || retval == NULL) {
 		return E_INVALIDARG;
 	}
@@ -161,14 +136,14 @@ end:
 	return hr;
 }
 
-STDMETHODIMP ElevationHelper_Reboot(CElevationHelper *This) {
-	return Reboot();
+STDMETHODIMP CElevationHelper::Reboot() {
+	return ::Reboot();
 }
 
-STDMETHODIMP ElevationHelper_BeforeUpdate(CElevationHelper *This) {
+STDMETHODIMP CElevationHelper::BeforeUpdate() {
 	return PauseResumeNGenQueue(FALSE);
 }
 
-STDMETHODIMP ElevationHelper_AfterUpdate(CElevationHelper *This) {
+STDMETHODIMP CElevationHelper::AfterUpdate() {
 	return PauseResumeNGenQueue(TRUE);
 }

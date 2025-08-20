@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <comdef.h>
 #include <shlwapi.h>
 #include "VersionInfo.h"

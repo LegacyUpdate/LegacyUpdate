@@ -4,7 +4,10 @@
 
 #pragma comment(lib, "wbemuuid.lib")
 
-#ifdef __cplusplus
+#ifdef CINTERFACE
+	#define our_CLSID_WbemLocator &CLSID_WbemLocator
+	#define our_IID_IWbemLocator  &IID_IWbemLocator
+#else
 	#define our_CLSID_WbemLocator CLSID_WbemLocator
 	#define our_IID_IWbemLocator  IID_IWbemLocator
 	#define IWbemLocator_ConnectServer(obj, ...) obj->ConnectServer(__VA_ARGS__)
@@ -15,9 +18,6 @@
 	#define IEnumWbemClassObject_Release(obj)    obj->Release()
 	#define IWbemServices_Release(obj)           obj->Release()
 	#define IWbemLocator_Release(obj)            obj->Release()
-#else
-	#define our_CLSID_WbemLocator &CLSID_WbemLocator
-	#define our_IID_IWbemLocator  &IID_IWbemLocator
 #endif
 
 HRESULT QueryWMIProperty(LPCWSTR query, LPCWSTR property, LPVARIANT value) {

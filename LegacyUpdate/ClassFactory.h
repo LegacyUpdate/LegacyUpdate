@@ -1,32 +1,31 @@
 #pragma once
 
+#include "com.h"
+
 STDMETHODIMP CreateClassFactory(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
-typedef struct CClassFactory CClassFactory;
+class DECLSPEC_NOVTABLE CClassFactory : public IClassFactory {
+public:
+	CClassFactory() :
+		m_refCount(1),
+		createFunc(NULL),
+		clsid(NULL) {}
 
-typedef struct CClassFactoryVtbl {
-	// IUnknown
-	HRESULT (STDMETHODCALLTYPE *QueryInterface)(CClassFactory *This, REFIID riid, void **ppvObject);
-	ULONG   (STDMETHODCALLTYPE *AddRef)(CClassFactory *This);
-	ULONG   (STDMETHODCALLTYPE *Release)(CClassFactory *This);
+	virtual ~CClassFactory();
 
-	// IClassFactory
-	HRESULT (STDMETHODCALLTYPE *CreateInstance)(CClassFactory *This, IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
-	HRESULT (STDMETHODCALLTYPE *LockServer)(CClassFactory *This, BOOL fLock);
-} CClassFactoryVtbl;
+private:
+	LONG m_refCount;
 
-struct CClassFactory {
-	const struct CClassFactoryVtbl *lpVtbl;
-	LONG refCount;
+public:
 	STDMETHODIMP (*createFunc)(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 	const GUID *clsid;
+
+	// IUnknown
+	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
+	STDMETHODIMP_(ULONG) AddRef();
+	STDMETHODIMP_(ULONG) Release();
+
+	// IClassFactory
+	STDMETHODIMP CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
+	STDMETHODIMP LockServer(BOOL fLock);
 };
-
-// IUnknown
-STDMETHODIMP ClassFactory_QueryInterface(CClassFactory *This, REFIID riid, void **ppvObject);
-ULONG STDMETHODCALLTYPE ClassFactory_AddRef(CClassFactory *This);
-ULONG STDMETHODCALLTYPE ClassFactory_Release(CClassFactory *This);
-
-// IClassFactory
-STDMETHODIMP ClassFactory_CreateInstance(CClassFactory *This, IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
-STDMETHODIMP ClassFactory_LockServer(CClassFactory *This, BOOL fLock);

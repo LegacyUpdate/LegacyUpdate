@@ -17,7 +17,7 @@ public:
 		this->pointer = NULL;
 	}
 
-	CComPtr(TInterface *ptr) throw() {
+	CComPtr(TInterface *ptr) {
 		this->pointer = ptr;
 		if (this->pointer != NULL) {
 			this->pointer->AddRef();
@@ -26,7 +26,7 @@ public:
 
 	CComPtr(CComPtr<TInterface> &other) : CComPtr(other.pointer) {}
 
-	CComPtr(CComPtr<TInterface> &&other) throw() {
+	CComPtr(CComPtr<TInterface> &&other) {
 		other.Swap(*this);
 	}
 
@@ -70,42 +70,39 @@ public:
 		return this->pointer;
 	}
 
-	TInterface *operator =(TInterface *other) throw()
-	{
+	TInterface *operator =(TInterface *other) {
 		if (this->pointer != other) {
-			CComPtr(other).Swap(*this);
+			this->pointer = other;
+			if (this->pointer != NULL) {
+				this->pointer->AddRef();
+			}
 		}
 		return *this;
 	}
 
-	TInterface *operator =(const CComPtr<TInterface> &other) throw()
-	{
+	TInterface *operator =(const CComPtr<TInterface> &other) {
 		if (this->pointer != other.pointer) {
-			CComPtr(other).Swap(*this);
+			this->pointer = other.pointer;
+			if (this->pointer != NULL) {
+				this->pointer->AddRef();
+			}
 		}
 		return *this;
 	}
 
-	TInterface *operator =(CComPtr<TInterface> &&other) throw() {
-		if (this->pointer != other.pointer) {
-			CComPtr(static_cast<CComPtr&&>(other)).Swap(*this);
-		}
-		return *this;
-	}
-
-	bool operator !() const throw() {
+	bool operator !() const {
 		return this->pointer == NULL;
 	}
 
-	bool operator <(TInterface *other) const throw() {
+	bool operator <(TInterface *other) const {
 		return this->pointer < other;
 	}
 
-	bool operator ==(TInterface *other) const throw() {
+	bool operator ==(TInterface *other) const {
 		return this->pointer == other;
 	}
 
-	bool operator ==(const CComPtr &other) const throw() {
+	bool operator ==(const CComPtr &other) const {
 		return this->pointer == other;
 	}
 
@@ -113,7 +110,7 @@ public:
 		this->~CComPtr();
 	}
 
-	TInterface *Detach() throw() {
+	TInterface *Detach() {
 		TInterface *ptr = this->pointer;
 		this->pointer = NULL;
 		return ptr;
@@ -125,11 +122,11 @@ public:
 		other.pointer = ptr;
 	}
 
-	HRESULT CoCreateInstance(REFCLSID rclsid, LPUNKNOWN pUnkOuter = NULL, DWORD dwClsContext = CLSCTX_ALL) throw() {
+	HRESULT CoCreateInstance(REFCLSID rclsid, LPUNKNOWN pUnkOuter = NULL, DWORD dwClsContext = CLSCTX_ALL) {
 		return ::CoCreateInstance(rclsid, pUnkOuter, dwClsContext, __uuidof(TInterface), (void **)&this->pointer);
 	}
 
-	HRESULT CoCreateInstance(REFCLSID rclsid, REFIID riid, LPUNKNOWN pUnkOuter = NULL, DWORD dwClsContext = CLSCTX_ALL) throw() {
+	HRESULT CoCreateInstance(REFCLSID rclsid, REFIID riid, LPUNKNOWN pUnkOuter = NULL, DWORD dwClsContext = CLSCTX_ALL) {
 		return ::CoCreateInstance(rclsid, pUnkOuter, dwClsContext, riid, (void **)&this->pointer);
 	}
 };

@@ -7,89 +7,78 @@
 #include <mshtml.h>
 #include <wuapi.h>
 #include "resource.h"
-#include "ccomptr.h"
+#include "com.h"
 #include "LegacyUpdate_i.h"
 
 STDMETHODIMP CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
-typedef struct CLegacyUpdateCtrl CLegacyUpdateCtrl;
+class CLegacyUpdateCtrl;
 
-typedef struct CLegacyUpdateCtrlVtbl {
-	// IUnknown
-	HRESULT (STDMETHODCALLTYPE *QueryInterface)(CLegacyUpdateCtrl *This, REFIID riid, void **ppvObject);
-	ULONG   (STDMETHODCALLTYPE *AddRef)(CLegacyUpdateCtrl *This);
-	ULONG   (STDMETHODCALLTYPE *Release)(CLegacyUpdateCtrl *This);
+class DECLSPEC_NOVTABLE CLegacyUpdateCtrl_IOleObject :
+	public IOleObjectImpl<CLegacyUpdateCtrl> {
+public:
+	CLegacyUpdateCtrl_IOleObject(CLegacyUpdateCtrl *pParent) :
+		IOleObjectImpl<CLegacyUpdateCtrl>(pParent) {}
 
-	// IDispatch
-	HRESULT (STDMETHODCALLTYPE *GetTypeInfoCount)(CLegacyUpdateCtrl *This, UINT *pctinfo);
-	HRESULT (STDMETHODCALLTYPE *GetTypeInfo)(CLegacyUpdateCtrl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
-	HRESULT (STDMETHODCALLTYPE *GetIDsOfNames)(CLegacyUpdateCtrl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
-	HRESULT (STDMETHODCALLTYPE *Invoke)(CLegacyUpdateCtrl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
-
-	// ILegacyUpdateCtrl
-	HRESULT (STDMETHODCALLTYPE *CheckControl)(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
-	HRESULT (STDMETHODCALLTYPE *MessageForHresult)(CLegacyUpdateCtrl *This, LONG inHresult, BSTR *retval);
-	HRESULT (STDMETHODCALLTYPE *GetOSVersionInfo)(CLegacyUpdateCtrl *This, OSVersionField osField, LONG systemMetric, VARIANT *retval);
-	HRESULT (STDMETHODCALLTYPE *RequestElevation)(CLegacyUpdateCtrl *This);
-	HRESULT (STDMETHODCALLTYPE *CreateObject)(CLegacyUpdateCtrl *This, BSTR progID, IDispatch **retval);
-	HRESULT (STDMETHODCALLTYPE *SetBrowserHwnd)(CLegacyUpdateCtrl *This, IUpdateInstaller *installer);
-	HRESULT (STDMETHODCALLTYPE *GetUserType)(CLegacyUpdateCtrl *This, UserType *retval);
-	HRESULT (STDMETHODCALLTYPE *get_IsRebootRequired)(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
-	HRESULT (STDMETHODCALLTYPE *get_IsWindowsUpdateDisabled)(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
-	HRESULT (STDMETHODCALLTYPE *RebootIfRequired)(CLegacyUpdateCtrl *This);
-	HRESULT (STDMETHODCALLTYPE *ViewWindowsUpdateLog)(CLegacyUpdateCtrl *This);
-	HRESULT (STDMETHODCALLTYPE *OpenWindowsUpdateSettings)(CLegacyUpdateCtrl *This);
-	HRESULT (STDMETHODCALLTYPE *get_IsUsingWsusServer)(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
-	HRESULT (STDMETHODCALLTYPE *get_WsusServerUrl)(CLegacyUpdateCtrl *This, BSTR *retval);
-	HRESULT (STDMETHODCALLTYPE *get_WsusStatusServerUrl)(CLegacyUpdateCtrl *This, BSTR *retval);
-	HRESULT (STDMETHODCALLTYPE *BeforeUpdate)(CLegacyUpdateCtrl *This);
-	HRESULT (STDMETHODCALLTYPE *AfterUpdate)(CLegacyUpdateCtrl *This);
-} CLegacyUpdateCtrlVtbl;
-
-struct CLegacyUpdateCtrl {
-	CLegacyUpdateCtrlVtbl *lpVtbl;
-	LONG refCount;
-
-	IOleClientSite *clientSite;
-	IOleInPlaceSite *inPlaceSite;
-	IOleContainer *container;
-
-	IElevationHelper *elevatedHelper;
-	IElevationHelper *nonElevatedHelper;
-
-	HWND hwnd;
-	BOOL windowOnly;
+	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite);
+	STDMETHODIMP GetClientSite(IOleClientSite **ppClientSite);
+	STDMETHODIMP Close(DWORD dwSaveOption);
 };
 
-// IUnknown
-STDMETHODIMP LegacyUpdateCtrl_QueryInterface(CLegacyUpdateCtrl *This, REFIID riid, void **ppvObject);
-ULONG STDMETHODCALLTYPE LegacyUpdateCtrl_AddRef(CLegacyUpdateCtrl *This);
-ULONG STDMETHODCALLTYPE LegacyUpdateCtrl_Release(CLegacyUpdateCtrl *This);
+class DECLSPEC_NOVTABLE CLegacyUpdateCtrl :
+	public IDispatchImpl<ILegacyUpdateCtrl, &LIBID_LegacyUpdateLib> {
+public:
+	CLegacyUpdateCtrl() :
+		m_IOleObject(this),
+		m_refCount(1),
+		m_clientSite(NULL),
+		m_inPlaceSite(NULL),
+		m_container(NULL),
+		m_elevatedHelper(NULL),
+		m_nonElevatedHelper(NULL) {}
 
-// IDispatch
-STDMETHODIMP LegacyUpdateCtrl_GetTypeInfoCount(CLegacyUpdateCtrl *This, UINT *pctinfo);
-STDMETHODIMP LegacyUpdateCtrl_GetTypeInfo(CLegacyUpdateCtrl *This, UINT iTInfo, LCID lcid, ITypeInfo **ppTInfo);
-STDMETHODIMP LegacyUpdateCtrl_GetIDsOfNames(CLegacyUpdateCtrl *This, REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
-STDMETHODIMP LegacyUpdateCtrl_Invoke(CLegacyUpdateCtrl *This, DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
+	virtual ~CLegacyUpdateCtrl();
 
-// IOleObject
-STDMETHODIMP LegacyUpdateCtrl_SetClientSite(CLegacyUpdateCtrl *This, IOleClientSite *pClientSite);
+private:
+	CLegacyUpdateCtrl_IOleObject m_IOleObject;
+	LONG m_refCount;
 
-// ILegacyUpdateCtrl
-STDMETHODIMP LegacyUpdateCtrl_CheckControl(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
-STDMETHODIMP LegacyUpdateCtrl_MessageForHresult(CLegacyUpdateCtrl *This, LONG inHresult, BSTR *retval);
-STDMETHODIMP LegacyUpdateCtrl_GetOSVersionInfo(CLegacyUpdateCtrl *This, OSVersionField osField, LONG systemMetric, VARIANT *retval);
-STDMETHODIMP LegacyUpdateCtrl_RequestElevation(CLegacyUpdateCtrl *This);
-STDMETHODIMP LegacyUpdateCtrl_CreateObject(CLegacyUpdateCtrl *This, BSTR progID, IDispatch **retval);
-STDMETHODIMP LegacyUpdateCtrl_SetBrowserHwnd(CLegacyUpdateCtrl *This, IUpdateInstaller *installer);
-STDMETHODIMP LegacyUpdateCtrl_GetUserType(CLegacyUpdateCtrl *This, UserType *retval);
-STDMETHODIMP LegacyUpdateCtrl_get_IsRebootRequired(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
-STDMETHODIMP LegacyUpdateCtrl_get_IsWindowsUpdateDisabled(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
-STDMETHODIMP LegacyUpdateCtrl_RebootIfRequired(CLegacyUpdateCtrl *This);
-STDMETHODIMP LegacyUpdateCtrl_ViewWindowsUpdateLog(CLegacyUpdateCtrl *This);
-STDMETHODIMP LegacyUpdateCtrl_OpenWindowsUpdateSettings(CLegacyUpdateCtrl *This);
-STDMETHODIMP LegacyUpdateCtrl_get_IsUsingWsusServer(CLegacyUpdateCtrl *This, VARIANT_BOOL *retval);
-STDMETHODIMP LegacyUpdateCtrl_get_WsusServerUrl(CLegacyUpdateCtrl *This, BSTR *retval);
-STDMETHODIMP LegacyUpdateCtrl_get_WsusStatusServerUrl(CLegacyUpdateCtrl *This, BSTR *retval);
-STDMETHODIMP LegacyUpdateCtrl_BeforeUpdate(CLegacyUpdateCtrl *This);
-STDMETHODIMP LegacyUpdateCtrl_AfterUpdate(CLegacyUpdateCtrl *This);
+public:
+	// IUnknown
+	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
+	STDMETHODIMP_(ULONG) AddRef();
+	STDMETHODIMP_(ULONG) Release();
+
+	IOleClientSite *m_clientSite;
+	IOleInPlaceSite *m_inPlaceSite;
+	IOleContainer *m_container;
+
+private:
+	IElevationHelper *m_elevatedHelper;
+	IElevationHelper *m_nonElevatedHelper;
+
+	STDMETHODIMP GetHTMLDocument(IHTMLDocument2 **retval);
+	STDMETHODIMP IsPermitted();
+	STDMETHODIMP GetIEWindowHWND(HWND *retval);
+	STDMETHODIMP GetElevatedHelper(IElevationHelper **retval);
+
+public:
+	// ILegacyUpdateCtrl
+	STDMETHODIMP CheckControl(VARIANT_BOOL *retval);
+	STDMETHODIMP MessageForHresult(LONG inHresult, BSTR *retval);
+	STDMETHODIMP GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
+	STDMETHODIMP RequestElevation();
+	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
+	STDMETHODIMP SetBrowserHwnd(IUpdateInstaller *installer);
+	STDMETHODIMP GetUserType(UserType *retval);
+	STDMETHODIMP get_IsRebootRequired(VARIANT_BOOL *retval);
+	STDMETHODIMP get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);
+	STDMETHODIMP RebootIfRequired();
+	STDMETHODIMP ViewWindowsUpdateLog();
+	STDMETHODIMP OpenWindowsUpdateSettings();
+	STDMETHODIMP get_IsUsingWsusServer(VARIANT_BOOL *retval);
+	STDMETHODIMP get_WsusServerUrl(BSTR *retval);
+	STDMETHODIMP get_WsusStatusServerUrl(BSTR *retval);
+	STDMETHODIMP BeforeUpdate();
+	STDMETHODIMP AfterUpdate();
+};

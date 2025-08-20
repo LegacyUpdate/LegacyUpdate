@@ -4,9 +4,7 @@
 // or project specific include files that are used frequently,
 // but are changed infrequently
 
-#ifndef STRICT
 #define STRICT
-#endif
 
 #define WINVER       _WIN32_WINNT_WIN2K
 #define _WIN32_WINNT _WIN32_WINNT_WIN2K

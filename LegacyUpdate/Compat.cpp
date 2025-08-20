@@ -1,14 +1,6 @@
-#include "stdafx.h"
-
-#ifndef PROCESS_PER_MONITOR_DPI_AWARE
-typedef int PROCESS_DPI_AWARENESS;
-#define PROCESS_PER_MONITOR_DPI_AWARE 2
-#endif
-
-#ifndef DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
-typedef int DPI_AWARENESS_CONTEXT;
-#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((DPI_AWARENESS_CONTEXT)-4)
-#endif
+#include "Compat.h"
+#include <windows.h>
+#include <shellscalingapi.h>
 
 typedef BOOL (WINAPI *_GetProductInfo)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 

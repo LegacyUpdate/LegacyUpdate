@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <shlwapi.h>
 #include "Exec.h"
 #include "LegacyUpdate.h"
