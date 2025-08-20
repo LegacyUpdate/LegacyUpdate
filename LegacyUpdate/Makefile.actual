@@ -5,7 +5,6 @@ FILES = \
 	../shared/HResult.c \
 	../shared/LegacyUpdate.c \
 	../shared/Registry.c \
-	../shared/VersionInfo.c \
 	../shared/WMI.c \
 	../shared/Wow64.c \
 	obj/$(TAG)/LegacyUpdate_i.c
@@ -88,7 +87,6 @@ LDFLAGS = \
 	-lwbemuuid \
 	-luuid \
 	-lshlwapi \
-	-lversion \
 	-lrpcrt4 \
 	-lrpcns4
 

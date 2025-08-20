@@ -108,8 +108,6 @@ _IS_BUILD_MACRO(11_23H2)
 _IS_BUILD_MACRO(11_24H2)
 #undef _IS_BUILD_MACRO
 
-EXTERN_C HRESULT GetOwnVersion(LPWSTR *version);
-
 static ALWAYS_INLINE void GetOwnFileName(LPWSTR *filename) {
 	*filename = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
 	GetModuleFileName((HMODULE)&__ImageBase, *filename, MAX_PATH);

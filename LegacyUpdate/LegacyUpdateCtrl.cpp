@@ -10,6 +10,7 @@
 #include "Registry.h"
 #include "User.h"
 #include "Utils.h"
+#include "Version.h"
 #include "VersionInfo.h"
 #include "WULog.h"
 #include <new>
@@ -330,16 +331,10 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		break;
 	}
 
-	case e_controlVersionString: {
-		LPWSTR data = NULL;
-		HRESULT hr = GetOwnVersion(&data);
-		if (!SUCCEEDED(hr)) {
-			return hr;
-		}
+	case e_controlVersionString:
 		retval->vt = VT_BSTR;
-		retval->bstrVal = SysAllocString(data);
+		retval->bstrVal = SysAllocString(L"" VERSION_STRING);
 		break;
-	}
 
 	case e_VistaProductType: {
 		DWORD productType = 0;

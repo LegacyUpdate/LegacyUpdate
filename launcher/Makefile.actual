@@ -5,7 +5,6 @@ FILES    = \
 	../shared/LegacyUpdate.c \
 	../shared/LoadImage.c \
 	../shared/Registry.c \
-	../shared/VersionInfo.c \
 	../shared/Wow64.c
 RCFILES  = resource.rc
 DEFFILES = ../LegacyUpdate/LegacyUpdate.def
