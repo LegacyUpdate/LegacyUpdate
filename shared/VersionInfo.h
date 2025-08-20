@@ -40,6 +40,8 @@
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
+#define OWN_MODULE ((HMODULE)&__ImageBase)
+
 static OSVERSIONINFOEX _versionInfo;
 
 static OSVERSIONINFOEX *GetVersionInfo() {

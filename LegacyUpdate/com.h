@@ -1,12 +1,18 @@
 #pragma once
 
 #include <combaseapi.h>
+#include <oleauto.h>
+#include <ocidl.h>
 #include "ccomptr.h"
 
 #define DEFINE_UUIDOF(cls, uuid) \
 	template<> const GUID &__mingw_uuidof<cls>() { \
 		return uuid; \
 	}
+
+#define HIMETRIC_PER_INCH 2540
+#define MAP_PIX_TO_LOGHIM(x, ppli) MulDiv(HIMETRIC_PER_INCH, (x), (ppli))
+#define MAP_LOGHIM_TO_PIX(x, ppli) MulDiv((ppli), (x), HIMETRIC_PER_INCH)
 
 template<typename TImpl, typename TInterface>
 class CComClass : public TInterface {
@@ -98,7 +104,7 @@ public:
 
 		*ppvObject = NULL;
 
-		if (IsEqualIID(riid, IID_IDispatch) || IsEqualIID(riid, __uuidof(TImpl))) {
+		if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IDispatch) || IsEqualIID(riid, __uuidof(TImpl))) {
 			*ppvObject = (TImpl *)this;
 			this->AddRef();
 			return S_OK;
@@ -128,18 +134,18 @@ public:
 		}
 
 		if (m_pTypeInfo == NULL) {
-			if (plibid != NULL) {
-				CComPtr<ITypeLib> pTypeLib;
-				HRESULT hr = LoadRegTypeLib(*plibid, 1, 0, LOCALE_NEUTRAL, &pTypeLib);
-				if (SUCCEEDED(hr)) {
-					hr = pTypeLib->GetTypeInfoOfGuid(__uuidof(TImpl), &m_pTypeInfo);
-				}
-
-				if (!SUCCEEDED(hr)) {
-					return hr;
-				}
-			} else {
+			if (plibid == NULL) {
 				return E_NOTIMPL;
+			}
+
+			CComPtr<ITypeLib> pTypeLib;
+			HRESULT hr = LoadRegTypeLib(*plibid, 1, 0, LOCALE_NEUTRAL, &pTypeLib);
+			if (SUCCEEDED(hr)) {
+				hr = pTypeLib->GetTypeInfoOfGuid(__uuidof(TImpl), &m_pTypeInfo);
+			}
+
+			if (!SUCCEEDED(hr)) {
+				return hr;
 			}
 		}
 
@@ -200,7 +206,7 @@ public:
 	}
 
 	STDMETHODIMP Close(DWORD dwSaveOption) {
-		return E_NOTIMPL;
+		return S_OK;
 	}
 
 	STDMETHODIMP SetMoniker(DWORD dwWhichMoniker, IMoniker *pmk) {
@@ -255,7 +261,10 @@ public:
 	}
 
 	STDMETHODIMP GetUserType(DWORD dwFormOfType, LPOLESTR *pszUserType) {
-		return E_NOTIMPL;
+		if (pszUserType == NULL) {
+			return E_POINTER;
+		}
+		return OleRegGetUserType(__uuidof(TImpl), dwFormOfType, pszUserType);
 	}
 
 	STDMETHODIMP SetExtent(DWORD dwDrawAspect, SIZEL *psizel) {
@@ -289,5 +298,249 @@ public:
 
 	STDMETHODIMP SetColorScheme(LOGPALETTE *pLogpal) {
 		return E_NOTIMPL;
+	}
+};
+
+template<typename TImpl>
+class IViewObjectExImpl : public CComClass<TImpl, IViewObjectEx> {
+public:
+	IViewObjectExImpl(TImpl *pParent) : CComClass<TImpl, IViewObjectEx>(pParent) {}
+
+	// IViewObject
+	STDMETHODIMP Draw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd, HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds, BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue) {
+		return this->m_pParent->OnDraw(dwDrawAspect, lindex, pvAspect, ptd, hdcTargetDev, hdcDraw, lprcBounds, lprcWBounds, pfnContinue, dwContinue);
+	}
+
+	STDMETHODIMP GetColorSet(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd, HDC hicTargetDev, LOGPALETTE **ppColorSet) {
+		if (ppColorSet == NULL) {
+			return E_POINTER;
+		}
+		*ppColorSet = NULL;
+		return S_FALSE;
+	}
+
+	STDMETHODIMP Freeze(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DWORD *pdwFreeze) {
+		return E_NOTIMPL;
+	}
+
+	STDMETHODIMP Unfreeze(DWORD dwFreeze) {
+		return E_NOTIMPL;
+	}
+
+	STDMETHODIMP SetAdvise(DWORD aspects, DWORD advf, IAdviseSink *pAdvSink) {
+		return S_OK;
+	}
+
+	STDMETHODIMP GetAdvise(DWORD *pAspects, DWORD *pAdvf, IAdviseSink **ppAdvSink) {
+		if (pAspects) {
+			*pAspects = DVASPECT_CONTENT;
+		}
+		if (pAdvf) {
+			*pAdvf = 0;
+		}
+		if (ppAdvSink) {
+			*ppAdvSink = NULL;
+		}
+		return S_OK;
+	}
+
+	// IViewObject2
+	STDMETHODIMP GetExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd, LPSIZEL lpsizel) {
+		if (lpsizel == NULL) {
+			return E_POINTER;
+		}
+
+		if (dwAspect != DVASPECT_CONTENT) {
+			return DV_E_DVASPECT;
+		}
+
+		if (!this->m_pParent->m_innerHwnd) {
+			lpsizel->cx = 0;
+			lpsizel->cy = 0;
+			return E_FAIL;
+		}
+
+		RECT rect;
+		GetClientRect(this->m_pParent->m_innerHwnd, &rect);
+
+		// Convert to HIMETRIC
+		HDC hdc = GetDC(NULL);
+		int ppiX = GetDeviceCaps(hdc, LOGPIXELSX);
+		int ppiY = GetDeviceCaps(hdc, LOGPIXELSY);
+		ReleaseDC(NULL, hdc);
+
+		lpsizel->cx = MAP_PIX_TO_LOGHIM(rect.right - rect.left, ppiX);
+		lpsizel->cy = MAP_PIX_TO_LOGHIM(rect.bottom - rect.top, ppiY);
+		return S_OK;
+	}
+
+	// IViewObjectEx
+	STDMETHODIMP GetRect(DWORD dwAspect, LPRECTL pRect) {
+		if (pRect == NULL) {
+			return E_POINTER;
+		}
+
+		if (dwAspect != DVASPECT_CONTENT) {
+			return DV_E_DVASPECT;
+		}
+
+		if (!this->m_pParent->m_innerHwnd) {
+			return E_FAIL;
+		}
+
+		RECT rect;
+		GetClientRect(this->m_pParent->m_innerHwnd, &rect);
+		pRect->left = rect.left;
+		pRect->top = rect.top;
+		pRect->right = rect.right;
+		pRect->bottom = rect.bottom;
+		return S_OK;
+	}
+
+	STDMETHODIMP GetViewStatus(DWORD *pdwStatus) {
+		if (pdwStatus == NULL) {
+			return E_POINTER;
+		}
+		*pdwStatus = VIEWSTATUS_SOLIDBKGND | VIEWSTATUS_OPAQUE;
+		return S_OK;
+	}
+
+	STDMETHODIMP QueryHitPoint(DWORD dwAspect, LPCRECT pRectBounds, POINT ptlLoc, LONG lCloseHint, DWORD *pHitResult) {
+		if (pRectBounds == NULL || pHitResult == NULL) {
+			return E_POINTER;
+		}
+		*pHitResult = PtInRect(pRectBounds, *(POINT *)&ptlLoc) ? HITRESULT_HIT : HITRESULT_OUTSIDE;
+		return S_OK;
+	}
+
+	STDMETHODIMP QueryHitRect(DWORD dwAspect, LPCRECT pRectBounds, LPCRECT pRectLoc, LONG lCloseHint, DWORD *pHitResult) {
+		if (pRectBounds == NULL || pRectLoc == NULL || pHitResult == NULL) {
+			return E_POINTER;
+		}
+		*pHitResult = IntersectRect((LPRECT)pHitResult, pRectBounds, pRectLoc) ? HITRESULT_HIT : HITRESULT_OUTSIDE;
+		return S_OK;
+	}
+
+	STDMETHODIMP GetNaturalExtent(DWORD dwAspect, LONG lindex, DVTARGETDEVICE *ptd, HDC hicTargetDev, DVEXTENTINFO *pExtentInfo, LPSIZEL pSizel) {
+		return GetExtent(dwAspect, lindex, ptd, pSizel);
+	}
+};
+
+template<typename TImpl>
+class IOleInPlaceObjectImpl : public CComClass<TImpl, IOleInPlaceObject> {
+public:
+	IOleInPlaceObjectImpl(TImpl *pParent) : CComClass<TImpl, IOleInPlaceObject>(pParent) {}
+
+	// IOleWindow
+	STDMETHODIMP GetWindow(HWND *phwnd) {
+		if (phwnd == NULL) {
+			return E_POINTER;
+		}
+		*phwnd = this->m_pParent->m_innerHwnd;
+		return *phwnd == NULL ? E_FAIL : S_OK;
+	}
+
+	STDMETHODIMP ContextSensitiveHelp(BOOL fEnterMode) {
+		return E_NOTIMPL;
+	}
+
+	// IOleInPlaceObject
+	STDMETHODIMP InPlaceDeactivate() {
+		return S_OK;
+	}
+
+	STDMETHODIMP UIDeactivate() {
+		return S_OK;
+	}
+
+	STDMETHODIMP SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect) {
+		if (lprcPosRect == NULL) {
+			return E_POINTER;
+		}
+
+		if (this->m_pParent->m_innerHwnd) {
+			SetWindowPos(
+				this->m_pParent->m_innerHwnd, NULL,
+				lprcPosRect->left, lprcPosRect->top,
+				lprcPosRect->right - lprcPosRect->left,
+				lprcPosRect->bottom - lprcPosRect->top,
+				SWP_NOZORDER | SWP_SHOWWINDOW
+			);
+		}
+
+		return S_OK;
+	}
+
+	STDMETHODIMP ReactivateAndUndo() {
+		return E_NOTIMPL;
+	}
+};
+
+template<typename TImpl>
+class IOleInPlaceActiveObjectImpl : public CComClass<TImpl, IOleInPlaceActiveObject> {
+public:
+	IOleInPlaceActiveObjectImpl(TImpl *pParent) : CComClass<TImpl, IOleInPlaceActiveObject>(pParent) {}
+
+	// IOleWindow
+	STDMETHODIMP GetWindow(HWND *phwnd) {
+		if (phwnd == NULL) {
+			return E_POINTER;
+		}
+		*phwnd = this->m_pParent->m_innerHwnd;
+		return *phwnd == NULL ? E_FAIL : S_OK;
+	}
+
+	STDMETHODIMP ContextSensitiveHelp(BOOL fEnterMode) {
+		return E_NOTIMPL;
+	}
+
+	// IOleInPlaceActiveObject
+	STDMETHODIMP TranslateAccelerator(LPMSG lpmsg) {
+		return S_FALSE;
+	}
+
+	STDMETHODIMP OnFrameWindowActivate(WINBOOL fActivate) {
+		return S_OK;
+	}
+
+	STDMETHODIMP OnDocWindowActivate(WINBOOL fActivate) {
+		return S_OK;
+	}
+
+	STDMETHODIMP ResizeBorder(LPCRECT prcBorder, IOleInPlaceUIWindow *pUIWindow, WINBOOL fFrameWindow) {
+		return S_OK;
+	}
+
+	STDMETHODIMP EnableModeless(WINBOOL fEnable) {
+		return S_OK;
+	}
+};
+
+template<typename TImpl>
+class IOleControlImpl : public CComClass<TImpl, IOleControl> {
+public:
+	IOleControlImpl(TImpl *pParent) : CComClass<TImpl, IOleControl>(pParent) {}
+
+	// IOleControl
+	STDMETHODIMP GetControlInfo(CONTROLINFO *pCI) {
+		if (pCI == NULL) {
+			return E_POINTER;
+		}
+		pCI->hAccel = NULL;
+		pCI->cAccel = 0;
+		pCI->dwFlags = 0;
+		return S_OK;
+	}
+
+	STDMETHODIMP OnMnemonic(LPMSG pMsg) {
+		return S_FALSE;
+	}
+
+	STDMETHODIMP OnAmbientPropertyChange(DISPID dispid) {
+		return S_OK;
+	}
+
+	STDMETHODIMP FreezeEvents(BOOL bFreeze) {
+		return S_OK;
 	}
 };
