@@ -75,18 +75,7 @@ STDMETHODIMP CElevationHelper::QueryInterface(REFIID riid, void **ppvObject) {
 
 	*ppvObject = NULL;
 
-	if (IsEqualIID(riid, IID_IUnknown)) {
-		*ppvObject = (IUnknown *)(IElevationHelper *)this;
-		AddRef();
-		return S_OK;
-	}
-
-	HRESULT hr = IDispatchImpl<IElevationHelper, &LIBID_LegacyUpdateLib>::QueryInterface(riid, ppvObject);
-	if (SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	return E_NOINTERFACE;
+	return IDispatchImpl<IElevationHelper, &LIBID_LegacyUpdateLib>::QueryInterface(riid, ppvObject);
 }
 
 STDMETHODIMP_(ULONG) CElevationHelper::AddRef() {

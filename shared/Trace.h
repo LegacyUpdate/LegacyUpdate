@@ -1,15 +1,7 @@
 #pragma once
 
-#ifdef TRACE
-	#undef TRACE
-#endif
-
 #ifdef _DEBUG
 	// Yeah, sue me lol
-	#ifdef _MSC_VER
-		#define __func__ __FUNCTION__
-	#endif
-
 	#ifdef __cplusplus
 		#define _TRACE_MSGBOX ::MessageBox
 	#else

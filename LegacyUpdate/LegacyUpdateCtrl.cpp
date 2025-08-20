@@ -67,24 +67,13 @@ STDMETHODIMP CLegacyUpdateCtrl::QueryInterface(REFIID riid, void **ppvObject) {
 
 	*ppvObject = NULL;
 
-	if (IsEqualIID(riid, IID_IUnknown)) {
-		*ppvObject = (IUnknown *)this;
-		AddRef();
-		return S_OK;
-	}
-
-	HRESULT hr = IDispatchImpl<ILegacyUpdateCtrl, &LIBID_LegacyUpdateLib>::QueryInterface(riid, ppvObject);
-	if (SUCCEEDED(hr)) {
-		return hr;
-	}
-
 	if (IsEqualIID(riid, IID_IOleObject)) {
 		*ppvObject = &m_IOleObject;
 		AddRef();
 		return S_OK;
 	}
 
-	return E_NOINTERFACE;
+	return IDispatchImpl<ILegacyUpdateCtrl, &LIBID_LegacyUpdateLib>::QueryInterface(riid, ppvObject);
 }
 
 STDMETHODIMP_(ULONG) CLegacyUpdateCtrl::AddRef() {

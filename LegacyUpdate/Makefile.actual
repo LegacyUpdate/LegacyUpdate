@@ -32,7 +32,6 @@ MSG     = $(foreach file,$(MCFILES),obj/$(notdir $(basename $(file)).bin))
 IDL     = $(foreach file,$(IDLFILES),obj/$(TAG)/$(notdir $(basename $(file))_i.c))
 
 CC      = $(PREFIX)gcc
-CXX     = $(PREFIX)g++
 RC      = $(PREFIX)windres
 MC      = $(PREFIX)windmc
 WIDL    = $(PREFIX)widl
