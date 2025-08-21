@@ -195,8 +195,13 @@ end:
 
 STDMETHODIMP CLegacyUpdateCtrl::GetIEWindowHWND(HWND *retval) {
 	*retval = NULL;
+
+	if (m_clientSite == NULL) {
+		return E_FAIL;
+	}
+
 	CComPtr<IOleWindow> oleWindow;
-	HRESULT hr = QueryInterface(IID_IOleWindow, (void **)&oleWindow);
+	HRESULT hr = m_clientSite->QueryInterface(IID_IOleWindow, (void **)&oleWindow);
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
