@@ -160,6 +160,8 @@ STDMETHODIMP CLegacyUpdateCtrl::GetHTMLDocument(IHTMLDocument2 **retval) {
 
 STDMETHODIMP CLegacyUpdateCtrl::IsPermitted() {
 	CComPtr<IHTMLDocument2> document;
+	CComPtr<IHTMLLocation> location;
+	BSTR host = NULL;
 	HRESULT hr = GetHTMLDocument(&document);
 	if (!SUCCEEDED(hr)) {
 #ifdef _DEBUG
@@ -171,8 +173,6 @@ STDMETHODIMP CLegacyUpdateCtrl::IsPermitted() {
 #endif
 	}
 
-	CComPtr<IHTMLLocation> location;
-	BSTR host = NULL;
 	hr = document->get_location(&location);
 	if (!SUCCEEDED(hr)) {
 		goto end;

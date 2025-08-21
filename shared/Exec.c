@@ -2,7 +2,7 @@
 #include "Exec.h"
 
 HRESULT Exec(LPCWSTR verb, LPCWSTR file, LPCWSTR params, LPCWSTR workingDir, int show, BOOL wait, LPDWORD exitCode) {
-	SHELLEXECUTEINFO execInfo;
+	SHELLEXECUTEINFO execInfo = {0};
 	execInfo.cbSize = sizeof(execInfo);
 	execInfo.lpVerb = verb;
 	execInfo.lpFile = file;
