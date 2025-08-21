@@ -47,7 +47,7 @@ STDMETHODIMP CProgressBarControl::QueryInterface(REFIID riid, void **ppvObject) 
 		AddRef();
 		return S_OK;
 	} else if (IsEqualIID(riid, IID_IViewObject) || IsEqualIID(riid, IID_IViewObject2) || IsEqualIID(riid, IID_IViewObjectEx)) {
- 		*ppvObject = (IViewObjectEx *)&m_IViewObjectEx;
+		*ppvObject = (IViewObjectEx *)&m_IViewObjectEx;
 		AddRef();
 		return S_OK;
 	} else if (IsEqualIID(riid, IID_IOleInPlaceObject) || IsEqualIID(riid, IID_IOleWindow) || IsEqualIID(riid, IID_IOleInPlaceObjectWindowless)) {
@@ -244,12 +244,10 @@ HRESULT CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *pRect
 		OWN_MODULE,
 		NULL
 	);
+	IsolationAwareEnd(&cookie);
 	if (!m_innerHwnd) {
-		IsolationAwareEnd(&cookie);
 		return E_FAIL;
 	}
-
-	IsolationAwareEnd(&cookie);
 
 	return put_Value(-1);
 }
@@ -317,7 +315,6 @@ STDMETHODIMP CProgressBarControl_IOleInPlaceObject::SetObjectRects(LPCRECT lprcP
 #pragma mark - IOleInPlaceActiveObject
 
 STDMETHODIMP CProgressBarControl_IOleInPlaceActiveObject::ResizeBorder(LPCRECT prcBorder, IOleInPlaceUIWindow *pUIWindow, BOOL fFrameWindow) {
-	TRACE(L"ResizeBorder");
 	if (prcBorder && m_pParent->m_innerHwnd) {
 		LONG width = prcBorder->right - prcBorder->left;
 		LONG height = prcBorder->bottom - prcBorder->top;
