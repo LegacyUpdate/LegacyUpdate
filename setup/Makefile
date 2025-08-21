@@ -6,22 +6,22 @@ NT4 ?= 0
 MAKENSIS = makensis
 NSISFLAGS = -DDEBUG=$(DEBUG) -DSIGN=$(SIGN) -DCI=$(CI) -DNT4=$(NT4)
 
-all:
-	+$(MAKE) -C ../nsisplugin
-	+$(MAKE) setup
-	+$(MAKE) activex
+all: nsisplugin setup activex
 
-nt4:
-	+$(MAKE) -C ../nsisplugin
-	+$(MAKE) NT4=1 setup-nt4
+nt4: nsisplugin setup-nt4
 
-setup:
+nsisplugin:
+ifeq ($(MAKELEVEL),0)
+	+$(MAKE) -C ../nsisplugin
+endif
+
+setup: nsisplugin
 	$(MAKENSIS) $(NSISFLAGS) setup.nsi
 
-setup-nt4:
+setup-nt4: nsisplugin
 	$(MAKENSIS) $(NSISFLAGS) setup-nt4.nsi
 
-activex:
+activex: setup
 ifeq ($(SIGN),1)
 	cp LegacyUpdate-*.exe codebase/setup.exe
 	cd codebase && makecab.exe /f lucontrl.ddf
@@ -30,11 +30,13 @@ ifeq ($(SIGN),1)
 endif
 
 clean:
+ifeq ($(MAKELEVEL),0)
 	+$(MAKE) -C ../nsisplugin clean
+endif
 	rm -f LegacyUpdate-*.exe codebase/{lucontrl.cab,setup.exe,setup.rpt}
 
 test:
 	+$(MAKE)
 	sudo.exe LegacyUpdate-*.exe
 
-.PHONY: all nsisplugin setup activex clean
+.PHONY: all nt4 nsisplugin setup setup-nt4 activex clean
