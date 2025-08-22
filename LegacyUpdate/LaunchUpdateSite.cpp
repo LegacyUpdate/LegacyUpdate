@@ -5,9 +5,18 @@
 // Function signature required by Rundll32.exe.
 EXTERN_C __declspec(dllexport)
 void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine, int nCmdShow) {
+	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+	if (!SUCCEEDED(hr)) {
+		goto end;
+	}
+
 	// This just calls LegacyUpdate.exe now for backwards compatibility.
-	HRESULT hr = StartLauncher(L"/launch", TRUE);
+	hr = StartLauncher(L"/launch", TRUE);
+
+end:
 	if (!SUCCEEDED(hr)) {
 		MessageBox(NULL, GetMessageForHresult(hr), L"Legacy Update", MB_OK | MB_ICONERROR);
 	}
+
+	CoUninitialize();
 }
