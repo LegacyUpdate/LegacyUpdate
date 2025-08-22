@@ -108,27 +108,29 @@ all-32:
 all-64:
 	+$(MAKE) internal-all ARCH=64
 
-internal-all: before-all $(BIN)
+internal-all: $(BIN)
 ifeq ($(SIGN),1)
 	../build/sign.sh $(BIN)
 endif
 
-before-all:
-	mkdir -p obj
-
 $(BIN): $(OBJ) $(RES)
+	@mkdir -p obj
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
 
 obj/%.$(TAG).o: %.c
+	@mkdir -p obj
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.c
+	@mkdir -p obj
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).res: %.rc
+	@mkdir -p obj
 	$(RC) $< $(RCFLAGS) -o $@
 
 obj/lib%.$(TAG).a: ../LegacyUpdate/%.def
+	@mkdir -p obj
 	$(DLLTOOL) -d $< -l $@ -D $(notdir $(basename $<).dll)
 
 clean:
@@ -138,4 +140,4 @@ test:
 	+$(MAKE) DEBUG=$(DEBUG)
 	./obj/LegacyUpdate.exe
 
-.PHONY: all all-archs all-32 all-64 internal-all before-all clean test
+.PHONY: all all-archs all-32 all-64 internal-all clean test

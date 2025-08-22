@@ -122,13 +122,10 @@ all-32:
 all-64:
 	+$(MAKE) internal-all ARCH=64
 
-internal-all: before-all $(BIN)
+internal-all: $(BIN)
 ifeq ($(SIGN),1)
 	../build/sign.sh $(BIN)
 endif
-
-before-all:
-	mkdir -p obj/$(TAG)
 
 $(BIN): $(OBJ) $(RES)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
@@ -137,45 +134,59 @@ $(DEF):
 	@:
 
 obj/%.$(TAG).o: %.c
+	@mkdir -p obj/$(TAG)
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/dlldatax.$(TAG).o: dlldatax.c
+	@mkdir -p obj/$(TAG)
 	$(CC) -x c $< $(filter-out -Wpedantic, $(CFLAGS)) -c -o $@
 
 obj/%.$(TAG).o: %.cpp
+	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.c
+	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.cpp
+	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
 obj/%.$(TAG).o: obj/%.c
+	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: obj/$(TAG)/%.c
+	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).res: %.rc
+	@mkdir -p obj/$(TAG)
 	$(RC) $< $(RCFLAGS) -o $@
 
 obj/%.bin: %.mc
+	@mkdir -p obj/$(TAG)
 	$(MC) $< $(MCFLAGS) -h $(dir $@) -r $(dir $@)
 
 obj/$(TAG)/%.tlb: %.idl
+	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -t -o $@ $<
 
 obj/$(TAG)/%_i.h: %.idl
+	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -h -o $@ $<
 
 obj/$(TAG)/%_i.c: %.idl
+	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -u -o $@ $<
 
 obj/$(TAG)/%_p.c: %.idl
+	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -p -o $@ $<
 
 obj/$(TAG)/%_dlldata.c: %.idl
+	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) --dlldata-only -o $@ $(notdir $(basename $<))
 
 $(OBJ): obj/$(TAG)/LegacyUpdate_i.h stdafx.h
@@ -183,7 +194,6 @@ $(OBJ): obj/$(TAG)/LegacyUpdate_i.h stdafx.h
 $(RES): $(MSG)
 
 obj/dlldatax.$(TAG).o: \
-	obj/$(TAG)/LegacyUpdate_i.h \
 	obj/$(TAG)/LegacyUpdate_dlldata.c \
 	obj/$(TAG)/LegacyUpdate_p.c
 
@@ -192,4 +202,4 @@ obj/LegacyUpdate.$(TAG).res: obj/$(TAG)/LegacyUpdate.tlb
 clean:
 	rm -rf obj
 
-.PHONY: all all-archs all-32 all-64 internal-all before-all clean
+.PHONY: all all-archs all-32 all-64 internal-all clean

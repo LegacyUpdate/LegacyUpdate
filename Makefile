@@ -2,12 +2,7 @@ export CI ?= 0
 export SIGN ?= 0
 export DEBUG ?= 1
 
-all: before-all setup
-
-before-all:
-ifeq ($(DEBUG),0)
-	+$(MAKE) clean
-endif
+all: setup
 
 activex:
 	+$(MAKE) -C LegacyUpdate
@@ -37,4 +32,4 @@ clean:
 clean-nt4:
 	+$(MAKE) -C setup clean
 
-.PHONY: all before-all activex launcher nsisplugin setup nt4 clean clean-nt4
+.PHONY: all activex launcher nsisplugin setup nt4 clean clean-nt4
