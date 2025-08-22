@@ -16,12 +16,10 @@ nsisplugin:
 setup: activex launcher nsisplugin
 	+$(MAKE) -C setup
 
-nt4:
-ifeq ($(DEBUG),0)
-	+$(MAKE) clean-nt4
-endif
-
+setup-nt4: nsisplugin
 	+$(MAKE) -C setup nt4
+
+nt4: setup-nt4
 
 clean:
 	+$(MAKE) -C LegacyUpdate clean
@@ -30,6 +28,7 @@ clean:
 	+$(MAKE) -C setup clean
 
 clean-nt4:
+	+$(MAKE) -C nsisplugin clean
 	+$(MAKE) -C setup clean
 
 .PHONY: all activex launcher nsisplugin setup nt4 clean clean-nt4

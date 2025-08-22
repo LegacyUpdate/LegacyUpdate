@@ -130,66 +130,54 @@ endif
 $(BIN): $(OBJ) $(RES)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
 
-$(DEF):
-	@:
+$(DEF): ;
+
+obj/$(TAG):
+	mkdir -p $@
 
 obj/%.$(TAG).o: %.c
-	@mkdir -p obj/$(TAG)
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/dlldatax.$(TAG).o: dlldatax.c
-	@mkdir -p obj/$(TAG)
 	$(CC) -x c $< $(filter-out -Wpedantic, $(CFLAGS)) -c -o $@
 
 obj/%.$(TAG).o: %.cpp
-	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.c
-	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.cpp
-	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
 obj/%.$(TAG).o: obj/%.c
-	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: obj/$(TAG)/%.c
-	@mkdir -p obj/$(TAG)
 	$(CC) -x c++ $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).res: %.rc
-	@mkdir -p obj/$(TAG)
 	$(RC) $< $(RCFLAGS) -o $@
 
 obj/%.bin: %.mc
-	@mkdir -p obj/$(TAG)
 	$(MC) $< $(MCFLAGS) -h $(dir $@) -r $(dir $@)
 
 obj/$(TAG)/%.tlb: %.idl
-	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -t -o $@ $<
 
 obj/$(TAG)/%_i.h: %.idl
-	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -h -o $@ $<
 
 obj/$(TAG)/%_i.c: %.idl
-	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -u -o $@ $<
 
 obj/$(TAG)/%_p.c: %.idl
-	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -p -o $@ $<
 
 obj/$(TAG)/%_dlldata.c: %.idl
-	@mkdir -p obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) --dlldata-only -o $@ $(notdir $(basename $<))
 
-$(OBJ): obj/$(TAG)/LegacyUpdate_i.h stdafx.h
+$(OBJ): obj/$(TAG)/LegacyUpdate_i.h stdafx.h | obj/$(TAG)
 
 $(RES): $(MSG)
 

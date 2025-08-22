@@ -114,24 +114,24 @@ ifeq ($(SIGN),1)
 endif
 
 $(BIN): $(OBJ) $(RES)
-	@mkdir -p obj
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
 
+obj:
+	mkdir -p $@
+
 obj/%.$(TAG).o: %.c
-	@mkdir -p obj
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.c
-	@mkdir -p obj
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).res: %.rc
-	@mkdir -p obj
 	$(RC) $< $(RCFLAGS) -o $@
 
 obj/lib%.$(TAG).a: ../LegacyUpdate/%.def
-	@mkdir -p obj
 	$(DLLTOOL) -d $< -l $@ -D $(notdir $(basename $<).dll)
+
+$(OBJ): | obj
 
 clean:
 	rm -rf obj

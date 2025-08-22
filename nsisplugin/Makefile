@@ -94,29 +94,28 @@ endif
 $(BIN): $(OBJ) $(RES)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
 
+obj:
+	mkdir -p $@
+
 obj/%.$(TAG).o: %.c
-	@mkdir -p obj
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: %.cpp
-	@mkdir -p obj
 	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.c
-	@mkdir -p obj
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../shared/%.cpp
-	@mkdir -p obj
 	$(CC) -x c++ $< $(CXXFLAGS) -c -o $@
 
 obj/%.$(TAG).o: ../include/nsis/%.c
-	@mkdir -p obj
 	$(CC) -x c $< $(CFLAGS) -c -o $@
 
 obj/%.$(TAG).res: %.rc
-	@mkdir -p obj
 	$(RC) $< $(RCFLAGS) -o $@
+
+$(OBJ): | obj
 
 clean:
 	rm -rf obj
