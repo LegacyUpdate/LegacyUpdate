@@ -1,10 +1,11 @@
+#include "Utils.h"
 #include <shlwapi.h>
+#include <winreg.h>
 #include "Exec.h"
 #include "LegacyUpdate.h"
 #include "../shared/LegacyUpdate.h"
 #include "WULog.h"
 
-// Define missing constants for mingw
 #ifndef SHUTDOWN_RESTART
 #define SHUTDOWN_RESTART 0x00000004
 #endif

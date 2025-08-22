@@ -9,7 +9,6 @@
 #include "Utils.h"
 #include "VersionInfo.h"
 #include <strsafe.h>
-#include <ccomptr.h>
 #include <new>
 
 const WCHAR *permittedProgIDs[] = {

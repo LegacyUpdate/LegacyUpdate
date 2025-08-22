@@ -374,6 +374,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
 		return S_OK;
 	}
 
+	// https://learn.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker
 	HWND hwnd;
 	GetIEWindowHWND(&hwnd);
 	HRESULT hr = CoCreateInstanceAsAdmin(hwnd, CLSID_ElevationHelper, IID_IElevationHelper, (void**)&m_elevatedHelper);
@@ -400,7 +401,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 		return hr;
 	}
 
- 	return elevatedHelper->CreateObject(progID, retval);
+	return elevatedHelper->CreateObject(progID, retval);
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
@@ -427,10 +428,13 @@ STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 	DoIsPermittedCheck();
 
 	if (IsUserAdmin()) {
+		// Entire process is elevated.
 		*retval = e_admin;
 	} else if (m_elevatedHelper != NULL) {
+		// Our control has successfully received elevation.
 		*retval = e_elevated;
 	} else {
+		// The control has no admin rights (although it may not have requested them yet).
 		*retval = e_nonAdmin;
 	}
 
@@ -440,6 +444,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
+	// Ask WU itself whether a reboot is required
 	CComPtr<ISystemInformation> systemInfo;
 	if (SUCCEEDED(systemInfo.CoCreateInstance(CLSID_SystemInformation, NULL, CLSCTX_INPROC_SERVER))) {
 		if (SUCCEEDED(systemInfo->get_RebootRequired(retval)) && *retval == VARIANT_TRUE) {
@@ -447,6 +452,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 		}
 	}
 
+	// Check reboot flag in registry
 	HKEY subkey = NULL;
 	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, KEY_READ | KEY_WOW64_64KEY, &subkey));
 	if (SUCCEEDED(hr)) {
@@ -462,6 +468,8 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
+	// Future note: These are in HKCU on NT; HKLM on 9x.
+	// Remove links and access to Windows Update
 	DWORD value = 0;
 	HRESULT hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", KEY_WOW64_64KEY, &value);
 	if (SUCCEEDED(hr) && value == 1) {
@@ -469,6 +477,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval
 		return S_OK;
 	}
 
+	// Remove access to use all Windows Update features
 	hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", KEY_WOW64_64KEY, &value);
 	if (SUCCEEDED(hr) && value == 1) {
 		*retval = VARIANT_TRUE;
@@ -485,6 +494,8 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired() {
 	VARIANT_BOOL isRebootRequired = VARIANT_FALSE;
 	HRESULT hr = get_IsRebootRequired(&isRebootRequired);
 	if (SUCCEEDED(hr) && isRebootRequired == VARIANT_TRUE) {
+		// Calling Commit() is recommended on Windows 10, to ensure feature updates are properly prepared prior to the
+		// reboot. If IUpdateInstaller4 doesn't exist, we can skip this.
 		CComPtr<IUpdateInstaller4> installer;
 		hr = installer.CoCreateInstance(CLSID_UpdateInstaller, NULL, CLSCTX_INPROC_SERVER);
 		if (SUCCEEDED(hr) && hr != REGDB_E_CLASSNOTREG) {
@@ -511,6 +522,7 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog() {
 
 	HRESULT hr = StartLauncher(L"/log", FALSE);
 	if (!SUCCEEDED(hr)) {
+		// Try directly
 		hr = ::ViewWindowsUpdateLog(SW_SHOWDEFAULT);
 	}
 
@@ -524,6 +536,8 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings() {
 	if (!SUCCEEDED(hr)) {
 		TRACE(L"OpenWindowsUpdateSettings() failed, falling back: %ls", GetMessageForHresult(hr));
 
+		// Might happen if the site isn't trusted, and the user rejected the IE medium integrity prompt.
+		// Use the basic Automatic Updates dialog directly from COM.
 		CComPtr<IAutomaticUpdates> automaticUpdates;
 		hr = automaticUpdates.CoCreateInstance(CLSID_AutomaticUpdates, NULL, CLSCTX_INPROC_SERVER);
 
