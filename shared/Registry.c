@@ -127,7 +127,7 @@ HRESULT SetRegistryEntries(RegistryEntry entries[], BOOL expandEnv) {
 				return hr;
 			}
 
-			if (entry.data.lpData == DELETE_VALUE) {
+			if (entry.uData.lpData == DELETE_VALUE) {
 				hr = HRESULT_FROM_WIN32(RegDeleteValue(key, entry.lpValueName));
 				if (hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
 					hr = S_OK;
