@@ -11,25 +11,26 @@
             "cppStandard": "c++11",
             "intelliSenseMode": "windows-gcc-x86",
             "compilerArgs": [
-                "-std=c++11",
                 "-mwindows",
                 "-municode",
-                "-s",
                 "-fPIE",
-                "-ffunction-sections",
-                "-fdata-sections",
                 "-fno-unwind-tables",
                 "-fno-asynchronous-unwind-tables",
                 "-fno-exceptions",
-                "-fno-rtti",
-                "-flto",
-                "-Wno-write-strings",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-Wno-unused-parameter",
+                "-Wno-unused-variable",
+                "-Wno-unknown-pragmas",
+                "-Wno-cast-function-type",
+                "-Wno-missing-field-initializers",
+                "-Iobj",
                 "-include stdafx.h"
             ],
             "defines": [
                 "UNICODE",
-                "_UNICODE",
-                "_USRDLL"
+                "_UNICODE"
             ]
         }
     ],

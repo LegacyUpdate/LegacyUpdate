@@ -2,46 +2,37 @@
 
 // ElevationHelper.h : Declaration of the CElevationHelper class.
 
-#include <atlctl.h>
 #include "resource.h"
+#include "com.h"
 #include "LegacyUpdate_i.h"
 
-BOOL ProgIDIsPermitted(PWSTR progID);
-STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, __in REFCLSID rclsid, __in REFIID riid, __deref_out void **ppv);
+STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 
-// CElevationHelper
-class ATL_NO_VTABLE CElevationHelper :
-	public CComObjectRootEx<CComSingleThreadModel>,
-	public CComCoClass<CElevationHelper, &CLSID_ElevationHelper>,
-	public ISupportErrorInfo,
-	public IDispatchImpl<IElevationHelper, &IID_IElevationHelper, &LIBID_LegacyUpdateLib, /*wMajor =*/ 1, /*wMinor =*/ 0> {
+BOOL ProgIDIsPermitted(PWSTR progID);
+STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, void **ppv);
+
+class DECLSPEC_NOVTABLE CElevationHelper :
+	public IDispatchImpl<IElevationHelper, &LIBID_LegacyUpdateLib> {
+public:
+	CElevationHelper() :
+		m_refCount(1) {}
+
+	virtual ~CElevationHelper();
+
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
+
+private:
+	LONG m_refCount;
 
 public:
-	CElevationHelper();
-
-	DECLARE_REGISTRY_RESOURCEID(IDR_ELEVATIONHELPER)
-
-	BEGIN_COM_MAP(CElevationHelper)
-		COM_INTERFACE_ENTRY(IElevationHelper)
-		COM_INTERFACE_ENTRY(IDispatch)
-		COM_INTERFACE_ENTRY(ISupportErrorInfo)
-	END_COM_MAP()
-
-	// ISupportsErrorInfo
-	STDMETHOD(InterfaceSupportsErrorInfo)(REFIID riid) {
-		return IsEqualGUID(riid, IID_IElevationHelper) ? S_OK : S_FALSE;
-	}
+	// IUnknown
+	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
+	STDMETHODIMP_(ULONG) AddRef();
+	STDMETHODIMP_(ULONG) Release();
 
 	// IElevationHelper
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct() { return S_OK; }
-	void FinalRelease() {}
-
 	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
-	STDMETHODIMP Reboot(void);
-	STDMETHODIMP BeforeUpdate(void);
-	STDMETHODIMP AfterUpdate(void);
+	STDMETHODIMP Reboot();
+	STDMETHODIMP BeforeUpdate();
+	STDMETHODIMP AfterUpdate();
 };
-
-OBJECT_ENTRY_AUTO(__uuidof(ElevationHelper), CElevationHelper)

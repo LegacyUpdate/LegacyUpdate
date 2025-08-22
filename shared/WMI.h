@@ -3,4 +3,4 @@
 #include <windows.h>
 #include <oaidl.h>
 
-EXTERN_C HRESULT QueryWMIProperty(LPWSTR query, LPWSTR property, LPVARIANT value);
+EXTERN_C HRESULT QueryWMIProperty(LPCWSTR query, LPCWSTR property, LPVARIANT value);

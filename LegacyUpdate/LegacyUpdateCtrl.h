@@ -4,101 +4,62 @@
 
 // CLegacyUpdateCtrl : See LegacyUpdateCtrl.cpp for implementation.
 
-#include <atlctl.h>
-#include <MsHTML.h>
+#include <mshtml.h>
 #include <wuapi.h>
 #include "resource.h"
+#include "com.h"
 #include "LegacyUpdate_i.h"
 
-// CLegacyUpdateCtrl
-class ATL_NO_VTABLE CLegacyUpdateCtrl :
-	public CComObjectRootEx<CComSingleThreadModel>,
-	public IDispatchImpl<ILegacyUpdateCtrl, &IID_ILegacyUpdateCtrl, &LIBID_LegacyUpdateLib, /*wMajor =*/ 1, /*wMinor =*/ 0>,
-	public IPersistStreamInitImpl<CLegacyUpdateCtrl>,
-	public IOleControlImpl<CLegacyUpdateCtrl>,
-	public IOleObjectImpl<CLegacyUpdateCtrl>,
-	public IOleInPlaceActiveObjectImpl<CLegacyUpdateCtrl>,
-	public IViewObjectExImpl<CLegacyUpdateCtrl>,
-	public IOleInPlaceObjectWindowlessImpl<CLegacyUpdateCtrl>,
-	public ISupportErrorInfo,
-	public IObjectWithSiteImpl<CLegacyUpdateCtrl>,
-	public IPersistStorageImpl<CLegacyUpdateCtrl>,
-	public IQuickActivateImpl<CLegacyUpdateCtrl>,
-	public IProvideClassInfo2Impl<&CLSID_LegacyUpdateCtrl, NULL, &LIBID_LegacyUpdateLib>,
-	public CComCoClass<CLegacyUpdateCtrl, &CLSID_LegacyUpdateCtrl>,
-	public CComControl<CLegacyUpdateCtrl> {
+STDMETHODIMP CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
+
+class CLegacyUpdateCtrl;
+
+class DECLSPEC_NOVTABLE CLegacyUpdateCtrl_IOleObject :
+	public IOleObjectImpl<CLegacyUpdateCtrl> {
+public:
+	CLegacyUpdateCtrl_IOleObject(CLegacyUpdateCtrl *pParent) :
+		IOleObjectImpl<CLegacyUpdateCtrl>(pParent) {}
+};
+
+class DECLSPEC_NOVTABLE CLegacyUpdateCtrl :
+	public IDispatchImpl<ILegacyUpdateCtrl, &LIBID_LegacyUpdateLib> {
+public:
+	CLegacyUpdateCtrl() :
+		m_IOleObject(this),
+		m_refCount(1),
+		m_clientSite(NULL),
+		m_adviseSink(NULL),
+		m_elevatedHelper(NULL),
+		m_nonElevatedHelper(NULL) {}
+
+	virtual ~CLegacyUpdateCtrl();
+
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
+
 private:
-	CComPtr<IElevationHelper> m_elevatedHelper;
-	CComPtr<IElevationHelper> m_nonElevatedHelper;
+	CLegacyUpdateCtrl_IOleObject m_IOleObject;
+	LONG m_refCount;
 
 public:
-	CLegacyUpdateCtrl() {
-		m_bWindowOnly = TRUE;
-	}
+	// IUnknown
+	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
+	STDMETHODIMP_(ULONG) AddRef();
+	STDMETHODIMP_(ULONG) Release();
 
-	DECLARE_OLEMISC_STATUS(
-		OLEMISC_INVISIBLEATRUNTIME |
-		OLEMISC_ACTIVATEWHENVISIBLE |
-		OLEMISC_SETCLIENTSITEFIRST |
-		OLEMISC_INSIDEOUT |
-		OLEMISC_CANTLINKINSIDE |
-		OLEMISC_RECOMPOSEONRESIZE
-	)
+	IOleClientSite *m_clientSite;
+	IAdviseSink *m_adviseSink;
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_LEGACYUPDATECTRL)
+private:
+	IElevationHelper *m_elevatedHelper;
+	IElevationHelper *m_nonElevatedHelper;
 
-	BEGIN_COM_MAP(CLegacyUpdateCtrl)
-		COM_INTERFACE_ENTRY(ILegacyUpdateCtrl)
-		COM_INTERFACE_ENTRY(IDispatch)
-		COM_INTERFACE_ENTRY(IViewObjectEx)
-		COM_INTERFACE_ENTRY(IViewObject2)
-		COM_INTERFACE_ENTRY(IViewObject)
-		COM_INTERFACE_ENTRY(IOleInPlaceObjectWindowless)
-		COM_INTERFACE_ENTRY(IOleInPlaceObject)
-		COM_INTERFACE_ENTRY2(IOleWindow, IOleInPlaceObjectWindowless)
-		COM_INTERFACE_ENTRY(IOleInPlaceActiveObject)
-		COM_INTERFACE_ENTRY(IOleControl)
-		COM_INTERFACE_ENTRY(IOleObject)
-		COM_INTERFACE_ENTRY(IPersistStreamInit)
-		COM_INTERFACE_ENTRY2(IPersist, IPersistStreamInit)
-		COM_INTERFACE_ENTRY(ISupportErrorInfo)
-		COM_INTERFACE_ENTRY(IQuickActivate)
-		COM_INTERFACE_ENTRY(IPersistStorage)
-		COM_INTERFACE_ENTRY(IProvideClassInfo)
-		COM_INTERFACE_ENTRY(IProvideClassInfo2)
-	END_COM_MAP()
+	STDMETHODIMP GetHTMLDocument(IHTMLDocument2 **retval);
+	STDMETHODIMP IsPermitted();
+	STDMETHODIMP GetIEWindowHWND(HWND *retval);
+	STDMETHODIMP GetElevatedHelper(IElevationHelper **retval);
 
-	BEGIN_PROP_MAP(CLegacyUpdateCtrl)
-	END_PROP_MAP()
-
-	BEGIN_MSG_MAP(CLegacyUpdateCtrl)
-		CHAIN_MSG_MAP(CComControl<CLegacyUpdateCtrl>)
-		DEFAULT_REFLECTION_HANDLER()
-	END_MSG_MAP()
-
-	// ISupportsErrorInfo
-	STDMETHOD(InterfaceSupportsErrorInfo)(REFIID riid) {
-		return IsEqualGUID(riid, IID_ILegacyUpdateCtrl) ? S_OK : S_FALSE;
-	}
-
-	// IViewObjectEx
-	DECLARE_VIEW_STATUS(VIEWSTATUS_SOLIDBKGND | VIEWSTATUS_OPAQUE)
-
+public:
 	// ILegacyUpdateCtrl
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct() { return S_OK; }
-	void FinalRelease() {}
-
-private:
-	IHTMLDocument2 *GetHTMLDocument();
-	HWND GetIEWindowHWND();
-	BOOL IsPermitted();
-	STDMETHODIMP GetElevatedHelper(CComPtr<IElevationHelper> &retval);
-
-public:
-	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite);
-
 	STDMETHODIMP CheckControl(VARIANT_BOOL *retval);
 	STDMETHODIMP MessageForHresult(LONG inHresult, BSTR *retval);
 	STDMETHODIMP GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval);
@@ -108,14 +69,12 @@ public:
 	STDMETHODIMP GetUserType(UserType *retval);
 	STDMETHODIMP get_IsRebootRequired(VARIANT_BOOL *retval);
 	STDMETHODIMP get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);
-	STDMETHODIMP RebootIfRequired(void);
-	STDMETHODIMP ViewWindowsUpdateLog(void);
-	STDMETHODIMP OpenWindowsUpdateSettings(void);
+	STDMETHODIMP RebootIfRequired();
+	STDMETHODIMP ViewWindowsUpdateLog();
+	STDMETHODIMP OpenWindowsUpdateSettings();
 	STDMETHODIMP get_IsUsingWsusServer(VARIANT_BOOL *retval);
 	STDMETHODIMP get_WsusServerUrl(BSTR *retval);
 	STDMETHODIMP get_WsusStatusServerUrl(BSTR *retval);
-	STDMETHODIMP BeforeUpdate(void);
-	STDMETHODIMP AfterUpdate(void);
+	STDMETHODIMP BeforeUpdate();
+	STDMETHODIMP AfterUpdate();
 };
-
-OBJECT_ENTRY_AUTO(__uuidof(LegacyUpdateCtrl), CLegacyUpdateCtrl)

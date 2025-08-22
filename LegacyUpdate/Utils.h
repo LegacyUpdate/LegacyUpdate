@@ -1,4 +1,4 @@
 #pragma once
 
-HRESULT StartLauncher(LPWSTR params, BOOL wait);
+HRESULT StartLauncher(LPCWSTR params, BOOL wait);
 HRESULT Reboot();

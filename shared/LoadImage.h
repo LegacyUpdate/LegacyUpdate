@@ -1,5 +1,5 @@
 #include <windows.h>
 
-HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourceType);
-HBITMAP LoadJPEGFile(LPWSTR filePath);
-BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outputPath);
+HBITMAP LoadPNGResource(HINSTANCE hInstance, LPCWSTR resourceName, LPCWSTR resourceType);
+HBITMAP LoadJPEGFile(LPCWSTR filePath);
+BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outputPath);

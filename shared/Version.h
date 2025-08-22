@@ -1,6 +1,6 @@
 #define VERSION_MAJOR 1
-#define VERSION_MINOR 11
+#define VERSION_MINOR 12
 #define VERSION_PATCH 0
 #define VERSION_BUILD 0
 
-#define VERSION_STRING "1.11"
+#define VERSION_STRING "1.12.0-dev"

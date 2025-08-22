@@ -2,15 +2,6 @@
 !define NAME               "Legacy Update"
 !define DOMAIN             "legacyupdate.net"
 
-; Build
-!if ${DEBUG} == 1
-	!define VSBUILD32        "Debug-VC08"
-	!define VSBUILD64        "Debug-VC17"
-!else
-	!define VSBUILD32        "Release"
-	!define VSBUILD64        "Release"
-!endif
-
 ; NSIS target
 !ifdef NSIS_UNICODE
 	!define NSIS_CHARSET     "unicode"
@@ -26,7 +17,7 @@
 	!define DLLVersion_3 1
 	!define DLLVersion_4 0
 !else
-	!getdllversion "..\${VSBUILD32}\LegacyUpdate.dll" DLLVersion_
+	!getdllversion "..\LegacyUpdate\obj\LegacyUpdate32.dll" DLLVersion_
 !endif
 
 !define LONGVERSION        "${DLLVersion_1}.${DLLVersion_2}.${DLLVersion_3}.${DLLVersion_4}"

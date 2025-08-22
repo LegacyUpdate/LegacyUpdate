@@ -40,7 +40,9 @@
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
-static OSVERSIONINFOEX _versionInfo = {0};
+#define OWN_MODULE ((HMODULE)&__ImageBase)
+
+static OSVERSIONINFOEX _versionInfo;
 
 static OSVERSIONINFOEX *GetVersionInfo() {
 	if (_versionInfo.dwOSVersionInfoSize == 0) {
@@ -107,8 +109,6 @@ _IS_BUILD_MACRO(11_22H2)
 _IS_BUILD_MACRO(11_23H2)
 _IS_BUILD_MACRO(11_24H2)
 #undef _IS_BUILD_MACRO
-
-EXTERN_C HRESULT GetOwnVersion(LPWSTR *version);
 
 static ALWAYS_INLINE void GetOwnFileName(LPWSTR *filename) {
 	*filename = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));

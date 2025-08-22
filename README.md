@@ -19,7 +19,7 @@ Just want to appreciate the nostalgia of the classic Windows Update website? Leg
 
 Download the latest version from the [Releases](https://github.com/LegacyUpdate/LegacyUpdate/releases) page of this repo, or from [**legacyupdate.net**](https://legacyupdate.net/).
 
-You can also download the [latest nightly build](https://nightly.link/LegacyUpdate/LegacyUpdate/workflows/build/main/artifact.zip), based on the current development work. Nightly builds are not guaranteed to be stable, and unlike release builds, require at least Windows 2000 SP4 or Windows XP SP2. You may also need to accept extra SmartScreen and other security warnings since these executables are unique to each build. If you’re not sure what to download, you probably want the [stable release](https://legacyupdate.net/).
+You can also download the [latest nightly build](https://nightly.link/LegacyUpdate/LegacyUpdate/workflows/build/main/artifact.zip), based on the current development work. Nightly builds are not guaranteed to be stable. You may also need to accept extra SmartScreen and other security warnings since these executables are unique to each build. If you’re not sure what to download, you probably want the [stable release](https://legacyupdate.net/).
 
 ## The ActiveX Control
 
@@ -29,36 +29,26 @@ This also allows us to extend it with convenient features not possible with Java
 
 ### Building
 
-The project is built on Windows 10/11 with [WSL 2](https://aka.ms/wslinstall). You can test much of the project using your running version of Windows, although for best results you should test using a virtual machine of Windows XP, Windows Vista, and Windows 7. Take snapshots of your VMs - this will make it far easier to test update scenarios.
+The project is built using [MinGW-w64](https://www.mingw-w64.org/) on Linux. You can test much of the project using your running version of Windows, although for best results you should test using a virtual machine of Windows XP, Windows Vista, and Windows 7. Take snapshots of your VMs - this will make it far easier to test update scenarios.
 
 You will need to install:
 
-* On Windows:
-  * [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) - select the following individual components:
-    * Desktop development with C++
-    * C++ Windows XP Support for VS 2017 (v141) tools
-    * C++ ATL for v141 build tools (x86 & x64)
-    * C++/CLI support for v141 build tools (14.16)
-  * [Visual Studio 2008 SP1](https://my.visualstudio.com/Downloads?q=Visual%20Studio%20Express%202008%20with%20Service%20Pack%201&pgroup=) for compiling a build that works on XP RTM and 2000 SP4 - not required if you only want to build for XP SP2 and later
-    * You will also need [Visual Studio 2010](https://my.visualstudio.com/Downloads?q=Visual%20Studio%202010&pgroup=), which provides bridging from 2008’s VSBuild system to the modern MSBuild.
-* On Linux:
-  * [MinGW-w64](https://www.mingw-w64.org/) for i686 and x86_64
-  * [NSIS](https://nsis.sourceforge.io/)
-  * [UPX](https://upx.github.io/)
+* [MinGW-w64](https://www.mingw-w64.org/) for i686 and x86_64
+* [NSIS](https://nsis.sourceforge.io/)
+* [UPX](https://upx.github.io/)
+* [Wine](https://www.winehq.org/) development tools
 
-Run the following command to install Linux build dependencies. This command specific to Ubuntu - if you use a different distro, you will need to find and install the equivalent packages from your package manager.
+Run the following command to install build dependencies. This command specific to Ubuntu - if you use a different distro, you will need to find and install the equivalent packages from your package manager.
 
 ```bash
-sudo apt install make nsis upx-ucl mingw-w64-i686-dev mingw-w64-x86-64-dev
+sudo apt install libwine-dev make mingw-w64-i686-dev mingw-w64-x86-64-dev nsis upx-ucl
 ```
 
 If you use Debian/Ubuntu’s build of NSIS, please note that it is compiled for Pentium II and later, and will fail to launch on Pentium, AMD K6, and other CPUs lacking SSE instructions. If you want to support these CPUs, run `./build/fix-nsis.sh` to patch the NSIS exehead binaries with a build that supports these CPUs.
 
-When opening the solution for the first time in Visual Studio 2022, it will suggest to retarget it against the latest Windows SDK. Cancel this dialog.
-
-If you get “unexpected precompiled header error” when building, install [KB976656](https://content.legacyupdate.net/support.microsoft.com/kb/976656/VS90SP1-KB976656-x86.exe), or merge `build\fix-vc08-aslr.reg`, which disables ASLR for `cl.exe`.
-
 ### Testing
+
+A barebones Visual Studio project is included to help with debugging.
 
 For debugging, if running on Windows XP with IE8, consider installing [Utilu IE Collection](https://www.utilu.com/iecollection/). IE6/IE7 are more convenient for debugging the native code because of their simplistic single-process model. Visual Studio is able to launch it and directly attach to the process the code is running in. Otherwise, you will need to manually find and attach the debugger to the IE child process hosting the website and ActiveX control.
 
@@ -72,7 +62,6 @@ To configure the debugger:
     * For Utilu IE7: `$(ProgramW6432)\Utilu IE Collection\IE700\iexplore.exe`
     * For PowerShell: `$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe` (or SysWOW64 to test the 32-bit build on 64-bit Windows)
 3. If using IE, set the Command Arguments field to `http://legacyupdate.net/windowsupdate/v6/`, or any other URL you want to use for debugging
-4. In the Debugger tab, set Register Output to Yes. (If running on Windows Vista or later, start Visual Studio as administrator to ensure the rights needed for this.)
 
 You can directly test the ActiveX control using PowerShell:
 

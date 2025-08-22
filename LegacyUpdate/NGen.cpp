@@ -1,13 +1,17 @@
-#include "stdafx.h"
 #include "NGen.h"
 #include "Exec.h"
 #include "VersionInfo.h"
 #include "Wow64.h"
-#include <Shlwapi.h>
+#include <shlwapi.h>
 
 STDMETHODIMP PauseResumeNGenQueue(BOOL state) {
+	// Only necessary prior to Windows 8
+	if (AtLeastWin8()) {
+		return S_OK;
+	}
+
 	// Pause and resume .NET Framework global assembly cache (GAC) and NGen queue
-	static LPWSTR versions[] = {
+	static LPCWSTR versions[] = {
 		L"v4.0.30319",
 		L"v2.0.50727"
 	};

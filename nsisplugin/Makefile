@@ -29,7 +29,6 @@ CFLAGS = \
 	-DUNICODE \
 	-D_UNICODE \
 	$(if $(filter 1,$(DEBUG)),-D_DEBUG -g,-DNDEBUG -Os) \
-	-D_USRDLL \
 	-s \
 	-fPIE \
 	-ffunction-sections \
@@ -84,17 +83,19 @@ RCFLAGS = \
 	-O coff \
 	-I../shared
 
-all: before-all $(BIN) after-all
+all: internal-all
+
+internal-all: $(BIN)
 ifeq ($(SIGN),1)
 	../build/sign.sh $(BIN)
 endif
 	cp $(BIN) ../setup/x86-unicode/
 
-before-all:
-	mkdir -p obj
-
 $(BIN): $(OBJ) $(RES)
 	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
+
+obj:
+	mkdir -p $@
 
 obj/%.$(TAG).o: %.c
 	$(CC) -x c $< $(CFLAGS) -c -o $@
@@ -114,6 +115,8 @@ obj/%.$(TAG).o: ../include/nsis/%.c
 obj/%.$(TAG).res: %.rc
 	$(RC) $< $(RCFLAGS) -o $@
 
+$(OBJ): | obj
+
 clean:
 	rm -rf obj
 
@@ -122,4 +125,4 @@ test:
 	cd ../setup && makensis test.nsi
 	cd ../setup && explorer.exe test.exe
 
-.PHONY: all before-all after-all clean test
+.PHONY: all internal-all clean test

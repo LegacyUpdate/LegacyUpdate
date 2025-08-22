@@ -10,9 +10,6 @@
 // Use msvcrt stdio functions
 #define __USE_MINGW_ANSI_STDIO 0
 
-// Enable comctl 6.0 (visual styles)
-#define ISOLATION_AWARE_ENABLED 1
-
 // Enable COM C interfaces
 #define CINTERFACE
 #define COBJMACROS

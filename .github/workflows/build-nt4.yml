@@ -20,7 +20,17 @@ jobs:
         sudo apt-get update -q
         sudo apt-get install -qy curl make mingw-w64-x86-64-dev nsis p7zip-full upx-ucl unzip
 
+    - name: MinGW toolchain cache
+      id: mingw-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          /opt/gcc-15.1-binutils-2.45-mingw-v13.0.0-i686
+          /opt/gcc-15.1-binutils-2.45-mingw-v13.0.0-x86_64
+        key: gcc-15.1-binutils-2.45-mingw-v13.0.0
+
     - name: Install MinGW toolchain
+      if: steps.mingw-cache.outputs.cache-hit != 'true'
       run: |
         curl -fsSL https://linuxfromscratch.org/~renodr/gcc-15.1-binutils-2.45-mingw-v13.0.0-i686.tar.xz -o /tmp/mingw32.tar.xz
         curl -fsSL https://linuxfromscratch.org/~renodr/gcc-15.1-binutils-2.45-mingw-v13.0.0-x86_64.tar.xz -o /tmp/mingw64.tar.xz
@@ -28,13 +38,29 @@ jobs:
         sudo tar -xf /tmp/mingw64.tar.xz -C /opt
         rm /tmp/mingw{32,64}.tar.xz
 
+    - name: NSIS cache
+      id: nsis-cache
+      uses: actions/cache@v4
+      with:
+        path: /opt/nsis-3.11
+        key: nsis-3.11
+
     - name: Install custom NSIS package
+      if: steps.nsis-cache.outputs.cache-hit != 'true'
       run: |
         curl -fsSL https://linuxfromscratch.org/~renodr/nsis-3.11-ubuntu24-v2.tar.xz -o /tmp/nsis-3.11.tar.xz
         sudo tar -xf /tmp/nsis-3.11.tar.xz -C /opt
         rm /tmp/nsis-3.11.tar.xz
 
+    - name: Patches cache
+      id: patches-cache
+      uses: actions/cache@v4
+      with:
+        path: setup/patches/
+        key: nt4-patches-${{hashFiles('setup/patches/**')}}
+
     - name: Download patches
+      if: steps.patches-cache.outputs.cache-hit != 'true'
       run: |
         ./build/get-nt4-patches.sh
 
@@ -44,7 +70,7 @@ jobs:
         export PATH=/opt/gcc-15.1-binutils-2.45-mingw-v13.0.0-i686/bin:$PATH
         export PATH=/opt/gcc-15.1-binutils-2.45-mingw-v13.0.0-x86_64/bin:$PATH
         export PATH=/opt/nsis-3.11/bin:$PATH
-        make CI=1 DEBUG=0 nt4
+        make -j$(nproc) CI=1 DEBUG=0 nt4
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4

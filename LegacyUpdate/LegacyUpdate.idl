@@ -98,7 +98,7 @@ interface IElevationHelper : IDispatch
 	helpstring("Legacy Update Control")
 ]
 library LegacyUpdateLib {
-	importlib(STDOLE_TLB);
+	importlib("stdole2.tlb");
 
 	[
 		uuid(AD28E0DF-5F5A-40B5-9432-85EFD97D1F9F),

@@ -2,76 +2,102 @@
 
 // ProgressBarControl.h : Declaration of the CProgressBarControl class.
 
-#include <atlctl.h>
 #include "resource.h"
+#include "com.h"
 #include "LegacyUpdate_i.h"
 
-// CProgressBarControl
-class ATL_NO_VTABLE CProgressBarControl :
-	public CComObjectRootEx<CComSingleThreadModel>,
-	public IDispatchImpl<IProgressBarControl, &IID_IProgressBarControl, &LIBID_LegacyUpdateLib, /*wMajor =*/ 1, /*wMinor =*/ 0>,
-	public IOleControlImpl<CProgressBarControl>,
-	public IOleObjectImpl<CProgressBarControl>,
-	public IOleInPlaceActiveObjectImpl<CProgressBarControl>,
-	public IViewObjectExImpl<CProgressBarControl>,
-	public IOleInPlaceObjectWindowlessImpl<CProgressBarControl>,
-	public CComCoClass<CProgressBarControl, &CLSID_ProgressBarControl>,
-	public CComControl<CProgressBarControl>
-{
+STDMETHODIMP CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
+
+class CProgressBarControl;
+
+class DECLSPEC_NOVTABLE CProgressBarControl_IOleObject :
+	public IOleObjectImpl<CProgressBarControl> {
 public:
-	CContainedWindow m_ctl;
+	CProgressBarControl_IOleObject(CProgressBarControl *pParent) :
+		IOleObjectImpl<CProgressBarControl>(pParent) {}
 
-	CProgressBarControl() : m_ctl(L"msctls_progress32", this, 1) {
-		m_bWindowOnly = TRUE;
-	}
-
-	DECLARE_OLEMISC_STATUS(
-		OLEMISC_RECOMPOSEONRESIZE |
-		OLEMISC_CANTLINKINSIDE |
-		OLEMISC_INSIDEOUT |
-		OLEMISC_ACTIVATEWHENVISIBLE |
-		OLEMISC_SETCLIENTSITEFIRST
-	)
-
-	DECLARE_REGISTRY_RESOURCEID(IDR_PROGRESSBARCONTROL)
-
-	BEGIN_COM_MAP(CProgressBarControl)
-		COM_INTERFACE_ENTRY(IProgressBarControl)
-		COM_INTERFACE_ENTRY(IDispatch)
-		COM_INTERFACE_ENTRY(IViewObjectEx)
-		COM_INTERFACE_ENTRY(IViewObject2)
-		COM_INTERFACE_ENTRY(IViewObject)
-		COM_INTERFACE_ENTRY(IOleInPlaceObjectWindowless)
-		COM_INTERFACE_ENTRY(IOleInPlaceObject)
-		COM_INTERFACE_ENTRY2(IOleWindow, IOleInPlaceObjectWindowless)
-		COM_INTERFACE_ENTRY(IOleInPlaceActiveObject)
-		COM_INTERFACE_ENTRY(IOleControl)
-		COM_INTERFACE_ENTRY(IOleObject)
-	END_COM_MAP()
-
-	BEGIN_PROP_MAP(CProgressBarControl)
-	END_PROP_MAP()
-
-	BEGIN_MSG_MAP(CProgressBarControl)
-		MESSAGE_HANDLER(WM_CREATE, OnCreate)
-		CHAIN_MSG_MAP(CComControl<CProgressBarControl>)
-		ALT_MSG_MAP(1)
-	END_MSG_MAP()
-
-	// IViewObjectEx
-	DECLARE_VIEW_STATUS(VIEWSTATUS_SOLIDBKGND | VIEWSTATUS_OPAQUE)
-
-	// IProgressBarControl
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct() { return S_OK; }
-	void FinalRelease() {}
-
-	LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled);
-	STDMETHODIMP SetObjectRects(LPCRECT prcPos, LPCRECT prcClip);
-
-	STDMETHODIMP get_Value(SHORT *pValue);
-	STDMETHODIMP put_Value(SHORT value);
+	STDMETHODIMP GetExtent(DWORD dwDrawAspect, SIZEL *psizel);
+	STDMETHODIMP SetExtent(DWORD dwDrawAspect, SIZEL *psizel);
+	STDMETHODIMP DoVerb(LONG iVerb, LPMSG lpmsg, IOleClientSite *pActiveSite, LONG lindex, HWND hwndParent, LPCRECT lprcPosRect);
+	STDMETHODIMP GetMiscStatus(DWORD dwAspect, DWORD *pdwStatus);
+	STDMETHODIMP Close(DWORD dwSaveOption);
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(ProgressBarControl), CProgressBarControl)
+class DECLSPEC_NOVTABLE CProgressBarControl_IViewObjectEx :
+	public IViewObjectExImpl<CProgressBarControl> {
+public:
+	CProgressBarControl_IViewObjectEx(CProgressBarControl *pParent) :
+		IViewObjectExImpl<CProgressBarControl>(pParent) {}
+};
+
+class DECLSPEC_NOVTABLE CProgressBarControl_IOleInPlaceObject :
+	public IOleInPlaceObjectImpl<CProgressBarControl> {
+public:
+	CProgressBarControl_IOleInPlaceObject(CProgressBarControl *pParent) :
+		IOleInPlaceObjectImpl<CProgressBarControl>(pParent) {}
+
+	STDMETHODIMP SetObjectRects(LPCRECT lprcPosRect, LPCRECT lprcClipRect);
+};
+
+class DECLSPEC_NOVTABLE CProgressBarControl_IOleInPlaceActiveObject :
+	public IOleInPlaceActiveObjectImpl<CProgressBarControl> {
+public:
+	CProgressBarControl_IOleInPlaceActiveObject(CProgressBarControl *pParent) :
+		IOleInPlaceActiveObjectImpl<CProgressBarControl>(pParent) {}
+
+	// IOleInPlaceActiveObject
+	STDMETHODIMP ResizeBorder(LPCRECT prcBorder, IOleInPlaceUIWindow *pUIWindow, BOOL fFrameWindow);
+};
+
+class DECLSPEC_NOVTABLE CProgressBarControl :
+	public IDispatchImpl<IProgressBarControl, &LIBID_LegacyUpdateLib> {
+public:
+	CProgressBarControl() :
+		m_IOleObject(this),
+		m_IViewObjectEx(this),
+		m_IOleInPlaceObject(this),
+		m_IOleInPlaceActiveObject(this),
+		m_refCount(1),
+		m_hwnd(NULL),
+		m_innerHwnd(NULL),
+		m_width(0),
+		m_height(0),
+		m_clientSite(NULL),
+		m_adviseSink(NULL) {
+	}
+
+	virtual ~CProgressBarControl();
+
+	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
+
+public:
+	CProgressBarControl_IOleObject m_IOleObject;
+	CProgressBarControl_IViewObjectEx m_IViewObjectEx;
+	CProgressBarControl_IOleInPlaceObject m_IOleInPlaceObject;
+	CProgressBarControl_IOleInPlaceActiveObject m_IOleInPlaceActiveObject;
+
+private:
+	LONG m_refCount;
+
+public:
+	HWND m_hwnd;
+	HWND m_innerHwnd;
+	LONG m_width;
+	LONG m_height;
+	IOleClientSite *m_clientSite;
+	IAdviseSink *m_adviseSink;
+
+	// IUnknown
+	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
+	STDMETHODIMP_(ULONG) AddRef();
+	STDMETHODIMP_(ULONG) Release();
+
+	// IProgressBarControl
+	STDMETHODIMP get_Value(SHORT *pValue);
+	STDMETHODIMP put_Value(SHORT value);
+
+	// Helpers
+	STDMETHODIMP CreateControlWindow(HWND hParent, const RECT *pRect);
+	STDMETHODIMP DestroyControlWindow();
+	STDMETHODIMP OnDraw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd, HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds, BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue);
+};

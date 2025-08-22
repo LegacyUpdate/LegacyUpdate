@@ -1,11 +1,7 @@
 #pragma once
 
-#ifdef _MERGE_PROXYSTUB
-extern "C" {
-	BOOL WINAPI PrxDllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved);
-	STDAPI PrxDllCanUnloadNow(void);
-	STDAPI PrxDllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv);
-	STDAPI PrxDllRegisterServer(void);
-	STDAPI PrxDllUnregisterServer(void);
-}
-#endif
+EXTERN_C BOOL WINAPI PrxDllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved);
+EXTERN_C STDAPI PrxDllCanUnloadNow(void);
+EXTERN_C STDAPI PrxDllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv);
+EXTERN_C STDAPI PrxDllRegisterServer(void);
+EXTERN_C STDAPI PrxDllUnregisterServer(void);

@@ -14,7 +14,7 @@ typedef HRESULT (WINAPI *_SHCreateStreamOnFileEx)(LPCWSTR pszFile, DWORD grfMode
 static _WICConvertBitmapSource $WICConvertBitmapSource;
 static _SHCreateStreamOnFileEx $SHCreateStreamOnFileEx;
 
-static HGLOBAL GetRawResource(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
+static HGLOBAL GetRawResource(HINSTANCE hInstance, LPCWSTR name, LPCWSTR type) {
 	HRSRC resource = FindResource(hInstance, name, type);
 	if (!resource) {
 		TRACE(L"FindResource failed: %d", GetLastError());
@@ -52,7 +52,7 @@ static HGLOBAL GetRawResource(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
 	return resourceDataHandle;
 }
 
-static IStream *GetResourceStream(HINSTANCE hInstance, LPWSTR name, LPWSTR type) {
+static IStream *GetResourceStream(HINSTANCE hInstance, LPCWSTR name, LPCWSTR type) {
 	IStream *stream = NULL;
 	HGLOBAL resource = GetRawResource(hInstance, name, type);
 	if (!resource) {
@@ -132,7 +132,7 @@ static HBITMAP GetHBitmapForWICBitmap(IWICBitmapSource *bitmap) {
 	return hBitmap;
 }
 
-HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourceType) {
+HBITMAP LoadPNGResource(HINSTANCE hInstance, LPCWSTR resourceName, LPCWSTR resourceType) {
 	if (!$WICConvertBitmapSource) {
 		$WICConvertBitmapSource = (_WICConvertBitmapSource)GetProcAddress(LoadLibrary(L"windowscodecs.dll"), "WICConvertBitmapSource");
 		if (!$WICConvertBitmapSource) {
@@ -159,7 +159,7 @@ HBITMAP LoadPNGResource(HINSTANCE hInstance, LPWSTR resourceName, LPWSTR resourc
 	return result;
 }
 
-HBITMAP LoadJPEGFile(LPWSTR filePath) {
+HBITMAP LoadJPEGFile(LPCWSTR filePath) {
 	if (!$WICConvertBitmapSource) {
 		$WICConvertBitmapSource = (_WICConvertBitmapSource)GetProcAddress(LoadLibrary(L"windowscodecs.dll"), "WICConvertBitmapSource");
 		if (!$WICConvertBitmapSource) {
@@ -194,7 +194,7 @@ HBITMAP LoadJPEGFile(LPWSTR filePath) {
 	return result;
 }
 
-BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPWSTR outputPath) {
+BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outputPath) {
 	BOOL result = FALSE;
 	if (!hBitmap) {
 		TRACE(L"Null bitmap");
