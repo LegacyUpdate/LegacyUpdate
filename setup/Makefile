@@ -1,10 +1,9 @@
 DEBUG ?= 1
 SIGN ?= 0
 CI ?= 0
-NT4 ?= 0
 
 MAKENSIS = makensis
-NSISFLAGS = -DDEBUG=$(DEBUG) -DSIGN=$(SIGN) -DCI=$(CI) -DNT4=$(NT4)
+NSISFLAGS = -DDEBUG=$(DEBUG) -DSIGN=$(SIGN) -DCI=$(CI)
 
 all: nsisplugin setup activex
 
@@ -16,10 +15,10 @@ ifeq ($(MAKELEVEL),0)
 endif
 
 setup: nsisplugin
-	$(MAKENSIS) $(NSISFLAGS) setup.nsi
+	$(MAKENSIS) $(NSISFLAGS) -DNT4=0 setup.nsi
 
 setup-nt4: nsisplugin
-	$(MAKENSIS) $(NSISFLAGS) setup-nt4.nsi
+	$(MAKENSIS) $(NSISFLAGS) -DNT4=1 setup-nt4.nsi
 
 activex: setup
 ifeq ($(SIGN),1)
