@@ -3,7 +3,7 @@
 #include <combaseapi.h>
 #include <oleauto.h>
 #include <ocidl.h>
-#include "comclass.h"
+#include "ComClass.h"
 
 template<typename TImpl>
 class IOleInPlaceObjectImpl : public ComClass<TImpl, IOleInPlaceObject> {
