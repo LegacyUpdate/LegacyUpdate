@@ -33,7 +33,7 @@ BOOL ProgIDIsPermitted(PWSTR progID) {
 }
 
 STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, void **ppv) {
-	WCHAR clsidString[45];
+	WCHAR clsidString[39];
 	StringFromGUID2(rclsid, clsidString, ARRAYSIZE(clsidString));
 
 	WCHAR monikerName[75];

@@ -47,15 +47,15 @@ STDMETHODIMP CProgressBarControl::UpdateRegistry(BOOL bRegister) {
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%", L"AppID", REG_SZ, (LPVOID)L"%APPID%"},
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\ProgID", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.ProgressBar.1"},
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\VersionIndependentProgID", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.ProgressBar"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Programmable", NULL, REG_SZ, (LPVOID)L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Programmable", NULL, REG_SZ, NULL},
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\InprocServer32", NULL, REG_SZ, (LPVOID)L"%MODULE%"},
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\InprocServer32", L"ThreadingModel", REG_SZ, (LPVOID)L"Apartment"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Control", NULL, REG_SZ, (LPVOID)L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Control", NULL, REG_SZ, NULL},
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\TypeLib", NULL, REG_SZ, (LPVOID)L"%LIBID%"},
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Version", NULL, REG_SZ, (LPVOID)L"1.0"},
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\MiscStatus", NULL, REG_DWORD, (LPVOID)PROGRESSBARCONTROL_MISCSTATUS},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Implemented Categories\\{7DD95801-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, (LPVOID)L""},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Implemented Categories\\{7DD95802-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, (LPVOID)L""},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Implemented Categories\\{7DD95801-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, NULL},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_ProgressBarControl%\\Implemented Categories\\{7DD95802-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, NULL},
 			{}
 		};
 		return SetRegistryEntries(entries, TRUE);

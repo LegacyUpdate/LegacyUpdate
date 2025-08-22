@@ -10,7 +10,10 @@ typedef struct {
 	LPCTSTR lpSubKey;
 	LPCWSTR lpValueName;
 	DWORD dwType;
-	LPVOID lpData;
+	union {
+		LPVOID lpData;
+		DWORD dwData;
+	} uData;
 	DWORD dataSize;
 	REGSAM samDesired;
 } RegistryEntry;

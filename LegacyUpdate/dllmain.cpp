@@ -96,12 +96,14 @@ STDAPI DllRegisterServer(void) {
 	HRESULT hr = OleInitialize(NULL);
 	BOOL oleInitialized = SUCCEEDED(hr);
 	if (!SUCCEEDED(hr) && hr != RPC_E_CHANGED_MODE && hr != CO_E_ALREADYINITIALIZED) {
+		TRACE(L"OleInitialize failed: %08x", hr);
 		return hr;
 	}
 
 	LPWSTR installPath;
 	hr = GetInstallPath(&installPath);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"GetInstallPath failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -115,6 +117,7 @@ STDAPI DllRegisterServer(void) {
 	CComPtr<ITypeLib> typeLib;
 	hr = LoadTypeLib(filename, &typeLib);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"LoadTypeLib failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -123,6 +126,7 @@ STDAPI DllRegisterServer(void) {
 
 	hr = RegisterTypeLib(typeLib, filename, NULL);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"RegisterTypeLib failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -135,6 +139,7 @@ STDAPI DllRegisterServer(void) {
 		!SUCCEEDED(StringFromCLSID(CLSID_LegacyUpdateCtrl, &clsidCtrl)) ||
 		!SUCCEEDED(StringFromCLSID(CLSID_ElevationHelper, &clsidElevationHelper)) ||
 		!SUCCEEDED(StringFromCLSID(CLSID_ProgressBarControl, &clsidProgressBar))) {
+		TRACE(L"StringFromCLSID failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -152,12 +157,13 @@ STDAPI DllRegisterServer(void) {
 
 	// Main
 	RegistryEntry mainEntries[] = {
-		{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", L"DllSurrogate", REG_SZ, (LPVOID)L""},
-		{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", REG_SZ, (LPVOID)L""},
+		{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", L"DllSurrogate", REG_SZ, NULL},
+		{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", REG_SZ, NULL},
 		{}
 	};
 	hr = SetRegistryEntries(mainEntries, TRUE);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"SetRegistryEntries main failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -167,6 +173,7 @@ STDAPI DllRegisterServer(void) {
 	// Register classes
 	hr = CLegacyUpdateCtrl::UpdateRegistry(TRUE);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"SetRegistryEntries LegacyUpdateCtrl failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -175,6 +182,7 @@ STDAPI DllRegisterServer(void) {
 
 	hr = CElevationHelper::UpdateRegistry(TRUE);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"SetRegistryEntries ElevationHelper failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -183,6 +191,7 @@ STDAPI DllRegisterServer(void) {
 
 	hr = CProgressBarControl::UpdateRegistry(TRUE);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"SetRegistryEntries ProgressBarControl failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -190,6 +199,9 @@ STDAPI DllRegisterServer(void) {
 	}
 
 	hr = PrxDllRegisterServer();
+	if (!SUCCEEDED(hr)) {
+		TRACE(L"PrxDllRegisterServer failed: %08x", hr);
+	}
 	if (oleInitialized) {
 		OleUninitialize();
 	}
@@ -201,6 +213,7 @@ STDAPI DllUnregisterServer(void) {
 	HRESULT hr = OleInitialize(NULL);
 	BOOL oleInitialized = SUCCEEDED(hr);
 	if (!SUCCEEDED(hr) && hr != RPC_E_CHANGED_MODE && hr != CO_E_ALREADYINITIALIZED) {
+		TRACE(L"OleInitialize failed: %08x", hr);
 		return hr;
 	}
 
@@ -208,6 +221,7 @@ STDAPI DllUnregisterServer(void) {
 	CComPtr<ITypeLib> typeLib;
 	hr = LoadRegTypeLib(LIBID_LegacyUpdateLib, 1, 0, LOCALE_NEUTRAL, &typeLib);
 	if (!SUCCEEDED(hr) && hr != TYPE_E_LIBNOTREGISTERED) {
+		TRACE(L"LoadRegTypeLib failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -218,6 +232,7 @@ STDAPI DllUnregisterServer(void) {
 		TLIBATTR *attrs;
 		hr = typeLib->GetLibAttr(&attrs);
 		if (!SUCCEEDED(hr)) {
+			TRACE(L"GetLibAttr failed: %08x", hr);
 			if (oleInitialized) {
 				OleUninitialize();
 			}
@@ -227,6 +242,7 @@ STDAPI DllUnregisterServer(void) {
 		hr = UnRegisterTypeLib(attrs->guid, attrs->wMajorVerNum, attrs->wMinorVerNum, attrs->lcid, attrs->syskind);
 		typeLib->ReleaseTLibAttr(attrs);
 		if (!SUCCEEDED(hr)) {
+			TRACE(L"UnRegisterTypeLib failed: %08x", hr);
 			if (oleInitialized) {
 				OleUninitialize();
 			}
@@ -239,7 +255,7 @@ STDAPI DllUnregisterServer(void) {
 	if (!SUCCEEDED(StringFromCLSID(CLSID_LegacyUpdateCtrl, &clsidCtrl)) ||
 		!SUCCEEDED(StringFromCLSID(CLSID_ElevationHelper, &clsidElevationHelper)) ||
 		!SUCCEEDED(StringFromCLSID(CLSID_ProgressBarControl, &clsidProgressBar))) {
-			TRACE(L"fail StringFromCLSID %08x", hr);
+		TRACE(L"StringFromCLSID failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -260,6 +276,7 @@ STDAPI DllUnregisterServer(void) {
 	};
 	hr = SetRegistryEntries(entries, TRUE);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"SetRegistryEntries main failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -269,6 +286,7 @@ STDAPI DllUnregisterServer(void) {
 	// Unregister classes
 	hr = CLegacyUpdateCtrl::UpdateRegistry(FALSE);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"SetRegistryEntries LegacyUpdateCtrl failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -277,6 +295,7 @@ STDAPI DllUnregisterServer(void) {
 
 	hr = CElevationHelper::UpdateRegistry(FALSE);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"SetRegistryEntries ElevationHelper failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -285,6 +304,7 @@ STDAPI DllUnregisterServer(void) {
 
 	hr = CProgressBarControl::UpdateRegistry(FALSE);
 	if (!SUCCEEDED(hr)) {
+		TRACE(L"SetRegistryEntries ProgressBarControl failed: %08x", hr);
 		if (oleInitialized) {
 			OleUninitialize();
 		}
@@ -292,6 +312,9 @@ STDAPI DllUnregisterServer(void) {
 	}
 
 	hr = PrxDllUnregisterServer();
+	if (!SUCCEEDED(hr)) {
+		TRACE(L"PrxDllUnregisterServer failed: %08x", hr);
+	}
 	if (oleInitialized) {
 		OleUninitialize();
 	}

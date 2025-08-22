@@ -18,6 +18,10 @@ static ALWAYS_INLINE REGSAM GetWow64Flag(REGSAM options) {
 }
 
 HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSAM options, LPWSTR *data, LPDWORD size) {
+	if (data == NULL) {
+		return E_POINTER;
+	}
+
 	HKEY subkey = NULL;
 	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, GetWow64Flag(KEY_READ | options), &subkey));
 	if (!SUCCEEDED(hr)) {
@@ -31,7 +35,6 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSA
 			goto end;
 		}
 
-		// Allocate space for data plus a trailing null
 		LPWSTR buffer = (LPWSTR)LocalAlloc(LPTR, length + sizeof(WCHAR));
 		if (!buffer) {
 			hr = E_OUTOFMEMORY;
@@ -44,11 +47,12 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSA
 			goto end;
 		}
 
-		buffer[length / sizeof(WCHAR)] = L'\0';
+		DWORD ourSize = length / sizeof(WCHAR);
+		buffer[ourSize] = L'\0';
 		*data = buffer;
 
 		if (size) {
-			*size = length / sizeof(WCHAR);
+			*size = ourSize;
 		}
 	}
 
@@ -57,9 +61,7 @@ end:
 		RegCloseKey(subkey);
 	}
 	if (!SUCCEEDED(hr)) {
-		if (data) {
-			*data = NULL;
-		}
+		*data = NULL;
 		if (size) {
 			*size = 0;
 		}
@@ -99,13 +101,17 @@ HRESULT SetRegistryEntries(RegistryEntry entries[], BOOL expandEnv) {
 		}
 
 		HRESULT hr;
-		if (entry.lpData == DELETE_KEY) {
+		if (entry.uData.lpData == DELETE_KEY) {
+#if WINVER < _WIN32_WINNT_WIN2K
+			hr = E_NOTIMPL;
+#else
 			hr = HRESULT_FROM_WIN32(SHDeleteKey(entry.hKey, entry.lpSubKey));
+#endif
 			if (hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
 				hr = S_OK;
 			}
 			if (!SUCCEEDED(hr)) {
-				TRACE(L"delete key %ls fail %08x", entry.lpSubKey, hr);
+				TRACE(L"Delete %ls failed: %08x", entry.lpSubKey, hr);
 				if (expandedSubKey) {
 					LocalFree(expandedSubKey);
 				}
@@ -114,34 +120,41 @@ HRESULT SetRegistryEntries(RegistryEntry entries[], BOOL expandEnv) {
 			HKEY key;
 			hr = HRESULT_FROM_WIN32(RegCreateKeyEx(entry.hKey, entry.lpSubKey, 0, NULL, 0, GetWow64Flag(KEY_WRITE | entry.samDesired), NULL, &key, NULL));
 			if (!SUCCEEDED(hr)) {
+				TRACE(L"Create %ls failed: %08x", entry.lpSubKey, hr);
 				if (expandedSubKey) {
 					LocalFree(expandedSubKey);
 				}
 				return hr;
 			}
 
-			if (entry.lpData == DELETE_VALUE) {
+			if (entry.data.lpData == DELETE_VALUE) {
 				hr = HRESULT_FROM_WIN32(RegDeleteValue(key, entry.lpValueName));
 				if (hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
 					hr = S_OK;
 				}
-				TRACE(L"delete val fail %08x", hr);
-			} else {
+			} else if (entry.uData.lpData != NULL) {
 				if (entry.dwType == REG_SZ) {
-					if (expandEnv) {
-						DWORD length = ExpandEnvironmentStrings((LPCWSTR)entry.lpData, NULL, 0);
-						expandedData = (LPWSTR)LocalAlloc(LPTR, length * sizeof(WCHAR));
-						ExpandEnvironmentStrings((LPCWSTR)entry.lpData, expandedData, length);
-						entry.lpData = expandedData;
+					if (entry.uData.lpData) {
+						if (expandEnv) {
+							DWORD length = ExpandEnvironmentStrings((LPCWSTR)entry.uData.lpData, NULL, 0);
+							expandedData = (LPWSTR)LocalAlloc(LPTR, length * sizeof(WCHAR));
+							ExpandEnvironmentStrings((LPCWSTR)entry.uData.lpData, expandedData, length);
+							entry.uData.lpData = expandedData;
+						}
+
+						entry.dataSize = (DWORD)(lstrlen((LPCWSTR)entry.uData.lpData) + 1) * sizeof(WCHAR);
+					} else {
+						entry.dataSize = 0;
 					}
 
-					entry.dataSize = (DWORD)(lstrlen((LPCWSTR)entry.lpData) + 1) * sizeof(WCHAR);
-				} else {
-					entry.dataSize = sizeof(entry.lpData);
-					entry.lpData = (LPVOID)&entry.lpData;
+					hr = HRESULT_FROM_WIN32(RegSetValueEx(key, entry.lpValueName, 0, entry.dwType, (const BYTE *)entry.uData.lpData, entry.dataSize));
+				} else if (entry.dwType == REG_DWORD) {
+					hr = HRESULT_FROM_WIN32(RegSetValueEx(key, entry.lpValueName, 0, entry.dwType, (const BYTE *)&entry.uData.dwData, sizeof(entry.uData.dwData)));
 				}
+			}
 
-				hr = HRESULT_FROM_WIN32(RegSetValueEx(key, entry.lpValueName, 0, entry.dwType, (const BYTE *)entry.lpData, entry.dataSize));
+			if (!SUCCEEDED(hr)) {
+				TRACE(L"Set %ls -> %ls failed: %08x", entry.lpSubKey, entry.lpValueName, hr);
 			}
 
 			if (expandedSubKey) {
