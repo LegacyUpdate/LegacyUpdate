@@ -190,32 +190,6 @@ STDMETHODIMP CProgressBarControl_IOleObject::DoVerb(LONG iVerb, LPMSG lpmsg, IOl
 	}
 }
 
-STDMETHODIMP CProgressBarControl_IOleObject::SetClientSite(IOleClientSite *pClientSite) {
-	if (m_pParent->m_clientSite) {
-		m_pParent->m_clientSite->Release();
-	}
-	m_pParent->m_clientSite = pClientSite;
-	if (m_pParent->m_clientSite) {
-		m_pParent->m_clientSite->AddRef();
-	}
-	return S_OK;
-}
-
-STDMETHODIMP CProgressBarControl_IOleObject::GetClientSite(IOleClientSite **ppClientSite) {
-	if (ppClientSite == NULL) {
-		return E_POINTER;
-	}
-
-	if (m_pParent->m_clientSite == NULL) {
-		*ppClientSite = NULL;
-		return E_FAIL;
-	}
-
-	m_pParent->m_clientSite->AddRef();
-	*ppClientSite = m_pParent->m_clientSite;
-	return S_OK;
-}
-
 STDMETHODIMP CProgressBarControl_IOleObject::GetMiscStatus(DWORD dwAspect, DWORD *pdwStatus) {
 	if (pdwStatus == NULL) {
 		return E_POINTER;
@@ -232,7 +206,7 @@ STDMETHODIMP CProgressBarControl_IOleObject::GetMiscStatus(DWORD dwAspect, DWORD
 
 STDMETHODIMP CProgressBarControl_IOleObject::Close(DWORD dwSaveOption) {
 	m_pParent->DestroyControlWindow();
-	return S_OK;
+	return IOleObjectImpl<CProgressBarControl>::Close(dwSaveOption);
 }
 
 STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *pRect) {

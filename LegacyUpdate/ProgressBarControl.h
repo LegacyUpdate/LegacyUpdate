@@ -19,8 +19,6 @@ public:
 	STDMETHODIMP GetExtent(DWORD dwDrawAspect, SIZEL *psizel);
 	STDMETHODIMP SetExtent(DWORD dwDrawAspect, SIZEL *psizel);
 	STDMETHODIMP DoVerb(LONG iVerb, LPMSG lpmsg, IOleClientSite *pActiveSite, LONG lindex, HWND hwndParent, LPCRECT lprcPosRect);
-	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite);
-	STDMETHODIMP GetClientSite(IOleClientSite **ppClientSite);
 	STDMETHODIMP GetMiscStatus(DWORD dwAspect, DWORD *pdwStatus);
 	STDMETHODIMP Close(DWORD dwSaveOption);
 };
@@ -51,13 +49,6 @@ public:
 	STDMETHODIMP ResizeBorder(LPCRECT prcBorder, IOleInPlaceUIWindow *pUIWindow, BOOL fFrameWindow);
 };
 
-class DECLSPEC_NOVTABLE CProgressBarControl_IOleControl :
-	public IOleControlImpl<CProgressBarControl> {
-public:
-	CProgressBarControl_IOleControl(CProgressBarControl *pParent) :
-		IOleControlImpl<CProgressBarControl>(pParent) {}
-};
-
 class DECLSPEC_NOVTABLE CProgressBarControl :
 	public IDispatchImpl<IProgressBarControl, &LIBID_LegacyUpdateLib> {
 public:
@@ -66,13 +57,13 @@ public:
 		m_IViewObjectEx(this),
 		m_IOleInPlaceObject(this),
 		m_IOleInPlaceActiveObject(this),
-		m_IOleControl(this),
 		m_refCount(1),
 		m_hwnd(NULL),
 		m_innerHwnd(NULL),
 		m_width(0),
 		m_height(0),
-		m_clientSite(NULL) {
+		m_clientSite(NULL),
+		m_adviseSink(NULL) {
 	}
 
 	virtual ~CProgressBarControl();
@@ -84,7 +75,6 @@ public:
 	CProgressBarControl_IViewObjectEx m_IViewObjectEx;
 	CProgressBarControl_IOleInPlaceObject m_IOleInPlaceObject;
 	CProgressBarControl_IOleInPlaceActiveObject m_IOleInPlaceActiveObject;
-	CProgressBarControl_IOleControl m_IOleControl;
 
 private:
 	LONG m_refCount;
@@ -95,6 +85,7 @@ public:
 	LONG m_width;
 	LONG m_height;
 	IOleClientSite *m_clientSite;
+	IAdviseSink *m_adviseSink;
 
 	// IUnknown
 	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);

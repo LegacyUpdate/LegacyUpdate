@@ -19,10 +19,6 @@ class DECLSPEC_NOVTABLE CLegacyUpdateCtrl_IOleObject :
 public:
 	CLegacyUpdateCtrl_IOleObject(CLegacyUpdateCtrl *pParent) :
 		IOleObjectImpl<CLegacyUpdateCtrl>(pParent) {}
-
-	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite);
-	STDMETHODIMP GetClientSite(IOleClientSite **ppClientSite);
-	STDMETHODIMP Close(DWORD dwSaveOption);
 };
 
 class DECLSPEC_NOVTABLE CLegacyUpdateCtrl :
@@ -32,8 +28,7 @@ public:
 		m_IOleObject(this),
 		m_refCount(1),
 		m_clientSite(NULL),
-		m_inPlaceSite(NULL),
-		m_container(NULL),
+		m_adviseSink(NULL),
 		m_elevatedHelper(NULL),
 		m_nonElevatedHelper(NULL) {}
 
@@ -52,8 +47,7 @@ public:
 	STDMETHODIMP_(ULONG) Release();
 
 	IOleClientSite *m_clientSite;
-	IOleInPlaceSite *m_inPlaceSite;
-	IOleContainer *m_container;
+	IAdviseSink *m_adviseSink;
 
 private:
 	IElevationHelper *m_elevatedHelper;

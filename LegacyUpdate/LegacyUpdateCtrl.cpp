@@ -124,42 +124,6 @@ STDMETHODIMP_(ULONG) CLegacyUpdateCtrl::Release() {
 	return count;
 }
 
-#pragma mark - IOleObject
-
-STDMETHODIMP CLegacyUpdateCtrl_IOleObject::SetClientSite(IOleClientSite *pClientSite) {
-	if (m_pParent->m_clientSite) {
-		m_pParent->m_clientSite->Release();
-	}
-	m_pParent->m_clientSite = pClientSite;
-	if (m_pParent->m_clientSite) {
-		m_pParent->m_clientSite->AddRef();
-	}
-	return S_OK;
-}
-
-STDMETHODIMP CLegacyUpdateCtrl_IOleObject::GetClientSite(IOleClientSite **ppClientSite) {
-	if (ppClientSite == NULL) {
-		return E_POINTER;
-	}
-
-	if (m_pParent->m_clientSite == NULL) {
-		*ppClientSite = NULL;
-		return E_FAIL;
-	}
-
-	m_pParent->m_clientSite->AddRef();
-	*ppClientSite = m_pParent->m_clientSite;
-	return S_OK;
-}
-
-STDMETHODIMP CLegacyUpdateCtrl_IOleObject::Close(DWORD dwSaveOption) {
-	if (m_pParent->m_clientSite) {
-		m_pParent->m_clientSite->Release();
-		m_pParent->m_clientSite = NULL;
-	}
-	return S_OK;
-}
-
 #pragma mark - ILegacyUpdateCtrl
 
 STDMETHODIMP CLegacyUpdateCtrl::GetHTMLDocument(IHTMLDocument2 **retval) {

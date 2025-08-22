@@ -194,11 +194,29 @@ public:
 
 	// IOleObject
 	STDMETHODIMP SetClientSite(IOleClientSite *pClientSite) {
-		return E_NOTIMPL;
+		if (this->m_pParent->m_clientSite) {
+			this->m_pParent->m_clientSite->Release();
+		}
+		this->m_pParent->m_clientSite = pClientSite;
+		if (this->m_pParent->m_clientSite) {
+			this->m_pParent->m_clientSite->AddRef();
+		}
+		return S_OK;
 	}
 
 	STDMETHODIMP GetClientSite(IOleClientSite **ppClientSite) {
-		return E_NOTIMPL;
+		if (ppClientSite == NULL) {
+			return E_POINTER;
+		}
+
+		if (this->m_pParent->m_clientSite == NULL) {
+			*ppClientSite = NULL;
+			return E_FAIL;
+		}
+
+		this->m_pParent->m_clientSite->AddRef();
+		*ppClientSite = this->m_pParent->m_clientSite;
+		return S_OK;
 	}
 
 	STDMETHODIMP SetHostNames(LPCOLESTR szContainerApp, LPCOLESTR szContainerObj) {
@@ -206,6 +224,10 @@ public:
 	}
 
 	STDMETHODIMP Close(DWORD dwSaveOption) {
+		if (this->m_pParent->m_clientSite) {
+			this->m_pParent->m_clientSite->Release();
+			this->m_pParent->m_clientSite = NULL;
+		}
 		return S_OK;
 	}
 
@@ -281,7 +303,7 @@ public:
 	}
 
 	STDMETHODIMP Advise(IAdviseSink *pAdvSink, DWORD *pdwConnection) {
-		return E_NOTIMPL;
+		return S_OK;
 	}
 
 	STDMETHODIMP Unadvise(DWORD dwConnection) {
@@ -328,6 +350,13 @@ public:
 	}
 
 	STDMETHODIMP SetAdvise(DWORD aspects, DWORD advf, IAdviseSink *pAdvSink) {
+		if (this->m_pParent->m_adviseSink) {
+			this->m_pParent->m_adviseSink->Release();
+		}
+		this->m_pParent->m_adviseSink = pAdvSink;
+		if (this->m_pParent->m_adviseSink) {
+			this->m_pParent->m_adviseSink->AddRef();
+		}
 		return S_OK;
 	}
 
@@ -339,7 +368,7 @@ public:
 			*pAdvf = 0;
 		}
 		if (ppAdvSink) {
-			*ppAdvSink = NULL;
+			*ppAdvSink = this->m_pParent->m_adviseSink;
 		}
 		return S_OK;
 	}
@@ -512,35 +541,6 @@ public:
 	}
 
 	STDMETHODIMP EnableModeless(WINBOOL fEnable) {
-		return S_OK;
-	}
-};
-
-template<typename TImpl>
-class IOleControlImpl : public CComClass<TImpl, IOleControl> {
-public:
-	IOleControlImpl(TImpl *pParent) : CComClass<TImpl, IOleControl>(pParent) {}
-
-	// IOleControl
-	STDMETHODIMP GetControlInfo(CONTROLINFO *pCI) {
-		if (pCI == NULL) {
-			return E_POINTER;
-		}
-		pCI->hAccel = NULL;
-		pCI->cAccel = 0;
-		pCI->dwFlags = 0;
-		return S_OK;
-	}
-
-	STDMETHODIMP OnMnemonic(LPMSG pMsg) {
-		return S_FALSE;
-	}
-
-	STDMETHODIMP OnAmbientPropertyChange(DISPID dispid) {
-		return S_OK;
-	}
-
-	STDMETHODIMP FreezeEvents(BOOL bFreeze) {
 		return S_OK;
 	}
 };
