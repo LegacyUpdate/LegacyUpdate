@@ -162,22 +162,24 @@ obj/%.$(TAG).res: %.rc
 obj/%.bin: %.mc
 	$(MC) $< $(MCFLAGS) -h $(dir $@) -r $(dir $@)
 
-obj/$(TAG)/%.tlb: %.idl
+obj/$(TAG)/%.tlb: %.idl | obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -t -o $@ $<
 
-obj/$(TAG)/%_i.h: %.idl
+obj/$(TAG)/%_i.h: %.idl | obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -h -o $@ $<
 
-obj/$(TAG)/%_i.c: %.idl
+obj/$(TAG)/%_i.c: %.idl | obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -u -o $@ $<
 
-obj/$(TAG)/%_p.c: %.idl
+obj/$(TAG)/%_p.c: %.idl | obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) -p -o $@ $<
 
-obj/$(TAG)/%_dlldata.c: %.idl
+obj/$(TAG)/%_dlldata.c: %.idl | obj/$(TAG)
 	$(WIDL) $(IDLFLAGS) --dlldata-only -o $@ $(notdir $(basename $<))
 
-$(OBJ): obj/$(TAG)/LegacyUpdate_i.h stdafx.h | obj/$(TAG)
+$(OBJ): obj/$(TAG)/LegacyUpdate_i.h stdafx.h
+
+$(OBJ) $(RES) $(MSG): | obj/$(TAG)
 
 $(RES): $(MSG)
 
