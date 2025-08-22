@@ -40,7 +40,7 @@ jobs:
         export PATH=/opt/gcc-15.1-binutils-2.45-mingw-v13.0.0-i686/bin:$PATH
         export PATH=/opt/gcc-15.1-binutils-2.45-mingw-v13.0.0-x86_64/bin:$PATH
         export PATH=/opt/nsis-3.11/bin:$PATH
-        make CI=1 DEBUG=0
+        make -j$(nproc) CI=1 DEBUG=0
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
