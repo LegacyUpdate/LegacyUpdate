@@ -1,8 +1,9 @@
 #include <windows.h>
 #include <commctrl.h>
-#include "MsgBox.h"
-#include "VersionInfo.h"
 #include "LoadImage.h"
+#include "MsgBox.h"
+#include "Registry.h"
+#include "VersionInfo.h"
 
 #define HK_RUNCMD 1
 
@@ -70,7 +71,7 @@ static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, L
 		// Don't accept any mouse input
 		return HTNOWHERE;
 
-	case WM_HOTKEY: {
+	case WM_HOTKEY:
 		// Shift-F10 to run cmd
 		if (wParam == HK_RUNCMD) {
 			DWORD exitCode = 0;
@@ -79,9 +80,7 @@ static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, L
 				RunCmd(&processInfo);
 			}
 		}
-
 		break;
-	}
 
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -89,6 +88,33 @@ static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, L
 	}
 
 	return DefWindowProc(hwnd, message, wParam, lParam);;
+}
+
+static void ResetSetupKey() {
+	HKEY key;
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"System\\Setup", 0, KEY_ALL_ACCESS, &key) != ERROR_SUCCESS) {
+		return;
+	}
+
+	// Reset CmdLine to empty string
+	LPWSTR cmdLine = L"";
+	DWORD cmdLineLength = 0;
+	if (SUCCEEDED(GetRegistryString(key, NULL, L"CmdLine_LegacyUpdateTemp", 0, &cmdLine, &cmdLineLength))) {
+		RegDeleteValue(key, L"CmdLine_LegacyUpdateTemp");
+	}
+	RegSetValueEx(key, L"CmdLine", 0, REG_SZ, (const BYTE *)cmdLine, cmdLineLength * sizeof(WCHAR));
+
+	// Reset SetupType to 0
+	DWORD setupType = 0;
+	if (SUCCEEDED(GetRegistryDword(key, NULL, L"SetupType_LegacyUpdateTemp", 0, &setupType))) {
+		RegDeleteValue(key, L"SetupType_LegacyUpdateTemp");
+	}
+	RegSetValueEx(key, L"SetupType", 0, REG_DWORD, (const BYTE *)&setupType, sizeof(setupType));
+
+	// Reset SetupShutdownRequired (likely doesn't exist)
+	RegDeleteValue(key, L"SetupShutdownRequired");
+
+	RegCloseKey(key);
 }
 
 static void CreateRunOnceWindow() {
@@ -233,6 +259,14 @@ void RunOnce() {
 	}
 #endif
 
+	// Allow breaking out by entering safe mode
+	if (GetSystemMetrics(SM_CLEANBOOT) != 0) {
+		MsgBox(NULL, L"Legacy Update setup was cancelled because the system is running in Safe Mode.", NULL, MB_OK | MB_ICONERROR);
+		ResetSetupKey();
+		PostQuitMessage(0);
+		return;
+	}
+
 	// Start Themes on this desktop
 	StartThemes();
 
@@ -246,8 +280,8 @@ void RunOnce() {
 	CreateRunOnceWindow();
 
 	// Construct path to LegacyUpdateSetup.exe
-	WCHAR setupPath[MAX_PATH];
-	GetModuleFileName(NULL, setupPath, ARRAYSIZE(setupPath));
+	LPWSTR setupPath;
+	GetOwnFileName(&setupPath);
 	wcsrchr(setupPath, L'\\')[1] = L'\0';
 	wcsncat(setupPath, L"LegacyUpdateSetup.exe", ARRAYSIZE(setupPath) - wcslen(setupPath) - 1);
 
@@ -256,21 +290,29 @@ void RunOnce() {
 	startupInfo.cb = sizeof(startupInfo);
 
 	PROCESS_INFORMATION processInfo = {0};
-	LPWSTR cmdLine = (LPWSTR)LocalAlloc(LPTR, 4096 * sizeof(WCHAR));
+	LPWSTR cmdLine = (LPWSTR)LocalAlloc(LPTR, (lstrlen(setupPath) + 12) * sizeof(WCHAR));
 	wsprintf(cmdLine, L"\"%ls\" /runonce", setupPath);
 	if (!CreateProcess(setupPath, cmdLine, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {
+		LocalFree(setupPath);
+		LocalFree(cmdLine);
+
+		MsgBox(NULL, L"Continuing Legacy Update setup failed", NULL, MB_OK | MB_ICONERROR);
+		ResetSetupKey();
+
 #ifdef _DEBUG
-		// Run cmd.exe instead
+		// Run cmd to inspect what happened
 		if (!RunCmd(&processInfo)) {
 			PostQuitMessage(0);
 			return;
 		}
 #else
-		MsgBox(NULL, L"Continuing Legacy Update setup failed", NULL, MB_OK | MB_ICONERROR);
 		PostQuitMessage(0);
 		return;
 #endif
 	}
+
+	LocalFree(setupPath);
+	LocalFree(cmdLine);
 
 	CloseHandle(processInfo.hThread);
 
@@ -281,6 +323,25 @@ void RunOnce() {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+	}
+
+	DWORD exitCode = 0;
+	if (GetExitCodeProcess(processInfo.hProcess, &exitCode) && exitCode != ERROR_SUCCESS && exitCode != ERROR_SUCCESS_RESTART_REQUIRED) {
+		MsgBox(NULL, L"Continuing Legacy Update setup failed", NULL, MB_OK | MB_ICONERROR);
+		ResetSetupKey();
+
+#ifdef _DEBUG
+		// Run cmd to inspect what happened
+		if (RunCmd(&processInfo)) {
+			MSG msg = {0};
+			while (WaitForSingleObject(processInfo.hProcess, 100) == WAIT_TIMEOUT) {
+				while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+			}
+		}
+#endif
 	}
 
 	CloseHandle(processInfo.hProcess);

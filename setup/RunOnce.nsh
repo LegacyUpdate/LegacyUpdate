@@ -15,7 +15,6 @@
 		${If} ${IsRunOnce}
 		${AndIf} $0 == "SYSTEM"
 			; Running in setup mode. Winlogon will reboot for us.
-			SetErrorLevel ${ERROR_SUCCESS}
 			Quit
 		${Else}
 			; Regular reboot.
