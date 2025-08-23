@@ -1,7 +1,6 @@
 #include "Compat.h"
 #include <windows.h>
 #include <shellscalingapi.h>
-#include "VersionInfo.h"
 #include "resource.h"
 
 typedef BOOL (WINAPI *_GetProductInfo)(DWORD, DWORD, DWORD, DWORD, PDWORD);
@@ -84,11 +83,15 @@ void IsolationAwareStart(ULONG_PTR *cookie) {
 		return;
 	}
 
+	// Borrowing the manifest from shell32.dll
+	WCHAR shell32[MAX_PATH];
+	GetModuleFileName(GetModuleHandle(L"shell32.dll"), shell32, ARRAYSIZE(shell32));
+
 	ACTCTX actCtx = {0};
 	actCtx.cbSize = sizeof(actCtx);
-	actCtx.dwFlags = ACTCTX_FLAG_RESOURCE_NAME_VALID | ACTCTX_FLAG_HMODULE_VALID;
-	actCtx.hModule = OWN_MODULE;
-	actCtx.lpResourceName = MAKEINTRESOURCE(ID_MANIFEST);
+	actCtx.dwFlags = ACTCTX_FLAG_RESOURCE_NAME_VALID;
+	actCtx.lpSource = shell32;
+	actCtx.lpResourceName = MAKEINTRESOURCE(124);
 
 	HANDLE hActCtx = $CreateActCtx(&actCtx);
 	if (hActCtx != INVALID_HANDLE_VALUE) {
