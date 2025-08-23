@@ -10,8 +10,6 @@
 #include "com.h"
 #include "LegacyUpdate_i.h"
 
-STDMETHODIMP CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
-
 class CLegacyUpdateCtrl;
 
 class DECLSPEC_NOVTABLE CLegacyUpdateCtrl_IOleObject :
@@ -34,6 +32,7 @@ public:
 
 	virtual ~CLegacyUpdateCtrl();
 
+	static STDMETHODIMP Create(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
 
 private:

@@ -6,8 +6,6 @@
 #include "com.h"
 #include "LegacyUpdate_i.h"
 
-STDMETHODIMP CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv);
-
 class CProgressBarControl;
 
 class DECLSPEC_NOVTABLE CProgressBarControl_IOleObject :
@@ -68,6 +66,7 @@ public:
 
 	virtual ~CProgressBarControl();
 
+	static STDMETHODIMP Create(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
 
 public:

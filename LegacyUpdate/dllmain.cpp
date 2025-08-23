@@ -22,12 +22,13 @@ LONG g_serverLocks = 0;
 typedef struct ClassEntry {
 	const GUID *clsid;
 	STDMETHODIMP (*createFunc)(IUnknown *pUnkOuter, REFIID riid, void **ppv);
+	STDMETHODIMP (*updateRegistryFunc)(BOOL bRegister);
 } ClassEntry;
 
 static ClassEntry g_classEntries[] = {
-	{&CLSID_LegacyUpdateCtrl,   CreateLegacyUpdateCtrl},
-	{&CLSID_ElevationHelper,    CreateElevationHelper},
-	{&CLSID_ProgressBarControl, CreateProgressBarControl}
+	{&CLSID_LegacyUpdateCtrl,   &CLegacyUpdateCtrl::Create,   &CLegacyUpdateCtrl::UpdateRegistry},
+	{&CLSID_ElevationHelper,    &CElevationHelper::Create,    &CElevationHelper::UpdateRegistry},
+	{&CLSID_ProgressBarControl, &CProgressBarControl::Create, &CProgressBarControl::UpdateRegistry}
 };
 
 // DLL Entry Point
@@ -171,31 +172,15 @@ STDAPI DllRegisterServer(void) {
 	}
 
 	// Register classes
-	hr = CLegacyUpdateCtrl::UpdateRegistry(TRUE);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"SetRegistryEntries LegacyUpdateCtrl failed: %08x", hr);
-		if (oleInitialized) {
-			OleUninitialize();
+	for (size_t i = 0; i < ARRAYSIZE(g_classEntries); i++) {
+		hr = g_classEntries[i].updateRegistryFunc(TRUE);
+		if (!SUCCEEDED(hr)) {
+			TRACE(L"SetRegistryEntries class failed: %08x", hr);
+			if (oleInitialized) {
+				OleUninitialize();
+			}
+			return hr;
 		}
-		return hr;
-	}
-
-	hr = CElevationHelper::UpdateRegistry(TRUE);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"SetRegistryEntries ElevationHelper failed: %08x", hr);
-		if (oleInitialized) {
-			OleUninitialize();
-		}
-		return hr;
-	}
-
-	hr = CProgressBarControl::UpdateRegistry(TRUE);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"SetRegistryEntries ProgressBarControl failed: %08x", hr);
-		if (oleInitialized) {
-			OleUninitialize();
-		}
-		return hr;
 	}
 
 	hr = PrxDllRegisterServer();
@@ -284,31 +269,15 @@ STDAPI DllUnregisterServer(void) {
 	}
 
 	// Unregister classes
-	hr = CLegacyUpdateCtrl::UpdateRegistry(FALSE);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"SetRegistryEntries LegacyUpdateCtrl failed: %08x", hr);
-		if (oleInitialized) {
-			OleUninitialize();
+	for (size_t i = 0; i < ARRAYSIZE(g_classEntries); i++) {
+		hr = g_classEntries[i].updateRegistryFunc(FALSE);
+		if (!SUCCEEDED(hr)) {
+			TRACE(L"SetRegistryEntries class failed: %08x", hr);
+			if (oleInitialized) {
+				OleUninitialize();
+			}
+			return hr;
 		}
-		return hr;
-	}
-
-	hr = CElevationHelper::UpdateRegistry(FALSE);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"SetRegistryEntries ElevationHelper failed: %08x", hr);
-		if (oleInitialized) {
-			OleUninitialize();
-		}
-		return hr;
-	}
-
-	hr = CProgressBarControl::UpdateRegistry(FALSE);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"SetRegistryEntries ProgressBarControl failed: %08x", hr);
-		if (oleInitialized) {
-			OleUninitialize();
-		}
-		return hr;
 	}
 
 	hr = PrxDllUnregisterServer();

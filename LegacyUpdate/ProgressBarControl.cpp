@@ -12,7 +12,7 @@
 
 DEFINE_UUIDOF(CProgressBarControl, CLSID_ProgressBarControl);
 
-STDMETHODIMP CreateProgressBarControl(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+STDMETHODIMP CProgressBarControl::Create(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
 	if (pUnkOuter != NULL) {
 		return CLASS_E_NOAGGREGATION;
 	}
@@ -33,6 +33,11 @@ CProgressBarControl::~CProgressBarControl() {
 	DestroyControlWindow();
 	if (m_clientSite) {
 		m_clientSite->Release();
+		m_clientSite = NULL;
+	}
+	if (m_adviseSink) {
+		m_adviseSink->Release();
+		m_adviseSink = NULL;
 	}
 }
 

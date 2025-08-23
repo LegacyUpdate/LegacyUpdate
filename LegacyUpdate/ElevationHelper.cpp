@@ -49,7 +49,7 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, vo
 	return CoGetObject(monikerName, (BIND_OPTS *)&bindOpts, riid, ppv);
 }
 
-STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+STDMETHODIMP CElevationHelper::Create(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
 	if (pUnkOuter != NULL) {
 		return CLASS_E_NOAGGREGATION;
 	}

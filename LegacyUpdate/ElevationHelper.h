@@ -6,8 +6,6 @@
 #include "com.h"
 #include "LegacyUpdate_i.h"
 
-STDMETHODIMP CreateElevationHelper(IUnknown *pUnkOuter, REFIID riid, void **ppv);
-
 BOOL ProgIDIsPermitted(PWSTR progID);
 STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, void **ppv);
 
@@ -19,6 +17,7 @@ public:
 
 	virtual ~CElevationHelper();
 
+	static STDMETHODIMP Create(IUnknown *pUnkOuter, REFIID riid, void **ppv);
 	static STDMETHODIMP UpdateRegistry(BOOL bRegister);
 
 private:

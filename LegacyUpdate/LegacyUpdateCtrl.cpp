@@ -28,7 +28,7 @@ const WCHAR *permittedHosts[] = {
 
 DEFINE_UUIDOF(CLegacyUpdateCtrl, CLSID_LegacyUpdateCtrl);
 
-STDMETHODIMP CreateLegacyUpdateCtrl(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+STDMETHODIMP CLegacyUpdateCtrl::Create(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
 	if (pUnkOuter != NULL) {
 		return CLASS_E_NOAGGREGATION;
 	}
@@ -49,6 +49,10 @@ CLegacyUpdateCtrl::~CLegacyUpdateCtrl() {
 	if (m_clientSite) {
 		m_clientSite->Release();
 		m_clientSite = NULL;
+	}
+	if (m_adviseSink) {
+		m_adviseSink->Release();
+		m_adviseSink = NULL;
 	}
 	if (m_elevatedHelper) {
 		m_elevatedHelper->Release();
