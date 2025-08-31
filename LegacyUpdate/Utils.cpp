@@ -31,6 +31,7 @@ HRESULT StartLauncher(LPCWSTR params, BOOL wait) {
 		hr = HRESULT_FROM_WIN32(code);
 	}
 
+	LocalFree(path);
 	return hr;
 }
 

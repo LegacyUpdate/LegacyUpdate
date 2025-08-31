@@ -144,7 +144,9 @@ end:
 			LPWSTR title = state
 				? L"Failed to register Legacy Update ActiveX control"
 				: L"Failed to unregister Legacy Update ActiveX control";
-			MsgBox(hwnd, title, GetMessageForHresult(hr), MB_ICONERROR);
+			LPWSTR message = GetMessageForHresult(hr);
+			MsgBox(hwnd, title, message, MB_ICONERROR);
+			LocalFree(message);
 		}
 
 		PostQuitMessage(hr);

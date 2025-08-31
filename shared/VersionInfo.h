@@ -44,7 +44,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 static OSVERSIONINFOEX _versionInfo;
 
-static OSVERSIONINFOEX *GetVersionInfo() {
+static ALWAYS_INLINE OSVERSIONINFOEX *GetVersionInfo() {
 	if (_versionInfo.dwOSVersionInfoSize == 0) {
 		ZeroMemory(&_versionInfo, sizeof(OSVERSIONINFOEX));
 		_versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
@@ -55,6 +55,10 @@ static OSVERSIONINFOEX *GetVersionInfo() {
 
 static ALWAYS_INLINE WORD GetWinVer() {
 	return __builtin_bswap16(LOWORD(GetVersion()));
+}
+
+static ALWAYS_INLINE WORD GetWinBuild() {
+	return HIWORD(GetVersion());
 }
 
 #define _IS_OS_MACRO(name, ver) \
@@ -81,13 +85,13 @@ _IS_OS_MACRO(10,     0x0A00)
 
 #define _IS_BUILD_MACRO(ver) \
 	static ALWAYS_INLINE BOOL IsWin ## ver() { \
-		return GetVersionInfo()->dwBuildNumber == BUILD_WIN ## ver; \
+		return GetWinBuild() == BUILD_WIN ## ver; \
 	} \
 	static ALWAYS_INLINE BOOL AtLeastWin ## ver() { \
-		return GetVersionInfo()->dwBuildNumber >= BUILD_WIN ## ver; \
+		return GetWinBuild() >= BUILD_WIN ## ver; \
 	} \
 	static ALWAYS_INLINE BOOL AtMostWin ## ver() { \
-		return GetVersionInfo()->dwBuildNumber <= BUILD_WIN ## ver; \
+		return GetWinBuild() <= BUILD_WIN ## ver; \
 	}
 
 _IS_BUILD_MACRO(10_1507)
@@ -110,7 +114,14 @@ _IS_BUILD_MACRO(11_23H2)
 _IS_BUILD_MACRO(11_24H2)
 #undef _IS_BUILD_MACRO
 
-static ALWAYS_INLINE void GetOwnFileName(LPWSTR *filename) {
+static ALWAYS_INLINE HRESULT GetOwnFileName(LPWSTR *filename) {
 	*filename = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-	GetModuleFileName((HMODULE)&__ImageBase, *filename, MAX_PATH);
+	if (GetModuleFileName(OWN_MODULE, *filename, MAX_PATH) == 0) {
+		HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
+		LocalFree(*filename);
+		*filename = NULL;
+		return hr;
+	}
+
+	return S_OK;
 }

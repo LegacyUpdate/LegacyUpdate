@@ -92,6 +92,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		LPWSTR args = (LPWSTR)LocalAlloc(LPTR, 512 * sizeof(WCHAR));
 		wsprintf(args, L"/launch %ls", argc > 0 ? argv[0] : L"");
 		hr = SelfElevate(args, NULL);
+		LocalFree(args);
 
 		// Access denied happens when the user clicks No/Cancel.
 		if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
@@ -223,10 +224,19 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 
 end:
 	if (!SUCCEEDED(hr)) {
-		MsgBox(NULL, GetMessageForHresult(hr), NULL, MB_ICONEXCLAMATION);
+		LPWSTR message = GetMessageForHresult(hr);
+		MsgBox(NULL, message, NULL, MB_ICONEXCLAMATION);
+		LocalFree(message);
 	}
 
-	browser = NULL;
+	VariantClear(&url);
+	VariantClear(&flags);
+	VariantClear(&nullVariant);
+
+	if (browser) {
+		IWebBrowser2_Release(browser);
+	}
+
 	CoUninitialize();
 	PostQuitMessage(0);
 }

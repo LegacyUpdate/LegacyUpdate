@@ -72,22 +72,30 @@ public:
 
 	TInterface *operator =(TInterface *other) {
 		if (this->pointer != other) {
+			TInterface *oldPtr = this->pointer;
 			this->pointer = other;
 			if (this->pointer != NULL) {
 				this->pointer->AddRef();
 			}
+			if (oldPtr != NULL) {
+				oldPtr->Release();
+			}
 		}
-		return *this;
+		return this->pointer;
 	}
 
 	TInterface *operator =(const CComPtr<TInterface> &other) {
 		if (this->pointer != other.pointer) {
+			TInterface *oldPtr = this->pointer;
 			this->pointer = other.pointer;
 			if (this->pointer != NULL) {
 				this->pointer->AddRef();
 			}
+			if (oldPtr != NULL) {
+				oldPtr->Release();
+			}
 		}
-		return *this;
+		return this->pointer;
 	}
 
 	bool operator !() const {
@@ -118,7 +126,7 @@ public:
 
 	void Swap(CComPtr &other) {
 		TInterface *ptr = this->pointer;
-		ptr = other.pointer;
+		this->pointer = other.pointer;
 		other.pointer = ptr;
 	}
 

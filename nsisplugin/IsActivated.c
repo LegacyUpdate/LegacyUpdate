@@ -37,9 +37,11 @@ PLUGIN_METHOD(IsActivated) {
 		// Vista+: Ask the Software Licensing Service
 		if (!$SLOpen) {
 			HMODULE slc = LoadLibrary(L"slc.dll");
-			$SLOpen = (_SLOpen)GetProcAddress(slc, "SLOpen");
-			$SLClose = (_SLClose)GetProcAddress(slc, "SLClose");
-			$SLGetLicensingStatusInformation = (_SLGetLicensingStatusInformation)GetProcAddress(slc, "SLGetLicensingStatusInformation");
+			if (slc) {
+				$SLOpen = (_SLOpen)GetProcAddress(slc, "SLOpen");
+				$SLClose = (_SLClose)GetProcAddress(slc, "SLClose");
+				$SLGetLicensingStatusInformation = (_SLGetLicensingStatusInformation)GetProcAddress(slc, "SLGetLicensingStatusInformation");
+			}
 		}
 
 		if (!$SLOpen || !$SLClose || !$SLGetLicensingStatusInformation) {

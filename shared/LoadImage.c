@@ -134,7 +134,10 @@ static HBITMAP GetHBitmapForWICBitmap(IWICBitmapSource *bitmap) {
 
 HBITMAP LoadPNGResource(HINSTANCE hInstance, LPCWSTR resourceName, LPCWSTR resourceType) {
 	if (!$WICConvertBitmapSource) {
-		$WICConvertBitmapSource = (_WICConvertBitmapSource)GetProcAddress(LoadLibrary(L"windowscodecs.dll"), "WICConvertBitmapSource");
+		HMODULE windowscodecs = LoadLibrary(L"windowscodecs.dll");
+		if (windowscodecs) {
+			$WICConvertBitmapSource = (_WICConvertBitmapSource)GetProcAddress(windowscodecs, "WICConvertBitmapSource");
+		}
 		if (!$WICConvertBitmapSource) {
 			return NULL;
 		}
@@ -161,14 +164,20 @@ HBITMAP LoadPNGResource(HINSTANCE hInstance, LPCWSTR resourceName, LPCWSTR resou
 
 HBITMAP LoadJPEGFile(LPCWSTR filePath) {
 	if (!$WICConvertBitmapSource) {
-		$WICConvertBitmapSource = (_WICConvertBitmapSource)GetProcAddress(LoadLibrary(L"windowscodecs.dll"), "WICConvertBitmapSource");
+		HMODULE windowscodecs = LoadLibrary(L"windowscodecs.dll");
+		if (windowscodecs) {
+			$WICConvertBitmapSource = (_WICConvertBitmapSource)GetProcAddress(windowscodecs, "WICConvertBitmapSource");
+		}
 		if (!$WICConvertBitmapSource) {
 			return NULL;
 		}
 	}
 
 	if (!$SHCreateStreamOnFileEx) {
-		$SHCreateStreamOnFileEx = (_SHCreateStreamOnFileEx)GetProcAddress(LoadLibrary(L"shlwapi.dll"), "SHCreateStreamOnFileEx");
+		HMODULE shlwapi = LoadLibrary(L"shlwapi.dll");
+		if (shlwapi) {
+			$SHCreateStreamOnFileEx = (_SHCreateStreamOnFileEx)GetProcAddress(shlwapi, "SHCreateStreamOnFileEx");
+		}
 		if (!$SHCreateStreamOnFileEx) {
 			return NULL;
 		}

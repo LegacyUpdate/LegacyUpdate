@@ -25,7 +25,7 @@ EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
 
 			if (!g_messagesHModule) {
 				// Try the current module
-				g_messagesHModule = (HMODULE)&__ImageBase;
+				g_messagesHModule = OWN_MODULE;
 			}
 		}
 

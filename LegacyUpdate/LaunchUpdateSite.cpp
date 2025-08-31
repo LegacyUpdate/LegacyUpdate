@@ -15,7 +15,9 @@ void CALLBACK LaunchUpdateSite(HWND hwnd, HINSTANCE hInstance, LPSTR lpszCmdLine
 
 end:
 	if (!SUCCEEDED(hr)) {
-		MessageBox(NULL, GetMessageForHresult(hr), L"Legacy Update", MB_OK | MB_ICONERROR);
+		LPWSTR message = GetMessageForHresult(hr);
+		MessageBox(NULL, message, L"Legacy Update", MB_OK | MB_ICONERROR);
+		LocalFree(message);
 	}
 
 	CoUninitialize();
