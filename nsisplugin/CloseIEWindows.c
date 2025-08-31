@@ -12,15 +12,11 @@ PLUGIN_METHOD(CloseIEWindows) {
 	// Find and close IE windows that might have the ActiveX control loaded
 	IShellWindows *windows;
 	HRESULT hr = CoCreateInstance(&CLSID_ShellWindows, NULL, CLSCTX_ALL, &IID_IShellWindows, (void **)&windows);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"CoCreateInstance");
 
 	long count = 0;
 	hr = IShellWindows_get_Count(windows, &count);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"get_Count");
 
 	VARIANT index = {0};
 	index.vt = VT_I4;

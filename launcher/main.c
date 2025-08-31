@@ -44,10 +44,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	// Init COM
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-	if (!SUCCEEDED(hr)) {
-		ExitProcess(hr);
-		return hr;
-	}
+	CHECK_HR_OR_GOTO_END(L"CoInitializeEx");
 
 	// Init common controls
 	INITCOMMONCONTROLSEX initComctl = {0};
@@ -139,11 +136,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		switch (msg.message) {
 		case WM_QUIT:
 		case WM_DESTROY:
+			hr = msg.wParam;
 			break;
 		}
 	}
 
+end:
 	CoUninitialize();
-	ExitProcess(msg.wParam);
-	return msg.wParam;
+	ExitProcess(hr);
+	return hr;
 }

@@ -107,20 +107,14 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	if (hr == REGDB_E_CLASSNOTREG || hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND) || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)) {
 		TRACE(L"LegacyUpdateCtrl not registered");
 		hr = RegisterServer(0, TRUE, TRUE);
-		if (!SUCCEEDED(hr)) {
-			goto end;
-		}
+		CHECK_HR_OR_GOTO_END(L"RegisterServer");
 
 		hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_LOCAL_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"Still failed to load LegacyUpdateCtrl");
-			goto end;
-		}
+		CHECK_HR_OR_GOTO_END(L"Still failed to load LegacyUpdateCtrl");
 
 		IUnknown_Release(browser);
 	} else if (!SUCCEEDED(hr)) {
-		TRACE(L"Create ILegacyUpdateCtrl failed (%8x)", hr);
-		goto end;
+		CHECK_HR_OR_GOTO_END(L"Create ILegacyUpdateCtrl");
 	}
 
 	// Spawn an IE window via the COM interface. This ensures the page opens in IE (ShellExecute uses
@@ -133,12 +127,11 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	//  - Class not registered: mshtml.dll unregistered, deleted, or uninstalled in Optional Features.
 	//  - Path not found: iexplore.exe is not present.
 	if (hr == REGDB_E_CLASSNOTREG || hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND) || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)) {
-		TRACE(L"IE not installed (%8x)", hr);
+		TRACE(L"IE not installed: %08x", hr);
 		hr = HandleIENotInstalled();
 		goto end;
 	} else if (!SUCCEEDED(hr)) {
-		TRACE(L"Create IWebBrowser2 failed (%8x)", hr);
-		goto end;
+		CHECK_HR_OR_GOTO_END(L"Create IWebBrowser2");
 	}
 
 	// Get the URL we want to launch
@@ -162,17 +155,11 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	VariantInit(&nullVariant);
 
 	hr = IWebBrowser2_Navigate2(browser, &url, &flags, &nullVariant, &nullVariant, &nullVariant);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"Navigate2 failed (%8x)", hr);
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"Navigate2");
 
 	HWND ieHwnd = NULL;
 	hr = IWebBrowser2_get_HWND(browser, (SHANDLE_PTR *)&ieHwnd);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"get_HWND failed (%8x)", hr);
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"get_HWND");
 
 	// Pass through our nCmdShow flag
 	ShowWindow(ieHwnd, nCmdShow);

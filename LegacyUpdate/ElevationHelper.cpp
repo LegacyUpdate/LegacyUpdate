@@ -37,9 +37,7 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, vo
 
 	WCHAR monikerName[75];
 	HRESULT hr = StringCchPrintf(monikerName, ARRAYSIZE(monikerName), L"Elevation:Administrator!new:%ls", clsidString);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
+	CHECK_HR_OR_RETURN(L"StringCchPrintf");
 
 	BIND_OPTS3 bindOpts;
 	ZeroMemory(&bindOpts, sizeof(bindOpts));
@@ -140,26 +138,16 @@ STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
 	CLSID clsid;
 
 	if (!ProgIDIsPermitted(progID)) {
-		hr = E_ACCESSDENIED;
-		goto end;
+		return E_ACCESSDENIED;
 	}
 
 	hr = CLSIDFromProgID(progID, &clsid);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_RETURN(L"CLSIDFromProgID");
 
 	hr = object.CoCreateInstance(clsid, IID_IDispatch, NULL, CLSCTX_INPROC_SERVER);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_RETURN(L"CoCreateInstance");
 
 	*retval = object.Detach();
-
-end:
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"CreateObject(%ls) failed: %ls\n", progID, GetMessageForHresult(hr));
-	}
 	return hr;
 }
 

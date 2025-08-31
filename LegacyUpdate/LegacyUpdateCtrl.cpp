@@ -137,16 +137,10 @@ STDMETHODIMP CLegacyUpdateCtrl::GetHTMLDocument(IHTMLDocument2 **retval) {
 
 	CComPtr<IOleContainer> container;
 	HRESULT hr = m_clientSite->GetContainer(&container);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"GetDocument() failed: %ls", GetMessageForHresult(hr));
-		return hr;
-	}
+	CHECK_HR_OR_RETURN(L"GetContainer");
 
 	hr = container->QueryInterface(IID_IHTMLDocument2, (void **)retval);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"GetDocument() failed: %ls", GetMessageForHresult(hr));
-	}
-
+	CHECK_HR_OR_RETURN(L"QueryInterface IID_IHTMLDocument2");
 	return hr;
 }
 
@@ -166,18 +160,14 @@ STDMETHODIMP CLegacyUpdateCtrl::IsPermitted() {
 	}
 
 	hr = document->get_location(&location);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"get_location");
 	if (location == NULL) {
 		hr = E_ACCESSDENIED;
 		goto end;
 	}
 
 	hr = location->get_host(&host);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"get_host");
 
 	for (DWORD i = 0; i < ARRAYSIZE(permittedHosts); i++) {
 		if (wcscmp(host, permittedHosts[i]) == 0) {
@@ -189,9 +179,6 @@ STDMETHODIMP CLegacyUpdateCtrl::IsPermitted() {
 end:
 	if (host) {
 		SysFreeString(host);
-	}
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"IsPermitted() failed: %ls", GetMessageForHresult(hr));
 	}
 	return hr;
 }
@@ -205,16 +192,10 @@ STDMETHODIMP CLegacyUpdateCtrl::GetIEWindowHWND(HWND *retval) {
 
 	CComPtr<IOleWindow> oleWindow;
 	HRESULT hr = m_clientSite->QueryInterface(IID_IOleWindow, (void **)&oleWindow);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_RETURN(L"QueryInterface");
 
 	hr = oleWindow->GetWindow(retval);
-
-end:
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"GetIEWindowHWND() failed: %ls", GetMessageForHresult(hr));
-	}
+	CHECK_HR_OR_RETURN(L"GetWindow");
 	return hr;
 }
 
@@ -224,9 +205,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(IElevationHelper **retval) {
 		// Use the helper directly, without elevation. It's the responsibility of the caller to ensure it
 		// is already running as admin on 2k/XP, or that it has requested elevation on Vista+.
 		HRESULT hr = CoCreateInstance(CLSID_ElevationHelper, NULL, CLSCTX_INPROC_SERVER, IID_IElevationHelper, (void **)&elevatedHelper);
-		if (!SUCCEEDED(hr)) {
-			return hr;
-		}
+		CHECK_HR_OR_RETURN(L"CoCreateInstance");
 		if (elevatedHelper == NULL) {
 			return E_POINTER;
 		}
@@ -384,9 +363,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
 	HWND hwnd;
 	GetIEWindowHWND(&hwnd);
 	HRESULT hr = CoCreateInstanceAsAdmin(hwnd, CLSID_ElevationHelper, IID_IElevationHelper, (void**)&m_elevatedHelper);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"RequestElevation() failed: %ls", GetMessageForHresult(hr));
-	}
+	CHECK_HR_OR_RETURN(L"CoCreateInstanceAsAdmin");
 	return hr;
 }
 
@@ -403,9 +380,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 
 	IElevationHelper *elevatedHelper;
 	HRESULT hr = GetElevatedHelper(&elevatedHelper);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
+	CHECK_HR_OR_RETURN(L"GetElevatedHelper");
 
 	return elevatedHelper->CreateObject(progID, retval);
 }
@@ -419,13 +394,14 @@ STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
 
 	CComPtr<IUpdateInstaller> updateInstaller;
 	HRESULT hr = installer->QueryInterface(IID_IUpdateInstaller, (void **)&updateInstaller);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
+	CHECK_HR_OR_RETURN(L"QueryInterface IID_IUpdateInstaller");
 
 	HWND hwnd;
-	GetIEWindowHWND(&hwnd);
-	updateInstaller->put_ParentHwnd(hwnd);
+	hr = GetIEWindowHWND(&hwnd);
+	CHECK_HR_OR_RETURN(L"GetIEWindowHWND");
+
+	hr = updateInstaller->put_ParentHwnd(hwnd);
+	CHECK_HR_OR_RETURN(L"put_ParentHwnd");
 
 	return S_OK;
 }
@@ -506,18 +482,15 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired() {
 		hr = installer.CoCreateInstance(CLSID_UpdateInstaller, NULL, CLSCTX_INPROC_SERVER);
 		if (SUCCEEDED(hr) && hr != REGDB_E_CLASSNOTREG) {
 			hr = installer->Commit(0);
-			if (!SUCCEEDED(hr)) {
-				return hr;
-			}
+			CHECK_HR_OR_RETURN(L"Commit");
 		}
 
 		IElevationHelper *elevatedHelper;
 		hr = GetElevatedHelper(&elevatedHelper);
-		if (!SUCCEEDED(hr)) {
-			return hr;
-		}
+		CHECK_HR_OR_RETURN(L"GetElevatedHelper");
 
 		hr = elevatedHelper->Reboot();
+		CHECK_HR_OR_RETURN(L"Reboot");
 	}
 
 	return hr;
@@ -532,6 +505,7 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog() {
 		hr = ::ViewWindowsUpdateLog(SW_SHOWDEFAULT);
 	}
 
+	CHECK_HR_OR_RETURN(L"ViewWindowsUpdateLog");
 	return hr;
 }
 
@@ -540,20 +514,16 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings() {
 
 	HRESULT hr = StartLauncher(L"/options", FALSE);
 	if (!SUCCEEDED(hr)) {
-		TRACE(L"OpenWindowsUpdateSettings() failed, falling back: %ls", GetMessageForHresult(hr));
+		TRACE(L"OpenWindowsUpdateSettings() failed, falling back: %08x", hr);
 
 		// Might happen if the site isn't trusted, and the user rejected the IE medium integrity prompt.
 		// Use the basic Automatic Updates dialog directly from COM.
 		CComPtr<IAutomaticUpdates> automaticUpdates;
 		hr = automaticUpdates.CoCreateInstance(CLSID_AutomaticUpdates, NULL, CLSCTX_INPROC_SERVER);
+		CHECK_HR_OR_RETURN(L"CoCreateInstance CLSID_AutomaticUpdates");
 
-		if (SUCCEEDED(hr)) {
-			hr = automaticUpdates->ShowSettingsDialog();
-		}
-
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"OpenWindowsUpdateSettings() failed: %ls", GetMessageForHresult(hr));
-		}
+		hr = automaticUpdates->ShowSettingsDialog();
+		CHECK_HR_OR_RETURN(L"ShowSettingsDialog");
 	}
 
 	return hr;
@@ -599,9 +569,7 @@ STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate() {
 
 	IElevationHelper *elevatedHelper;
 	HRESULT hr = GetElevatedHelper(&elevatedHelper);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
+	CHECK_HR_OR_RETURN(L"GetElevatedHelper");
 
 	return elevatedHelper->BeforeUpdate();
 }
@@ -611,9 +579,7 @@ STDMETHODIMP CLegacyUpdateCtrl::AfterUpdate() {
 
 	IElevationHelper *elevatedHelper;
 	HRESULT hr = GetElevatedHelper(&elevatedHelper);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
+	CHECK_HR_OR_RETURN(L"GetElevatedHelper");
 
 	return elevatedHelper->AfterUpdate();
 }

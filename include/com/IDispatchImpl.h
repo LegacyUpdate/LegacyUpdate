@@ -56,13 +56,10 @@ public:
 
 			CComPtr<ITypeLib> pTypeLib;
 			HRESULT hr = LoadRegTypeLib(*plibid, 1, 0, LOCALE_NEUTRAL, &pTypeLib);
-			if (SUCCEEDED(hr)) {
-				hr = pTypeLib->GetTypeInfoOfGuid(__uuidof(TImpl), &m_pTypeInfo);
-			}
+			CHECK_HR_OR_RETURN(L"LoadRegTypeLib");
 
-			if (!SUCCEEDED(hr)) {
-				return hr;
-			}
+			hr = pTypeLib->GetTypeInfoOfGuid(__uuidof(TImpl), &m_pTypeInfo);
+			CHECK_HR_OR_RETURN(L"GetTypeInfoOfGuid");
 		}
 
 		*ppTInfo = m_pTypeInfo;
@@ -81,9 +78,7 @@ public:
 
 		CComPtr<ITypeInfo> pTypeInfo;
 		HRESULT hr = GetTypeInfo(0, lcid, &pTypeInfo);
-		if (!SUCCEEDED(hr)) {
-			return hr;
-		}
+		CHECK_HR_OR_RETURN(L"GetTypeInfo");
 
 		return pTypeInfo->GetIDsOfNames(rgszNames, cNames, rgDispId);
 	}
@@ -95,9 +90,7 @@ public:
 
 		CComPtr<ITypeInfo> pTypeInfo;
 		HRESULT hr = GetTypeInfo(0, lcid, &pTypeInfo);
-		if (!SUCCEEDED(hr)) {
-			return hr;
-		}
+		CHECK_HR_OR_RETURN(L"GetTypeInfo");
 
 		return pTypeInfo->Invoke(this, dispIdMember, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
 	}

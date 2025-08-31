@@ -80,9 +80,7 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	}
 
 	hr = GetInstallPath(&installPath);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"GetInstallPath");
 
 	dllPath = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
 	wsprintf(dllPath, L"%ls\\LegacyUpdate.dll", installPath);

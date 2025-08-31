@@ -3,7 +3,6 @@
 #include <winreg.h>
 #include "Exec.h"
 #include "LegacyUpdate.h"
-#include "../shared/LegacyUpdate.h"
 #include "WULog.h"
 
 #ifndef SHUTDOWN_RESTART
@@ -19,9 +18,7 @@ typedef DWORD (WINAPI *_InitiateShutdownW)(LPWSTR lpMachineName, LPWSTR lpMessag
 HRESULT StartLauncher(LPCWSTR params, BOOL wait) {
 	LPWSTR path = NULL;
 	HRESULT hr = GetInstallPath(&path);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
+	CHECK_HR_OR_RETURN(L"GetInstallPath");
 
 	PathAppend(path, L"LegacyUpdate.exe");
 
@@ -46,14 +43,12 @@ HRESULT Reboot() {
 	// Make sure we have permission to shut down
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token)) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
-		TRACE(L"OpenProcessToken() failed: %ls\n", GetMessageForHresult(hr));
-		goto end;
+		CHECK_HR_OR_GOTO_END(L"OpenProcessToken");
 	}
 
 	if (!LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &shutdownLuid)) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
-		TRACE(L"LookupPrivilegeValue() failed: %ls\n", GetMessageForHresult(hr));
-		goto end;
+		CHECK_HR_OR_GOTO_END(L"LookupPrivilegeValue");
 	}
 
 	// Ask the system nicely to give us shutdown privilege
@@ -63,8 +58,7 @@ HRESULT Reboot() {
 
 	if (!AdjustTokenPrivileges(token, FALSE, &privileges, 0, NULL, NULL)) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
-		TRACE(L"AdjustTokenPrivileges() failed: %ls\n", GetMessageForHresult(hr));
-		goto end;
+		CHECK_HR_OR_GOTO_END(L"AdjustTokenPrivileges");
 	}
 
 	// Reboot with reason "Operating System: Security fix (Unplanned)", ensuring to install updates.
@@ -75,18 +69,18 @@ HRESULT Reboot() {
 
 	// Try InitiateSystemShutdownEx (2k/XP)
 	if (!SUCCEEDED(hr)) {
-		TRACE(L"InitiateShutdown() failed: %ls\n", GetMessageForHresult(hr));
+		TRACE(L"InitiateShutdown failed: %08x", hr);
 
 		if (InitiateSystemShutdownEx(NULL, NULL, 0, FALSE, TRUE, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX) == 0) {
 			hr = HRESULT_FROM_WIN32(GetLastError());
-			TRACE(L"InitiateSystemShutdownExW() failed: %ls\n", GetMessageForHresult(hr));
+			CHECK_HR_OR_GOTO_END(L"InitiateSystemShutdownEx");
 		}
 	}
 
 	// Last-ditch attempt ExitWindowsEx (only guaranteed to work for the current logged in user)
-	if (!SUCCEEDED(hr) && !ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
+		if (!SUCCEEDED(hr) && !ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
-		TRACE(L"ExitWindowsEx() failed: %ls\n", GetMessageForHresult(hr));
+		CHECK_HR_OR_GOTO_END(L"ExitWindowsEx");
 	}
 
 end:

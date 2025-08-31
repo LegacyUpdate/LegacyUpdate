@@ -243,9 +243,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 		if (_productName.vt == VT_EMPTY) {
 			// Get from WMI
 			HRESULT hr = QueryWMIProperty(L"SELECT Caption FROM Win32_OperatingSystem", L"Caption", &_productName);
-			if (!SUCCEEDED(hr)) {
-				return hr;
-			}
+			CHECK_HR_OR_RETURN(L"QueryWMIProperty");
 		}
 	}
 

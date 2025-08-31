@@ -177,9 +177,7 @@ STDMETHODIMP CProgressBarControl_IOleObject::DoVerb(LONG iVerb, LPMSG lpmsg, IOl
 	case OLEIVERB_SHOW:
 		if (hwndParent && lprcPosRect) {
 			HRESULT hr = m_pParent->CreateControlWindow(hwndParent, lprcPosRect);
-			if (!SUCCEEDED(hr)) {
-				return hr;
-			}
+			CHECK_HR_OR_RETURN(L"CreateControlWindow");
 			ShowWindow(m_pParent->m_innerHwnd, SW_SHOW);
 		}
 		return S_OK;
