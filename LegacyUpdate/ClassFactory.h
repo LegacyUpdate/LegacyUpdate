@@ -13,6 +13,8 @@ public:
 
 	virtual ~CClassFactory();
 
+	static STDMETHODIMP Create(IUnknown *pUnkOuter, REFIID riid, void **ppv);
+
 private:
 	LONG m_refCount;
 

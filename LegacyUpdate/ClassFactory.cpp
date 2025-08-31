@@ -6,7 +6,7 @@
 #include "dllmain.h"
 #include <new>
 
-STDMETHODIMP CreateClassFactory(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
+STDMETHODIMP CClassFactory::Create(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
 	if (pUnkOuter != NULL) {
 		return CLASS_E_NOAGGREGATION;
 	}

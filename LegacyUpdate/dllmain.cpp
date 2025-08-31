@@ -76,7 +76,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) {
 	for (DWORD i = 0; i < ARRAYSIZE(g_classEntries); i++) {
 		if (IsEqualCLSID(rclsid, *g_classEntries[i].clsid)) {
 			CClassFactory *pFactory;
-			HRESULT hr = CreateClassFactory(NULL, riid, (void **)&pFactory);
+			HRESULT hr = CClassFactory::Create(NULL, riid, (void **)&pFactory);
 			if (pFactory == NULL) {
 				return E_OUTOFMEMORY;
 			}
@@ -92,91 +92,102 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv) {
 	return CLASS_E_CLASSNOTAVAILABLE;
 }
 
-// DllRegisterServer - Adds entries to the system registry
-STDAPI DllRegisterServer(void) {
+// Shared register/unregister method
+STDAPI UpdateRegistration(BOOL state) {
 	HRESULT hr = OleInitialize(NULL);
 	BOOL oleInitialized = SUCCEEDED(hr);
-	if (!SUCCEEDED(hr) && hr != RPC_E_CHANGED_MODE && hr != CO_E_ALREADYINITIALIZED) {
-		TRACE(L"OleInitialize failed: %08x", hr);
-		return hr;
+	if (hr != RPC_E_CHANGED_MODE && hr != CO_E_ALREADYINITIALIZED) {
+		CHECK_HR_OR_RETURN(L"OleInitialize");
 	}
 
-	LPWSTR installPath = NULL;
-	LPWSTR filename = NULL;
-	LPWSTR libid = NULL, clsidCtrl = NULL, clsidElevationHelper = NULL, clsidProgressBar = NULL;
-
+	LPWSTR installPath = NULL, filename = NULL, libid = NULL;
 	hr = GetInstallPath(&installPath);
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"GetInstallPath failed: %08x", hr);
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"GetInstallPath");
 
-	GetOwnFileName(&filename);
+	hr = GetOwnFileName(&filename);
+	CHECK_HR_OR_GOTO_END(L"GetOwnFileName");
 
 	// Register type library
-	{
+	if (state) {
 		CComPtr<ITypeLib> typeLib;
 		hr = LoadTypeLib(filename, &typeLib);
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"LoadTypeLib failed: %08x", hr);
-			goto end;
-		}
+		CHECK_HR_OR_GOTO_END(L"LoadTypeLib");
 
 		hr = RegisterTypeLib(typeLib, filename, NULL);
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"RegisterTypeLib failed: %08x", hr);
-			goto end;
+		CHECK_HR_OR_GOTO_END(L"RegisterTypeLib");
+	} else {
+		CComPtr<ITypeLib> typeLib;
+		hr = LoadRegTypeLib(LIBID_LegacyUpdateLib, 1, 0, LOCALE_NEUTRAL, &typeLib);
+		if (hr != TYPE_E_LIBNOTREGISTERED) {
+			CHECK_HR_OR_GOTO_END(L"LoadRegTypeLib");
 		}
-	}
 
-	// Get IDs
-	if (!SUCCEEDED(StringFromCLSID(LIBID_LegacyUpdateLib, &libid)) ||
-		!SUCCEEDED(StringFromCLSID(CLSID_LegacyUpdateCtrl, &clsidCtrl)) ||
-		!SUCCEEDED(StringFromCLSID(CLSID_ElevationHelper, &clsidElevationHelper)) ||
-		!SUCCEEDED(StringFromCLSID(CLSID_ProgressBarControl, &clsidProgressBar))) {
-		TRACE(L"StringFromCLSID failed: %08x", hr);
-		hr = E_FAIL;
-		goto end;
+		if (hr != TYPE_E_LIBNOTREGISTERED) {
+			TLIBATTR *attrs;
+			hr = typeLib->GetLibAttr(&attrs);
+			CHECK_HR_OR_GOTO_END(L"GetLibAttr");
+
+			hr = UnRegisterTypeLib(attrs->guid, attrs->wMajorVerNum, attrs->wMinorVerNum, attrs->lcid, attrs->syskind);
+			typeLib->ReleaseTLibAttr(attrs);
+			CHECK_HR_OR_GOTO_END(L"UnRegisterTypeLib");
+		}
 	}
 
 	// Set vars used for expansions
+	hr = StringFromCLSID(LIBID_LegacyUpdateLib, &libid);
+	CHECK_HR_OR_GOTO_END(L"StringFromCLSID");
+
 	SetEnvironmentVariable(L"APPID", APPID_LegacyUpdateLib);
 	SetEnvironmentVariable(L"LIBID", libid);
-	SetEnvironmentVariable(L"CLSID_LegacyUpdateCtrl", clsidCtrl);
-	SetEnvironmentVariable(L"CLSID_ElevationHelper", clsidElevationHelper);
-	SetEnvironmentVariable(L"CLSID_ProgressBarControl", clsidProgressBar);
 	SetEnvironmentVariable(L"MODULE", filename);
 	SetEnvironmentVariable(L"INSTALLPATH", installPath);
 
+	CoTaskMemFree(libid);
+
 	// Main
-	{
-		RegistryEntry mainEntries[] = {
+	if (state) {
+		RegistryEntry entries[] = {
 			{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", L"DllSurrogate", REG_SZ, NULL},
 			{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", REG_SZ, NULL},
 			{}
 		};
-		hr = SetRegistryEntries(mainEntries, TRUE);
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"SetRegistryEntries main failed: %08x", hr);
-			goto end;
-		}
+		hr = SetRegistryEntries(entries, TRUE);
+	} else {
+		RegistryEntry entries[] = {
+			{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", NULL, 0, DELETE_KEY},
+			{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", NULL, 0, DELETE_KEY},
+			{}
+		};
+		hr = SetRegistryEntries(entries, TRUE);
 	}
+
+	CHECK_HR_OR_GOTO_END(L"SetRegistryEntries main");
 
 	// Register classes
-	for (size_t i = 0; i < ARRAYSIZE(g_classEntries); i++) {
-		hr = g_classEntries[i].updateRegistryFunc(TRUE);
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"SetRegistryEntries class failed: %08x", hr);
-			goto end;
-		}
+	for (DWORD i = 0; i < ARRAYSIZE(g_classEntries); i++) {
+		ClassEntry entry = g_classEntries[i];
+		LPWSTR clsidStr;
+		hr = StringFromCLSID(*entry.clsid, &clsidStr);
+		CHECK_HR_OR_GOTO_END(L"StringFromCLSID");
+
+		SetEnvironmentVariable(L"CLSID", clsidStr);
+		CoTaskMemFree(clsidStr);
+
+		hr = entry.updateRegistryFunc(state);
+		CHECK_HR_OR_GOTO_END(L"SetRegistryEntries class");
 	}
 
-	hr = PrxDllRegisterServer();
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"PrxDllRegisterServer failed: %08x", hr);
-	}
+	// Register proxy
+	hr = state ? PrxDllRegisterServer() : PrxDllUnregisterServer();
+	CHECK_HR_OR_GOTO_END(L"Proxy registration");
 
 end:
+	// Clean up environment
+	static LPCWSTR envVars[] = {L"APPID", L"LIBID", L"MODULE", L"INSTALLPATH", L"CLSID"};
+	for (DWORD i = 0; i < ARRAYSIZE(envVars); i++) {
+		SetEnvironmentVariable(envVars[i], NULL);
+	}
+
 	if (installPath) {
 		LocalFree(installPath);
 	}
@@ -186,15 +197,6 @@ end:
 	if (libid) {
 		CoTaskMemFree(libid);
 	}
-	if (clsidCtrl) {
-		CoTaskMemFree(clsidCtrl);
-	}
-	if (clsidElevationHelper) {
-		CoTaskMemFree(clsidElevationHelper);
-	}
-	if (clsidProgressBar) {
-		CoTaskMemFree(clsidProgressBar);
-	}
 
 	if (oleInitialized) {
 		OleUninitialize();
@@ -202,101 +204,14 @@ end:
 	return hr;
 }
 
+// DllRegisterServer - Adds entries to the system registry
+STDAPI DllRegisterServer(void) {
+	return UpdateRegistration(TRUE);
+}
+
 // DllUnregisterServer - Removes entries from the system registry
 STDAPI DllUnregisterServer(void) {
-	HRESULT hr = OleInitialize(NULL);
-	BOOL oleInitialized = SUCCEEDED(hr);
-	if (!SUCCEEDED(hr) && hr != RPC_E_CHANGED_MODE && hr != CO_E_ALREADYINITIALIZED) {
-		TRACE(L"OleInitialize failed: %08x", hr);
-		return hr;
-	}
-
-	LPWSTR clsidCtrl = NULL, clsidElevationHelper = NULL, clsidProgressBar = NULL;
-
-	// Unregister type library
-	{
-		CComPtr<ITypeLib> typeLib;
-		hr = LoadRegTypeLib(LIBID_LegacyUpdateLib, 1, 0, LOCALE_NEUTRAL, &typeLib);
-		if (!SUCCEEDED(hr) && hr != TYPE_E_LIBNOTREGISTERED) {
-			TRACE(L"LoadRegTypeLib failed: %08x", hr);
-			goto end;
-		}
-
-		if (hr != TYPE_E_LIBNOTREGISTERED) {
-			TLIBATTR *attrs;
-			hr = typeLib->GetLibAttr(&attrs);
-			if (!SUCCEEDED(hr)) {
-				TRACE(L"GetLibAttr failed: %08x", hr);
-				goto end;
-			}
-
-			hr = UnRegisterTypeLib(attrs->guid, attrs->wMajorVerNum, attrs->wMinorVerNum, attrs->lcid, attrs->syskind);
-			typeLib->ReleaseTLibAttr(attrs);
-			if (!SUCCEEDED(hr)) {
-				TRACE(L"UnRegisterTypeLib failed: %08x", hr);
-				goto end;
-			}
-		}
-	}
-
-	// Get IDs
-	if (!SUCCEEDED(StringFromCLSID(CLSID_LegacyUpdateCtrl, &clsidCtrl)) ||
-		!SUCCEEDED(StringFromCLSID(CLSID_ElevationHelper, &clsidElevationHelper)) ||
-		!SUCCEEDED(StringFromCLSID(CLSID_ProgressBarControl, &clsidProgressBar))) {
-		TRACE(L"StringFromCLSID failed: %08x", hr);
-		hr = E_FAIL;
-		goto end;
-	}
-
-	// Set vars used for expansions
-	SetEnvironmentVariable(L"APPID", APPID_LegacyUpdateLib);
-	SetEnvironmentVariable(L"CLSID_LegacyUpdateCtrl", clsidCtrl);
-	SetEnvironmentVariable(L"CLSID_ElevationHelper", clsidElevationHelper);
-	SetEnvironmentVariable(L"CLSID_ProgressBarControl", clsidProgressBar);
-
-	// Delete registry entries
-	{
-		RegistryEntry entries[] = {
-			{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", NULL, 0, DELETE_KEY},
-			{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", NULL, 0, DELETE_KEY},
-			{}
-		};
-		hr = SetRegistryEntries(entries, TRUE);
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"SetRegistryEntries main failed: %08x", hr);
-			goto end;
-		}
-	}
-
-	// Unregister classes
-	for (size_t i = 0; i < ARRAYSIZE(g_classEntries); i++) {
-		hr = g_classEntries[i].updateRegistryFunc(FALSE);
-		if (!SUCCEEDED(hr)) {
-			TRACE(L"SetRegistryEntries class failed: %08x", hr);
-			goto end;
-		}
-	}
-
-	hr = PrxDllUnregisterServer();
-	if (!SUCCEEDED(hr)) {
-		TRACE(L"PrxDllUnregisterServer failed: %08x", hr);
-	}
-
-end:
-	if (clsidCtrl) {
-		CoTaskMemFree(clsidCtrl);
-	}
-	if (clsidElevationHelper) {
-		CoTaskMemFree(clsidElevationHelper);
-	}
-	if (clsidProgressBar) {
-		CoTaskMemFree(clsidProgressBar);
-	}
-
-	if (oleInitialized) {
-		OleUninitialize();
-	}
-	return hr;
+	return UpdateRegistration(FALSE);
 }
 
 // DllInstall - Adds/Removes entries to the system registry per machine only.

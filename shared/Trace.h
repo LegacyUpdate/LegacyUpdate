@@ -12,3 +12,15 @@
 #else
 	#define TRACE(...)
 #endif
+
+#define CHECK_HR_OR_RETURN(thing) \
+	if (!SUCCEEDED(hr)) { \
+		TRACE(thing L" failed: %08x", hr); \
+		return hr; \
+	}
+
+#define CHECK_HR_OR_GOTO_END(thing) \
+	if (!SUCCEEDED(hr)) { \
+		TRACE(thing L" failed: %08x", hr); \
+		goto end; \
+	}

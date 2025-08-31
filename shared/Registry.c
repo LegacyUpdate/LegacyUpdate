@@ -89,7 +89,7 @@ end:
 }
 
 HRESULT SetRegistryEntries(RegistryEntry entries[], BOOL expandEnv) {
-	for (size_t i = 0; entries[i].hKey != NULL; i++) {
+	for (DWORD i = 0; entries[i].hKey != NULL; i++) {
 		RegistryEntry entry = entries[i];
 		LPWSTR expandedSubKey = NULL, expandedData = NULL;
 

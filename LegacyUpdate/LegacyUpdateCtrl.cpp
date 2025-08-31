@@ -70,19 +70,19 @@ STDMETHODIMP CLegacyUpdateCtrl::UpdateRegistry(BOOL bRegister) {
 			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control", NULL, REG_SZ, (LPVOID)L"Legacy Update Control"},
 			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control\\CurVer", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.Control.1"},
 			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control.1", NULL, REG_SZ, (LPVOID)L"Legacy Update Control"},
-			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control.1\\CLSID", NULL, REG_SZ, (LPVOID)L"%CLSID_LegacyUpdateCtrl%"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%", NULL, REG_SZ, (LPVOID)L"Legacy Update Control"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%", L"AppID", REG_SZ, (LPVOID)L"%APPID%"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\ProgID", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.Control"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Programmable", NULL, REG_SZ, NULL},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\InprocServer32", NULL, REG_SZ, (LPVOID)L"%MODULE%"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\InprocServer32", L"ThreadingModel", REG_SZ, (LPVOID)L"Apartment"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Control", NULL, REG_SZ, NULL},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\TypeLib", NULL, REG_SZ, (LPVOID)L"%LIBID%"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Version", NULL, REG_SZ, (LPVOID)L"1.0"},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\MiscStatus", NULL, REG_DWORD, (LPVOID)LEGACYUPDATECTRL_MISCSTATUS},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Implemented Categories\\{7DD95801-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, NULL},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%\\Implemented Categories\\{7DD95802-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, NULL},
+			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control.1\\CLSID", NULL, REG_SZ, (LPVOID)L"%CLSID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%", NULL, REG_SZ, (LPVOID)L"Legacy Update Control"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%", L"AppID", REG_SZ, (LPVOID)L"%APPID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\ProgID", NULL, REG_SZ, (LPVOID)L"LegacyUpdate.Control"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\Programmable", NULL, REG_SZ, NULL},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\InprocServer32", NULL, REG_SZ, (LPVOID)L"%MODULE%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\InprocServer32", L"ThreadingModel", REG_SZ, (LPVOID)L"Apartment"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\Control", NULL, REG_SZ, NULL},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\TypeLib", NULL, REG_SZ, (LPVOID)L"%LIBID%"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\Version", NULL, REG_SZ, (LPVOID)L"1.0"},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\MiscStatus", NULL, REG_DWORD, (LPVOID)LEGACYUPDATECTRL_MISCSTATUS},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\Implemented Categories\\{7DD95801-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, NULL},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\Implemented Categories\\{7DD95802-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, NULL},
 			{}
 		};
 		return SetRegistryEntries(entries, TRUE);
@@ -90,7 +90,7 @@ STDMETHODIMP CLegacyUpdateCtrl::UpdateRegistry(BOOL bRegister) {
 		RegistryEntry entries[] = {
 			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control", NULL, 0, DELETE_KEY},
 			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control.1", NULL, 0, DELETE_KEY},
-			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID_LegacyUpdateCtrl%", NULL, 0, DELETE_KEY},
+			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%", NULL, 0, DELETE_KEY},
 			{}
 		};
 		return SetRegistryEntries(entries, TRUE);
