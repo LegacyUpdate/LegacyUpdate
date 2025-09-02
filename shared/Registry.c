@@ -88,12 +88,12 @@ end:
 	return hr;
 }
 
-HRESULT SetRegistryEntries(RegistryEntry entries[], BOOL expandEnv) {
+HRESULT SetRegistryEntries(RegistryEntry entries[]) {
 	for (DWORD i = 0; entries[i].hKey != NULL; i++) {
 		RegistryEntry entry = entries[i];
 		LPWSTR expandedSubKey = NULL, expandedData = NULL;
 
-		if (expandEnv && entry.lpSubKey) {
+		if (entry.lpSubKey) {
 			DWORD length = ExpandEnvironmentStrings((LPCWSTR)entry.lpSubKey, NULL, 0);
 			expandedSubKey = (LPWSTR)LocalAlloc(LPTR, length * sizeof(WCHAR));
 			ExpandEnvironmentStrings((LPCWSTR)entry.lpSubKey, expandedSubKey, length);
@@ -135,12 +135,10 @@ HRESULT SetRegistryEntries(RegistryEntry entries[], BOOL expandEnv) {
 			} else if (entry.uData.lpData != NULL) {
 				if (entry.dwType == REG_SZ) {
 					if (entry.uData.lpData) {
-						if (expandEnv) {
-							DWORD length = ExpandEnvironmentStrings((LPCWSTR)entry.uData.lpData, NULL, 0);
-							expandedData = (LPWSTR)LocalAlloc(LPTR, length * sizeof(WCHAR));
-							ExpandEnvironmentStrings((LPCWSTR)entry.uData.lpData, expandedData, length);
-							entry.uData.lpData = expandedData;
-						}
+						DWORD length = ExpandEnvironmentStrings((LPCWSTR)entry.uData.lpData, NULL, 0);
+						expandedData = (LPWSTR)LocalAlloc(LPTR, length * sizeof(WCHAR));
+						ExpandEnvironmentStrings((LPCWSTR)entry.uData.lpData, expandedData, length);
+						entry.uData.lpData = expandedData;
 
 						entry.dataSize = (DWORD)(lstrlen((LPCWSTR)entry.uData.lpData) + 1) * sizeof(WCHAR);
 					} else {

@@ -61,6 +61,7 @@ STDMETHODIMP CElevationHelper::Create(IUnknown *pUnkOuter, REFIID riid, void **p
 	// TODO: Only do this if we're in dllhost
 	BecomeDPIAware();
 	HRESULT hr = pThis->QueryInterface(riid, ppv);
+	CHECK_HR_OR_RETURN(L"QueryInterface");
 	pThis->Release();
 	return hr;
 }
@@ -88,7 +89,7 @@ STDMETHODIMP CElevationHelper::UpdateRegistry(BOOL bRegister) {
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\Elevation", L"IconReference", REG_SZ, (LPVOID)L"@%INSTALLPATH%\\LegacyUpdate.exe,-100"},
 			{}
 		};
-		return SetRegistryEntries(entries, TRUE);
+		return SetRegistryEntries(entries);
 	} else {
 		RegistryEntry entries[] = {
 			{HKEY_CLASSES_ROOT, L"LegacyUpdate.ElevationHelper", NULL, 0, DELETE_KEY},
@@ -96,7 +97,7 @@ STDMETHODIMP CElevationHelper::UpdateRegistry(BOOL bRegister) {
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%", NULL, 0, DELETE_KEY},
 			{}
 		};
-		return SetRegistryEntries(entries, TRUE);
+		return SetRegistryEntries(entries);
 	}
 }
 

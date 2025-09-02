@@ -108,18 +108,14 @@ PLUGIN_METHOD(InitTaskbarProgress) {
 	HRESULT hr = E_FAIL;
 
 	if (!progressBar) {
-		goto fail;
+		goto end;
 	}
 
 	hr = CoCreateInstance(&CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, &IID_ITaskbarList3, (void **)&g_taskbarList);
-	if (!SUCCEEDED(hr)) {
-		goto fail;
-	}
+	CHECK_HR_OR_GOTO_END(L"CoCreateInstance");
 
 	hr = ITaskbarList3_HrInit(g_taskbarList);
-	if (!SUCCEEDED(hr)) {
-		goto fail;
-	}
+	CHECK_HR_OR_GOTO_END(L"HrInit");
 
 	// Get the initial progress bar range
 	SendMessage(progressBar, PBM_GETRANGE, 0, (LPARAM)&range);
@@ -129,11 +125,11 @@ PLUGIN_METHOD(InitTaskbarProgress) {
 	g_progressOrigWndProc = (WNDPROC)SetWindowLongPtr(progressBar, GWLP_WNDPROC, (LONG_PTR)ProgressBarWndProc);
 	g_dialogOrigWndProc = (WNDPROC)SetWindowLongPtr(g_hwndParent, GWLP_WNDPROC, (LONG_PTR)MainWndProc);
 	if (!g_progressOrigWndProc || !g_dialogOrigWndProc) {
-		goto fail;
+		goto end;
 	}
 	return;
 
-fail:
+end:
 	if (g_taskbarList) {
 		ITaskbarList3_Release(g_taskbarList);
 		g_taskbarList = NULL;

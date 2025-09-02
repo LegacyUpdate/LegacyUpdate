@@ -85,7 +85,7 @@ STDMETHODIMP CLegacyUpdateCtrl::UpdateRegistry(BOOL bRegister) {
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%\\Implemented Categories\\{7DD95802-9882-11CF-9FA9-00AA006C42C4}", NULL, REG_SZ, NULL},
 			{}
 		};
-		return SetRegistryEntries(entries, TRUE);
+		return SetRegistryEntries(entries);
 	} else {
 		RegistryEntry entries[] = {
 			{HKEY_CLASSES_ROOT, L"LegacyUpdate.Control", NULL, 0, DELETE_KEY},
@@ -93,7 +93,7 @@ STDMETHODIMP CLegacyUpdateCtrl::UpdateRegistry(BOOL bRegister) {
 			{HKEY_CLASSES_ROOT, L"CLSID\\%CLSID%", NULL, 0, DELETE_KEY},
 			{}
 		};
-		return SetRegistryEntries(entries, TRUE);
+		return SetRegistryEntries(entries);
 	}
 }
 
@@ -331,6 +331,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 			if (SUCCEEDED(hr)) {
 				retval->vt = VT_BSTR;
 				retval->bstrVal = SysAllocStringLen(data, size - 1);
+				LocalFree(data);
 			}
 		}
 		break;

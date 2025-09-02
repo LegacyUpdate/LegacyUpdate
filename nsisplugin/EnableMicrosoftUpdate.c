@@ -12,19 +12,19 @@ PLUGIN_METHOD(EnableMicrosoftUpdate) {
 	IUpdateServiceRegistration *registration;
 
 	HRESULT hr = CoCreateInstance(&CLSID_UpdateServiceManager, NULL, CLSCTX_INPROC_SERVER, &IID_IUpdateServiceManager2, (void **)&serviceManager);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"CoCreateInstance");
 
 	BSTR clientID = SysAllocString(L"Legacy Update");
-	IUpdateServiceManager2_put_ClientApplicationID(serviceManager, clientID);
+	hr = IUpdateServiceManager2_put_ClientApplicationID(serviceManager, clientID);
 	SysFreeString(clientID);
+	CHECK_HR_OR_GOTO_END(L"put_ClientApplicationID");
 
 	BSTR serviceID = SysAllocString(MicrosoftUpdateServiceID);
 	BSTR serviceCab = SysAllocString(L"");
 	hr = IUpdateServiceManager2_AddService2(serviceManager, serviceID, asfAllowPendingRegistration | asfAllowOnlineRegistration | asfRegisterServiceWithAU, serviceCab, &registration);
 	SysFreeString(serviceID);
 	SysFreeString(serviceCab);
+	CHECK_HR_OR_GOTO_END(L"AddService2");
 
 end:
 	if (registration) {

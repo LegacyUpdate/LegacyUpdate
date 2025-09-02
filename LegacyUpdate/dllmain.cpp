@@ -151,14 +151,14 @@ STDAPI UpdateRegistration(BOOL state) {
 			{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", REG_SZ, NULL},
 			{}
 		};
-		hr = SetRegistryEntries(entries, TRUE);
+		hr = SetRegistryEntries(entries);
 	} else {
 		RegistryEntry entries[] = {
 			{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", NULL, 0, DELETE_KEY},
 			{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", NULL, 0, DELETE_KEY},
 			{}
 		};
-		hr = SetRegistryEntries(entries, TRUE);
+		hr = SetRegistryEntries(entries);
 	}
 
 	CHECK_HR_OR_GOTO_END(L"SetRegistryEntries main");

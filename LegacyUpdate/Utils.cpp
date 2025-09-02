@@ -24,10 +24,10 @@ HRESULT StartLauncher(LPCWSTR params, BOOL wait) {
 
 	DWORD code = 0;
 	hr = Exec(NULL, path, params, NULL, SW_SHOWDEFAULT, wait, &code);
-	if (SUCCEEDED(hr)) {
-		hr = HRESULT_FROM_WIN32(code);
-	}
+	CHECK_HR_OR_GOTO_END(L"Exec");
+	hr = HRESULT_FROM_WIN32(code);
 
+end:
 	LocalFree(path);
 	return hr;
 }

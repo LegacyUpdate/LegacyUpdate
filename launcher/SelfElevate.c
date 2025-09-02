@@ -7,6 +7,7 @@ HRESULT SelfElevate(LPWSTR args, LPDWORD code) {
 	LPWSTR fileName = NULL;
 	GetOwnFileName(&fileName);
 	HRESULT hr = Exec(L"runas", fileName, args, NULL, SW_SHOWDEFAULT, TRUE, code);
+	CHECK_HR_OR_RETURN(L"Exec");
 	LocalFree(fileName);
 	return hr;
 }

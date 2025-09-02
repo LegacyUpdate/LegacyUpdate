@@ -2,8 +2,6 @@
 #include "WMI.h"
 #include <wbemcli.h>
 
-#pragma comment(lib, "wbemuuid.lib")
-
 #ifdef CINTERFACE
 	#define our_CLSID_WbemLocator &CLSID_WbemLocator
 	#define our_IID_IWbemLocator  &IID_IWbemLocator
@@ -29,40 +27,31 @@ HRESULT QueryWMIProperty(LPCWSTR query, LPCWSTR property, LPVARIANT value) {
 	ULONG uReturn = 0;
 
 	HRESULT hr = CoCreateInstance(our_CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, our_IID_IWbemLocator, (void **)&locator);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"CoCreateInstance");
 
 	server = SysAllocString(L"ROOT\\CIMV2");
 	hr = IWbemLocator_ConnectServer(locator, server, NULL, NULL, NULL, 0, NULL, NULL, &services);
 	SysFreeString(server);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"ConnectServer");
 
 	hr = CoSetProxyBlanket((IUnknown *)services, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"CoSetProxyBlanket");
 
 	wql = SysAllocString(L"WQL");
 	queryBstr = SysAllocString(query);
 	hr = IWbemServices_ExecQuery(services, wql, queryBstr, WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &enumerator);
 	SysFreeString(wql);
 	SysFreeString(queryBstr);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"ExecQuery");
 
 	uReturn = 0;
 	hr = IEnumWbemClassObject_Next(enumerator, (LONG)WBEM_INFINITE, 1, &object, &uReturn);
-	if (!SUCCEEDED(hr)) {
-		goto end;
-	}
+	CHECK_HR_OR_GOTO_END(L"Next");
 
 	propBstr = SysAllocString(property);
 	hr = IWbemClassObject_Get(object, propBstr, 0, value, NULL, NULL);
 	SysFreeString(propBstr);
+	CHECK_HR_OR_GOTO_END(L"Get");
 
 end:
 	if (object) {

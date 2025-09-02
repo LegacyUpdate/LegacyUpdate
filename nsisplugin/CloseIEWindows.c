@@ -46,6 +46,9 @@ PLUGIN_METHOD(CloseIEWindows) {
 
 		if (wcsstr(location, LegacyUpdateSiteURLHttp) != NULL || wcsstr(location, LegacyUpdateSiteURLHttps) != NULL) {
 			hr = IWebBrowser2_Quit(browser);
+			if (!SUCCEEDED(hr)) {
+				TRACE(L"Quit failed: %08x", hr);
+			}
 
 			// Wait up to 5 seconds for the window to close
 			HWND hwnd = 0;
