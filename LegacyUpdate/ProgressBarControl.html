@@ -6,8 +6,11 @@
 	<meta http-equiv="MSThemeCompatible" content="yes">
 </head>
 <body>
-	<div style="border: 1px solid;">
+	<div style="border: 1px solid #555; width: 200px; height: 150px; margin: 100px; overflow: scroll;">
+		<div style="height: 50px;"></div>
 		<object id="ProgressBarControl" classid="CLSID:7b875a2f-2dfb-4d38-91f5-5c0bfb74c377" width="208" height="14"></object>
+		<div style="padding-top: 200px;"></div>
+		.
 	</div>
 
 	<div id="Value">-1</div>
@@ -15,33 +18,50 @@
 	<button onclick="marquee()">Marquee</button>
 	<button onclick="normal()">Normal</button>
 	<button onclick="zero()">Zero</button>
+	<button onclick="stop()">Stop</button>
 
 	<script>
 		var timer = -1;
+		var value = -1;
 
-		function marquee() {
+		function stop() {
 			if (timer !== -1) {
-				clearInterval(timer);
+				clearTimeout(timer);
+				timer = -1;
+			}
+		}
+
+		function update(marquee) {
+			if (marquee) {
+				value = -1;
+			} else {
+				value = value === 100 ? 0 : value + 1;
 			}
 
-			ProgressBarControl.Value = -1;
-			Value.innerText = "-1";
+			ProgressBarControl.Value = value;
+			Value.innerText = value;
+
+			if (marquee) {
+				stop();
+			} else {
+				timer = setTimeout(update, 100, false);
+			}
+		}
+
+		function marquee() {
+			stop();
+			update(true);
 		}
 
 		function normal() {
-			if (timer !== -1) {
-				clearInterval(timer);
-			}
-
-			timer = setInterval(function() {
-				var value = ProgressBarControl.Value;
-				Value.innerText = value;
-				ProgressBarControl.Value = value === 100 ? 0 : value + 1;
-			}, 100);
+			stop();
+			update(false);
 		}
 
 		function zero() {
-			ProgressBarControl.Value = 0;
+			stop();
+			value = 100;
+			update(false);
 		}
 	</script>
 </body>

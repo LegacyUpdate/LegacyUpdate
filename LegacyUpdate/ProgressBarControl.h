@@ -47,6 +47,13 @@ public:
 	STDMETHODIMP ResizeBorder(LPCRECT prcBorder, IOleInPlaceUIWindow *pUIWindow, BOOL fFrameWindow);
 };
 
+class DECLSPEC_NOVTABLE CProgressBarControl_IQuickActivateImpl :
+	public IQuickActivateImpl<CProgressBarControl> {
+public:
+	CProgressBarControl_IQuickActivateImpl(CProgressBarControl *pParent) :
+		IQuickActivateImpl<CProgressBarControl>(pParent) {}
+};
+
 class DECLSPEC_NOVTABLE CProgressBarControl :
 	public IDispatchImpl<IProgressBarControl, &LIBID_LegacyUpdateLib> {
 public:
@@ -55,13 +62,15 @@ public:
 		m_IViewObjectEx(this),
 		m_IOleInPlaceObject(this),
 		m_IOleInPlaceActiveObject(this),
+		m_IQuickActivateImpl(this),
 		m_refCount(1),
 		m_hwnd(NULL),
 		m_innerHwnd(NULL),
 		m_width(0),
 		m_height(0),
 		m_clientSite(NULL),
-		m_adviseSink(NULL) {
+		m_adviseSink(NULL),
+		m_progressBarOrigWndProc(NULL) {
 	}
 
 	virtual ~CProgressBarControl();
@@ -74,6 +83,7 @@ public:
 	CProgressBarControl_IViewObjectEx m_IViewObjectEx;
 	CProgressBarControl_IOleInPlaceObject m_IOleInPlaceObject;
 	CProgressBarControl_IOleInPlaceActiveObject m_IOleInPlaceActiveObject;
+	CProgressBarControl_IQuickActivateImpl m_IQuickActivateImpl;
 
 private:
 	LONG m_refCount;
@@ -85,6 +95,7 @@ public:
 	LONG m_height;
 	IOleClientSite *m_clientSite;
 	IAdviseSink *m_adviseSink;
+	WNDPROC m_progressBarOrigWndProc;
 
 	// IUnknown
 	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
@@ -99,4 +110,6 @@ public:
 	STDMETHODIMP CreateControlWindow(HWND hParent, const RECT *pRect);
 	STDMETHODIMP DestroyControlWindow();
 	STDMETHODIMP OnDraw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd, HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds, BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue);
+	STDMETHODIMP InvalidateContainer();
+	static LRESULT CALLBACK ProgressBarWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

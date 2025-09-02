@@ -7,5 +7,6 @@
 #include <com/IOleInPlaceActiveObjectImpl.h>
 #include <com/IOleInPlaceObjectImpl.h>
 #include <com/IOleObjectImpl.h>
+#include <com/IQuickActivateImpl.h>
 #include <com/IUnknownImpl.h>
 #include <com/IViewObjectExImpl.h>
