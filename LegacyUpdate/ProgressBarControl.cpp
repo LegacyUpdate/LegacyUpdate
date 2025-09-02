@@ -396,9 +396,6 @@ LRESULT CALLBACK CProgressBarControl::ProgressBarWndProc(HWND hwnd, UINT uMsg, W
 	switch (uMsg) {
 	case WM_PAINT:
 	case WM_TIMER:
-	case WM_PRINTCLIENT:
-	case WM_ERASEBKGND:
-	case WM_NCPAINT:
 		// Redraw after progress bar paint
 		pThis->InvalidateContainer();
 		break;
