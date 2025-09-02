@@ -9,67 +9,18 @@ FILES    = \
 RCFILES  = resource.rc
 DEFFILES = ../LegacyUpdate/LegacyUpdate.def
 
-ARCH   ?= 32
+BIN      = obj/LegacyUpdate$(ARCH).exe
 
-ifeq ($(ARCH),64)
-TAG     = x86_64
-else
-TAG     = i686
-endif
+all: all-archs
 
-PREFIX  = $(TAG)-w64-mingw32-
+all-archs: all-32 all-64
 
-BIN     = obj/LegacyUpdate$(ARCH).exe
-OBJ     = $(foreach file,$(FILES),obj/$(notdir $(basename $(file)).$(TAG).o))
-RES     = $(foreach file,$(RCFILES),obj/$(notdir $(basename $(file)).$(TAG).res))
-DEFDLL  = $(foreach file,$(DEFFILES),obj/lib$(notdir $(basename $(file)).$(TAG).a))
+include ../build/shared.mk
 
-CC      = $(PREFIX)g++
-RC      = $(PREFIX)windres
-DLLTOOL = $(PREFIX)dlltool
+CFLAGS  += \
+	-mwindows
 
-override DEBUG := $(or $(DEBUG),1)
-
-CFLAGS = \
-	-mwindows \
-	-municode \
-	-DUNICODE \
-	-D_UNICODE \
-	$(if $(filter 1,$(DEBUG)),-D_DEBUG -g,-DNDEBUG -Os) \
-	-s \
-	-fPIE \
-	-ffunction-sections \
-	-fdata-sections \
-	-fno-unwind-tables \
-	-fno-asynchronous-unwind-tables \
-	-fno-exceptions \
-	-flto \
-	-Wall \
-	-Werror \
-	-Wextra \
-	-Wpedantic \
-	-Wno-unused-parameter \
-	-Wno-unknown-pragmas \
-	-Wno-cast-function-type \
-	-I../include \
-	-I../shared \
-	-include stdafx.h
-
-CXXFLAGS = \
-	$(CFLAGS) \
-	-std=c++11 \
-	-fno-rtti
-
-LDFLAGS = \
-	-nodefaultlibs \
-	-nostartfiles \
-	-nostdlib \
-	-Wl,--gc-sections \
-	-Wl,--no-seh \
-	-Wl,--nxcompat \
-	-Wl,--enable-auto-image-base \
-	-Wl,--enable-stdcall-fixup \
-	-Wl,--strip-all \
+LDFLAGS += \
 	-Lobj \
 	-lmsvcrt \
 	-lgcc \
@@ -85,59 +36,14 @@ LDFLAGS = \
 	-lgdi32 \
 	-lmsimg32
 
-RCFLAGS = \
-	-O coff \
-	-I../shared
-
 ifeq ($(ARCH),64)
 	LDFLAGS += -Wl,-ewWinMain
-	RCFLAGS += -F pe-x86-64
 else
-	CFLAGS  += -march=i486
 	LDFLAGS += -Wl,-e_wWinMain
-	RCFLAGS += -F pe-i386
 endif
-
-all: all-archs
-
-all-archs: all-32 all-64
-
-all-32:
-	+$(MAKE) internal-all ARCH=32
-
-all-64:
-	+$(MAKE) internal-all ARCH=64
-
-internal-all: $(BIN)
-ifeq ($(SIGN),1)
-	../build/sign.sh $(BIN)
-endif
-
-$(BIN): $(OBJ) $(RES)
-	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $@
-
-obj:
-	mkdir -p $@
-
-obj/%.$(TAG).o: %.c
-	$(CC) -x c $< $(CFLAGS) -c -o $@
-
-obj/%.$(TAG).o: ../shared/%.c
-	$(CC) -x c $< $(CFLAGS) -c -o $@
-
-obj/%.$(TAG).res: %.rc
-	$(RC) $< $(RCFLAGS) -o $@
-
-obj/lib%.$(TAG).a: ../LegacyUpdate/%.def
-	$(DLLTOOL) -d $< -l $@ -D $(notdir $(basename $<).dll)
-
-$(OBJ): | obj
-
-clean:
-	rm -rf obj
 
 test:
 	+$(MAKE) DEBUG=$(DEBUG)
 	./obj/LegacyUpdate.exe
 
-.PHONY: all all-archs all-32 all-64 internal-all clean test
+.PHONY: all all-archs all-32 all-64 test
