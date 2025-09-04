@@ -106,7 +106,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	default: {
 		const LPWSTR usage = L""
-			L"LegacyUpdate.exe [/launch|/regserver|/unregserver]\n"
+			L"LegacyUpdate.exe [/launch|/options|/log|/regserver|/unregserver]\n"
 			L"\n"
 			L"/launch\n"
 			L"    Launch Legacy Update website in Internet Explorer\n"
