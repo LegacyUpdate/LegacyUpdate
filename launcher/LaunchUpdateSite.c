@@ -19,7 +19,7 @@ const LPWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
 DEFINE_GUID(IID_ILegacyUpdateCtrl,  0xC33085BB, 0xC3E1, 0x4D27, 0xA2, 0x14, 0xAF, 0x01, 0x95, 0x3D, 0xF5, 0xE5);
 DEFINE_GUID(CLSID_LegacyUpdateCtrl, 0xAD28E0DF, 0x5F5A, 0x40B5, 0x94, 0x32, 0x85, 0xEF, 0xD9, 0x7D, 0x1F, 0x9F);
 
-static LPWSTR GetUpdateSiteURL() {
+static LPWSTR GetUpdateSiteURL(void) {
 	// Fallback: Use SSL only on Vista and up
 	BOOL useHTTPS = AtLeastWinVista();
 
@@ -40,7 +40,7 @@ static LPWSTR GetUpdateSiteURL() {
 	return useHTTPS ? UpdateSiteURLHttps : UpdateSiteURLHttp;
 }
 
-HRESULT HandleIENotInstalled() {
+HRESULT HandleIENotInstalled(void) {
 	// Handle case where the user has uninstalled Internet Explorer using Programs and Features.
 	if (AtLeastWin8() && !AtLeastWin10_1703()) {
 		// Windows 8 - 10 1607: Directly prompt to reinstall IE using Fondue.exe.

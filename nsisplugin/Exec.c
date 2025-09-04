@@ -27,7 +27,7 @@ freely, subject to the following restrictions:
 
 #if defined(_MSC_VER) && !defined(GetVersion)
 #if _MSC_VER >= 1500
-FORCEINLINE DWORD NoDepr_GetVersion() { __pragma(warning(push))__pragma(warning(disable:4996)) DWORD r = GetVersion(); __pragma(warning(pop)) return r; }
+FORCEINLINE DWORD NoDepr_GetVersion(void) { __pragma(warning(push))__pragma(warning(disable:4996)) DWORD r = GetVersion(); __pragma(warning(pop)) return r; }
 #define GetVersion NoDepr_GetVersion
 #endif //~ _MSC_VER >= 1500
 #endif //~ _MSC_VER
@@ -107,7 +107,7 @@ static void TruncateStringMB(UINT Codepage, LPSTR Buffer, SIZE_T Length, unsigne
   }
 }
 
-static BOOL IsWOW64() {
+static BOOL IsWOW64(void) {
 #ifdef _WIN64
   return FALSE;
 #else

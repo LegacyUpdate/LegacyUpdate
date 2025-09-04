@@ -45,7 +45,7 @@ STDMETHODIMP CLegacyUpdateCtrl::Create(IUnknown *pUnkOuter, REFIID riid, void **
 	return hr;
 }
 
-CLegacyUpdateCtrl::~CLegacyUpdateCtrl() {
+CLegacyUpdateCtrl::~CLegacyUpdateCtrl(void) {
 	if (m_clientSite) {
 		m_clientSite->Release();
 		m_clientSite = NULL;
@@ -115,11 +115,11 @@ STDMETHODIMP CLegacyUpdateCtrl::QueryInterface(REFIID riid, void **ppvObject) {
 	return IDispatchImpl<ILegacyUpdateCtrl, &LIBID_LegacyUpdateLib>::QueryInterface(riid, ppvObject);
 }
 
-STDMETHODIMP_(ULONG) CLegacyUpdateCtrl::AddRef() {
+STDMETHODIMP_(ULONG) CLegacyUpdateCtrl::AddRef(void) {
 	return InterlockedIncrement(&m_refCount);
 }
 
-STDMETHODIMP_(ULONG) CLegacyUpdateCtrl::Release() {
+STDMETHODIMP_(ULONG) CLegacyUpdateCtrl::Release(void) {
 	ULONG count = InterlockedDecrement(&m_refCount);
 	if (count == 0) {
 		this->~CLegacyUpdateCtrl();
@@ -144,7 +144,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetHTMLDocument(IHTMLDocument2 **retval) {
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::IsPermitted() {
+STDMETHODIMP CLegacyUpdateCtrl::IsPermitted(void) {
 	CComPtr<IHTMLDocument2> document;
 	CComPtr<IHTMLLocation> location;
 	BSTR host = NULL;
@@ -217,7 +217,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(IElevationHelper **retval) {
 	return S_OK;
 }
 
-#define DoIsPermittedCheck() { \
+#define DoIsPermittedCheck(void) { \
 		HRESULT hr = IsPermitted(); \
 		if (!SUCCEEDED(hr)) { \
 			return hr; \
@@ -353,7 +353,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::RequestElevation() {
+STDMETHODIMP CLegacyUpdateCtrl::RequestElevation(void) {
 	DoIsPermittedCheck();
 
 	if (m_elevatedHelper != NULL || !AtLeastWinVista()) {
@@ -386,7 +386,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 	return elevatedHelper->CreateObject(progID, retval);
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
+STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUnknown *installer) {
 	DoIsPermittedCheck();
 
 	if (installer == NULL) {
@@ -471,7 +471,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired() {
+STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	DoIsPermittedCheck();
 
 	VARIANT_BOOL isRebootRequired = VARIANT_FALSE;
@@ -497,7 +497,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired() {
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog() {
+STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	DoIsPermittedCheck();
 
 	HRESULT hr = StartLauncher(L"/log", FALSE);
@@ -510,7 +510,7 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog() {
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings() {
+STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	DoIsPermittedCheck();
 
 	HRESULT hr = StartLauncher(L"/options", FALSE);
@@ -565,7 +565,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 	return S_OK;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate() {
+STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate(void) {
 	DoIsPermittedCheck();
 
 	IElevationHelper *elevatedHelper;
@@ -575,7 +575,7 @@ STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate() {
 	return elevatedHelper->BeforeUpdate();
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::AfterUpdate() {
+STDMETHODIMP CLegacyUpdateCtrl::AfterUpdate(void) {
 	DoIsPermittedCheck();
 
 	IElevationHelper *elevatedHelper;

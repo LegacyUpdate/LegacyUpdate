@@ -7,13 +7,13 @@ class CComPtr {
 public:
 	TInterface *pointer;
 
-	void *operator new(std::size_t) = delete;
-	void *operator new[](std::size_t) = delete;
+	void *operator new(size_t) = delete;
+	void *operator new[](size_t) = delete;
 
 	void operator delete(void *ptr) = delete;
 	void operator delete[](void *ptr) = delete;
 
-	CComPtr() {
+	CComPtr(void) {
 		this->pointer = NULL;
 	}
 
@@ -30,7 +30,7 @@ public:
 		other.Swap(*this);
 	}
 
-	~CComPtr() {
+	~CComPtr(void) {
 		TInterface *pointer = this->pointer;
 		if (pointer != NULL) {
 			this->pointer = NULL;
@@ -38,7 +38,7 @@ public:
 		}
 	}
 
-	operator TInterface *() {
+	operator TInterface *(void) {
 		return this->pointer;
 	}
 
@@ -46,7 +46,7 @@ public:
 		return this->pointer;
 	}
 
-	TInterface &operator *() {
+	TInterface &operator *(void) {
 		return *this->pointer;
 	}
 
@@ -54,7 +54,7 @@ public:
 		return *this->pointer;
 	}
 
-	TInterface **operator &() {
+	TInterface **operator &(void) {
 		return &this->pointer;
 	}
 
@@ -62,7 +62,7 @@ public:
 		return &this->pointer;
 	}
 
-	TInterface *operator ->() {
+	TInterface *operator ->(void) {
 		return this->pointer;
 	}
 
@@ -114,11 +114,11 @@ public:
 		return this->pointer == other;
 	}
 
-	void Release() {
+	void Release(void) {
 		this->~CComPtr();
 	}
 
-	TInterface *Detach() {
+	TInterface *Detach(void) {
 		TInterface *ptr = this->pointer;
 		this->pointer = NULL;
 		return ptr;

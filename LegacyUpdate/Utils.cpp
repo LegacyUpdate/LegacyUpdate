@@ -32,7 +32,7 @@ end:
 	return hr;
 }
 
-HRESULT Reboot() {
+HRESULT Reboot(void) {
 	HRESULT hr = E_FAIL;
 
 	HANDLE token = NULL;

@@ -34,7 +34,7 @@ typedef HRESULT (WINAPI *_DwmIsCompositionEnabled)(BOOL *pfEnabled);
 typedef HRESULT (WINAPI *_DwmDefWindowProc)(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *plResult);
 typedef HRESULT (WINAPI *_DwmSetWindowAttribute)(HWND hwnd, DWORD dwAttribute, LPCVOID pvAttribute, DWORD cbAttribute);
 typedef HRESULT (WINAPI *_SetWindowThemeAttribute)(HWND hwnd, enum WINDOWTHEMEATTRIBUTETYPE eAttribute, PVOID pvAttribute, DWORD cbAttribute);
-typedef BOOL (WINAPI *_IsThemeActive)();
+typedef BOOL (WINAPI *_IsThemeActive)(void);
 typedef HTHEME (WINAPI *_OpenThemeData)(HWND hwnd, LPCWSTR pszClassList);
 typedef HRESULT (WINAPI *_CloseThemeData)(HTHEME hTheme);
 typedef HRESULT (WINAPI *_DrawThemeBackground)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect);
@@ -66,7 +66,7 @@ static WNDPROC g_dialogOrigWndProc;
 static WNDPROC g_bannerOrigWndProc;
 static WNDPROC g_bottomOrigWndProc;
 
-static Theme GetTheme() {
+static Theme GetTheme(void) {
 	BOOL enabled = FALSE;
 	if (!$DwmIsCompositionEnabled || !$IsThemeActive || !SUCCEEDED($DwmIsCompositionEnabled(&enabled))) {
 		return ThemeClassic;
@@ -83,7 +83,7 @@ static Theme GetTheme() {
 	return $IsThemeActive() ? ThemeBasic : ThemeClassic;
 }
 
-static void ConfigureWindow() {
+static void ConfigureWindow(void) {
 	HWND bannerWindow = GetDlgItem(g_hwndParent, 1046);
 	HWND bannerDivider = GetDlgItem(g_hwndParent, 1047);
 	HWND bottomDivider = GetDlgItem(g_hwndParent, 6900);

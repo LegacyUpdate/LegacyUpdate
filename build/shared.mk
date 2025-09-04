@@ -1,5 +1,6 @@
 _COMMA = ,
 
+CLANG  ?= 0
 ARCH   ?= 32
 
 ifeq ($(ARCH),64)
@@ -32,7 +33,12 @@ IDL_P   = $(foreach file,$(IDLFILES),$(OBJDIR)/$(notdir $(basename $(file))_p.c)
 DLLDATA = $(foreach file,$(IDLFILES),$(OBJDIR)/$(notdir $(basename $(file))_dlldata.c))
 TLB     = $(foreach file,$(IDLFILES),$(OBJDIR)/$(notdir $(basename $(file)).tlb))
 
-CC      = $(PREFIX)gcc
+ifeq ($(CLANG),1)
+	CC    = $(PREFIX)clang++
+else
+	CC    = $(PREFIX)gcc
+endif
+
 RC      = $(PREFIX)windres
 MC      = $(PREFIX)windmc
 WIDL    = $(PREFIX)widl
@@ -47,10 +53,8 @@ CFLAGS   += \
 	-municode \
 	-DUNICODE \
 	-D_UNICODE \
-	$(if $(filter 1,$(DEBUG)),-D_DEBUG,-DNDEBUG -Os) \
+	$(if $(filter 1,$(DEBUG)),-D_DEBUG,-DNDEBUG -Os -s) \
 	-g \
-	-gstrict-dwarf \
-	-s \
 	-fPIE \
 	-ffunction-sections \
 	-fdata-sections \
@@ -71,6 +75,13 @@ CFLAGS   += \
 	-I$(OBJDIR) \
 	-include stdafx.h
 
+ifeq ($(CLANG),1)
+	CFLAGS += \
+		-Wno-dollar-in-identifier-extension \
+		-Wno-missing-braces \
+		-Wno-duplicate-decl-specifier
+endif
+
 CXXFLAGS += \
 	$(CFLAGS) \
 	-std=c++11 \
@@ -87,9 +98,16 @@ LDFLAGS  += \
 	-Wl,--enable-stdcall-fixup \
 	-Wl,--out-implib,$(STATIC) \
 	$(if $(EMITDEF),-Wl$(_COMMA)--output-def$(_COMMA)$(DEF),$(DEF)) \
-	-Wl,--strip-all \
-	-lmsvcrt \
-	-lgcc
+	$(if $(filter 1,$(DEBUG)),,-Wl$(COMMA)--strip-all) \
+	-lmsvcrt
+
+ifeq ($(CLANG),1)
+	LDFLAGS += \
+		-static
+else
+	LDFLAGS += \
+		-lgcc
+endif
 
 RCFLAGS  += \
 	-O coff \

@@ -17,13 +17,10 @@ all-archs: all-32 all-64
 
 include ../build/shared.mk
 
-CFLAGS  += \
-	-mwindows
-
 LDFLAGS += \
+	-Wl,--subsystem,windows \
 	-Lobj \
 	-lmsvcrt \
-	-lgcc \
 	-lpsapi \
 	-lkernel32 \
 	-luser32 \
@@ -32,6 +29,7 @@ LDFLAGS += \
 	-ladvapi32 \
 	-lcomctl32 \
 	-lshell32 \
+	-lshlwapi \
 	-lversion \
 	-lgdi32 \
 	-lmsimg32

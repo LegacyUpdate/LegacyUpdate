@@ -22,7 +22,7 @@ static HRESULT RegisterDllInternal(LPWSTR path, BOOL state) {
 		goto end;
 	}
 
-	hr = ((HRESULT (WINAPI *)())proc)();
+	hr = ((HRESULT (WINAPI *)(void))proc)();
 
 end:
 	if (module) {

@@ -281,7 +281,7 @@ int NSISCALL myatoi_or(LPCTSTR s)
   return v;
 }
 
-INT_PTR NSISCALL popintptr()
+INT_PTR NSISCALL popintptr(void)
 {
   TCHAR buf[128];
   if (popstringn(buf,COUNTOF(buf)))
@@ -289,7 +289,7 @@ INT_PTR NSISCALL popintptr()
   return nsishelper_str_to_ptr(buf);
 }
 
-int NSISCALL popint_or()
+int NSISCALL popint_or(void)
 {
   TCHAR buf[128];
   if (popstringn(buf,COUNTOF(buf)))

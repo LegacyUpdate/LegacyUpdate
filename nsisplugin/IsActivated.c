@@ -51,7 +51,7 @@ PLUGIN_METHOD(IsActivated) {
 		}
 
 		HSLC slc = NULL;
-		SL_LICENSING_STATUS *status;
+		SL_LICENSING_STATUS *status = NULL;
 		UINT count = 0;
 		HRESULT hr = $SLOpen(&slc);
 		if (!SUCCEEDED(hr)) {

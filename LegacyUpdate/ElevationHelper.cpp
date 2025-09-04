@@ -65,7 +65,7 @@ STDMETHODIMP CElevationHelper::Create(IUnknown *pUnkOuter, REFIID riid, void **p
 	return hr;
 }
 
-CElevationHelper::~CElevationHelper() {
+CElevationHelper::~CElevationHelper(void) {
 }
 
 STDMETHODIMP CElevationHelper::UpdateRegistry(BOOL bRegister) {
@@ -112,11 +112,11 @@ STDMETHODIMP CElevationHelper::QueryInterface(REFIID riid, void **ppvObject) {
 	return IDispatchImpl<IElevationHelper, &LIBID_LegacyUpdateLib>::QueryInterface(riid, ppvObject);
 }
 
-STDMETHODIMP_(ULONG) CElevationHelper::AddRef() {
+STDMETHODIMP_(ULONG) CElevationHelper::AddRef(void) {
 	return InterlockedIncrement(&m_refCount);
 }
 
-STDMETHODIMP_(ULONG) CElevationHelper::Release() {
+STDMETHODIMP_(ULONG) CElevationHelper::Release(void) {
 	ULONG count = InterlockedDecrement(&m_refCount);
 	if (count == 0) {
 		this->~CElevationHelper();
@@ -151,14 +151,14 @@ STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
 	return hr;
 }
 
-STDMETHODIMP CElevationHelper::Reboot() {
+STDMETHODIMP CElevationHelper::Reboot(void) {
 	return ::Reboot();
 }
 
-STDMETHODIMP CElevationHelper::BeforeUpdate() {
+STDMETHODIMP CElevationHelper::BeforeUpdate(void) {
 	return PauseResumeNGenQueue(FALSE);
 }
 
-STDMETHODIMP CElevationHelper::AfterUpdate() {
+STDMETHODIMP CElevationHelper::AfterUpdate(void) {
 	return PauseResumeNGenQueue(TRUE);
 }

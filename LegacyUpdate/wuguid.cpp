@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <initguid.h>
+#include <com.h>
 
 DEFINE_GUID(CLSID_UpdateInstaller,   0xd2e0fe7f, 0xd23e, 0x48e1, 0x93, 0xc0, 0x6f, 0xa8, 0xcc, 0x34, 0x64, 0x74);
 DEFINE_GUID(IID_IUpdateInstaller,    0x7b929c68, 0xccdc, 0x4226, 0x96, 0xb1, 0x87, 0x24, 0x60, 0x0b, 0x54, 0xc2);
@@ -19,14 +20,6 @@ EXTERN_C const GUID IID_ISystemInformation;
 EXTERN_C const GUID IID_IAutomaticUpdates;
 EXTERN_C const GUID IID_IUpdateInstaller4;
 
-template<> const GUID &__mingw_uuidof<ISystemInformation>() {
-	return IID_ISystemInformation;
-}
-
-template<> const GUID &__mingw_uuidof<IAutomaticUpdates>() {
-	return IID_IAutomaticUpdates;
-}
-
-template<> const GUID &__mingw_uuidof<IUpdateInstaller4>() {
-	return IID_IUpdateInstaller4;
-}
+DEFINE_UUIDOF(ISystemInformation, IID_ISystemInformation);
+DEFINE_UUIDOF(IAutomaticUpdates,  IID_IAutomaticUpdates);
+DEFINE_UUIDOF(IUpdateInstaller4,  IID_IUpdateInstaller4);

@@ -8,7 +8,7 @@
 #define HK_RUNCMD 1
 
 typedef DWORD (__fastcall *_ThemeWaitForServiceReady)(DWORD timeout);
-typedef DWORD (__fastcall *_ThemeWatchForStart)();
+typedef DWORD (__fastcall *_ThemeWatchForStart)(void);
 
 static const COLORREF WallpaperColorWinXP = RGB( 0,  78, 152); // #004e98
 static const COLORREF WallpaperColorWin8  = RGB(32, 103, 178); // #2067b2
@@ -18,7 +18,7 @@ static const WCHAR RunOnceClassName[] = L"LegacyUpdateRunOnce";
 
 static HANDLE g_cmdHandle;
 
-static void StartThemes() {
+static void StartThemes(void) {
 	// Ask UxInit.dll to ask the Themes service to start a session for this desktop. Themes doesn't automatically start a
 	// session for the SYSTEM desktop, so we need to ask it to. This matches what msoobe.exe does on first boot.
 
@@ -90,7 +90,7 @@ static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, L
 	return DefWindowProc(hwnd, message, wParam, lParam);;
 }
 
-static void ResetSetupKey() {
+static void ResetSetupKey(void) {
 	HKEY key;
 	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"System\\Setup", 0, KEY_ALL_ACCESS, &key) != ERROR_SUCCESS) {
 		return;
@@ -117,7 +117,7 @@ static void ResetSetupKey() {
 	RegCloseKey(key);
 }
 
-static void CreateRunOnceWindow() {
+static void CreateRunOnceWindow(void) {
 	// Create window
 	WNDCLASS wndClass = {0};
 	wndClass.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_NOCLOSE;
@@ -212,7 +212,7 @@ static void CreateRunOnceWindow() {
 }
 
 #ifndef _DEBUG
-static BOOL IsSystemUser() {
+static BOOL IsSystemUser(void) {
 	BOOL result = FALSE;
 	PTOKEN_USER tokenInfo = NULL;
 	PSID systemSid = NULL;
@@ -250,7 +250,7 @@ end:
 }
 #endif
 
-void RunOnce() {
+void RunOnce(void) {
 #ifndef _DEBUG
 	// Only relevant if we're SYSTEM
 	if (!IsSystemUser()) {
@@ -283,7 +283,7 @@ void RunOnce() {
 	LPWSTR setupPath;
 	GetOwnFileName(&setupPath);
 	wcsrchr(setupPath, L'\\')[1] = L'\0';
-	wcsncat(setupPath, L"LegacyUpdateSetup.exe", ARRAYSIZE(setupPath) - wcslen(setupPath) - 1);
+	wcsncat(setupPath, L"LegacyUpdateSetup.exe", MAX_PATH - wcslen(setupPath) - 1);
 
 	// Execute and wait for completion
 	STARTUPINFO startupInfo = {0};

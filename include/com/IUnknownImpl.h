@@ -12,7 +12,7 @@ private:
 protected:
 	IUnknownImpl() : m_refCount(1) {}
 
-	virtual ~IUnknownImpl() {
+	virtual ~IUnknownImpl(void) {
 		if (m_refCount != 0) {
 			DebugBreak();
 		}
@@ -39,11 +39,11 @@ public:
 		return E_NOINTERFACE;
 	}
 
-	STDMETHODIMP_(ULONG) AddRef() {
+	STDMETHODIMP_(ULONG) AddRef(void) {
 		return InterlockedIncrement(&m_refCount);
 	}
 
-	STDMETHODIMP_(ULONG) Release() {
+	STDMETHODIMP_(ULONG) Release(void) {
 		ULONG count = InterlockedDecrement(&m_refCount);
 		if (count == 0) {
 			delete this;

@@ -12,7 +12,7 @@ HINSTANCE g_hInstance;
 extern void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow);
 extern void LaunchOptions(int nCmdShow);
 extern void LaunchLog(int nCmdShow);
-extern void RunOnce();
+extern void RunOnce(void);
 
 typedef enum Action {
 	ActionLaunch,
@@ -32,7 +32,9 @@ static const LPWSTR actions[] = {
 	L"/unregserver"
 };
 
+#ifndef __clang__
 EXTERN_C __declspec(dllexport)
+#endif
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 	g_hInstance = hInstance;
 	Startup();

@@ -5,7 +5,7 @@
 #include <ocidl.h>
 
 #define DEFINE_UUIDOF(cls, uuid) \
-	template<> const GUID &__mingw_uuidof<cls>() { \
+	template<> const GUID &__mingw_uuidof<cls>(void) { \
 		return uuid; \
 	}
 

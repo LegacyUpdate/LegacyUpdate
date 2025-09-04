@@ -24,11 +24,11 @@ public:
 	}
 
 	// IOleInPlaceObject
-	STDMETHODIMP InPlaceDeactivate() {
+	STDMETHODIMP InPlaceDeactivate(void) {
 		return S_OK;
 	}
 
-	STDMETHODIMP UIDeactivate() {
+	STDMETHODIMP UIDeactivate(void) {
 		return S_OK;
 	}
 
@@ -50,7 +50,7 @@ public:
 		return S_OK;
 	}
 
-	STDMETHODIMP ReactivateAndUndo() {
+	STDMETHODIMP ReactivateAndUndo(void) {
 		return E_NOTIMPL;
 	}
 };

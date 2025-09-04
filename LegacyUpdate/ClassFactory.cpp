@@ -23,7 +23,7 @@ STDMETHODIMP CClassFactory::Create(IUnknown *pUnkOuter, REFIID riid, void **ppv)
 	return hr;
 }
 
-CClassFactory::~CClassFactory() {
+CClassFactory::~CClassFactory(void) {
 }
 
 STDMETHODIMP CClassFactory::QueryInterface(REFIID riid, void **ppvObject) {
@@ -42,11 +42,11 @@ STDMETHODIMP CClassFactory::QueryInterface(REFIID riid, void **ppvObject) {
 	return E_NOINTERFACE;
 }
 
-STDMETHODIMP_(ULONG) CClassFactory::AddRef() {
+STDMETHODIMP_(ULONG) CClassFactory::AddRef(void) {
 	return InterlockedIncrement(&m_refCount);
 }
 
-STDMETHODIMP_(ULONG) CClassFactory::Release() {
+STDMETHODIMP_(ULONG) CClassFactory::Release(void) {
 	ULONG count = InterlockedDecrement(&m_refCount);
 	if (count == 0) {
 		this->~CClassFactory();

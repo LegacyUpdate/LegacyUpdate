@@ -30,7 +30,7 @@ STDMETHODIMP CProgressBarControl::Create(IUnknown *pUnkOuter, REFIID riid, void 
 	return hr;
 }
 
-CProgressBarControl::~CProgressBarControl() {
+CProgressBarControl::~CProgressBarControl(void) {
 	DestroyControlWindow();
 	if (m_clientSite) {
 		m_clientSite->Release();
@@ -110,11 +110,11 @@ STDMETHODIMP CProgressBarControl::QueryInterface(REFIID riid, void **ppvObject) 
 	return IDispatchImpl<IProgressBarControl, &LIBID_LegacyUpdateLib>::QueryInterface(riid, ppvObject);
 }
 
-STDMETHODIMP_(ULONG) CProgressBarControl::AddRef() {
+STDMETHODIMP_(ULONG) CProgressBarControl::AddRef(void) {
 	return InterlockedIncrement(&m_refCount);
 }
 
-STDMETHODIMP_(ULONG) CProgressBarControl::Release() {
+STDMETHODIMP_(ULONG) CProgressBarControl::Release(void) {
 	ULONG count = InterlockedDecrement(&m_refCount);
 	if (count == 0) {
 		this->~CProgressBarControl();
@@ -271,7 +271,7 @@ STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *
 	return put_Value(-1);
 }
 
-STDMETHODIMP CProgressBarControl::DestroyControlWindow() {
+STDMETHODIMP CProgressBarControl::DestroyControlWindow(void) {
 	if (m_innerHwnd) {
 		DestroyWindow(m_innerHwnd);
 		m_innerHwnd = NULL;
@@ -365,7 +365,7 @@ STDMETHODIMP CProgressBarControl_IOleInPlaceActiveObject::ResizeBorder(LPCRECT p
 
 #pragma mark - Helper methods
 
-STDMETHODIMP CProgressBarControl::InvalidateContainer() {
+STDMETHODIMP CProgressBarControl::InvalidateContainer(void) {
 	if (m_adviseSink) {
 		m_adviseSink->OnViewChange(DVASPECT_CONTENT, -1);
 	}

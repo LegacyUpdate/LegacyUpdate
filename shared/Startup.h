@@ -5,7 +5,7 @@
 typedef void (WINAPI *_SetDefaultDllDirectories)(DWORD DirectoryFlags);
 typedef BOOL (WINAPI *_SetDllDirectoryW)(LPWSTR);
 
-static inline void HardenDllSearchPaths() {
+static inline void HardenDllSearchPaths(void) {
 	// Try our best to secure DLL search paths to just system32
 	WCHAR windir[MAX_PATH];
 	WCHAR sysdir[MAX_PATH];
@@ -43,6 +43,6 @@ static inline void HardenDllSearchPaths() {
 	}
 }
 
-static inline void Startup() {
+static inline void Startup(void) {
 	HardenDllSearchPaths();
 }

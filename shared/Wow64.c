@@ -12,7 +12,7 @@ static _GetNativeSystemInfo $GetNativeSystemInfo = NULL;
 static _Wow64DisableWow64FsRedirection $Wow64DisableWow64FsRedirection;
 static _Wow64RevertWow64FsRedirection $Wow64RevertWow64FsRedirection;
 
-static void LoadWow64Symbols() {
+static void LoadWow64Symbols(void) {
 	if (!_loadedWow64) {
 		_loadedWow64 = TRUE;
 

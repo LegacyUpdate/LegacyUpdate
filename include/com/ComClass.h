@@ -17,11 +17,11 @@ public:
 		return m_pParent->QueryInterface(riid, ppvObject);
 	}
 
-	STDMETHODIMP_(ULONG) AddRef() {
+	STDMETHODIMP_(ULONG) AddRef(void) {
 		return m_pParent->AddRef();
 	}
 
-	STDMETHODIMP_(ULONG) Release() {
+	STDMETHODIMP_(ULONG) Release(void) {
 		return m_pParent->Release();
 	}
 };

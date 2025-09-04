@@ -25,10 +25,8 @@ all-archs: all-32 all-64
 
 include ../build/shared.mk
 
-CFLAGS  += \
-	-mdll
-
 LDFLAGS += \
+	-shared \
 	-lkernel32 \
 	-luser32 \
 	-lgdi32 \

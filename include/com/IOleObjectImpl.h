@@ -84,11 +84,11 @@ public:
 		return OleRegEnumVerbs(__uuidof(TImpl), ppEnumOleVerb);
 	}
 
-	STDMETHODIMP Update() {
+	STDMETHODIMP Update(void) {
 		return S_OK;
 	}
 
-	STDMETHODIMP IsUpToDate() {
+	STDMETHODIMP IsUpToDate(void) {
 		return S_OK;
 	}
 

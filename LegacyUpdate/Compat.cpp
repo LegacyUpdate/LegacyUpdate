@@ -42,7 +42,7 @@ BOOL GetVistaProductInfo(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD d
 	return FALSE;
 }
 
-void BecomeDPIAware() {
+void BecomeDPIAware(void) {
 	// Make the process DPI-aware... hopefully
 	// Windows 10 1703+ per-monitor v2
 	_SetProcessDpiAwarenessContext $SetProcessDpiAwarenessContext = (_SetProcessDpiAwarenessContext)GetProcAddress(LoadLibrary(L"user32.dll"), "SetProcessDpiAwarenessContext");

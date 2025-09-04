@@ -44,7 +44,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 static OSVERSIONINFOEX _versionInfo;
 
-static ALWAYS_INLINE OSVERSIONINFOEX *GetVersionInfo() {
+static ALWAYS_INLINE OSVERSIONINFOEX *GetVersionInfo(void) {
 	if (_versionInfo.dwOSVersionInfoSize == 0) {
 		ZeroMemory(&_versionInfo, sizeof(OSVERSIONINFOEX));
 		_versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
@@ -53,22 +53,22 @@ static ALWAYS_INLINE OSVERSIONINFOEX *GetVersionInfo() {
 	return &_versionInfo;
 }
 
-static ALWAYS_INLINE WORD GetWinVer() {
+static ALWAYS_INLINE WORD GetWinVer(void) {
 	return __builtin_bswap16(LOWORD(GetVersion()));
 }
 
-static ALWAYS_INLINE WORD GetWinBuild() {
+static ALWAYS_INLINE WORD GetWinBuild(void) {
 	return HIWORD(GetVersion());
 }
 
 #define _IS_OS_MACRO(name, ver) \
-	static ALWAYS_INLINE BOOL IsWin ## name() { \
+	static ALWAYS_INLINE BOOL IsWin ## name(void) { \
 		return GetWinVer() == ver; \
 	} \
-	static ALWAYS_INLINE BOOL AtLeastWin ## name() { \
+	static ALWAYS_INLINE BOOL AtLeastWin ## name(void) { \
 		return GetWinVer() >= ver; \
 	} \
-	static ALWAYS_INLINE BOOL AtMostWin ## name() { \
+	static ALWAYS_INLINE BOOL AtMostWin ## name(void) { \
 		return GetWinVer() <= ver; \
 	}
 
@@ -84,13 +84,13 @@ _IS_OS_MACRO(10,     0x0A00)
 #undef _IS_OS_MACRO
 
 #define _IS_BUILD_MACRO(ver) \
-	static ALWAYS_INLINE BOOL IsWin ## ver() { \
+	static ALWAYS_INLINE BOOL IsWin ## ver(void) { \
 		return GetWinBuild() == BUILD_WIN ## ver; \
 	} \
-	static ALWAYS_INLINE BOOL AtLeastWin ## ver() { \
+	static ALWAYS_INLINE BOOL AtLeastWin ## ver(void) { \
 		return GetWinBuild() >= BUILD_WIN ## ver; \
 	} \
-	static ALWAYS_INLINE BOOL AtMostWin ## ver() { \
+	static ALWAYS_INLINE BOOL AtMostWin ## ver(void) { \
 		return GetWinBuild() <= BUILD_WIN ## ver; \
 	}
 

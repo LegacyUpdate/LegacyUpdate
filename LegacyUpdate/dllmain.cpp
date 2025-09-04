@@ -120,9 +120,7 @@ STDAPI UpdateRegistration(BOOL state) {
 		hr = LoadRegTypeLib(LIBID_LegacyUpdateLib, 1, 0, LOCALE_NEUTRAL, &typeLib);
 		if (hr != TYPE_E_LIBNOTREGISTERED) {
 			CHECK_HR_OR_GOTO_END(L"LoadRegTypeLib");
-		}
 
-		if (hr != TYPE_E_LIBNOTREGISTERED) {
 			TLIBATTR *attrs;
 			hr = typeLib->GetLibAttr(&attrs);
 			CHECK_HR_OR_GOTO_END(L"GetLibAttr");
