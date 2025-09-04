@@ -50,12 +50,12 @@ PLUGIN_METHOD(CloseIEWindows) {
 				TRACE(L"Quit failed: %08x", hr);
 			}
 
-			// Wait up to 5 seconds for the window to close
+			// Wait up to 10 seconds for the window to close
 			HWND hwnd = 0;
 			hr = IWebBrowser2_get_HWND(browser, (SHANDLE_PTR *)&hwnd);
 			if (SUCCEEDED(hr) && hwnd != 0) {
 				DWORD start = GetTickCount();
-				while (IsWindow(hwnd) && GetTickCount() - start < 5000) {
+				while (IsWindow(hwnd) && GetTickCount() - start < 10000) {
 					Sleep(100);
 				}
 			}
@@ -103,9 +103,9 @@ PLUGIN_METHOD(CloseIEWindows) {
 						if (_wcsicmp(dllName, L"LegacyUpdate.dll") == 0 || _wcsicmp(dllName, L"LegacyUpdate32.dll") == 0) {
 							TerminateProcess(process, 0);
 
-							// Wait up to 5 seconds for the dllhost to close
+							// Wait up to 10 seconds for the dllhost to close
 							DWORD start = GetTickCount();
-							while (GetTickCount() - start < 5000) {
+							while (GetTickCount() - start < 10000) {
 								Sleep(100);
 
 								DWORD exitCode = 0;
