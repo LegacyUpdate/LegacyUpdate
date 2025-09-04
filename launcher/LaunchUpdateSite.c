@@ -103,13 +103,13 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	}
 
 	// Can we instantiate our own ActiveX control? If not, try to register it.
-	hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_LOCAL_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
+	hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_INPROC_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
 	if (hr == REGDB_E_CLASSNOTREG || hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND) || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)) {
 		TRACE(L"LegacyUpdateCtrl not registered");
 		hr = RegisterServer(0, TRUE, TRUE);
 		CHECK_HR_OR_GOTO_END(L"RegisterServer");
 
-		hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_LOCAL_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
+		hr = CoCreateInstance(&CLSID_LegacyUpdateCtrl, NULL, CLSCTX_INPROC_SERVER, &IID_ILegacyUpdateCtrl, (void **)&browser);
 		CHECK_HR_OR_GOTO_END(L"Still failed to load LegacyUpdateCtrl");
 
 		IUnknown_Release(browser);
