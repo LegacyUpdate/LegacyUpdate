@@ -192,9 +192,6 @@ end:
 	if (filename) {
 		LocalFree(filename);
 	}
-	if (libid) {
-		CoTaskMemFree(libid);
-	}
 
 	if (oleInitialized) {
 		OleUninitialize();
