@@ -387,7 +387,7 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 	return elevatedHelper->CreateObject(progID, retval);
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUnknown *installer) {
+STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
 	DoIsPermittedCheck();
 
 	if (installer == NULL) {
