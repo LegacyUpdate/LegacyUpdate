@@ -133,41 +133,40 @@ static const WinNT5BrandString nt5BrandStrings[] = {
 
 static const WinNT5Variant nt5Variants[] = {
 	// XP
-	{0x0501, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_IA64,  {STR_WINXP, STR_PRO, STR_IA64}}, // "Microsoft Windows XP Professional 64-Bit Edition"
-	{0x0501, OS_HOME,           PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_HOME}},          // "Microsoft Windows XP Home Edition"
-	{0x0501, OS_TABLETPC,       PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_TABLETPC}},      // "Microsoft Windows XP Tablet PC Edition"
-	{0x0501, OS_MEDIACENTER,    PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_MEDIACENTER}},   // "Microsoft Windows XP Media Center Edition"
-	{0x0501, OS_STARTER,        PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_STARTER}},       // "Microsoft Windows XP Starter Edition"
-	{0x0501, OS_EMBPOS,         PROCESSOR_ARCHITECTURE_INTEL, {STR_WIN,   STR_EMBPOS}},        // "Microsoft Windows Embedded for Point of Service"
-	{0x0501, OS_WINFLP,         PROCESSOR_ARCHITECTURE_INTEL, {STR_WIN,   STR_WINFLP}},        // "Microsoft Windows Fundamentals for Legacy PCs"
-	{0x0501, OS_EMBSTD2009,     PROCESSOR_ARCHITECTURE_INTEL, {STR_WIN,   STR_EMBSTD2009}},    // "Microsoft Windows Embedded Standard"
-	{0x0501, OS_EMBPOS2009,     PROCESSOR_ARCHITECTURE_INTEL, {STR_WIN,   STR_EMBPOS2009}},    // "Microsoft Windows Embedded POSReady 2009"
+	{MAXDWORD, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_IA64,  {STR_WINXP, STR_PRO, STR_IA64}}, // "Microsoft Windows XP Professional 64-Bit Edition"
+	{MAXDWORD, OS_HOME,           PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_HOME}},          // "Microsoft Windows XP Home Edition"
+	{MAXDWORD, OS_TABLETPC,       PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_TABLETPC}},      // "Microsoft Windows XP Tablet PC Edition"
+	{MAXDWORD, OS_MEDIACENTER,    PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_MEDIACENTER}},   // "Microsoft Windows XP Media Center Edition"
+	{MAXDWORD, OS_STARTER,        PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_STARTER}},       // "Microsoft Windows XP Starter Edition"
+	{0x0501,   OS_EMBPOS,         PROCESSOR_ARCHITECTURE_INTEL, {STR_WIN,   STR_EMBPOS}},        // "Microsoft Windows Embedded for Point of Service"
+	{MAXDWORD, OS_WINFLP,         PROCESSOR_ARCHITECTURE_INTEL, {STR_WIN,   STR_WINFLP}},        // "Microsoft Windows Fundamentals for Legacy PCs"
+	{MAXDWORD, OS_EMBSTD2009,     PROCESSOR_ARCHITECTURE_INTEL, {STR_WIN,   STR_EMBSTD2009}},    // "Microsoft Windows Embedded Standard"
+	{MAXDWORD, OS_EMBPOS2009,     PROCESSOR_ARCHITECTURE_INTEL, {STR_WIN,   STR_EMBPOS2009}},    // "Microsoft Windows Embedded POSReady 2009"
 	// Check for XP Embedded last as WES2009 also identifies as OS_EMBEDDED.
-	{0x0501, OS_EMBEDDED,       PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_EMBEDDED}},      // "Microsoft Windows XP Embedded"
-	{0x0501, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_PRO}},           // "Microsoft Windows XP Professional"
-	{0x0501, MAXDWORD,          MAXWORD,                      {STR_WINXP}},                    // "Microsoft Windows XP"
+	{MAXDWORD, OS_EMBEDDED,       PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_EMBEDDED}},      // "Microsoft Windows XP Embedded"
+	{MAXDWORD, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_INTEL, {STR_WINXP, STR_PRO}},           // "Microsoft Windows XP Professional"
+	{0x0501,   MAXDWORD,          MAXWORD,                      {STR_WINXP}},                    // "Microsoft Windows XP"
 
 	// Server 2003
-	{0x0502, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_IA64,  {STR_WINXP, STR_PRO, STR_IA64}}, // "Microsoft Windows XP Professional 64-Bit Edition"
-	{0x0502, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_AMD64, {STR_WINXP, STR_PROX64}},        // "Microsoft Windows XP Professional x64 Edition"
-	{0x0502, OS_SERVER,         PROCESSOR_ARCHITECTURE_IA64,  {STR_STANDARDIA64}},             // "Microsoft(R) Windows(R) Server 2003, Standard Edition for 64-Bit Itanium-based Systems"
-	{0x0502, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_IA64,  {STR_ENTERPRISEIA64}},           // "Microsoft(R) Windows(R) Server 2003, Enterprise Edition for 64-Bit Itanium-based Systems"
-	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_IA64,  {STR_DATACENTERIA64}},           // "Microsoft(R) Windows(R) Server 2003, Datacenter Edition for 64-Bit Itanium-based Systems"
-	{0x0502, OS_APPLIANCE,      MAXWORD,                      {STR_SRV03, STR_APPLIANCE}},     // "Microsoft Windows Server 2003, Appliance Server"
-	{0x0502, OS_STORAGESERVER,  MAXWORD,                      {STR_STORAGESERVER_1, STR_STORAGESERVER_2}}, // "Microsoft Windows Storage Server 2003 R2"
+	{MAXDWORD, OS_PROFESSIONAL,   PROCESSOR_ARCHITECTURE_AMD64, {STR_WINXP, STR_PROX64}},        // "Microsoft Windows XP Professional x64 Edition"
+	{MAXDWORD, OS_SERVER,         PROCESSOR_ARCHITECTURE_IA64,  {STR_STANDARDIA64}},             // "Microsoft(R) Windows(R) Server 2003, Standard Edition for 64-Bit Itanium-based Systems"
+	{MAXDWORD, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_IA64,  {STR_ENTERPRISEIA64}},           // "Microsoft(R) Windows(R) Server 2003, Enterprise Edition for 64-Bit Itanium-based Systems"
+	{MAXDWORD, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_IA64,  {STR_DATACENTERIA64}},           // "Microsoft(R) Windows(R) Server 2003, Datacenter Edition for 64-Bit Itanium-based Systems"
+	{MAXDWORD, OS_APPLIANCE,      MAXWORD,                      {STR_SRV03, STR_APPLIANCE}},     // "Microsoft Windows Server 2003, Appliance Server"
+	{MAXDWORD, OS_STORAGESERVER,  MAXWORD,                      {STR_STORAGESERVER_1, STR_STORAGESERVER_2}}, // "Microsoft Windows Storage Server 2003 R2"
 	// TODO: How do we detect UDS Server?
-	{0x0502, OS_COMPUTECLUSTER, MAXWORD,                      {STR_COMPUTECLUSTER_1, STR_COMPUTECLUSTER_2, STR_COMPUTECLUSTER_3}}, // "Microsoft Windows Server 2003 Compute Cluster Edition"
-	{0x0502, OS_HOMESERVER,     MAXWORD,                      {STR_HOMESERVER_1, STR_HOMESERVER_2}}, // "Microsoft Windows Home Server"
+	{MAXDWORD, OS_COMPUTECLUSTER, MAXWORD,                      {STR_COMPUTECLUSTER_1, STR_COMPUTECLUSTER_2, STR_COMPUTECLUSTER_3}}, // "Microsoft Windows Server 2003 Compute Cluster Edition"
+	{0x0502,   OS_HOMESERVER,     MAXWORD,                      {STR_HOMESERVER_1, STR_HOMESERVER_2}}, // "Microsoft Windows Home Server"
 	// I don't think any of the above editions identify as OS_SERVER, but just in case
-	{0x0502, OS_SERVER,         PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_STANDARD}},      // "Microsoft Windows Server 2003, Standard Edition"
-	{0x0502, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_ENTERPRISE}},    // "Microsoft Windows Server 2003, Enterprise Edition"
-	{0x0502, OS_WEBSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_BLADE}},         // "Microsoft Windows Server 2003, Web Edition"
-	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_DATACENTER}},    // "Microsoft Windows Server 2003, Datacenter Edition"
-	{0x0502, OS_SERVER,         PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_STANDARDX64}},   // "Microsoft Windows Server 2003, Standard x64 Edition"
-	{0x0502, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_ENTERPRISEX64}}, // "Microsoft Windows Server 2003, Enterprise x64 Edition"
-	{0x0502, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_DATACENTERX64}}, // "Microsoft Windows Server 2003, Datacenter x64 Edition"
-	{0x0502, OS_SMALLBUSINESSSERVER, PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_SBS}},      // "Microsoft Windows Server 2003 for Small Business Server"
-	{0x0502, MAXDWORD,          MAXWORD,                      {STR_SRV03}},                    // "Microsoft Windows Server 2003"
+	{MAXDWORD, OS_SERVER,         PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_STANDARD}},      // "Microsoft Windows Server 2003, Standard Edition"
+	{MAXDWORD, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_ENTERPRISE}},    // "Microsoft Windows Server 2003, Enterprise Edition"
+	{MAXDWORD, OS_WEBSERVER,      PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_BLADE}},         // "Microsoft Windows Server 2003, Web Edition"
+	{MAXDWORD, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_DATACENTER}},    // "Microsoft Windows Server 2003, Datacenter Edition"
+	{MAXDWORD, OS_SERVER,         PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_STANDARDX64}},   // "Microsoft Windows Server 2003, Standard x64 Edition"
+	{MAXDWORD, OS_ADVSERVER,      PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_ENTERPRISEX64}}, // "Microsoft Windows Server 2003, Enterprise x64 Edition"
+	{MAXDWORD, OS_DATACENTER,     PROCESSOR_ARCHITECTURE_AMD64, {STR_SRV03, STR_DATACENTERX64}}, // "Microsoft Windows Server 2003, Datacenter x64 Edition"
+	{MAXDWORD, OS_SMALLBUSINESSSERVER, PROCESSOR_ARCHITECTURE_INTEL, {STR_SRV03, STR_SBS}},      // "Microsoft Windows Server 2003 for Small Business Server"
+	{0x0502,   MAXDWORD,          MAXWORD,                      {STR_SRV03}},                    // "Microsoft Windows Server 2003"
 };
 
 HRESULT GetOSProductName(LPVARIANT productName) {
@@ -176,7 +175,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 
 		// Handle the absolute disaster of Windows XP/Server 2003 edition branding
 		WORD winver = GetWinVer();
-		if (HIBYTE(winver) == 5) {
+		if (HIBYTE(winver) == 5 && winver > 0x0500) {
 			_IsOS $IsOS = (_IsOS)GetProcAddress(LoadLibrary(L"shlwapi.dll"), MAKEINTRESOURCEA(437));
 
 			SYSTEM_INFO systemInfo;
@@ -185,7 +184,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 			WinNT5Variant variant = {};
 			for (DWORD i = 0; i < ARRAYSIZE(nt5Variants); i++) {
 				WinNT5Variant thisVariant = nt5Variants[i];
-				if (thisVariant.version == winver &&
+				if ((thisVariant.version == MAXDWORD || thisVariant.version == winver) &&
 					(thisVariant.archFlag == MAXWORD || thisVariant.archFlag == systemInfo.wProcessorArchitecture) &&
 					(thisVariant.osFlag == MAXDWORD || $IsOS(thisVariant.osFlag))) {
 					variant = thisVariant;
