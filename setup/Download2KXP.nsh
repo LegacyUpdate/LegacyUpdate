@@ -1,4 +1,4 @@
-!insertmacro NeedsSPHandler "W2KSP4"  "Win2000"   2
+!insertmacro NeedsSPHandler "W2KSP4"  "Win2000"   3
 !insertmacro NeedsSPHandler "XPSP1a"  "WinXP2002" 0
 !insertmacro NeedsSPHandler "XPSP3"   "WinXP2002" 2
 !insertmacro NeedsSPHandler "XPESP3"  "WinXP2002" 2
