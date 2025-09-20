@@ -135,14 +135,22 @@ Function PrepareRunOnce
 	${EndIf}
 FunctionEnd
 
+!macro -RebootIfRequired
+	${If} ${RebootFlag}
+		${If} ${Silent}
+			Call RebootIfRequired
+		${Else}
+			Return
+		${EndIf}
+	${EndIf}
+!macroend
+
+!define RebootIfRequired `!insertmacro -RebootIfRequired`
+
 Function RebootIfRequired
 	${MementoSectionSave}
 	${If} ${RebootFlag}
-		; Give the user a moment to understand we're rebooting
-		${DetailPrint} "$(StatusRestarting)"
-		Sleep 2000
-
-		; Now reboot
+		; Reboot now
 		Call PrepareRunOnce
 		!insertmacro PromptReboot
 	${Else}
@@ -246,7 +254,7 @@ Function RebootIfCbsRebootPending
 	${If} $1 == 1
 		${VerbosePrint} "Restarting to install previously pending packages"
 		SetRebootFlag true
-		Call RebootIfRequired
+		${RebootIfRequired}
 	${EndIf}
 FunctionEnd
 

@@ -90,7 +90,7 @@ static UINT_PTR NSISPluginCallback(enum NSPIM event) {
 PLUGIN_METHOD(InitTaskbarProgress) {
 	PLUGIN_INIT();
 
-	if (!AtLeastWinVista()) {
+	if (!AtLeastWin7()) {
 		return;
 	}
 

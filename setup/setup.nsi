@@ -82,6 +82,7 @@ Var /GLOBAL UninstallInstalled
 !include DownloadVista78.nsh
 !include UpdateRoots.nsh
 ; !include ActiveXPage.nsh
+!include RebootPage.nsh
 
 !insertmacro GetParameters
 !insertmacro GetOptions
@@ -101,6 +102,8 @@ Var /GLOBAL UninstallInstalled
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
 
 !insertmacro MUI_PAGE_INSTFILES
+
+Page custom RebootPage
 
 !define MUI_PAGE_HEADER_TEXT         "Uninstall Legacy Update"
 !define MUI_UNCONFIRMPAGE_TEXT_TOP   "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
@@ -166,7 +169,7 @@ Section -BeforeInstall PREREQS_START
 !if ${DEBUG} == 1
 		${If} ${TestRunOnce}
 			SetRebootFlag true
-			Call RebootIfRequired
+			${RebootIfRequired}
 		${EndIf}
 !endif
 	${Else}
@@ -178,100 +181,113 @@ SectionEnd
 ; Win2k prerequisities
 Section "$(IE) 6.0 $(SP) 1" IE6SP1
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallIE6
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 Section "Windows 2000 $(SP) 4" W2KSP4
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallW2KSP4
 	Call InstallW2KUR1
 	Call FixW2KUR1
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 ; XP 2002 prerequisities
 ${MementoSection} "Windows XP $(SP) 3" XPSP3
+	${RebootIfRequired}
 	Call InstallXPSP1a
-	Call RebootIfRequired
+	${RebootIfRequired}
 	Call InstallXPSP3
-	Call RebootIfRequired
+	${RebootIfRequired}
 ${MementoSectionEnd}
 
 ${MementoSection} "Windows XP $(EMB) $(SP) 3" XPESP3
+	${RebootIfRequired}
 	Call InstallXPESP3
-	Call RebootIfRequired
+	${RebootIfRequired}
 ${MementoSectionEnd}
 
 ${MementoUnselectedSection} "$(SectionWES09)" WES09
+	${RebootIfRequired}
 	WriteRegDword HKLM "${REGPATH_POSREADY}" "Installed" 1
 ${MementoSectionEnd}
 
 ; XP 2003 prerequisities
 ${MementoSection} "Windows XP/$(SRV) 2003 $(SP) 2" 2003SP2
+	${RebootIfRequired}
 	Call Install2003SP2
-	Call RebootIfRequired
+	${RebootIfRequired}
 ${MementoSectionEnd}
 
 ; Vista prerequisities
 Section "Windows Vista $(SP) 2" VISTASP2
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallVistaSP1
-	Call RebootIfRequired
+	${RebootIfRequired}
 	Call InstallVistaSP2
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 Section "$(SectionSSU)" VISTASSU
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallKB3205638
 	Call InstallKB4012583
 	Call InstallKB4015195
 	Call InstallKB4015380
 	Call InstallKB4493730
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 ${MementoSection} "$(IE) 9" VISTAIE9
+	${RebootIfRequired}
 	Call InstallKB971512
 	Call InstallKB2117917
-	Call RebootIfRequired
+	${RebootIfRequired}
 	Call InstallIE9
-	Call RebootIfRequired
+	${RebootIfRequired}
 ${MementoSectionEnd}
 
 ; 7 prerequisities
 Section "Windows 7 $(SP) 1" WIN7SP1
 	SectionIn Ro
 	Call InstallWin7SP1
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 Section "$(SectionSSU)" WIN7SSU
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallKB3138612
 	Call InstallKB4474419
 	Call InstallKB4490628
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 ; Windows Home Server 2011 is based on Server 2008 R2, but has its own separate "rollup" updates
 Section "$(SectionWHS2011U4)" WHS2011U4
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallKB2757011
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 ; 8 prerequisities
 Section "$(SectionSSU)" WIN8SSU
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallKB4598297
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 ; 8.1 prerequisities
 Section "Windows 8.1 $(Update) 1" WIN81U1
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallKB3021910
 	Call InstallClearCompressionFlag
 	Call InstallKB2919355
@@ -279,13 +295,14 @@ Section "Windows 8.1 $(Update) 1" WIN81U1
 	Call InstallKB2959977
 	Call InstallKB2937592
 	Call InstallKB2934018
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 Section "$(SectionSSU)" WIN81SSU
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallKB3021910
-	Call RebootIfRequired
+	${RebootIfRequired}
 SectionEnd
 
 ; Shared prerequisites
@@ -293,10 +310,12 @@ SectionEnd
 
 Section "$(SectionWUA)" WUA
 	SectionIn Ro
+	${RebootIfRequired}
 	Call InstallWUA
 SectionEnd
 
 ${MementoSection} "$(SectionRootCerts)" ROOTCERTS
+	${RebootIfRequired}
 	Call ConfigureCrypto
 
 	${IfNot} ${IsPostInstall}
@@ -305,6 +324,7 @@ ${MementoSection} "$(SectionRootCerts)" ROOTCERTS
 ${MementoSectionEnd}
 
 ${MementoSection} "$(SectionEnableMU)" ENABLEMU
+	${RebootIfRequired}
 	LegacyUpdateNSIS::EnableMicrosoftUpdate
 	Pop $0
 	${If} $0 != 0
@@ -325,6 +345,8 @@ SectionEnd
 
 ; Main installation
 ${MementoSection} "$(^Name)" LEGACYUPDATE
+	${RebootIfRequired}
+
 	; WUSERVER section
 	Call MakeUninstallEntry
 
@@ -953,7 +975,7 @@ Function .onInstSuccess
 	${MementoSectionSave}
 
 	; Reboot now if we need to. Nothing further in this function will be run if we do need to reboot.
-	Call RebootIfRequired
+	${RebootIfRequired}
 
 	; If we're done, launch the update site
 	Call PostInstall

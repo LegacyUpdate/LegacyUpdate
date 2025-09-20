@@ -2,12 +2,36 @@
 #include <windows.h>
 #include "Version.h"
 
+#define INNER_WIDTH         317
+#define INNER_HEIGHT        119
+#define INNER_WIDTH_ALIGNED (INNER_WIDTH - 12)
+
 /////////////////////////////////////////////////////////////////////////////
 // English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(65001)
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialogs
+//
+
+IDD_REBOOT DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Icon
+	CONTROL    "",         IDI_ICON2,     "STATIC", SS_ICON, 0, 0, 21, 20
+	// Intro text
+	LTEXT      "Text\nText\nText", IDC_INTROTEXT, 27, 0, INNER_WIDTH - 28, 65
+	// Countdown text
+	LTEXT      "",         IDC_TEXT1,           0, 70, INNER_WIDTH, 16, SS_LEFTNOWORDWRAP | SS_NOPREFIX
+	// Progress
+	CONTROL    "",         IDC_PROGRESS,        "msctls_progress32", WS_BORDER, 0, 86, INNER_WIDTH_ALIGNED, 10
+END
 
 
 /////////////////////////////////////////////////////////////////////////////

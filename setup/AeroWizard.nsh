@@ -61,6 +61,7 @@ Var /GLOBAL AeroWizard.Font
 	; Set white background
 	SetCtlColors $HWNDPARENT SYSCLR:WINDOWTEXT SYSCLR:WINDOW
 	SetCtlColors $ChildHwnd  SYSCLR:WINDOWTEXT SYSCLR:WINDOW
+	!insertmacro SetBackground $ChildHwnd 103
 	${For} $4 1000 1043
 		!insertmacro SetBackground $ChildHwnd $4
 	${Next}
