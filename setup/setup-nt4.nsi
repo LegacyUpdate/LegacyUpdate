@@ -33,8 +33,8 @@ ReserveFile "PatchesNT4.ini"
 
 !define RUNONCEDIR "$COMMONPROGRAMDATA\Legacy Update"
 
-!define MUI_UI                       "modern_aerowizard.exe"
-!define MUI_UI_HEADERIMAGE           "modern_aerowizard.exe"
+!define MUI_UI                       "obj\resource.dll"
+!define MUI_UI_HEADERIMAGE           "obj\resource.dll"
 !define MUI_COMPONENTSPAGE_CHECKBITMAP "${NSISDIR}\Contrib\Graphics\Checks\classic.bmp"
 
 !define MUI_CUSTOMFUNCTION_ABORT     CleanUp

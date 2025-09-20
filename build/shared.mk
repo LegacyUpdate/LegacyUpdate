@@ -131,6 +131,8 @@ else
 	RCFLAGS += -F pe-i386
 endif
 
+all::
+
 all-32:
 	+$(MAKE) internal-all ARCH=32
 
@@ -198,7 +200,7 @@ $(OBJ) $(RES) $(MSG): | $(OBJDIR)
 
 $(RES): $(MSG) $(TLB)
 
-clean:
+clean::
 	rm -rf obj
 
-.PHONY: all-32 all-64 internal-all clean
+.PHONY: all all-32 all-64 internal-all clean

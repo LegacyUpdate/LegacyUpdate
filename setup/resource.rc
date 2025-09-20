@@ -1,0 +1,141 @@
+#include "resource.h"
+#include <windows.h>
+#include <richedit.h>
+
+#define OUTER_WIDTH         355
+#define OUTER_HEIGHT        233
+
+#define INNER_LEFT          25
+#define INNER_WIDTH         317
+#define INNER_HEIGHT        119
+#define INNER_WIDTH_ALIGNED INNER_WIDTH - 12
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(65001)
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialogs
+//
+
+IDD_INST DIALOGEX 0, 0, OUTER_WIDTH, OUTER_HEIGHT
+STYLE DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_WINDOWEDGE | WS_EX_APPWINDOW
+CAPTION "Template"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Bottom divider
+	LTEXT      "",         6900,                0, 207, OUTER_WIDTH + 2, 1, SS_ETCHEDHORZ | WS_CHILD | WS_GROUP
+	// Bottom background
+	LTEXT      "",         6901,                0, 208, OUTER_WIDTH, 25, WS_CHILD | WS_GROUP
+	// Buttons
+	PUSHBUTTON "Back",     IDABORT,             207, 213, 45, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP
+	PUSHBUTTON "Next",     IDOK,                253, 213, 45, 14, BS_PUSHBUTTON | WS_TABSTOP
+	PUSHBUTTON "Cancel",   IDCANCEL,            303, 213, 45, 14, BS_PUSHBUTTON | WS_TABSTOP
+	// Branding
+	LTEXT      "Branding", IDC_VERSTR,          INNER_LEFT, 216, 180, 11, WS_DISABLED
+	// Inner content
+	LTEXT      "",         IDC_CHILDRECT,       INNER_LEFT, 75, INNER_WIDTH, INNER_HEIGHT, SS_BLACKRECT | WS_GROUP | NOT WS_VISIBLE
+	// Title
+	LTEXT      "Title",    1037,                INNER_LEFT, 52, INNER_WIDTH, 36, 0
+	// Top divider
+	LTEXT      "",         1047,                0, 40, OUTER_WIDTH + 2, 1, SS_ETCHEDHORZ | WS_CHILD | WS_GROUP
+	// Banner
+	LTEXT      "",         1046,                0, 0, OUTER_WIDTH, 40, SS_BITMAP | WS_CHILD
+END
+
+IDD_LICENSE DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Unused
+	CONTROL    "",         IDC_EDIT1,           "RichEdit20W", ES_MULTILINE | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 0, 0, 0, 0
+END
+
+IDD_DIR DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Unused
+	EDITTEXT               IDC_DIR,             0, 0, 0, 0, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+	PUSHBUTTON "",         IDC_BROWSE,          0, 0, 0, 0, BS_PUSHBUTTON | WS_TABSTOP
+END
+
+IDD_SELCOM DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Intro text
+	LTEXT      "Text\nText\nText", IDC_INTROTEXT, 0, 0, INNER_WIDTH, 31, 0
+	// Selection
+	CONTROL    "",         IDC_TREE1,           "SysTreeView32", TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP, 0, 32, INNER_WIDTH_ALIGNED, 53
+	// Description
+	LTEXT      "",         1043,                0, 91, INNER_WIDTH, 29, 0
+	// Unused
+	COMBOBOX               IDC_COMBO1,          0, 0, 0, 0, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_INSTFILES DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Show details
+	PUSHBUTTON "",         IDC_SHOWDETAILS,     0, 33, 60, 14, BS_PUSHBUTTON
+	// Progress
+	CONTROL    "",         IDC_PROGRESS,        "msctls_progress32", WS_BORDER, 0, 16, INNER_WIDTH_ALIGNED, 10
+	// Intro text
+	LTEXT      "",         IDC_INTROTEXT,       0, 0, INNER_WIDTH, 16, SS_LEFTNOWORDWRAP | SS_NOPREFIX
+	// Details list
+	CONTROL    "",         IDC_LIST1,           "SysListView32", LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP | NOT WS_VISIBLE, 0, 33, INNER_WIDTH_ALIGNED, 85
+END
+
+IDD_UNINST DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Uninstall path label
+	LTEXT      "",         IDC_UNINSTFROM,      0, 42, 65, 8, 0
+	// Uninstall path
+	EDITTEXT               IDC_EDIT1,           70, 40, 234, 12, ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_TABSTOP
+	// Intro text
+	LTEXT      "",         IDC_INTROTEXT,       0, 0, INNER_WIDTH, 30, 0
+END
+
+IDD_LICENSE_FSRB DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Unused
+	CONTROL    "",         IDC_EDIT1,           "RichEdit20W", ES_MULTILINE | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 0, 0, 0, 0
+	PUSHBUTTON "",         IDC_LICENSEAGREE,    0, 0, 0, 0, BS_AUTORADIOBUTTON | WS_TABSTOP
+	PUSHBUTTON "",         IDC_LICENSEDISAGREE, 0, 0, 0, 0, BS_AUTORADIOBUTTON | WS_TABSTOP
+END
+
+IDD_LICENSE_FSCB DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Unused
+	CONTROL    "",         IDC_EDIT1,           "RichEdit20W", ES_MULTILINE | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 0, 0, 0, 0
+	PUSHBUTTON "",         IDC_LICENSEAGREE,    0, 0, 0, 0, BS_AUTOCHECKBOX | WS_TABSTOP
+END
+
+IDD_VERIFY DIALOGEX 0, 0, 167, 43
+STYLE DS_SHELLFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Status
+	CTEXT      "",         IDC_STR,             40, 26, 120, 10, 0
+	// Icon
+	ICON                   IDI_ICON2,           -1, 10, 11, 21, 20, 0
+	// Loading text
+	CTEXT      "Please wait while Setup is loading...", 76, 40, 10, 120, 16, 0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////

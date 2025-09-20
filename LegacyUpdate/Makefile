@@ -19,7 +19,7 @@ DEF      = LegacyUpdate.def
 C_LANG   = c++
 CXX_LANG = c++
 
-all: all-archs
+all:: all-archs
 
 all-archs: all-32 all-64
 

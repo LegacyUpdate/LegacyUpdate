@@ -38,8 +38,8 @@ Var /GLOBAL UninstallInstalled
 
 !define RUNONCEDIR "$COMMONPROGRAMDATA\Legacy Update"
 
-!define MUI_UI                       "modern_aerowizard.exe"
-!define MUI_UI_HEADERIMAGE           "modern_aerowizard.exe"
+!define MUI_UI                       "obj\resource.dll"
+!define MUI_UI_HEADERIMAGE           "obj\resource.dll"
 
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.OnShow
 !define MUI_CUSTOMFUNCTION_ABORT     CleanUp

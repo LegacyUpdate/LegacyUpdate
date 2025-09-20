@@ -9,7 +9,7 @@ RCFILES  = resource.rc
 
 BIN      = obj/LegacyUpdateNSIS.dll
 
-all: internal-all
+all:: internal-all
 
 include ../build/shared.mk
 

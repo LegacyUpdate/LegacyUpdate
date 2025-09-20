@@ -18,7 +18,6 @@ Debug-VC17/
 Release/
 *.exe
 *.dll
-!setup/modern_aerowizard.exe
 !setup/x86-unicode/*.dll
 setup/x86-unicode/LegacyUpdateNSIS.dll
 obj/

@@ -11,7 +11,7 @@ DEFFILES = ../LegacyUpdate/LegacyUpdate.def
 
 BIN      = obj/LegacyUpdate$(ARCH).exe
 
-all: all-archs
+all:: all-archs
 
 all-archs: all-32 all-64
 
