@@ -98,7 +98,7 @@ LDFLAGS  += \
 	-Wl,--enable-stdcall-fixup \
 	-Wl,--out-implib,$(STATIC) \
 	$(if $(EMITDEF),-Wl$(_COMMA)--output-def$(_COMMA)$(DEF),$(DEF)) \
-	$(if $(filter 1,$(DEBUG)),,-Wl$(COMMA)--strip-all) \
+	$(if $(filter 1,$(DEBUG)),,-Wl$(_COMMA)--strip-all) \
 	-lmsvcrt
 
 ifeq ($(CLANG),1)
