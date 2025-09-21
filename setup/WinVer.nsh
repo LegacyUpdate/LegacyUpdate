@@ -75,7 +75,7 @@
 		Var /GLOBAL __WINVERPROD
 	!endif
 
-  StrCmp $__WINVEROS "" _winver_noveryet
+	StrCmp $__WINVEROS "" _winver_noveryet
 		Return
 
 	_winver_noveryet:
@@ -92,7 +92,7 @@
 		Var /GLOBAL __WINVERSUITE
 	!endif
 
-  StrCmp $__WINVERSUITE "" _winver_noveryet_ex
+	StrCmp $__WINVERSUITE "" _winver_noveryet_ex
 		Return
 
 	_winver_noveryet_ex:

@@ -78,7 +78,7 @@ HRESULT Reboot(void) {
 	}
 
 	// Last-ditch attempt ExitWindowsEx (only guaranteed to work for the current logged in user)
-		if (!SUCCEEDED(hr) && !ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
+	if (!SUCCEEDED(hr) && !ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX)) {
 		hr = HRESULT_FROM_WIN32(GetLastError());
 		CHECK_HR_OR_GOTO_END(L"ExitWindowsEx");
 	}

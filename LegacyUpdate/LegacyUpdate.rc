@@ -28,24 +28,24 @@ VS_VERSION_INFO VERSIONINFO
  FILETYPE VFT_APP
  FILESUBTYPE VFT2_UNKNOWN
 BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "CompanyName", "Hashbang Productions"
-            VALUE "FileDescription", "Legacy Update"
-            VALUE "FileVersion", VERSION_STRING
-            VALUE "InternalName", "LegacyUpdate.dll"
-            VALUE "LegalCopyright", "© Hashbang Productions. All rights reserved."
-            VALUE "OriginalFilename", "LegacyUpdate.dll"
-            VALUE "ProductName", "Legacy Update"
-            VALUE "ProductVersion", VERSION_STRING
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x0409, 0x04b0
-    END
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904b0"
+		BEGIN
+			VALUE "CompanyName", "Hashbang Productions"
+			VALUE "FileDescription", "Legacy Update"
+			VALUE "FileVersion", VERSION_STRING
+			VALUE "InternalName", "LegacyUpdate.dll"
+			VALUE "LegalCopyright", "© Hashbang Productions. All rights reserved."
+			VALUE "OriginalFilename", "LegacyUpdate.dll"
+			VALUE "ProductName", "Legacy Update"
+			VALUE "ProductVersion", VERSION_STRING
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x0409, 0x04b0
+	END
 END
 
 
@@ -56,7 +56,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_LEGACYUPDATE        "Legacy Update"
+	IDS_LEGACYUPDATE        "Legacy Update"
 END
 
 #endif    // English (United States) resources
