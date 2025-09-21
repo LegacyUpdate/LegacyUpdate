@@ -48,6 +48,9 @@
 !macroend
 
 Function CleanUpRunOnce
+	; The reboot has happened, so remove reboot flag if any
+	DeleteRegValue HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "RebootPending"
+
 	; Restore setup keys
 	; Be careful here. Doing this wrong can cause SYSTEM_LICENSE_VIOLATION bootloops!
 	!insertmacro RunOnceRestoreReg Str   HKLM "${REGPATH_SETUP}" "CmdLine"   ""
@@ -89,49 +92,54 @@ FunctionEnd
 Var /GLOBAL RunOnce.UseFallback
 
 Function PrepareRunOnce
-	${If} ${RebootFlag}
-		!if ${NT4} == 0
-		${IfNot} ${IsRunOnce}
-			; Copy to runonce path to ensure installer is accessible by the temp user
-			CreateDirectory "${RUNONCEDIR}"
-			SetOutPath "${RUNONCEDIR}"
-			CopyFiles /SILENT "$EXEPATH" "${RUNONCEDIR}\LegacyUpdateSetup.exe"
-			Call CopyLauncher
+	${IfNot} ${RebootFlag}
+		Return
+	${EndIf}
 
-			; Remove mark of the web to prevent "Open File - Security Warning" dialog
-			System::Call '${DeleteFile}("${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier")'
-		${EndIf}
+	; Set flag in case the user decides to restart later, so we can jump straight to the restart page
+	WriteRegDword HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "RebootPending" 1
+
+	!if ${NT4} == 0
+	${IfNot} ${IsRunOnce}
+		; Copy to runonce path to ensure installer is accessible by the temp user
+		CreateDirectory "${RUNONCEDIR}"
+		SetOutPath "${RUNONCEDIR}"
+		CopyFiles /SILENT "$EXEPATH" "${RUNONCEDIR}\LegacyUpdateSetup.exe"
+		Call CopyLauncher
+
+		; Remove mark of the web to prevent "Open File - Security Warning" dialog
+		System::Call '${DeleteFile}("${RUNONCEDIR}\LegacyUpdateSetup.exe:Zone.Identifier")'
+	${EndIf}
+	!endif
+
+	${If} $RunOnce.UseFallback == 1
+		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdateRunOnce" '"${RUNONCEDIR}\LegacyUpdateSetup.exe" /runonce'
+	${Else}
+		; Somewhat documented in KB939857:
+		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
+		; See also Wine winternl.h
+		!if ${NT4} == 1
+			StrCpy $1 "${RUNONCEDIR}\LegacyUpdateSetup.exe"
+		!else
+			StrCpy $1 "${RUNONCEDIR}\LegacyUpdate.exe"
 		!endif
 
-		${If} $RunOnce.UseFallback == 1
-			WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdateRunOnce" '"${RUNONCEDIR}\LegacyUpdateSetup.exe" /runonce'
-		${Else}
-			; Somewhat documented in KB939857:
-			; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
-			; See also Wine winternl.h
-			!if ${NT4} == 1
-				StrCpy $1 "${RUNONCEDIR}\LegacyUpdateSetup.exe"
-			!else
-				StrCpy $1 "${RUNONCEDIR}\LegacyUpdate.exe"
-			!endif
+		!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"$1" /runonce'
+		!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
+		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
+	${EndIf}
 
-			!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"$1" /runonce'
-			!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
-			WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
-		${EndIf}
+	; Temporarily disable Security Center first run if needed
+	${If} ${IsWinXP2002}
+	${AndIfNot} ${AtLeastServicePack} 2
+		${VerbosePrint} "Disabling Security Center first run"
+		!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled" 1
+	${EndIf}
 
-		; Temporarily disable Security Center first run if needed
-		${If} ${IsWinXP2002}
-		${AndIfNot} ${AtLeastServicePack} 2
-			${VerbosePrint} "Disabling Security Center first run"
-			!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled" 1
-		${EndIf}
-
-		; Temporarily disable logon animation if needed
-		${If} ${AtLeastWin8}
-			${VerbosePrint} "Disabling first logon animation"
-			!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
-		${EndIf}
+	; Temporarily disable logon animation if needed
+	${If} ${AtLeastWin8}
+		${VerbosePrint} "Disabling first logon animation"
+		!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
 	${EndIf}
 FunctionEnd
 

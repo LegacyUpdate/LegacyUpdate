@@ -162,6 +162,12 @@ Section -BeforeInstall PREREQS_START
 		Call PreDownload
 
 		; If a reboot is pending, do it now
+		ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "RebootPending"
+		${If} $0 == 1
+			SetRebootFlag true
+			${RebootIfRequired}
+		${EndIf}
+
 		${IfNot} ${AtLeastWin10}
 			Call RebootIfCbsRebootPending
 		${EndIf}
@@ -829,6 +835,12 @@ Function ComponentsPageCheck
 		${If} $1 == 0
 			Abort
 		${EndIf}
+	${EndIf}
+
+	; Skip if reboot pending
+	ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "RebootPending"
+	${If} $0 == 1
+		Abort
 	${EndIf}
 
 	; Handle 2000 Datacenter Server
