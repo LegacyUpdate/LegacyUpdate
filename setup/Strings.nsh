@@ -263,3 +263,12 @@ LangString SectionNT4USBDesc    ${LANG_ENGLISH} \
 	"Installs the Inside Out Networks USB Peripheral Drivers, enabling access to USB devices.$\r$\nBy installing, you are agreeing to the Inside Out Networks Edgeport for NT 4.0 License Agreement."
 LangString SectionSPCleanupDesc ${LANG_ENGLISH} \
 	"Deletes backup files created during installation of updates. This frees up disk space, but you will not be able to uninstall updates."
+
+; Reboot page
+LangString RebootPageTitle   ${LANG_ENGLISH} "Restarting Windows"
+LangString RebootPageText    ${LANG_ENGLISH} "Your computer will not be up to date until you restart it. Please save any open files, photos or documents and restart now.$\r$\n\
+$\r$\n\
+Setup will resume after restarting. Your computer may restart several times to complete installation."
+LangString RebootPageTimer   ${LANG_ENGLISH} "Restarting in "
+LangString RebootPageRestart ${LANG_ENGLISH} "Restart"
+LangString RebootPageLater   ${LANG_ENGLISH} "Later"

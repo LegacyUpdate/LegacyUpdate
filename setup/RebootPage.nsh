@@ -9,13 +9,13 @@ Function RebootPage
 		Abort
 	${EndIf}
 
-	!insertmacro MUI_HEADER_TEXT "Restarting Windows" ""
+	!insertmacro MUI_HEADER_TEXT "$(RebootPageTitle)" ""
 
 	LegacyUpdateNSIS::RebootPageCreate \
-		"Your computer will not be up to date until you restart it. Please save any open files, photos or documents and restart now.$\n$\nSetup will resume after restarting. Your computer may restart several times to complete installation." \
-		"Restarting in " \
-		"Restart" \
-		"Later"
+		"$(RebootPageText)" \
+		"$(RebootPageTimer)" \
+		"$(RebootPageRestart)" \
+		"$(RebootPageLater)"
 
 	Call AeroWizardOnShow
 
