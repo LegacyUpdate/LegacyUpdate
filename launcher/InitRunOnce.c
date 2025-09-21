@@ -4,6 +4,7 @@
 #include "MsgBox.h"
 #include "Registry.h"
 #include "VersionInfo.h"
+#include "resource.h"
 
 #define HK_RUNCMD 1
 
@@ -261,7 +262,9 @@ void RunOnce(void) {
 
 	// Allow breaking out by entering safe mode
 	if (GetSystemMetrics(SM_CLEANBOOT) != 0) {
-		MsgBox(NULL, L"Legacy Update setup was cancelled because the system is running in Safe Mode.", NULL, MB_OK | MB_ICONERROR);
+		WCHAR message[4096];
+		LoadString(GetModuleHandle(NULL), IDS_RUNONCESAFEMODE, message, ARRAYSIZE(message));
+		MsgBox(NULL, message, NULL, MB_OK | MB_ICONWARNING);
 		ResetSetupKey();
 		PostQuitMessage(0);
 		return;
@@ -296,7 +299,10 @@ void RunOnce(void) {
 		LocalFree(setupPath);
 		LocalFree(cmdLine);
 
-		MsgBox(NULL, L"Continuing Legacy Update setup failed", NULL, MB_OK | MB_ICONERROR);
+		WCHAR message[4096];
+		LoadString(GetModuleHandle(NULL), IDS_RUNONCEFAILED, message, ARRAYSIZE(message));
+		MsgBox(NULL, message, NULL, MB_OK | MB_ICONERROR);
+
 		ResetSetupKey();
 
 #ifdef _DEBUG
@@ -327,7 +333,10 @@ void RunOnce(void) {
 
 	DWORD exitCode = 0;
 	if (GetExitCodeProcess(processInfo.hProcess, &exitCode) && exitCode != ERROR_SUCCESS && exitCode != ERROR_SUCCESS_RESTART_REQUIRED) {
-		MsgBox(NULL, L"Continuing Legacy Update setup failed", NULL, MB_OK | MB_ICONERROR);
+		WCHAR message[4096];
+		LoadString(GetModuleHandle(NULL), IDS_RUNONCEFAILED, message, ARRAYSIZE(message));
+		MsgBox(NULL, message, NULL, MB_OK | MB_ICONERROR);
+
 		ResetSetupKey();
 
 #ifdef _DEBUG

@@ -105,26 +105,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	}
 
 	default: {
-		const LPWSTR usage = L""
-			L"LegacyUpdate.exe [/launch|/options|/log|/regserver|/unregserver]\n"
-			L"\n"
-			L"/launch\n"
-			L"    Launch Legacy Update website in Internet Explorer\n"
-			L"\n"
-			L"/options\n"
-			L"    Open the Windows Update Options control panel\n"
-			L"\n"
-			L"/log\n"
-			L"    Open the Windows Update log file\n"
-			L"\n"
-			L"/regserver\n"
-			L"    Register ActiveX control\n"
-			L"\n"
-			L"/unregserver\n"
-			L"    Unregister ActiveX control\n"
-			L"\n"
-			L"If no parameters are provided, /launch is assumed.";
-		MsgBox(NULL, L"LegacyUpdate.exe usage", usage, MB_OK);
+		WCHAR title[4096], body[4096];
+		LoadString(GetModuleHandle(NULL), IDS_USAGE_TITLE, title, ARRAYSIZE(title));
+		LoadString(GetModuleHandle(NULL), IDS_USAGE_BODY, body, ARRAYSIZE(body));
+		MsgBox(NULL, title, body, MB_OK);
 		PostQuitMessage(1);
 		break;
 	}

@@ -74,11 +74,44 @@ IDR_CPLTASKS            XML                     "CplTasks.xml"
 
 STRINGTABLE
 BEGIN
-	IDS_LEGACYUPDATEOCX     "Legacy Update Control"
+	// Shortcuts
+	IDS_LEGACYUPDATEOCX     "Legacy Update"
 	IDS_LEGACYUPDATE        "Legacy Update"
 	IDS_CHECKFORUPDATES     "Check for updates"
 	IDS_CHECKFORUPDATES_ALT "Check for software and driver updates via Legacy Update."
+
+	// Usage
+	IDS_USAGE_TITLE         "LegacyUpdate.exe usage"
+	IDS_USAGE_BODY          ""
+		"LegacyUpdate.exe [/launch|/options|/log|/regserver|/unregserver]\n"
+		"\n"
+		"/launch\n"
+		"    Launch Legacy Update website in Internet Explorer\n"
+		"\n"
+		"/options\n"
+		"    Open the Windows Update Options control panel\n"
+		"\n"
+		"/log\n"
+		"    Open the Windows Update log file\n"
+		"\n"
+		"/regserver\n"
+		"    Register ActiveX control\n"
+		"\n"
+		"/unregserver\n"
+		"    Unregister ActiveX control\n"
+		"\n"
+		"If no parameters are provided, /launch is assumed."
+
+	// Launch
 	IDS_IENOTINSTALLED      "Internet Explorer is not installed. Use Optional Features in Control Panel to install it before using Legacy Update."
+
+	// RegisterServer
+	IDS_REGISTERFAILED      "Failed to register Legacy Update ActiveX control"
+	IDS_UNREGISTERFAILED    "Failed to unregister Legacy Update ActiveX control"
+
+	// RunOnce
+	IDS_RUNONCEFAILED       "Continuing Legacy Update setup failed"
+	IDS_RUNONCESAFEMODE     "Legacy Update setup was cancelled because the system is running in Safe Mode."
 END
 
 

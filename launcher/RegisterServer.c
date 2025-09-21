@@ -8,6 +8,7 @@
 #include "User.h"
 #include "VersionInfo.h"
 #include "Wow64.h"
+#include "resource.h"
 
 static HRESULT RegisterDllInternal(LPWSTR path, BOOL state) {
 	HMODULE module = LoadLibrary(path);
@@ -139,9 +140,8 @@ end:
 
 	if (!forLaunch) {
 		if (!SUCCEEDED(hr)) {
-			LPWSTR title = state
-				? L"Failed to register Legacy Update ActiveX control"
-				: L"Failed to unregister Legacy Update ActiveX control";
+			WCHAR title[4096];
+			LoadString(GetModuleHandle(NULL), state ? IDS_REGISTERFAILED : IDS_UNREGISTERFAILED, title, ARRAYSIZE(title));
 			LPWSTR message = GetMessageForHresult(hr);
 			MsgBox(hwnd, title, message, MB_ICONERROR);
 			LocalFree(message);
