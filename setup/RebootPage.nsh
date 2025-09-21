@@ -27,6 +27,7 @@ Function RebootPage
 		Call RebootIfRequired
 	${Else}
 		; Later
+		${MementoSectionSave}
 		Call PrepareRunOnce
 		Quit
 	${EndIf}
