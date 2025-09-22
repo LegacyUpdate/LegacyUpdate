@@ -70,7 +70,8 @@ public:
 		m_height(0),
 		m_clientSite(NULL),
 		m_adviseSink(NULL),
-		m_progressBarOrigWndProc(NULL) {
+		m_progressBarOrigWndProc(NULL),
+		m_timerHwnd(NULL) {
 	}
 
 	virtual ~CProgressBarControl();
@@ -96,6 +97,7 @@ public:
 	IOleClientSite *m_clientSite;
 	IAdviseSink *m_adviseSink;
 	WNDPROC m_progressBarOrigWndProc;
+	HWND m_timerHwnd;
 
 	// IUnknown
 	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
@@ -112,4 +114,5 @@ public:
 	STDMETHODIMP OnDraw(DWORD dwDrawAspect, LONG lindex, void *pvAspect, DVTARGETDEVICE *ptd, HDC hdcTargetDev, HDC hdcDraw, LPCRECTL lprcBounds, LPCRECTL lprcWBounds, BOOL (STDMETHODCALLTYPE *pfnContinue)(ULONG_PTR dwContinue), ULONG_PTR dwContinue);
 	STDMETHODIMP InvalidateContainer();
 	static LRESULT CALLBACK ProgressBarWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK TimerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

@@ -10,6 +10,9 @@
 
 #define PROGRESSBARCONTROL_MISCSTATUS (OLEMISC_RECOMPOSEONRESIZE | OLEMISC_CANTLINKINSIDE | OLEMISC_INSIDEOUT | OLEMISC_ACTIVATEWHENVISIBLE | OLEMISC_SETCLIENTSITEFIRST | OLEMISC_NOUIACTIVATE)
 
+#define PROGRESSBAR_TIMER_ID 1
+#define PROGRESSBAR_INTERVAL (1000 / 10)
+
 DEFINE_UUIDOF(CProgressBarControl, CLSID_ProgressBarControl);
 
 STDMETHODIMP CProgressBarControl::Create(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
@@ -222,7 +225,7 @@ STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *
 			// Just update the position
 			SetWindowPos(
 				m_innerHwnd, NULL,
-				pRect->left, pRect->top,
+				0, 0,
 				m_width, m_height,
 				SWP_NOZORDER | SWP_NOACTIVATE
 			);
@@ -247,12 +250,12 @@ STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *
 	initComctl.dwICC = ICC_PROGRESS_CLASS;
 	InitCommonControlsEx(&initComctl);
 
-	// Draw off-screen window
+	// Create progress bar window
 	m_innerHwnd = CreateWindowEx(
-		WS_EX_CLIENTEDGE,
+		0,
 		PROGRESS_CLASS,
 		NULL,
-		WS_CHILD,
+		WS_CHILD | WS_VISIBLE,
 		0, 0,
 		m_width, m_height,
 		m_hwnd,
@@ -267,15 +270,55 @@ STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *
 
 	SetWindowLongPtr(m_innerHwnd, GWLP_USERDATA, (LONG_PTR)this);
 	m_progressBarOrigWndProc = (WNDPROC)SetWindowLongPtr(m_innerHwnd, GWLP_WNDPROC, (LONG_PTR)ProgressBarWndProc);
+	ShowWindow(m_innerHwnd, SW_SHOWNA);
+
+	// Set empty window region so we can do our own drawing
+	HRGN emptyRegion = CreateRectRgn(0, 0, 0, 0);
+	SetWindowRgn(m_innerHwnd, emptyRegion, FALSE);
+
+	if (AtLeastWinVista()) {
+		// Create dummy window for handling the timer
+		static WCHAR timerClassName[] = L"LegacyUpdateProgressBarControlWindow";
+		static WNDCLASS wndClass = {0};
+
+		if (wndClass.hInstance == NULL) {
+			wndClass.lpfnWndProc = CProgressBarControl::TimerWndProc;
+			wndClass.hInstance = OWN_MODULE;
+			wndClass.lpszClassName = timerClassName;
+			RegisterClass(&wndClass);
+		}
+
+		m_timerHwnd = CreateWindowEx(
+			0,
+			timerClassName,
+			NULL,
+			0,
+			0, 0, 0, 0,
+			HWND_MESSAGE,
+			NULL,
+			OWN_MODULE,
+			NULL
+		);
+
+		if (m_timerHwnd) {
+			SetWindowLongPtr(m_timerHwnd, GWLP_USERDATA, (LONG_PTR)this);
+		}
+	}
 
 	return put_Value(-1);
 }
 
 STDMETHODIMP CProgressBarControl::DestroyControlWindow(void) {
 	if (m_innerHwnd) {
+		KillTimer(m_timerHwnd, PROGRESSBAR_TIMER_ID);
 		DestroyWindow(m_innerHwnd);
 		m_innerHwnd = NULL;
 		m_progressBarOrigWndProc = NULL;
+	}
+
+	if (m_timerHwnd) {
+		DestroyWindow(m_timerHwnd);
+		m_timerHwnd = NULL;
 	}
 
 	m_hwnd = NULL;
@@ -354,7 +397,7 @@ STDMETHODIMP CProgressBarControl_IOleInPlaceActiveObject::ResizeBorder(LPCRECT p
 
 		SetWindowPos(
 			m_pParent->m_innerHwnd, NULL,
-			prcBorder->left, prcBorder->top,
+			0, 0,
 			width, height,
 			SWP_NOZORDER | SWP_NOACTIVATE
 		);
@@ -371,13 +414,18 @@ STDMETHODIMP CProgressBarControl::InvalidateContainer(void) {
 	}
 
 	if (m_clientSite) {
-		CComPtr<IOleInPlaceSite> inPlaceSite;
-		m_clientSite->QueryInterface(IID_IOleInPlaceSite, (void**)&inPlaceSite);
-		if (inPlaceSite) {
-			HWND containerHwnd;
-			inPlaceSite->GetWindow(&containerHwnd);
-			if (containerHwnd) {
-				InvalidateRect(containerHwnd, NULL, TRUE);
+		CComPtr<IOleInPlaceSiteWindowless> inPlaceSiteWindowless;
+		m_clientSite->QueryInterface(IID_IOleInPlaceSiteWindowless, (void**)&inPlaceSiteWindowless);
+		if (inPlaceSiteWindowless) {
+			inPlaceSiteWindowless->InvalidateRect(NULL, TRUE);
+		} else {
+			CComPtr<IOleInPlaceSite> inPlaceSite;
+			m_clientSite->QueryInterface(IID_IOleInPlaceSite, (void**)&inPlaceSite);
+			if (inPlaceSite) {
+				HWND containerHwnd;
+				if (SUCCEEDED(inPlaceSite->GetWindow(&containerHwnd)) && containerHwnd) {
+					InvalidateRect(containerHwnd, NULL, TRUE);
+				}
 			}
 		}
 	}
@@ -391,22 +439,36 @@ LRESULT CALLBACK CProgressBarControl::ProgressBarWndProc(HWND hwnd, UINT uMsg, W
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 
-	LRESULT result = CallWindowProc(pThis->m_progressBarOrigWndProc, hwnd, uMsg, wParam, lParam);
+	LRESULT result;
 
 	switch (uMsg) {
 	case WM_PAINT:
-	case WM_TIMER:
 		// Redraw after progress bar paint
+		result = CallWindowProc(pThis->m_progressBarOrigWndProc, hwnd, uMsg, wParam, lParam);
 		pThis->InvalidateContainer();
-		break;
+		return result;
 
 	case WM_NCDESTROY:
 		// Clean up
 		SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)pThis->m_progressBarOrigWndProc);
+	}
+
+	return CallWindowProc(pThis->m_progressBarOrigWndProc, hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT CALLBACK CProgressBarControl::TimerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	CProgressBarControl *pThis = (CProgressBarControl *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+
+	switch (uMsg) {
+	case WM_TIMER:
+		if (wParam == PROGRESSBAR_TIMER_ID && pThis != NULL) {
+			pThis->InvalidateContainer();
+			return 0;
+		}
 		break;
 	}
 
-	return result;
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
 #pragma mark - IProgressBarControl
@@ -440,19 +502,29 @@ STDMETHODIMP CProgressBarControl::put_Value(SHORT value) {
 	ULONG_PTR cookie;
 	IsolationAwareStart(&cookie);
 
+	SHORT oldValue = -1;
+	get_Value(&oldValue);
+
 	if (value == -1) {
 		// Marquee style
 		SetWindowLongPtr(m_innerHwnd, GWL_STYLE, GetWindowLongPtr(m_innerHwnd, GWL_STYLE) | PBS_MARQUEE);
 		SendMessage(m_innerHwnd, PBM_SETMARQUEE, TRUE, 100);
+
+		if (oldValue != -1 && m_timerHwnd) {
+			SetTimer(m_timerHwnd, PROGRESSBAR_TIMER_ID, PROGRESSBAR_INTERVAL, NULL);
+		}
 	} else {
 		// Normal style
-		SHORT oldValue = -1;
-		get_Value(&oldValue);
 		if (oldValue == -1) {
 			SendMessage(m_innerHwnd, PBM_SETMARQUEE, FALSE, 0);
 			SetWindowLongPtr(m_innerHwnd, GWL_STYLE, GetWindowLongPtr(m_innerHwnd, GWL_STYLE) & ~PBS_MARQUEE);
 			SendMessage(m_innerHwnd, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+
+			if (m_timerHwnd) {
+				KillTimer(m_timerHwnd, PROGRESSBAR_TIMER_ID);
+			}
 		}
+
 		SendMessage(m_innerHwnd, PBM_SETPOS, value, 0);
 	}
 
