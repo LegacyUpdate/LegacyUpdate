@@ -33,7 +33,13 @@ STDMETHODIMP PauseResumeNGenQueue(BOOL state) {
 			ExpandEnvironmentStrings(path, expandedPath, ARRAYSIZE(expandedPath));
 
 			if (PathFileExists(expandedPath)) {
-				hr = Exec(NULL, expandedPath, state ? L"queue pause" : L"queue continue", NULL, SW_HIDE, TRUE, NULL);
+				SHELLEXECUTEINFO execInfo = {0};
+				execInfo.cbSize = sizeof(execInfo);
+				execInfo.fMask = SEE_MASK_FLAG_NO_UI;
+				execInfo.lpFile = expandedPath;
+				execInfo.lpParameters = state ? L"queue pause" : L"queue continue";
+				execInfo.nShow = SW_HIDE;
+				hr = ExecEx(&execInfo, TRUE, NULL);
 
 				if (SUCCEEDED(hr)) {
 					break;
