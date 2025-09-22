@@ -51,6 +51,18 @@ LangString MsgBoxBetaOS ${LANG_ENGLISH} \
 	$\r$\n\
 	Continue anyway?"
 
+LangString MsgBoxOneCoreAPI ${LANG_ENGLISH} \
+	"One-Core-API has been detected on this system. Installation of updates will fail while One-Core-API is installed.$\r$\n\
+	$\r$\n\
+	It is recommended to uninstall One-Core-API, then install it again after you have installed all updates.$\r$\n\
+	$\r$\n\
+	Continue anyway?"
+
+LangString MsgBoxNNN4NT5 ${LANG_ENGLISH} \
+	"A compatibility mode has been set on this program by NNN Changer for NT 5.x (NNN4NT5). Legacy Update will not work correctly in compatibility mode.$\r$\n\
+	$\r$\n\
+	Click the $\"Delete$\" button in NNN4NT5 to disable compatibility mode, then try again."
+
 LangString MsgBoxCompatMode ${LANG_ENGLISH} \
 	"A compatibility mode has been set on this program. Legacy Update will not work correctly in compatibility mode.$\r$\n\
 	$\r$\n\

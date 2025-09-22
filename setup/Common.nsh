@@ -149,24 +149,40 @@ Function InitChecks
 
 		${If} $1 == 1
 			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxBetaOS)" /SD IDOK \
-				IDOK +2
+				IDOK +3
+			SetErrorLevel 1
 			Quit
 		${EndIf}
+
+!if ${NT4} == 0
+		; Detect One-Core-API
+		ReadRegDword $0 HKLM "Software\Microsoft\Windows NT\CurrentVersion\HotFix\OCAB" "Installed"
+		${If} $0 == 1
+			${VerbosePrint} "One-Core-API detected"
+			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxOneCoreAPI)" /SD IDOK \
+				IDOK +3
+			SetErrorLevel 1
+			Quit
+		${EndIf}
+!endif
 	${EndIf}
 
 !if ${NT4} == 0
+	; Detect NNN4NT5
+	ReadEnvStr $0 "_COMPAT_VER_NNN"
+	${If} $0 != ""
+		${VerbosePrint} "NNN4NT5 detected"
+		MessageBox MB_USERICON "$(MsgBoxNNN4NT5)" /SD IDOK
+		SetErrorLevel 1
+		Quit
+	${EndIf}
+
 	; Check for compatibility mode (GetVersionEx() and RtlGetNtVersionNumbers() disagreeing)
 	GetWinVer $0 Major
 	GetWinVer $1 Minor
 	GetWinVer $2 Build
 	System::Call '${RtlGetNtVersionNumbers}(.r3, .r4, .r5)'
 	IntOp $5 $5 & 0xFFFF
-
-	; Detect NNN4NT5
-	ReadEnvStr $6 "_COMPAT_VER_NNN"
-	${If} $6 != ""
-		StrCpy $3 "?"
-	${EndIf}
 
 	; Windows 2000 lacks RtlGetNtVersionNumbers(), but there is no compatibility mode anyway.
 	${If} "$3.$4.$5" != "0.0.0"
