@@ -357,21 +357,22 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 	Call MakeUninstallEntry
 
 	${If} ${AtMostWinVista}
-		; Check if Schannel is going to work with modern TLS
+		; Check if SChannel is going to work with modern TLS
 		${If} ${AtLeastWinVista}
 			${DetailPrint} "$(StatusCheckingSSL)"
 			!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
 				`/TIMEOUTCONNECT 0 /TIMEOUTRECONNECT 0`
 			Pop $0
 			Call DownloadWaitSilent
+			Pop $1
 			Pop $0
-			Pop $0
-			${VerbosePrint} "Ping result: $0"
+			${VerbosePrint} "Ping result: $0 ($1)"
 		${Else}
 			StrCpy $0 ""
 		${EndIf}
 
-		${If} $0 == "OK"
+		${If} $1 >= 200
+		${AndIf} $1 < 300
 			; HTTPS will work
 			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER_HTTPS}"
 			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER_HTTPS}"

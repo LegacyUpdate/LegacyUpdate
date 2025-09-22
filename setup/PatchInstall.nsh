@@ -91,7 +91,8 @@ FunctionEnd
 !endif
 	Pop $1
 	Pop $0
-	${If} $0 != "OK"
+	${If} $1 < 200
+	${OrIf} $1 >= 300
 		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
 			StrCpy $2 "${name}"
 			MessageBox MB_USERICON "$(MsgBoxDownloadFailed)" /SD IDOK
