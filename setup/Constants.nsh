@@ -58,6 +58,7 @@
 ; System
 !define REGPATH_HARDWARE_SYSTEM    "Hardware\Description\System"
 !define REGPATH_CONTROL            "System\CurrentControlSet\Control"
+!define REGPATH_CONTROL_HAL        "${REGPATH_CONTROL}\HAL"
 !define REGPATH_CONTROL_LANGUAGE   "${REGPATH_CONTROL}\Nls\Language"
 !define REGPATH_CONTROL_WINDOWS    "${REGPATH_CONTROL}\Windows"
 
@@ -86,6 +87,7 @@
 
 ; IE zone keys
 !define REGPATH_INETSETTINGS       "Software\Microsoft\Windows\CurrentVersion\Internet Settings"
+!define REGPATH_INETSETTINGS_WINHTTP "${REGPATH_INETSETTINGS}\WinHttp"
 !define REGPATH_ZONEDOMAINS        "${REGPATH_INETSETTINGS}\ZoneMap\Domains"
 !define REGPATH_ZONEESCDOMAINS     "${REGPATH_INETSETTINGS}\ZoneMap\EscDomains"
 
@@ -101,3 +103,6 @@
 ; Roots update keys
 !define ROOTSUPDATE_GUID           "{EF289A85-8E57-408d-BE47-73B55609861A}"
 !define REGPATH_COMPONENTS         "Software\Microsoft\Active Setup\Installed Components"
+
+; One-Core-API keys
+!define REGPATH_HOTFIX_OCAB        "Software\Microsoft\Windows NT\CurrentVersion\HotFix\OCAB"

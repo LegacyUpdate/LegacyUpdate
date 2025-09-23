@@ -35,8 +35,8 @@ Function _ConfigureCrypto
 	!insertmacro -SetSecureProtocolsBitmask HKCU "${REGPATH_INETSETTINGS}" "SecureProtocols"
 
 	; Enable WinHTTP TLSv1.1 and v1.2
-	!insertmacro -SetSecureProtocolsBitmask HKLM "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols"
-	!insertmacro -SetSecureProtocolsBitmask HKCU "${REGPATH_INETSETTINGS}\WinHttp" "DefaultSecureProtocols"
+	!insertmacro -SetSecureProtocolsBitmask HKLM "${REGPATH_INETSETTINGS_WINHTTP}" "DefaultSecureProtocols"
+	!insertmacro -SetSecureProtocolsBitmask HKCU "${REGPATH_INETSETTINGS_WINHTTP}" "DefaultSecureProtocols"
 
 	; Enable .NET inheriting SChannel protocol config
 	; .NET 3 uses the same registry keys as .NET 2.

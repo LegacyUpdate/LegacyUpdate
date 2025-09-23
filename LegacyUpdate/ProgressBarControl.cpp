@@ -249,7 +249,7 @@ STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *
 
 	// Create progress bar window
 	m_innerHwnd = CreateWindowEx(
-		0,
+		WS_EX_CLIENTEDGE,
 		PROGRESS_CLASS,
 		NULL,
 		WS_CHILD | WS_VISIBLE,
@@ -402,15 +402,14 @@ STDMETHODIMP CProgressBarControl::put_Value(SHORT value) {
 	ULONG_PTR cookie;
 	IsolationAwareStart(&cookie);
 
-	SHORT oldValue = -1;
-	get_Value(&oldValue);
-
 	if (value == -1) {
 		// Marquee style
 		SetWindowLongPtr(m_innerHwnd, GWL_STYLE, GetWindowLongPtr(m_innerHwnd, GWL_STYLE) | PBS_MARQUEE);
 		SendMessage(m_innerHwnd, PBM_SETMARQUEE, TRUE, 100);
 	} else {
 		// Normal style
+		SHORT oldValue = -1;
+		get_Value(&oldValue);
 		if (oldValue == -1) {
 			SendMessage(m_innerHwnd, PBM_SETMARQUEE, FALSE, 0);
 			SetWindowLongPtr(m_innerHwnd, GWL_STYLE, GetWindowLongPtr(m_innerHwnd, GWL_STYLE) & ~PBS_MARQUEE);

@@ -15,5 +15,5 @@
 
 Function FixW2KUR1
 	; Fix idling on multi-CPU systems when Update Rollup 1 is installed
-	WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\HAL" "14140000FFFFFFFF" 0x10
+	WriteRegDWORD HKLM "${REGPATH_CONTROL_HAL}" "14140000FFFFFFFF" 0x10
 FunctionEnd
