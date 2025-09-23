@@ -10,9 +10,6 @@
 
 #define PROGRESSBARCONTROL_MISCSTATUS (OLEMISC_RECOMPOSEONRESIZE | OLEMISC_CANTLINKINSIDE | OLEMISC_INSIDEOUT | OLEMISC_ACTIVATEWHENVISIBLE | OLEMISC_SETCLIENTSITEFIRST | OLEMISC_NOUIACTIVATE)
 
-#define PROGRESSBAR_TIMER_ID 1337
-#define PROGRESSBAR_INTERVAL 100
-
 DEFINE_UUIDOF(CProgressBarControl, CLSID_ProgressBarControl);
 
 STDMETHODIMP CProgressBarControl::Create(IUnknown *pUnkOuter, REFIID riid, void **ppv) {
@@ -225,7 +222,7 @@ STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *
 			// Just update the position
 			SetWindowPos(
 				m_innerHwnd, NULL,
-				0, 0,
+				pRect->left, pRect->top,
 				m_width, m_height,
 				SWP_NOZORDER | SWP_NOACTIVATE
 			);
@@ -268,23 +265,13 @@ STDMETHODIMP CProgressBarControl::CreateControlWindow(HWND hParent, const RECT *
 		return E_FAIL;
 	}
 
-	SetWindowLongPtr(m_innerHwnd, GWLP_USERDATA, (LONG_PTR)this);
-	m_progressBarOrigWndProc = (WNDPROC)SetWindowLongPtr(m_innerHwnd, GWLP_WNDPROC, (LONG_PTR)ProgressBarWndProc);
-	ShowWindow(m_innerHwnd, SW_SHOWNA);
-
-	// Set empty window region so we can do our own drawing
-	HRGN emptyRegion = CreateRectRgn(0, 0, 0, 0);
-	SetWindowRgn(m_innerHwnd, emptyRegion, FALSE);
-
 	return put_Value(-1);
 }
 
 STDMETHODIMP CProgressBarControl::DestroyControlWindow(void) {
 	if (m_innerHwnd) {
-		KillTimer(m_innerHwnd, PROGRESSBAR_TIMER_ID);
 		DestroyWindow(m_innerHwnd);
 		m_innerHwnd = NULL;
-		m_progressBarOrigWndProc = NULL;
 	}
 
 	m_hwnd = NULL;
@@ -315,25 +302,10 @@ STDMETHODIMP CProgressBarControl::OnDraw(DWORD dwDrawAspect, LONG lindex, void *
 		LONG height = lprcBounds->bottom - lprcBounds->top;
 		SetWindowPos(
 			m_innerHwnd, NULL,
-			0, 0, width, height,
+			lprcBounds->left, lprcBounds->top,
+			width, height,
 			SWP_NOZORDER | SWP_NOACTIVATE
 		);
-
-		// Draw into hdcMem
-		HDC hdcMem = CreateCompatibleDC(hdcDraw);
-		HBITMAP bitmap = CreateCompatibleBitmap(hdcDraw, width, height);
-		HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, bitmap);
-
-		SendMessage(m_innerHwnd, WM_PRINT, (WPARAM)hdcMem, PRF_CLIENT | PRF_CHILDREN | PRF_ERASEBKGND | PRF_NONCLIENT);
-
-		// Draw that into hdcDraw
-		BitBlt(hdcDraw,
-			lprcBounds->left, lprcBounds->top, width, height,
-			hdcMem, 0, 0, SRCCOPY);
-
-		SelectObject(hdcMem, hbmOld);
-		DeleteObject(bitmap);
-		DeleteDC(hdcMem);
 	}
 
 	return S_OK;
@@ -363,7 +335,7 @@ STDMETHODIMP CProgressBarControl_IOleInPlaceActiveObject::ResizeBorder(LPCRECT p
 
 		SetWindowPos(
 			m_pParent->m_innerHwnd, NULL,
-			0, 0,
+			prcBorder->left, prcBorder->top,
 			width, height,
 			SWP_NOZORDER | SWP_NOACTIVATE
 		);
@@ -397,30 +369,6 @@ STDMETHODIMP CProgressBarControl::InvalidateContainer(void) {
 	}
 
 	return S_OK;
-}
-
-LRESULT CALLBACK CProgressBarControl::ProgressBarWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	CProgressBarControl *pThis = (CProgressBarControl *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-	if (!pThis) {
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-
-	LRESULT result;
-
-	switch (uMsg) {
-	case WM_TIMER:
-		if (wParam == PROGRESSBAR_TIMER_ID && pThis != NULL) {
-			pThis->InvalidateContainer();
-			return 0;
-		}
-		break;
-
-	case WM_NCDESTROY:
-		// Clean up
-		SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)pThis->m_progressBarOrigWndProc);
-	}
-
-	return CallWindowProc(pThis->m_progressBarOrigWndProc, hwnd, uMsg, wParam, lParam);
 }
 
 #pragma mark - IProgressBarControl
@@ -460,18 +408,13 @@ STDMETHODIMP CProgressBarControl::put_Value(SHORT value) {
 	if (value == -1) {
 		// Marquee style
 		SetWindowLongPtr(m_innerHwnd, GWL_STYLE, GetWindowLongPtr(m_innerHwnd, GWL_STYLE) | PBS_MARQUEE);
-		SendMessage(m_innerHwnd, PBM_SETMARQUEE, TRUE, PROGRESSBAR_INTERVAL * 10);
-
-		if (oldValue != -1) {
-			SetTimer(m_innerHwnd, PROGRESSBAR_TIMER_ID, PROGRESSBAR_INTERVAL, NULL);
-		}
+		SendMessage(m_innerHwnd, PBM_SETMARQUEE, TRUE, 100);
 	} else {
 		// Normal style
 		if (oldValue == -1) {
 			SendMessage(m_innerHwnd, PBM_SETMARQUEE, FALSE, 0);
 			SetWindowLongPtr(m_innerHwnd, GWL_STYLE, GetWindowLongPtr(m_innerHwnd, GWL_STYLE) & ~PBS_MARQUEE);
 			SendMessage(m_innerHwnd, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
-			KillTimer(m_innerHwnd, PROGRESSBAR_TIMER_ID);
 		}
 
 		SendMessage(m_innerHwnd, PBM_SETPOS, value, 0);
