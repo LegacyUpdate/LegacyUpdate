@@ -97,7 +97,7 @@ PLUGIN_METHOD(InitTaskbarProgress) {
 	g_extra = extra;
 	extra->RegisterPluginCallback(g_hInstance, NSISPluginCallback);
 
-	if (g_progressOrigWndProc) {
+	if (g_dialogOrigWndProc) {
 		// Already initialised
 		return;
 	}
