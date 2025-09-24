@@ -333,10 +333,6 @@ void RunOnce(void) {
 
 	DWORD exitCode = 0;
 	if (GetExitCodeProcess(processInfo.hProcess, &exitCode) && exitCode != ERROR_SUCCESS && exitCode != ERROR_SUCCESS_RESTART_REQUIRED) {
-		WCHAR message[4096];
-		LoadString(GetModuleHandle(NULL), IDS_RUNONCEFAILED, message, ARRAYSIZE(message));
-		MsgBox(NULL, message, NULL, MB_OK | MB_ICONERROR);
-
 		ResetSetupKey();
 
 #ifdef _DEBUG
