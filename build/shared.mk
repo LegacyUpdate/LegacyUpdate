@@ -53,8 +53,7 @@ CFLAGS   += \
 	-municode \
 	-DUNICODE \
 	-D_UNICODE \
-	$(if $(filter 1,$(DEBUG)),-D_DEBUG,-DNDEBUG -Os -s) \
-	-g \
+	$(if $(filter 1,$(DEBUG)),-D_DEBUG -g,-DNDEBUG -Os -s) \
 	-fPIE \
 	-ffunction-sections \
 	-fdata-sections \
