@@ -215,6 +215,8 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outp
 	HDC hdcMemScaled = NULL;
 	HGLOBAL handle = NULL;
 	HANDLE file = INVALID_HANDLE_VALUE;
+	HBITMAP oldBitmap = NULL;
+	HBITMAP oldScaledBitmap = NULL;
 
 	HBITMAP scaledBitmap = CreateCompatibleBitmap(hdc, width, height);
 	if (!scaledBitmap) {
@@ -230,6 +232,9 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outp
 
 	hdcMemScaled = CreateCompatibleDC(hdc);
 	SetStretchBltMode(hdcMemScaled, HALFTONE);
+
+	oldBitmap = SelectObject(hdcMem, hBitmap);
+	oldScaledBitmap = SelectObject(hdcMemScaled, scaledBitmap);
 
 	if (!StretchBlt(hdcMemScaled,
 		0, 0, width, height, hdcMem,
@@ -286,6 +291,12 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outp
 	result = TRUE;
 
 end:
+	if (hdcMem && oldBitmap) {
+		SelectObject(hdcMem, oldBitmap);
+	}
+	if (hdcMemScaled && oldScaledBitmap) {
+		SelectObject(hdcMemScaled, oldScaledBitmap);
+	}
 	if (file != INVALID_HANDLE_VALUE) {
 		CloseHandle(file);
 	}
