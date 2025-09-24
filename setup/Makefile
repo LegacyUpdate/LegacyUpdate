@@ -39,7 +39,7 @@ endif
 
 clean::
 	rm -rf obj
-	rm -f LegacyUpdate-*.exe codebase/{lucontrl.cab,setup.exe,setup.rpt}s
+	rm -f LegacyUpdate-*.exe codebase/{lucontrl.cab,setup.exe,setup.rpt}
 ifeq ($(MAKELEVEL),0)
 	+$(MAKE) -C ../nsisplugin clean
 endif
