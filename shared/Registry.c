@@ -3,19 +3,8 @@
 #include "VersionInfo.h"
 #include <shlwapi.h>
 
-LPVOID DELETE_KEY = (LPVOID)INT_MIN;
+LPVOID DELETE_KEY   = (LPVOID)INT_MIN;
 LPVOID DELETE_VALUE = (LPVOID)(INT_MIN + 1);
-
-static ALWAYS_INLINE REGSAM GetWow64Flag(REGSAM options) {
-#ifndef _WIN64
-	if (!AtLeastWinXP2002()) {
-		// Filter out WOW64 keys, which are not supported on Windows 2000
-		return options & ~(KEY_WOW64_64KEY | KEY_WOW64_32KEY);
-	}
-#endif
-
-	return options;
-}
 
 HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSAM options, LPWSTR *data, LPDWORD size) {
 	if (data == NULL) {
@@ -23,7 +12,7 @@ HRESULT GetRegistryString(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSA
 	}
 
 	HKEY subkey = NULL;
-	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, GetWow64Flag(KEY_READ | options), &subkey));
+	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, GetRegistryWow64Flag(KEY_READ | options), &subkey));
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
@@ -71,7 +60,7 @@ end:
 
 HRESULT GetRegistryDword(HKEY key, LPCWSTR subkeyPath, LPCWSTR valueName, REGSAM options, LPDWORD data) {
 	HKEY subkey = NULL;
-	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, GetWow64Flag(KEY_READ | options), &subkey));
+	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(key, subkeyPath, 0, GetRegistryWow64Flag(KEY_READ | options), &subkey));
 	if (!SUCCEEDED(hr)) {
 		goto end;
 	}
@@ -118,7 +107,7 @@ HRESULT SetRegistryEntries(RegistryEntry entries[]) {
 			}
 		} else {
 			HKEY key;
-			hr = HRESULT_FROM_WIN32(RegCreateKeyEx(entry.hKey, entry.lpSubKey, 0, NULL, 0, GetWow64Flag(KEY_WRITE | entry.samDesired), NULL, &key, NULL));
+			hr = HRESULT_FROM_WIN32(RegCreateKeyEx(entry.hKey, entry.lpSubKey, 0, NULL, 0, GetRegistryWow64Flag(KEY_WRITE | entry.samDesired), NULL, &key, NULL));
 			if (!SUCCEEDED(hr)) {
 				TRACE(L"Create %ls failed: %08x", entry.lpSubKey, hr);
 				if (expandedSubKey) {

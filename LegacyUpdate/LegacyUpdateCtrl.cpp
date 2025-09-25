@@ -438,7 +438,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 
 	// Check reboot flag in registry
 	HKEY subkey = NULL;
-	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, KEY_READ | KEY_WOW64_64KEY, &subkey));
+	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, GetRegistryWow64Flag(KEY_READ | KEY_WOW64_64KEY), &subkey));
 	if (SUCCEEDED(hr)) {
 		RegCloseKey(subkey);
 		*retval = VARIANT_TRUE;

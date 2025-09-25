@@ -2,6 +2,13 @@
 
 #include <windows.h>
 
+// Filter out WOW64 keys that are not supported on Windows 2000
+#ifdef _WIN64
+#define GetRegistryWow64Flag(options) (options)
+#else
+#define GetRegistryWow64Flag(options) (AtLeastWinXP2002() ? options : (options & ~(KEY_WOW64_64KEY | KEY_WOW64_32KEY)))
+#endif
+
 EXTERN_C LPVOID DELETE_KEY;
 EXTERN_C LPVOID DELETE_VALUE;
 
