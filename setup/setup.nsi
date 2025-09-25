@@ -368,7 +368,7 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 			Pop $0
 			${VerbosePrint} "Ping result: $0 ($1)"
 		${Else}
-			StrCpy $0 ""
+			StrCpy $1 0
 		${EndIf}
 
 		${If} $1 >= 200
