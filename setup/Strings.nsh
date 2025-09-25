@@ -173,43 +173,41 @@ LangString SectionRootCerts ${LANG_ENGLISH} "Root certificates store update"
 LangString SectionEnableMU  ${LANG_ENGLISH} "Enable Microsoft Update"
 LangString SectionActivate  ${LANG_ENGLISH} "Activate Windows"
 
-LangString SectionReboots   ${LANG_ENGLISH} \
-	"Your computer will restart automatically to complete installation."
 LangString SectionSupEULA   ${LANG_ENGLISH} \
 	"By installing, you are agreeing to the Supplemental End User License Agreement for this update."
 LangString SectionMSLT      ${LANG_ENGLISH} \
 	"By installing, you are agreeing to the Microsoft Software License Terms for this update."
 
 LangString SectionW2KSP4Desc    ${LANG_ENGLISH} \
-	"Updates Windows 2000 to Service Pack 4 with Update Rollup 1, as required to install the Windows Update Agent.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+	"Updates Windows 2000 to Service Pack 4 with Update Rollup 1, as required to install the Windows Update Agent.$\r$\n$(SectionSupEULA)"
 LangString SectionIE6SP1Desc    ${LANG_ENGLISH} \
-	"Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+	"Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\n$(SectionSupEULA)"
 LangString SectionXPSP3Desc     ${LANG_ENGLISH} \
-	"Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online. $(SectionReboots) $(SectionSupEULA)"
+	"Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online. $(SectionSupEULA)"
 LangString SectionXPESP3Desc    ${LANG_ENGLISH} \
-	"Updates Windows XP Embedded to Service Pack 3. Required if you would like to activate Windows online. $(SectionReboots) $(SectionSupEULA)"
+	"Updates Windows XP Embedded to Service Pack 3. Required if you would like to activate Windows online. $(SectionSupEULA)"
 LangString SectionWES09Desc     ${LANG_ENGLISH} \
 	"Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this."
 LangString Section2003SP2Desc   ${LANG_ENGLISH} \
-	"Updates Windows XP Professional x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. $(SectionReboots) $(SectionSupEULA)"
+	"Updates Windows XP Professional x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. $(SectionSupEULA)"
 LangString SectionVistaSP2Desc  ${LANG_ENGLISH} \
-	"Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. $(SectionReboots) $(SectionMSLT)"
+	"Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. $(SectionMSLT)"
 LangString SectionVistaSSUDesc  ${LANG_ENGLISH} \
-	"Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n$(SectionReboots)"
+	"Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent."
 LangString SectionVistaIE9Desc  ${LANG_ENGLISH} \
-	"Updates Internet Explorer to 9.0.$\r$\n$(SectionReboots) $(SectionMSLT)"
+	"Updates Internet Explorer to 9.0.$\r$\n$(SectionMSLT)"
 LangString SectionWin7SP1Desc   ${LANG_ENGLISH} \
-	"Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. $(SectionReboots) $(SectionMSLT)"
+	"Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. $(SectionMSLT)"
 LangString SectionWin7SSUDesc   ${LANG_ENGLISH} \
-	"Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n$(SectionReboots)"
+	"Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent."
 LangString SectionWin8SSUDesc   ${LANG_ENGLISH} \
-	"Updates Windows 8 or Windows Server 2012 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n$(SectionReboots)"
+	"Updates Windows 8 or Windows Server 2012 with additional updates required to resolve issues with the Windows Update Agent."
 LangString SectionWin81U1Desc   ${LANG_ENGLISH} \
-	"Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10.$\r$\n$(SectionReboots)"
+	"Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10."
 LangString SectionWin81SSUDesc  ${LANG_ENGLISH} \
-	"Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent.$\r$\n$(SectionReboots)"
+	"Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent."
 LangString SectionWHS2011U4Desc ${LANG_ENGLISH} \
-	"Updates Windows Home Server 2011 to Update Rollup 4 to resolve issues with the Windows Update Agent. Also fixes data corruption problems.$\r$\n$(SectionReboots)"
+	"Updates Windows Home Server 2011 to Update Rollup 4 to resolve issues with the Windows Update Agent. Also fixes data corruption problems."
 LangString SectionWUADesc       ${LANG_ENGLISH} \
 	"Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 LangString SectionRootCertsDesc ${LANG_ENGLISH} \
@@ -254,11 +252,11 @@ LangString SectionNT4WDUNoDesc  ${LANG_ENGLISH} \
 	"Keeps the Windows 95-style Explorer experience. This choice can not be changed later."
 
 LangString SectionNT4SP6ADesc   ${LANG_ENGLISH} \
-	"Updates Windows NT 4.0 to Service Pack 6a with 128-bit encryption support.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+	"Updates Windows NT 4.0 to Service Pack 6a with 128-bit encryption support.$\r$\n$(SectionSupEULA)"
 LangString SectionNT4RollupDesc ${LANG_ENGLISH} \
-	"Installs Windows NT 4.0 Service Pack 6a Security Rollup Package.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+	"Installs Windows NT 4.0 Service Pack 6a Security Rollup Package.$\r$\n$(SectionSupEULA)"
 LangString SectionNT4PostSPDesc ${LANG_ENGLISH} \
-	"Installs Windows NT 4.0 updates released after the Security Rollup Package.$\r$\n$(SectionReboots) $(SectionSupEULA)"
+	"Installs Windows NT 4.0 updates released after the Security Rollup Package.$\r$\n$(SectionSupEULA)"
 
 LangString SectionNT4MSIDesc    ${LANG_ENGLISH} \
 	"Installs Windows Installer, required to install newer applications.$\r$\n$(SectionSupEULA)"
