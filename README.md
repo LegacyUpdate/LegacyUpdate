@@ -98,7 +98,7 @@ This project is not affiliated with or endorsed by Microsoft. This software is p
 Legacy Update was started and is primarily developed by [Adam Demasi (@kirb)](https://kirb.me/), with contributions from:
 
 * [Douglas R. Reno (@renodr)](https://github.com/renodr): Build system improvements and other project maintenance. Check out his awesome work on [Linux From Scratch](https://www.linuxfromscratch.org/)!
-* [@CHA0SHACKER](https://github.com/CHA0SHACKER): Helps us with finding and sorting through the crazy number of patches. Check out his [update archives](https://archive.org/details/@cha0shacker)!
+* [Jonas Deutz (@CHA0SHACKER)](https://github.com/CHA0SHACKER): Helps us with finding and sorting through the crazy number of patches. Check out his [update archives](https://archive.org/details/@cha0shacker)!
 * [@stdin82](https://github.com/stdin82): Helped us find some patches on the Windows Update server, and other general help on the issue tracker.
 * The [Windows Update Restored](https://windowsupdaterestored.com/) team: [@CaptainTER06](https://github.com/CaptainTER06), [@TheOneGoofAli](https://github.com/TheOneGoofAli), [et al.](https://windowsupdaterestored.com/)
 
