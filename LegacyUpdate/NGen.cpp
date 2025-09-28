@@ -10,6 +10,11 @@ STDMETHODIMP PauseResumeNGenQueue(BOOL state) {
 		return S_OK;
 	}
 
+	// If resuming but the system is already shutting down, ignore because it will process on boot
+	if (state && GetSystemMetrics(SM_SHUTTINGDOWN)) {
+		return S_OK;
+	}
+
 	// Pause and resume .NET Framework global assembly cache (GAC) and NGen queue
 	static LPCWSTR versions[] = {
 		L"v4.0.30319",
