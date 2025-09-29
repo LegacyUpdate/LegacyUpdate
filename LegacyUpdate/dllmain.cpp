@@ -145,8 +145,9 @@ STDAPI UpdateRegistration(BOOL state) {
 	// Main
 	if (state) {
 		RegistryEntry entries[] = {
-			{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", L"DllSurrogate", REG_SZ, NULL},
-			{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", REG_SZ, NULL},
+			{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", NULL, REG_SZ, (LPVOID)L"Legacy Update Control"},
+			{HKEY_CLASSES_ROOT, L"AppID\\%APPID%", L"DllSurrogate", REG_SZ, (LPVOID)L""},
+			{HKEY_CLASSES_ROOT, L"AppID\\LegacyUpdate.dll", L"AppID", REG_SZ, (LPVOID)L"%APPID%"},
 			{}
 		};
 		hr = SetRegistryEntries(entries);
