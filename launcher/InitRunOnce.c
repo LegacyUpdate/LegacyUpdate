@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <commctrl.h>
+#include "HResult.h"
 #include "LoadImage.h"
 #include "MsgBox.h"
 #include "Registry.h"
@@ -50,6 +51,10 @@ static void StartThemes(void) {
 }
 
 static BOOL RunCmd(LPPROCESS_INFORMATION processInfo) {
+	if (g_cmdHandle) {
+		return TRUE;
+	}
+
 	WCHAR cmd[MAX_PATH];
 	ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\cmd.exe", cmd, ARRAYSIZE(cmd));
 
@@ -212,6 +217,21 @@ static void CreateRunOnceWindow(void) {
 	UpdateWindow(hwnd);
 }
 
+static void FixUserWallpaper(void) {
+	// Work around bug in at least Windows 7 SP1 where the pre-logon wallpaper persists into the user session.
+	// We nudge it into doing the right thing by re-applying the wallpaper from the registry.
+	LPWSTR wallpaper = NULL;
+	DWORD length = 0;
+	if (SUCCEEDED(GetRegistryString(HKEY_CURRENT_USER, L"Control Panel\\Desktop", L"Wallpaper", 0, & wallpaper, &length))) {
+		if (length > 0) {
+			SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)wallpaper, SPIF_SENDWININICHANGE);
+		}
+	}
+	if (wallpaper) {
+		LocalFree(wallpaper);
+	}
+}
+
 #ifndef _DEBUG
 static BOOL IsSystemUser(void) {
 	BOOL result = FALSE;
@@ -251,17 +271,18 @@ end:
 }
 #endif
 
-void RunOnce(void) {
+void RunOnce(BOOL postInstall) {
 #ifndef _DEBUG
-	// Only relevant if we're SYSTEM
-	if (!IsSystemUser()) {
+	// Only run in the matching context
+	BOOL isSystemUser = IsSystemUser();
+	if ((postInstall && isSystemUser) || (!postInstall && !isSystemUser)) {
 		PostQuitMessage(1);
 		return;
 	}
 #endif
 
 	// Allow breaking out by entering safe mode
-	if (GetSystemMetrics(SM_CLEANBOOT) != 0) {
+	if (GetSystemMetrics(SM_CLEANBOOT)) {
 		WCHAR message[4096];
 		LoadString(GetModuleHandle(NULL), IDS_RUNONCESAFEMODE, message, ARRAYSIZE(message));
 		MsgBox(NULL, message, NULL, MB_OK | MB_ICONWARNING);
@@ -270,17 +291,33 @@ void RunOnce(void) {
 		return;
 	}
 
-	// Start Themes on this desktop
-	StartThemes();
+	HWND firstUxWnd = 0;
+	if (postInstall) {
+		// Fix pre-logon wallpaper persisting into the user's desktop
+		FixUserWallpaper();
 
-	// Find and hide the FirstUxWnd window, if it exists (Windows 7+)
-	HWND firstUxWnd = FindWindow(L"FirstUxWndClass", NULL);
-	if (firstUxWnd) {
-		ShowWindow(firstUxWnd, SW_HIDE);
+		// Trick winlogon into thinking the shell has started, so it doesn't appear to be stuck at "Welcome" (XP) or
+		// "Preparing your desktop..." (Vista+)
+		// https://social.msdn.microsoft.com/Forums/WINDOWS/en-US/ca253e22-1ef8-4582-8710-9cd9c89b15c3
+		LPWSTR eventName = AtLeastWinVista() ? L"ShellDesktopSwitchEvent" : L"msgina: ShellReadyEvent";
+		HANDLE eventHandle = OpenEvent(EVENT_MODIFY_STATE, 0, eventName);
+		if (eventHandle) {
+			SetEvent(eventHandle);
+			CloseHandle(eventHandle);
+		}
+	} else {
+		// Start Themes on this desktop
+		StartThemes();
+
+		// Find and hide the FirstUxWnd window, if it exists (Windows 7+)
+		firstUxWnd = FindWindow(L"FirstUxWndClass", NULL);
+		if (firstUxWnd) {
+			ShowWindow(firstUxWnd, SW_HIDE);
+		}
+
+		// Set up our window
+		CreateRunOnceWindow();
 	}
-
-	// Set up our window
-	CreateRunOnceWindow();
 
 	// Construct path to LegacyUpdateSetup.exe
 	LPWSTR setupPath;
@@ -292,16 +329,20 @@ void RunOnce(void) {
 	STARTUPINFO startupInfo = {0};
 	startupInfo.cb = sizeof(startupInfo);
 
+	LPWSTR cmdLine = (LPWSTR)LocalAlloc(LPTR, (lstrlen(setupPath) + 16) * sizeof(WCHAR));
+	wsprintf(cmdLine, L"\"%ls\" %ls", setupPath, postInstall ? L"/postinstall" : L"/runonce");
 	PROCESS_INFORMATION processInfo = {0};
-	LPWSTR cmdLine = (LPWSTR)LocalAlloc(LPTR, (lstrlen(setupPath) + 12) * sizeof(WCHAR));
-	wsprintf(cmdLine, L"\"%ls\" /runonce", setupPath);
 	if (!CreateProcess(setupPath, cmdLine, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {
 		LocalFree(setupPath);
 		LocalFree(cmdLine);
 
-		WCHAR message[4096];
-		LoadString(GetModuleHandle(NULL), IDS_RUNONCEFAILED, message, ARRAYSIZE(message));
-		MsgBox(NULL, message, NULL, MB_OK | MB_ICONERROR);
+		WCHAR title[4096];
+		LoadString(GetModuleHandle(NULL), IDS_RUNONCEFAILED, title, ARRAYSIZE(title));
+		LPWSTR message = GetMessageForHresult(HRESULT_FROM_WIN32(GetLastError()));
+		MsgBox(NULL, title, message, MB_OK | MB_ICONERROR);
+		if (message) {
+			LocalFree(message);
+		}
 
 		ResetSetupKey();
 

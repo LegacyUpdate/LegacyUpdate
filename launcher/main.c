@@ -12,7 +12,7 @@ HINSTANCE g_hInstance;
 extern void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow);
 extern void LaunchOptions(int nCmdShow);
 extern void LaunchLog(int nCmdShow);
-extern void RunOnce(void);
+extern void RunOnce(BOOL postInstall);
 
 typedef enum Action {
 	ActionLaunch,
@@ -92,9 +92,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		LaunchLog(nCmdShow);
 		break;
 
-	case ActionRunOnce:
-		RunOnce();
+	case ActionRunOnce: {
+		BOOL postInstall = flagsCount > 0 ? wcscmp(flags[0], L"postinstall") == 0 : FALSE;
+		RunOnce(postInstall);
 		break;
+	}
 
 	case ActionRegServer:
 	case ActionUnregServer: {

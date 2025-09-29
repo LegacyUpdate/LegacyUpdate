@@ -261,7 +261,7 @@ Function OnRunOnceDone
 	${AndIfNot} ${Abort}
 		; Set up postinstall runonce
 		${VerbosePrint} "Preparing postinstall"
-		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"${RUNONCEDIR}\LegacyUpdateSetup.exe" /postinstall'
+		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce postinstall'
 
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
 		${If} $0 == "SYSTEM"
