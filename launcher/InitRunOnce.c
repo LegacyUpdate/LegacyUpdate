@@ -332,10 +332,12 @@ void RunOnce(void) {
 	}
 
 	DWORD exitCode = 0;
-	if (GetExitCodeProcess(processInfo.hProcess, &exitCode) && exitCode != ERROR_SUCCESS && exitCode != ERROR_SUCCESS_RESTART_REQUIRED) {
+	if (GetExitCodeProcess(processInfo.hProcess, &exitCode) && exitCode != ERROR_SUCCESS && exitCode != ERROR_SUCCESS_REBOOT_REQUIRED) {
 		ResetSetupKey();
 
 #ifdef _DEBUG
+		TRACE(L"Setup exited with code: %d", exitCode);
+
 		// Run cmd to inspect what happened
 		if (RunCmd(&processInfo)) {
 			MSG msg = {0};
