@@ -288,11 +288,11 @@ Function CleanUp
 
 	${If} ${IsRunOnce}
 		Call OnRunOnceDone
-	${EndIf}
-
-	${If} ${IsPostInstall}
-	${OrIfNot} ${RebootFlag}
-		Call CleanUpRunOnceFinal
+	${Else}
+		${If} ${IsPostInstall}
+		${OrIfNot} ${RebootFlag}
+			Call CleanUpRunOnceFinal
+		${EndIf}
 	${EndIf}
 FunctionEnd
 

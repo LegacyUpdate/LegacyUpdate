@@ -146,10 +146,10 @@ FunctionEnd
 !macro -RebootIfRequired
 	${If} ${RebootFlag}
 		${If} ${Silent}
+		${OrIf} ${IsRunOnce}
 			Call RebootIfRequired
-		${Else}
-			Return
 		${EndIf}
+		Return
 	${EndIf}
 !macroend
 
@@ -170,16 +170,6 @@ FunctionEnd
 Function OnRunOnceLogon
 	; To be safe in case we crash, immediately restore setup keys. We'll set them again if needed.
 	Call CleanUpRunOnce
-
-	; If we're in the middle of installing a service pack, the system will reboot without notice. Be prepared for that
-	; to happen.
-	ClearErrors
-	EnumRegKey $1 HKLM "${REGPATH_CBS_REBOOTINPROGRESS}" 0
-	${IfNot} ${Errors}
-		; System will reboot without notice. Be prepared for that to happen.
-		${VerbosePrint} "CBS reboot is pending"
-		Call PrepareRunOnce
-	${EndIf}
 FunctionEnd
 
 !macro SetMarquee state

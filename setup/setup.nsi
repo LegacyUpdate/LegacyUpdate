@@ -936,6 +936,7 @@ FunctionEnd
 Function PostInstall
 	; Handle first run flag if needed
 	${If} ${FileExists} "$INSTDIR\LegacyUpdate.exe"
+	${AndIfNot} ${IsRunOnce}
 		ClearErrors
 		ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "ActiveXInstalled"
 		${If} ${Errors}
@@ -976,11 +977,11 @@ Function CleanUp
 
 	${If} ${IsRunOnce}
 		Call OnRunOnceDone
-	${EndIf}
-
-	${If} ${IsPostInstall}
-	${OrIfNot} ${RebootFlag}
-		Call CleanUpRunOnceFinal
+	${Else}
+		${If} ${IsPostInstall}
+		${OrIfNot} ${RebootFlag}
+			Call CleanUpRunOnceFinal
+		${EndIf}
 	${EndIf}
 FunctionEnd
 

@@ -35,7 +35,7 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, vo
 	WCHAR clsidString[39];
 	StringFromGUID2(rclsid, clsidString, ARRAYSIZE(clsidString));
 
-	WCHAR monikerName[75];
+	WCHAR monikerName[67];
 	wsprintf(monikerName, L"Elevation:Administrator!new:%ls", clsidString);
 
 	BIND_OPTS3 bindOpts;
