@@ -72,7 +72,6 @@
 		Var /GLOBAL __WINVEROS
 		Var /GLOBAL __WINVERBUILD
 		Var /GLOBAL __WINVERSP
-		Var /GLOBAL __WINVERPROD
 	!endif
 
 	StrCmp $__WINVEROS "" _winver_noveryet
@@ -82,7 +81,6 @@
 		GetWinVer $__WINVEROS    NTDDIMajMin
 		GetWinVer $__WINVERBUILD Build
 		GetWinVer $__WINVERSP    ServicePack
-		GetWinVer $__WINVERPROD  Product
 !macroend
 
 !macro __WinVer_InitEx
@@ -90,6 +88,7 @@
 		!define __WINVER_VARS_DECLARED_EX
 
 		Var /GLOBAL __WINVERSUITE
+		Var /GLOBAL __WINVERPROD
 	!endif
 
 	StrCmp $__WINVERSUITE "" _winver_noveryet_ex
@@ -98,13 +97,16 @@
 	_winver_noveryet_ex:
 		Push $0
 		Push $1
+		Push $2
 		System::Alloc ${OSVERSIONINFOEXW_SIZE}
 		Pop $0
 		System::Call '*$0(i ${OSVERSIONINFOEXW_SIZE})'
 		System::Call '${GetVersionEx}(.r0)'
-		System::Call '*$0(i, i, i, i, i, &t128, h, h, h .r1, b, b)'
+		System::Call '*$0(i, i, i, i, i, &t128, h, h, h .r1, b .r2, b)'
 		System::Free $0
 		StrCpy $__WINVERSUITE $1
+		StrCpy $__WINVERPROD  $2
+		Pop $2
 		Pop $1
 		Pop $0
 !macroend
@@ -126,16 +128,16 @@
 	!insertmacro _${op} $__WINVERSP ${num} `${_t}` `${_f}`
 !macroend
 
-!macro __WinVer_TestProduct op num _t _f
-	${CallArtificialFunction} __WinVer_Init
-	!insertmacro _${op} $__WINVERPROD ${num} `${_t}` `${_f}`
-!macroend
-
 !macro __WinVer_TestSuite _a num _t _f
 	!insertmacro _LOGICLIB_TEMP
 	${CallArtificialFunction} __WinVer_InitEx
 	IntOp $_LOGICLIB_TEMP $__WINVERSUITE & ${num}
 	!insertmacro _= $_LOGICLIB_TEMP ${num} `${_t}` `${_f}`
+!macroend
+
+!macro __WinVer_TestProduct op num _t _f
+	${CallArtificialFunction} __WinVer_InitEx
+	!insertmacro _${op} $__WINVERPROD ${num} `${_t}` `${_f}`
 !macroend
 
 !macro __WinVer_TestSystemMetric op metric _t _f
@@ -148,6 +150,7 @@
 
 ; Defines
 
+; TODO: This is apparently insufficient prior to NT4 SP6?
 !define IsClientOS         `=  _WinVer_TestProduct ${VER_NT_WORKSTATION}`
 !define IsServerOS         `!= _WinVer_TestProduct ${VER_NT_WORKSTATION}`
 
