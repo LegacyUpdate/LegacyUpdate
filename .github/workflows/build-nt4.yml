@@ -42,15 +42,15 @@ jobs:
       id: nsis-cache
       uses: actions/cache@v4
       with:
-        path: /opt/nsis-3.11-lfs
-        key: nsis-3.11-lfs
+        path: /opt/nsis-3.11
+        key: nsis-3.11
 
     - name: Install custom NSIS package
       if: steps.nsis-cache.outputs.cache-hit != 'true'
       run: |
-        curl -fsSL https://linuxfromscratch.org/~renodr/nsis-3.11-lfsci.tar.xz -o /tmp/nsis-3.11-lfs.tar.xz
-        sudo tar -xf /tmp/nsis-3.11-lfs.tar.xz -C /opt
-        rm /tmp/nsis-3.11-lfs.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/nsis-3.11-lfsci.tar.xz -o /tmp/nsis-3.11.tar.xz
+        sudo tar -xf /tmp/nsis-3.11.tar.xz -C /opt
+        rm /tmp/nsis-3.11.tar.xz
 
     - name: Patches cache
       id: patches-cache
@@ -69,7 +69,7 @@ jobs:
       run: |
         export PATH=/opt/gcc-15.1-binutils-2.45-mingw-v13.0.0-i686/bin:$PATH
         export PATH=/opt/gcc-15.1-binutils-2.45-mingw-v13.0.0-x86_64/bin:$PATH
-        export PATH=/opt/nsis-3.11-lfs/bin:$PATH
+        export PATH=/opt/nsis-3.11/bin:$PATH
         make -j$(nproc) CI=1 DEBUG=0 nt4
 
     - name: Upload Build Artifact
