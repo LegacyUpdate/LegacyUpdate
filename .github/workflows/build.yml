@@ -48,7 +48,7 @@ jobs:
     - name: Install custom NSIS package
       if: steps.nsis-cache.outputs.cache-hit != 'true'
       run: |
-        curl -fsSL https://linuxfromscratch.org/~renodr/nsis-3.11-ubuntu24-v2.tar.xz -o /tmp/nsis-3.11.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/nsis-3.11-lfsci.tar.xz -o /tmp/nsis-3.11.tar.xz
         sudo tar -xf /tmp/nsis-3.11.tar.xz -C /opt
         rm /tmp/nsis-3.11.tar.xz
 
