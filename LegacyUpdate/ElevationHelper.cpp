@@ -160,10 +160,8 @@ STDMETHODIMP CElevationHelper::SetBrowserHwnd(IUpdateInstaller *installer, HWND 
 	HRESULT hr = installer->QueryInterface(IID_IUpdateInstaller, (void **)&updateInstaller);
 	CHECK_HR_OR_RETURN(L"QueryInterface IID_IUpdateInstaller");
 
-TRACE(L"(%p)->put_ParentHwnd(%p)", updateInstaller, hwnd);
 	hr = updateInstaller->put_ParentHwnd(hwnd);
 	CHECK_HR_OR_RETURN(L"put_ParentHwnd");
-TRACE(L"ok");
 
 	return S_OK;
 }
