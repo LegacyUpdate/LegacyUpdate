@@ -394,18 +394,15 @@ STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
 		return E_INVALIDARG;
 	}
 
-	CComPtr<IUpdateInstaller> updateInstaller;
-	HRESULT hr = installer->QueryInterface(IID_IUpdateInstaller, (void **)&updateInstaller);
-	CHECK_HR_OR_RETURN(L"QueryInterface IID_IUpdateInstaller");
+	IElevationHelper *elevatedHelper;
+	HRESULT hr = GetElevatedHelper(&elevatedHelper);
+	CHECK_HR_OR_RETURN(L"GetElevatedHelper");
 
 	HWND hwnd;
 	hr = GetIEWindowHWND(&hwnd);
 	CHECK_HR_OR_RETURN(L"GetIEWindowHWND");
 
-	hr = updateInstaller->put_ParentHwnd(hwnd);
-	CHECK_HR_OR_RETURN(L"put_ParentHwnd");
-
-	return S_OK;
+	return elevatedHelper->SetBrowserHwnd(installer, hwnd);
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {

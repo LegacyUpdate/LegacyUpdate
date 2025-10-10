@@ -31,6 +31,7 @@ public:
 
 	// IElevationHelper
 	STDMETHODIMP CreateObject(BSTR progID, IDispatch **retval);
+	STDMETHODIMP SetBrowserHwnd(IUpdateInstaller *installer, HWND hwnd);
 	STDMETHODIMP Reboot();
 	STDMETHODIMP BeforeUpdate();
 	STDMETHODIMP AfterUpdate();
