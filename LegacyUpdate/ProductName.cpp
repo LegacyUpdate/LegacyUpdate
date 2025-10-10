@@ -1,5 +1,6 @@
 #include <comdef.h>
 #include <shlwapi.h>
+#include "Registry.h"
 #include "VersionInfo.h"
 #include "WMI.h"
 #include "Wow64.h"
@@ -253,6 +254,18 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 			// Get from WMI
 			HRESULT hr = QueryWMIProperty(L"SELECT Caption FROM Win32_OperatingSystem", L"Caption", &_productName);
 			CHECK_HR_OR_RETURN(L"QueryWMIProperty");
+		}
+
+		if (_productName.vt == VT_EMPTY) {
+			// Get from registry
+			LPWSTR data = NULL;
+			DWORD size = 0;
+			HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", KEY_WOW64_64KEY, &data, &size);
+			CHECK_HR_OR_RETURN(L"GetRegistryString");
+
+			_productName.vt = VT_BSTR;
+			_productName.bstrVal = SysAllocStringLen(data, size - 1);
+			LocalFree(data);
 		}
 	}
 

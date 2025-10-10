@@ -298,7 +298,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_SPVersionString: {
 		LPWSTR data = NULL;
 		DWORD size = 0;
-		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", 0, &data, &size);
+		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", KEY_WOW64_64KEY, &data, &size);
 		retval->vt = VT_BSTR;
 		retval->bstrVal = SUCCEEDED(hr)
 			? SysAllocStringLen(data, size - 1)
@@ -323,25 +323,13 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 		break;
 	}
 
-	case e_productName: {
-		HRESULT hr = GetOSProductName(retval);
-		if (!SUCCEEDED(hr)) {
-			LPWSTR data = NULL;
-			DWORD size = 0;
-			hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", 0, &data, &size);
-			if (SUCCEEDED(hr)) {
-				retval->vt = VT_BSTR;
-				retval->bstrVal = SysAllocStringLen(data, size - 1);
-				LocalFree(data);
-			}
-		}
-		break;
-	}
+	case e_productName:
+		return GetOSProductName(retval);
 
 	case e_displayVersion: {
 		LPWSTR data = NULL;
 		DWORD size = 0;
-		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", 0, &data, &size);
+		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", KEY_WOW64_64KEY, &data, &size);
 		if (SUCCEEDED(hr)) {
 			retval->vt = VT_BSTR;
 			retval->bstrVal = SysAllocStringLen(data, size - 1);
@@ -532,7 +520,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	DWORD useWUServer = 0;
-	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", 0, &useWUServer);
+	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", KEY_WOW64_64KEY, &useWUServer);
 	*retval = SUCCEEDED(hr) && useWUServer == 1 ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
@@ -542,7 +530,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 
 	LPWSTR data = NULL;
 	DWORD size = 0;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", 0, &data, &size);
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", KEY_WOW64_64KEY, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	if (data) {
 		LocalFree(data);
@@ -555,7 +543,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 
 	LPWSTR data = NULL;
 	DWORD size = 0;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", 0, &data, &size);
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", KEY_WOW64_64KEY, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	if (data) {
 		LocalFree(data);

@@ -222,7 +222,7 @@ static void FixUserWallpaper(void) {
 	// We nudge it into doing the right thing by re-applying the wallpaper from the registry.
 	LPWSTR wallpaper = NULL;
 	DWORD length = 0;
-	if (SUCCEEDED(GetRegistryString(HKEY_CURRENT_USER, L"Control Panel\\Desktop", L"Wallpaper", 0, & wallpaper, &length))) {
+	if (SUCCEEDED(GetRegistryString(HKEY_CURRENT_USER, L"Control Panel\\Desktop", L"Wallpaper", 0, &wallpaper, &length))) {
 		if (length > 0) {
 			SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)wallpaper, SPIF_SENDWININICHANGE);
 		}
