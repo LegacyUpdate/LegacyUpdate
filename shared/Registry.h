@@ -6,7 +6,7 @@
 #ifdef _WIN64
 	#define GetRegistryWow64Flag(options) (options)
 #else
-	#define GetRegistryWow64Flag(options) ((options) & ~(AtLeastWinXP2002() ? 0 : ~(KEY_WOW64_64KEY | KEY_WOW64_32KEY)))
+	#define GetRegistryWow64Flag(options) ((options) & ~(AtLeastWinXP2002() ? 0 : KEY_WOW64_64KEY | KEY_WOW64_32KEY))
 #endif
 
 EXTERN_C LPVOID DELETE_KEY;
