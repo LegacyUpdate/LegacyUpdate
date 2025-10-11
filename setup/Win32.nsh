@@ -18,6 +18,8 @@
 !define SetEvent                 'kernel32::SetEvent(i) i'
 !define CloseHandle              'kernel32::CloseHandle(i) i'
 !define DeleteFile               'kernel32::DeleteFile(t) i'
+!define TermsrvAppInstallMode    'kernel32::TermsrvAppInstallMode() i'
+!define SetTermsrvAppInstallMode 'kernel32::SetTermsrvAppInstallMode(i) i'
 
 ; ntdll
 !define RtlGetNtVersionNumbers   'ntdll::RtlGetNtVersionNumbers(*i, *i, *i)'

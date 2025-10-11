@@ -68,6 +68,9 @@ LangString MsgBoxCompatMode ${LANG_ENGLISH} \
 	$\r$\n\
 	Disable it in the Properties dialog of this file and try again."
 
+LangString MsgBoxTermsrvAppInstallMode ${LANG_ENGLISH} \
+	"Terminal Services is currently in Execute mode. To install Legacy Update, Terminal Services will be changed to Install mode."
+
 LangString MsgBoxPluginFailed ${LANG_ENGLISH} \
 	"Setup failed to initialize.$\r$\n\
 	$\r$\n\

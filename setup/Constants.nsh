@@ -60,6 +60,7 @@
 !define REGPATH_CONTROL            "System\CurrentControlSet\Control"
 !define REGPATH_CONTROL_HAL        "${REGPATH_CONTROL}\HAL"
 !define REGPATH_CONTROL_LANGUAGE   "${REGPATH_CONTROL}\Nls\Language"
+!define REGPATH_CONTROL_TERMSRV    "${REGPATH_CONTROL}\Terminal Server"
 !define REGPATH_CONTROL_WINDOWS    "${REGPATH_CONTROL}\Windows"
 
 ; XP POSReady hack

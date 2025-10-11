@@ -973,6 +973,7 @@ FunctionEnd
 Function CleanUp
 	; Called only after all tasks have completed
 	Call CleanUpRunOnce
+	Call RevertTermsrvUserMode
 	!insertmacro InhibitSleep 0
 
 	${If} ${IsRunOnce}

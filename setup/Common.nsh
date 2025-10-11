@@ -66,6 +66,8 @@ SetPluginUnload alwaysoff
 !define VerbosePrint `!insertmacro -DetailPrint 0`
 !define DetailPrint  `!insertmacro -DetailPrint 1`
 
+Var /GLOBAL TermsrvUserModeChanged
+
 Function InitChecks
 	${If} ${IsHelp}
 		MessageBox MB_USERICON "$(MsgBoxUsage)"
@@ -193,6 +195,32 @@ Function InitChecks
 		Quit
 	${EndIf}
 !endif
+
+	; Check for Terminal Services execute mode
+	${If} ${IsServerOS}
+	${AndIf} ${IsTerminalServer}
+		ReadRegDword $0 HKLM "${REGPATH_CONTROL_TERMSRV}" "TSAppCompat"
+		System::Call '${TermsrvAppInstallMode}() .r1'
+		${If} $0 == 1
+		${AndIf} $1 == 0
+			${IfNot} ${IsRunOnce}
+			${AndIfNot} ${IsPostInstall}
+				MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxTermsrvAppInstallMode)" /SD IDOK \
+					IDOK +3
+				SetErrorLevel 1
+				Quit
+			${EndIf}
+
+			StrCpy $TermsrvUserModeChanged 1
+			System::Call '${SetTermsrvAppInstallMode}(1)'
+		${EndIf}
+	${EndIf}
+FunctionEnd
+
+Function RevertTermsrvUserMode
+	${If} $TermsrvUserModeChanged == 1
+		System::Call '${SetTermsrvAppInstallMode}(0)'
+	${EndIf}
 FunctionEnd
 
 !macro InhibitSleep state
