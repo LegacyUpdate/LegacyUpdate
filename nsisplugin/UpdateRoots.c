@@ -8,9 +8,9 @@ PLUGIN_METHOD(UpdateRoots) {
 
 	HRESULT hr = E_FAIL;
 	WCHAR stateStr[1024], store[1024], path[1024];
-	popstring(stateStr);
-	popstring(store);
-	popstring(path);
+	popstringn(stateStr, sizeof(stateStr) / sizeof(WCHAR));
+	popstringn(store, sizeof(store) / sizeof(WCHAR));
+	popstringn(path, sizeof(path) / sizeof(WCHAR));
 
 	if (lstrlen(stateStr) == 0 || lstrlen(store) == 0 || lstrlen(path) == 0) {
 		pushint(E_INVALIDARG);

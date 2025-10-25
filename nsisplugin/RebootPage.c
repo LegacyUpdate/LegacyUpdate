@@ -76,10 +76,10 @@ PLUGIN_METHOD(RebootPageCreate) {
 	PLUGIN_INIT();
 
 	WCHAR introText[1024], nextText[1024], cancelText[1024];
-	popstring(introText);
-	popstring(g_timerPrefix);
-	popstring(nextText);
-	popstring(cancelText);
+	popstringn(introText, sizeof(introText) / sizeof(WCHAR));
+	popstringn(g_timerPrefix, sizeof(g_timerPrefix) / sizeof(WCHAR));
+	popstringn(nextText, sizeof(nextText) / sizeof(WCHAR));
+	popstringn(cancelText, sizeof(cancelText) / sizeof(WCHAR));
 
 	// Set up child dialog
 	RECT childRect;
