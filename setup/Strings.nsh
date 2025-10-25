@@ -7,6 +7,7 @@ MiscButtonText "Back" "Next" "Cancel" "Close"
 LangString ^ExecShell  ${LANG_ENGLISH} "Execute: "
 LangString ^Completed  ${LANG_ENGLISH} "Done"
 LangString Downloading ${LANG_ENGLISH} "Downloading "
+LangString Verifying   ${LANG_ENGLISH} "Verifying "
 LangString Extracting  ${LANG_ENGLISH} "Extracting "
 LangString Installing  ${LANG_ENGLISH} "Installing "
 LangString ExitCode    ${LANG_ENGLISH} "Exit code: "
@@ -91,6 +92,11 @@ LangString MsgBoxDownloadFailed ${LANG_ENGLISH} \
 	"$2 failed to download.$\r$\n\
 	$\r$\n\
 	$0 ($1)"
+
+LangString MsgBoxHashFailed ${LANG_ENGLISH} \
+	"$2 failed to download.$\r$\n\
+	$\r$\n\
+	The downloaded file is corrupt. If this persists, a firewall or your internet service provider may be blocking the download."
 
 LangString MsgBoxInstallFailed ${LANG_ENGLISH} \
 	"$2 failed to install.$\r$\n\

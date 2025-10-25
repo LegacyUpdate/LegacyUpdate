@@ -58,7 +58,7 @@ Function ConfigureCrypto
 FunctionEnd
 
 !macro _DownloadSST name
-	!insertmacro Download "$(CTL) (${name})" "${TRUSTEDR}/${name}.sst" "${name}.sst" 0
+	!insertmacro Download "$(CTL) (${name})" "${TRUSTEDR}/${name}.sst" "${name}.sst" "" 0
 !macroend
 
 Function DownloadRoots

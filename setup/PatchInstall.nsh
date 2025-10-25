@@ -103,7 +103,7 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro Download name url filename verbose
+!macro Download name url filename hash verbose
 	${IfNot} ${FileExists} "${RUNONCEDIR}\${filename}"
 		${If} ${FileExists} "$EXEDIR\${filename}"
 			CopyFiles /SILENT "$EXEDIR\${filename}" "${RUNONCEDIR}\${filename}"
@@ -112,6 +112,24 @@ FunctionEnd
 		${EndIf}
 	${EndIf}
 	StrCpy $0 "${RUNONCEDIR}\${filename}"
+
+!if "${hash}" != ""
+	${DetailPrint} "$(Verifying)${name}..."
+	LegacyUpdateNSIS::VerifyFileHash "$0" "${hash}"
+	Pop $R0
+	Pop $R1
+	${If} ${IsVerbose}
+		${VerbosePrint} "Expected: ${hash}"
+		${VerbosePrint} "Actual: $R1"
+	${EndIf}
+	${If} $R0 != 1
+		StrCpy $2 "${name}"
+		MessageBox MB_USERICON "$(MsgBoxHashFailed)" /SD IDOK
+		Delete /REBOOTOK "$0"
+		SetErrorLevel 1
+		Abort
+	${EndIf}
+!endif
 !macroend
 
 Var /GLOBAL Exec.Command
@@ -215,12 +233,14 @@ Function -PatchHandler
 	Call GetArch
 	Pop $1
 	Pop $0
+	StrCpy $2 "$0-$1"
 	ClearErrors
-	ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" $0-$1
+	ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2"
 	${If} ${Errors}
 		; Language neutral
+		StrCpy $2 "$1"
 		ClearErrors
-		ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" $1
+		ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2"
 		${If} ${Errors}
 			StrCpy $0 "$Patch.Title"
 			MessageBox MB_USERICON "$(MsgBoxPatchNotFound)" /SD IDOK
@@ -229,7 +249,8 @@ Function -PatchHandler
 		${EndIf}
 	${EndIf}
 	ReadINIStr $1 $PLUGINSDIR\Patches.ini "$Patch.Key" Prefix
-	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" 1
+	ReadINIStr $3 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2-sha256"
+	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" "$3" 1
 FunctionEnd
 
 !define PATCH_FLAGS_OTHER 0
@@ -295,8 +316,8 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro DownloadMSU kbid name url
-	!insertmacro Download '${name} (${kbid})' '${url}' '${kbid}.msu' 1
+!macro DownloadMSU kbid name url sha256
+	!insertmacro Download '${name} (${kbid})' '${url}' '${kbid}.msu' '${sha256}' 1
 !macroend
 
 Function InstallMSU

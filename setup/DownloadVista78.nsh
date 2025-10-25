@@ -29,9 +29,10 @@ FunctionEnd
 		${If} $0 == 1
 			Call GetArch
 			Pop $0
+			ReadINIStr $2 $PLUGINSDIR\Patches.ini "${kbid}" "$0-sha256"
 			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
 			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" Prefix
-			!insertmacro Download "${title}" "$1$0" "${kbid}.exe" 1
+			!insertmacro Download "${title}" "$1$0" "${kbid}.exe" "$2" 1
 		${EndIf}
 	FunctionEnd
 
@@ -55,7 +56,8 @@ FunctionEnd
 			Pop $0
 			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" $0
 			ReadINIStr $2 $PLUGINSDIR\Patches.ini "${kbid}" Prefix
-			!insertmacro DownloadMSU "${kbid}" "${title}" "$2$1"
+			ReadINIStr $3 $PLUGINSDIR\Patches.ini "${kbid}" "$0-sha256"
+			!insertmacro DownloadMSU "${kbid}" "${title}" "$2$1" "$3"
 		${EndIf}
 	FunctionEnd
 
@@ -165,7 +167,8 @@ Function DownloadClearCompressionFlag
 		Pop $0
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini ClearCompressionFlag $0
 		ReadINIStr $1 $PLUGINSDIR\Patches.ini ClearCompressionFlag Prefix
-		!insertmacro Download "Windows 8.1 $(Update) 1 $(PrepTool)" "$1$0" "ClearCompressionFlag.exe" 1
+		ReadINIStr $2 $PLUGINSDIR\Patches.ini ClearCompressionFlag "$0-sha256"
+		!insertmacro Download "Windows 8.1 $(Update) 1 $(PrepTool)" "$1$0" "ClearCompressionFlag.exe" "$2" 1
 	${EndIf}
 FunctionEnd
 
