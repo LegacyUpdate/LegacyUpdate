@@ -104,6 +104,13 @@ FunctionEnd
 ; Windows 8.1 Servicing Stack
 !insertmacro MSUHandler "KB3021910" "2015-04 $(SSU) for Windows 8.1"
 
+; Weird prerequisite to Update 1 that fixes the main KB2919355 update failing to install
+Function NeedsClearCompressionFlag
+	Call NeedsKB2919355
+FunctionEnd
+
+!insertmacro PatchHandler "ClearCompressionFlag" "Windows 8.1 $(Update) 1 $(PrepTool)" ${PATCH_FLAGS_OTHER} ""
+
 ; Windows 8.1 Update 1
 !insertmacro MSUHandler "KB2919355" "Windows 8.1 $(Update) 1"
 !insertmacro MSUHandler "KB2932046" "Windows 8.1 $(Update) 1"
@@ -159,22 +166,3 @@ FunctionEnd
 ; 		Push 0
 ; 	${EndIf}
 ; FunctionEnd
-
-; Weird prerequisite to Update 1 that fixes the main KB2919355 update failing to install
-Function DownloadClearCompressionFlag
-	${If} ${NeedsPatch} KB2919355
-		Call GetArch
-		Pop $0
-		ReadINIStr $0 $PLUGINSDIR\Patches.ini ClearCompressionFlag $0
-		ReadINIStr $1 $PLUGINSDIR\Patches.ini ClearCompressionFlag Prefix
-		ReadINIStr $2 $PLUGINSDIR\Patches.ini ClearCompressionFlag "$0-sha256"
-		!insertmacro Download "Windows 8.1 $(Update) 1 $(PrepTool)" "$1$0" "ClearCompressionFlag.exe" "$2" 1
-	${EndIf}
-FunctionEnd
-
-Function InstallClearCompressionFlag
-	${If} ${NeedsPatch} KB2919355
-		Call DownloadClearCompressionFlag
-		!insertmacro Install "Windows 8.1 $(Update) 1 $(PrepTool)" "ClearCompressionFlag.exe" ""
-	${EndIf}
-FunctionEnd

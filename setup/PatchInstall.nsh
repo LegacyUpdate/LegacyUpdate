@@ -70,66 +70,81 @@ Function DownloadWait
 	NSxfer::Query /ID $Download.ID /ERRORCODE /ERRORTEXT /END
 FunctionEnd
 
-!macro -Download name url filename verbose
-!if ${verbose} == 1
-	${DetailPrint} "$(Downloading)${name}..."
-!endif
-	${If} ${IsVerbose}
-		${DetailPrint} "$(Downloading)${name}..."
-		${VerbosePrint} "From: ${url}"
-		${VerbosePrint} "To: ${filename}"
+
+Var /GLOBAL Download.Name
+Var /GLOBAL Download.URL
+Var /GLOBAL Download.Filename
+Var /GLOBAL Download.Hash
+Var /GLOBAL Download.Verbose
+
+Function Download
+	${If} ${FileExists} "${RUNONCEDIR}\$Download.Filename"
+		StrCpy $0 "${RUNONCEDIR}\$Download.Filename"
+		Return
 	${EndIf}
-	!insertmacro DownloadRequest "${url}" "${filename}" ""
-!if ${verbose} == 1
-	Call DownloadWait
-!else
-	${If} ${IsVerbose}
-		Call DownloadWait
+
+	${If} ${FileExists} "$EXEDIR\$Download.Filename"
+		CopyFiles /SILENT "$EXEDIR\$Download.Filename" "${RUNONCEDIR}\$Download.Filename"
 	${Else}
-		Call DownloadWaitSilent
-	${EndIf}
-!endif
-	Pop $1
-	Pop $0
-	${If} $1 < 200
-	${OrIf} $1 >= 300
-		${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
-			StrCpy $2 "${name}"
-			MessageBox MB_USERICON "$(MsgBoxDownloadFailed)" /SD IDOK
+		${If} $Download.Verbose == 1
+		${OrIf} ${IsVerbose}
+			${DetailPrint} "$(Downloading)$Download.Name..."
 		${EndIf}
-		Delete /REBOOTOK "${filename}"
-		SetErrorLevel 1
-		Abort
+		${If} ${IsVerbose}
+			${VerbosePrint} "From: $Download.URL"
+			${VerbosePrint} "To: ${RUNONCEDIR}\$Download.Filename"
+		${EndIf}
+		!insertmacro DownloadRequest "$Download.URL" "${RUNONCEDIR}\$Download.Filename" ""
+		${If} $Download.Verbose == 1
+		${OrIf} ${IsVerbose}
+			Call DownloadWait
+		${Else}
+			Call DownloadWaitSilent
+		${EndIf}
+		Pop $1
+		Pop $0
+		${If} $1 < 200
+		${OrIf} $1 >= 300
+			${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
+				StrCpy $2 "$Download.Name"
+				MessageBox MB_USERICON "$(MsgBoxDownloadFailed)" /SD IDOK
+			${EndIf}
+			Delete /REBOOTOK "${RUNONCEDIR}\$Download.Filename"
+			SetErrorLevel 1
+			Abort
+		${EndIf}
 	${EndIf}
-!macroend
+
+	StrCpy $0 "${RUNONCEDIR}\$Download.Filename"
+
+	; Verify downloaded file
+	${If} $Download.Hash != ""
+		${DetailPrint} "$(Verifying)$Download.Name..."
+		LegacyUpdateNSIS::VerifyFileHash "$0" "$Download.Hash"
+		Pop $R0
+		Pop $R1
+		${If} ${IsVerbose}
+		${OrIf} $R0 != 1
+			${DetailPrint} "Expected: $Download.Hash"
+			${DetailPrint} "Actual: $R1"
+		${EndIf}
+		${If} $R0 != 1
+			StrCpy $2 "$Download.Name"
+			MessageBox MB_USERICON "$(MsgBoxHashFailed)" /SD IDOK
+			Delete /REBOOTOK "$0"
+			SetErrorLevel 1
+			Abort
+		${EndIf}
+	${EndIf}
+FunctionEnd
 
 !macro Download name url filename hash verbose
-	${IfNot} ${FileExists} "${RUNONCEDIR}\${filename}"
-		${If} ${FileExists} "$EXEDIR\${filename}"
-			CopyFiles /SILENT "$EXEDIR\${filename}" "${RUNONCEDIR}\${filename}"
-		${Else}
-			!insertmacro -Download '${name}' '${url}' '${RUNONCEDIR}\${filename}' ${verbose}
-		${EndIf}
-	${EndIf}
-	StrCpy $0 "${RUNONCEDIR}\${filename}"
-
-!if "${hash}" != ""
-	${DetailPrint} "$(Verifying)${name}..."
-	LegacyUpdateNSIS::VerifyFileHash "$0" "${hash}"
-	Pop $R0
-	Pop $R1
-	${If} ${IsVerbose}
-		${VerbosePrint} "Expected: ${hash}"
-		${VerbosePrint} "Actual: $R1"
-	${EndIf}
-	${If} $R0 != 1
-		StrCpy $2 "${name}"
-		MessageBox MB_USERICON "$(MsgBoxHashFailed)" /SD IDOK
-		Delete /REBOOTOK "$0"
-		SetErrorLevel 1
-		Abort
-	${EndIf}
-!endif
+	StrCpy $Download.Name "${name}"
+	StrCpy $Download.URL "${url}"
+	StrCpy $Download.Filename "${filename}"
+	StrCpy $Download.Hash "${hash}"
+	StrCpy $Download.Verbose ${verbose}
+	Call Download
 !macroend
 
 Var /GLOBAL Exec.Command
@@ -216,17 +231,34 @@ FunctionEnd
 Var /GLOBAL SPCleanup
 !endif
 
-Function SkipSPUninstall
-!if ${NT4} == 1
-	Push $SPCleanup
-!else
-	Push 0
-!endif
-FunctionEnd
+; TODO
+; Function SkipSPUninstall
+; !if ${NT4} == 1
+; 	Push $SPCleanup
+; !else
+; 	Push 0
+; !endif
+; FunctionEnd
 
 Var /GLOBAL Patch.Key
 Var /GLOBAL Patch.File
 Var /GLOBAL Patch.Title
+Var /GLOBAL Patch.Params
+
+!define PATCH_FLAGS_OTHER 0
+!define PATCH_FLAGS_NT4   1
+!define PATCH_FLAGS_SHORT 2
+!define PATCH_FLAGS_LONG  3
+
+!macro -PatchHandlerFlags params cleanup
+!if ${DEBUG} == 1
+	; To make testing go faster
+	StrCpy $Patch.Params "${params} ${cleanup}"
+!else
+	; LUNT will add a SkipSPUninstall setting. For now, we ignore the cleanup param.
+	StrCpy $Patch.Params "${params}"
+!endif
+!macroend
 
 Function -PatchHandler
 	Call GetUpdateLanguage
@@ -253,27 +285,17 @@ Function -PatchHandler
 	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" "$3" 1
 FunctionEnd
 
-!define PATCH_FLAGS_OTHER 0
-!define PATCH_FLAGS_NT4   1
-!define PATCH_FLAGS_SHORT 2
-!define PATCH_FLAGS_LONG  3
-
-!macro -PatchHandlerFlags params cleanup
-!if ${DEBUG} == 1
-	; To make testing go faster
-	StrCpy $R0 "${params} ${cleanup}"
-!else
-	; NT4 branch will add a SkipSPUninstall setting. For now, we ignore the cleanup param.
-	StrCpy $R0 "${params}"
-!endif
-!macroend
+Function InstallPatch
+	!insertmacro ExecWithErrorHandling "$Patch.Title" '"$0" $Patch.Params'
+FunctionEnd
 
 !macro PatchHandler kbid title type params
 	Function Download${kbid}
+		StrCpy $Patch.Key   "${kbid}"
+		StrCpy $Patch.File  "${kbid}.exe"
+		StrCpy $Patch.Title "${title}"
+
 		${If} ${NeedsPatch} ${kbid}
-			StrCpy $Patch.Key   "${kbid}"
-			StrCpy $Patch.File  "${kbid}.exe"
-			StrCpy $Patch.Title "${title}"
 			Call -PatchHandler
 		${EndIf}
 	FunctionEnd
@@ -284,9 +306,9 @@ FunctionEnd
 		${EndIf}
 
 		Call Download${kbid}
-		Call SkipSPUninstall
+		; TODO: Call SkipSPUninstall
 !if ${type} == ${PATCH_FLAGS_OTHER}
-		StrCpy $R0 ""
+		StrCpy $Patch.Params ""
 !endif
 !if ${type} == ${PATCH_FLAGS_NT4}
 		!insertmacro -PatchHandlerFlags "-z"    "-n -o"
@@ -297,7 +319,9 @@ FunctionEnd
 !if ${type} == ${PATCH_FLAGS_LONG}
 		!insertmacro -PatchHandlerFlags "/passive /norestart" "/n /o"
 !endif
-		!insertmacro Install "${title}" "${kbid}.exe" "$R0 ${params}"
+
+		StrCpy $Patch.Params "$Patch.Params ${params}"
+		Call InstallPatch
 	FunctionEnd
 !macroend
 
