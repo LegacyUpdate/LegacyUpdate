@@ -723,6 +723,12 @@ Function .onInit
 
 		${IfNot} ${NeedsPatch} IE9
 			!insertmacro RemoveSection ${VISTAIE9}
+		${ElseIf} ${IsServerOS}
+			LegacyUpdateNSIS::IsServerCore
+			Pop $0
+			${If} $0 == 1
+				!insertmacro RemoveSection ${VISTAIE9}
+			${EndIf}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${VISTASP2}
@@ -798,6 +804,16 @@ Function .onInit
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${ENABLEMU}
+	${EndIf}
+
+	; Server Core does not have IE.
+	${If} ${AtLeastWinVista}
+	${AndIf} ${IsServerOS}
+		LegacyUpdateNSIS::IsServerCore
+		Pop $0
+		${If} $0 == 1
+			!insertmacro RemoveSection ${LEGACYUPDATE}
+		${EndIf}
 	${EndIf}
 
 	; ${IfNot} ${AtMostWinVista}
