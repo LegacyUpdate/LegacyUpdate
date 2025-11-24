@@ -806,13 +806,14 @@ Function .onInit
 		!insertmacro RemoveSection ${ENABLEMU}
 	${EndIf}
 
-	; Server Core does not have IE.
+	; Server Core does not have IE nor activation wizard
 	${If} ${AtLeastWinVista}
 	${AndIf} ${IsServerOS}
 		LegacyUpdateNSIS::IsServerCore
 		Pop $0
 		${If} $0 == 1
 			!insertmacro RemoveSection ${LEGACYUPDATE}
+			!insertmacro RemoveSection ${ACTIVATE}
 		${EndIf}
 	${EndIf}
 
