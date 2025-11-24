@@ -2,8 +2,7 @@
 #include <windows.h>
 #include <shellscalingapi.h>
 #include "resource.h"
-
-typedef BOOL (WINAPI *_GetProductInfo)(DWORD, DWORD, DWORD, DWORD, PDWORD);
+#include "ProductInfo.h"
 
 typedef BOOL (WINAPI *_SetProcessDpiAwarenessContext)(DPI_AWARENESS_CONTEXT);
 typedef HRESULT (WINAPI *_SetProcessDpiAwareness)(PROCESS_DPI_AWARENESS);
@@ -15,9 +14,6 @@ typedef BOOL (WINAPI *_DeactivateActCtx)(DWORD, ULONG_PTR);
 typedef void (WINAPI *_ReleaseActCtx)(HANDLE);
 typedef BOOL (WINAPI *_GetCurrentActCtx)(HANDLE *);
 
-static BOOL productInfoLoaded = FALSE;
-static _GetProductInfo $GetProductInfo;
-
 static BOOL actCtxLoaded = FALSE;
 static _CreateActCtxW $CreateActCtx;
 static _ActivateActCtx $ActivateActCtx;
@@ -27,20 +23,6 @@ static _GetCurrentActCtx $GetCurrentActCtx;
 
 static BOOL comctlLoaded = FALSE;
 static HMODULE hComctl32 = NULL;
-
-BOOL GetVistaProductInfo(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD dwSpMajorVersion, DWORD dwSpMinorVersion, PDWORD pdwReturnedProductType) {
-	if (!productInfoLoaded) {
-		productInfoLoaded = TRUE;
-		$GetProductInfo = (_GetProductInfo)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "GetProductInfo");
-	}
-
-	if ($GetProductInfo) {
-		return $GetProductInfo(dwOSMajorVersion, dwOSMinorVersion, dwSpMajorVersion, dwSpMinorVersion, pdwReturnedProductType);
-	}
-
-	*pdwReturnedProductType = PRODUCT_UNDEFINED;
-	return FALSE;
-}
 
 void BecomeDPIAware(void) {
 	// Make the process DPI-aware... hopefully
