@@ -47,12 +47,14 @@ PLUGIN_METHOD(IsServerCore) {
             case PRODUCT_DATACENTER_SERVER_CORE_V:
             case PRODUCT_STANDARD_SERVER_CORE_V:
             case PRODUCT_ENTERPRISE_SERVER_CORE_V:
+            case PRODUCT_HYPERV:
             case PRODUCT_STORAGE_EXPRESS_SERVER_CORE:
             case PRODUCT_STORAGE_STANDARD_SERVER_CORE:
             case PRODUCT_STORAGE_WORKGROUP_SERVER_CORE:
             case PRODUCT_STANDARD_SERVER_SOLUTIONS_CORE:
             case PRODUCT_STORAGE_ENTERPRISE_SERVER_CORE:
             case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM_CORE:
+            case PRODUCT_CLUSTER_SERVER_V:
                 pushint(1);
                 return;
         }
