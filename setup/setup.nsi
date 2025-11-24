@@ -390,121 +390,132 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 		!insertmacro RestartWUAUService
 	${EndIf}
 
-	; ACTIVEX section
-	SetOutPath $INSTDIR
-	; Call MakeUninstallEntry
-
-	; Add Control Panel entry
-	; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
-	; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    ""                "${NAME}"
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-2'
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon"        ""                '"$OUTDIR\LegacyUpdate.exe",-100'
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" ""                '"$OUTDIR\LegacyUpdate.exe"'
-	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder"        "Attributes"      0
-	WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName"             "${CPL_APPNAME}"
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory"        "5,10"
-	WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl"       '"$OUTDIR\LegacyUpdate.exe",-202'
-
-	${If} ${IsWin2000}
-		; Doesn't seem to support @ syntax with an exe?
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         'Check for software and driver updates via Legacy Update.'
+	; Server Core does not have IE, do not install ActiveX control
+	${If} ${AtLeastWinVista}
+	${AndIf} ${IsServerOS}
+		LegacyUpdateNSIS::IsServerCore
+		Pop $0
 	${Else}
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         '@"$OUTDIR\LegacyUpdate.exe",-4'
+		StrCpy $0 0
 	${EndIf}
 
-	WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
+	${If} $0 != 1
+		; ACTIVEX section
+		SetOutPath $INSTDIR
+		; Call MakeUninstallEntry
 
-	; Install DLLs
-	${DetailPrint} "$(StatusClosingIE)"
-	LegacyUpdateNSIS::CloseIEWindows
+		; Add Control Panel entry
+		; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
+		; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    ""                "${NAME}"
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-2'
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon"        ""                '"$OUTDIR\LegacyUpdate.exe",-100'
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" ""                '"$OUTDIR\LegacyUpdate.exe"'
+		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder"        "Attributes"      0
+		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName"             "${CPL_APPNAME}"
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory"        "5,10"
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl"       '"$OUTDIR\LegacyUpdate.exe",-202'
 
-	; NOTE: Here we specifically check for amd64, because the DLL is amd64.
-	; We still install to native Program Files on IA64, but with x86 binaries.
-	File /ONAME=LegacyUpdate.dll "..\LegacyUpdate\obj\LegacyUpdate32.dll"
-	${If} ${IsNativeAMD64}
-		${If} ${FileExists} "LegacyUpdate32.dll"
-			${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate32.dll"
-		${EndIf}
-		Rename "LegacyUpdate.dll" "LegacyUpdate32.dll"
-		File /ONAME=LegacyUpdate.dll "..\LegacyUpdate\obj\LegacyUpdate64.dll"
-	${EndIf}
-	Call CopyLauncher
-
-	; Register DLLs
-	ExecWait '"$OUTDIR\LegacyUpdate.exe" /regserver $HWNDPARENT' $0
-	${If} $0 != 0
-		Abort
-	${EndIf}
-
-	; Create shortcut
-	${If} ${IsWin2000}
-		; Doesn't seem to support @ syntax with an exe?
-		StrCpy $0 "Check for software and driver updates via Legacy Update."
-	${Else}
-		StrCpy $0 '@"$OUTDIR\LegacyUpdate.exe",-4'
-	${EndIf}
-
-	CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
-		'"$OUTDIR\LegacyUpdate.exe"' '' \
-		"$OUTDIR\LegacyUpdate.exe" 0 \
-		SW_SHOWNORMAL "" \
-		"$0"
-
-	; Hide WU shortcuts
-	${If} ${AtMostWinXP2003}
-		${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
-			CreateDirectory "$OUTDIR\Backup"
-			Rename "$COMMONSTARTMENU\Windows Update.lnk" "$OUTDIR\Backup\Windows Update.lnk"
+		${If} ${IsWin2000}
+			; Doesn't seem to support @ syntax with an exe?
+			WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         'Check for software and driver updates via Legacy Update.'
+		${Else}
+			WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         '@"$OUTDIR\LegacyUpdate.exe",-4'
 		${EndIf}
 
-		${If} ${FileExists} "$COMMONSTARTMENU\Microsoft Update.lnk"
-			CreateDirectory "$OUTDIR\Backup"
-			Rename "$COMMONSTARTMENU\Microsoft Update.lnk" "$OUTDIR\Backup\Microsoft Update.lnk"
+		WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
+
+		; Install DLLs
+		${DetailPrint} "$(StatusClosingIE)"
+		LegacyUpdateNSIS::CloseIEWindows
+
+		; NOTE: Here we specifically check for amd64, because the DLL is amd64.
+		; We still install to native Program Files on IA64, but with x86 binaries.
+		File /ONAME=LegacyUpdate.dll "..\LegacyUpdate\obj\LegacyUpdate32.dll"
+		${If} ${IsNativeAMD64}
+			${If} ${FileExists} "LegacyUpdate32.dll"
+				${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate32.dll"
+			${EndIf}
+			Rename "LegacyUpdate.dll" "LegacyUpdate32.dll"
+			File /ONAME=LegacyUpdate.dll "..\LegacyUpdate\obj\LegacyUpdate64.dll"
 		${EndIf}
-	${EndIf}
+		Call CopyLauncher
 
-	; Add to trusted sites
-	WriteRegDword HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
-	WriteRegDword HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
-	WriteRegDword HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
-	WriteRegDword HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
+		; Register DLLs
+		ExecWait '"$OUTDIR\LegacyUpdate.exe" /regserver $HWNDPARENT' $0
+		${If} $0 != 0
+			Abort
+		${EndIf}
 
-	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
-	WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
-	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
-	WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
+		; Create shortcut
+		${If} ${IsWin2000}
+			; Doesn't seem to support @ syntax with an exe?
+			StrCpy $0 "Check for software and driver updates via Legacy Update."
+		${Else}
+			StrCpy $0 '@"$OUTDIR\LegacyUpdate.exe",-4'
+		${EndIf}
 
-	; Add low rights elevation policy
-	WriteRegDword HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "Policy"  3
-	WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppPath" "$OUTDIR"
-	WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppName" "LegacyUpdate.exe"
+		CreateShortcut "$COMMONSTARTMENU\${NAME}.lnk" \
+			'"$OUTDIR\LegacyUpdate.exe"' '' \
+			"$OUTDIR\LegacyUpdate.exe" 0 \
+			SW_SHOWNORMAL "" \
+			"$0"
 
-	${If} ${RunningX64}
-		SetRegView 32
+		; Hide WU shortcuts
+		${If} ${AtMostWinXP2003}
+			${If} ${FileExists} "$COMMONSTARTMENU\Windows Update.lnk"
+				CreateDirectory "$OUTDIR\Backup"
+				Rename "$COMMONSTARTMENU\Windows Update.lnk" "$OUTDIR\Backup\Windows Update.lnk"
+			${EndIf}
+
+			${If} ${FileExists} "$COMMONSTARTMENU\Microsoft Update.lnk"
+				CreateDirectory "$OUTDIR\Backup"
+				Rename "$COMMONSTARTMENU\Microsoft Update.lnk" "$OUTDIR\Backup\Microsoft Update.lnk"
+			${EndIf}
+		${EndIf}
+
+		; Add to trusted sites
+		WriteRegDword HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
+		WriteRegDword HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
+		WriteRegDword HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
+		WriteRegDword HKLM "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
+
+		WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "http"  2
+		WriteRegDword HKCU "${REGPATH_ZONEDOMAINS}\${DOMAIN}"    "https" 2
+		WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "http"  2
+		WriteRegDword HKCU "${REGPATH_ZONEESCDOMAINS}\${DOMAIN}" "https" 2
+
+		; Add low rights elevation policy
 		WriteRegDword HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "Policy"  3
 		WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppPath" "$OUTDIR"
 		WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppName" "LegacyUpdate.exe"
-		SetRegView 64
-	${EndIf}
 
-	; Delete LegacyUpdate.dll in System32 from 1.0 installer
-	${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
-		${DeleteWithErrorHandling} $WINDIR\System32\LegacyUpdate.dll
-	${EndIf}
+		${If} ${RunningX64}
+			SetRegView 32
+			WriteRegDword HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "Policy"  3
+			WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppPath" "$OUTDIR"
+			WriteRegStr   HKLM "${REGPATH_ELEVATIONPOLICY}\${ELEVATIONPOLICY_GUID}" "AppName" "LegacyUpdate.exe"
+			SetRegView 64
+		${EndIf}
 
-	; Delete LegacyUpdate.inf from 1.0 installer
-	${If} ${FileExists} $WINDIR\inf\LegacyUpdate.inf
-		Delete $WINDIR\inf\LegacyUpdate.inf
-	${EndIf}
+		; Delete LegacyUpdate.dll in System32 from 1.0 installer
+		${If} ${FileExists} $WINDIR\System32\LegacyUpdate.dll
+			${DeleteWithErrorHandling} $WINDIR\System32\LegacyUpdate.dll
+		${EndIf}
 
-	; If 32-bit Legacy Update exists, move it to 64-bit Program Files
-	${If} ${RunningX64}
-	${AndIf} ${FileExists} "$PROGRAMFILES32\Legacy Update\Backup"
-		CreateDirectory "$PROGRAMFILES64\Legacy Update"
-		Rename "$PROGRAMFILES32\Legacy Update\Backup" "$PROGRAMFILES64\Legacy Update\Backup"
-		RMDir /r "$PROGRAMFILES32\Legacy Update"
+		; Delete LegacyUpdate.inf from 1.0 installer
+		${If} ${FileExists} $WINDIR\inf\LegacyUpdate.inf
+			Delete $WINDIR\inf\LegacyUpdate.inf
+		${EndIf}
+
+		; If 32-bit Legacy Update exists, move it to 64-bit Program Files
+		${If} ${RunningX64}
+		${AndIf} ${FileExists} "$PROGRAMFILES32\Legacy Update\Backup"
+			CreateDirectory "$PROGRAMFILES64\Legacy Update"
+			Rename "$PROGRAMFILES32\Legacy Update\Backup" "$PROGRAMFILES64\Legacy Update\Backup"
+			RMDir /r "$PROGRAMFILES32\Legacy Update"
+		${EndIf}
 	${EndIf}
 ${MementoSectionEnd}
 
@@ -563,9 +574,11 @@ Section "-un.Legacy Update website" un.ACTIVEX
 	LegacyUpdateNSIS::CloseIEWindows
 
 	; Unregister DLLs
-	ExecWait '"$OUTDIR\LegacyUpdate.exe" /unregserver $HWNDPARENT' $0
-	${If} $0 != 0
-		Abort
+	${If} ${FileExists} "$INSTDIR\LegacyUpdate.exe"
+		ExecWait '"$OUTDIR\LegacyUpdate.exe" /unregserver $HWNDPARENT' $0
+		${If} $0 != 0
+			Abort
+		${EndIf}
 	${EndIf}
 
 	; Delete files
@@ -806,13 +819,12 @@ Function .onInit
 		!insertmacro RemoveSection ${ENABLEMU}
 	${EndIf}
 
-	; Server Core does not have IE nor activation wizard
+	; Server Core does not have activation wizard
 	${If} ${AtLeastWinVista}
 	${AndIf} ${IsServerOS}
 		LegacyUpdateNSIS::IsServerCore
 		Pop $0
 		${If} $0 == 1
-			!insertmacro RemoveSection ${LEGACYUPDATE}
 			!insertmacro RemoveSection ${ACTIVATE}
 		${EndIf}
 	${EndIf}
