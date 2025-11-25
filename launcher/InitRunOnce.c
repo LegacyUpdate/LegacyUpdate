@@ -220,12 +220,15 @@ static void CreateRunOnceWindow(void) {
 static void FixUserWallpaper(void) {
 	// Work around bug in at least Windows 7 SP1 where the pre-logon wallpaper persists into the user session.
 	// We nudge it into doing the right thing by re-applying the wallpaper from the registry.
+	// This also occurs if there is no wallpaper set and the background is a solid color (i.e. on Server Core).
 	LPWSTR wallpaper = NULL;
 	DWORD length = 0;
 	if (SUCCEEDED(GetRegistryString(HKEY_CURRENT_USER, L"Control Panel\\Desktop", L"Wallpaper", 0, &wallpaper, &length))) {
 		if (length > 0) {
 			SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)wallpaper, SPIF_SENDWININICHANGE);
 		}
+	} else {
+		SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)L"", SPIF_SENDWININICHANGE);
 	}
 	if (wallpaper) {
 		LocalFree(wallpaper);
