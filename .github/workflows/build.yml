@@ -42,7 +42,7 @@ jobs:
       id: nsis-cache
       uses: actions/cache@v4
       with:
-        path: /opt/nsis-3.11
+        path: /opt/nsis-3.11-lfs
         key: nsis-3.11
 
     - name: Install custom NSIS package
@@ -57,7 +57,7 @@ jobs:
       run: |
         export PATH=/opt/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-i686/bin:$PATH
         export PATH=/opt/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-x86_64/bin:$PATH
-        export PATH=/opt/nsis-3.11/bin:$PATH
+        export PATH=/opt/nsis-3.11-lfs/bin:$PATH
         make -j$(nproc) CI=1 DEBUG=0
 
     - name: Upload Build Artifact
