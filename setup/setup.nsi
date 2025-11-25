@@ -229,6 +229,14 @@ ${MementoSection} "Windows XP/$(SRV) 2003 $(SP) 2" 2003SP2
 ${MementoSectionEnd}
 
 ; Vista prerequisities
+Section "$(SectionWS2008HVU)" WS2008HVU
+	SectionIn Ro
+	${If} ${NeedsPatch} HyperV2008Update
+		Call InstallKB950050
+		${RebootIfRequired}
+	${EndIf}
+SectionEnd
+
 Section "Windows Vista $(SP) 2" VISTASP2
 	SectionIn Ro
 	${RebootIfRequired}
@@ -622,6 +630,7 @@ SectionEnd
 	!insertmacro DESCRIPTION_STRING WIN8SSU
 	!insertmacro DESCRIPTION_STRING WIN81U1
 	!insertmacro DESCRIPTION_STRING WIN81SSU
+	!insertmacro DESCRIPTION_STRING WS2008HVU
 	!insertmacro DESCRIPTION_STRING WHS2011U4
 	!insertmacro DESCRIPTION_STRING WUA
 	!insertmacro DESCRIPTION_STRING ROOTCERTS
@@ -713,6 +722,10 @@ Function .onInit
 
 	${If} ${IsWinVista}
 		; Determine whether Vista prereqs need to be installed
+		${IfNot} ${NeedsPatch} HyperV2008Update
+			!insertmacro RemoveSection ${WS2008HVU}
+		${EndIf}
+
 		${IfNot} ${NeedsPatch} VistaSP2
 			!insertmacro RemoveSection ${VISTASP2}
 		${EndIf}
@@ -725,6 +738,7 @@ Function .onInit
 			!insertmacro RemoveSection ${VISTAIE9}
 		${EndIf}
 	${Else}
+		!insertmacro RemoveSection ${WS2008HVU}
 		!insertmacro RemoveSection ${VISTASP2}
 		!insertmacro RemoveSection ${VISTASSU}
 		!insertmacro RemoveSection ${VISTAIE9}
@@ -879,6 +893,10 @@ Function PreDownload
 
 	; Vista
 	${If} ${IsWinVista}
+		${If} ${NeedsPatch} HyperV2008Update
+			Call DownloadKB950050
+		${EndIf}
+
 		Call DownloadVistaSP1
 		Call DownloadVistaSP2
 		Call DownloadKB3205638
