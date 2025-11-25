@@ -73,7 +73,7 @@ jobs:
         make -j$(nproc) CI=1 DEBUG=0 nt4
 
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         path: |
           setup/LegacyUpdateNT-*.exe
