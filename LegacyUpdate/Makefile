@@ -4,6 +4,7 @@ FILES    = \
 	../shared/Exec.c \
 	../shared/HResult.c \
 	../shared/LegacyUpdate.c \
+	../shared/ProductInfo.c \
 	../shared/Registry.c \
 	../shared/WMI.c \
 	../shared/Wow64.c \
