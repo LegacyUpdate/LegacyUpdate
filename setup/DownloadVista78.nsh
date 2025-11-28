@@ -90,6 +90,28 @@ FunctionEnd
 ; Windows Vista Servicing Stack Update
 !insertmacro MSUHandler "KB4493730" "2019-04 $(SSU) for Windows $(SRV) 2008"
 
+; Hyper-V Update for Windows Server 2008
+!insertmacro MSUHandler "KB950050" "Hyper-V $(Update) for Windows $(SRV) 2008"
+
+; Only check/apply KB950050 if the Hyper-V role is present on 2008 SP1
+; This update is integrated in SP2
+Function NeedsHyperV2008Update
+	${If} ${IsWinVista}
+	${AndIf} ${IsServerOS}
+	${AndIf} ${AtMostServicePack} 1
+		; Get version of Hyper-V boot driver.
+		${GetFileVersion} "$WINDIR\system32\drivers\hvboot.sys" $0
+		${VersionCompare} $0 "6.0.6001.18016" $1
+		${If} $1 == 2 ; Less than
+			Push 1
+		${Else}
+			Push 0
+		${EndIf}
+	${Else}
+		Push 0
+	${EndIf}
+FunctionEnd
+
 ; Windows 7 Servicing Stack Update
 !insertmacro MSUHandler "KB3138612" "2016-03 $(SSU) for Windows 7"
 !insertmacro MSUHandler "KB4474419" "$(SHA2) for Windows 7"
