@@ -13,7 +13,12 @@ AutoCloseWindow       true
 ManifestSupportedOS   all
 ManifestDPIAware      true
 AllowSkipFiles        off
-SetCompressor         /SOLID lzma
+
+!if ${DEBUG} == 1
+	SetCompress         off
+!else
+	SetCompressor       /SOLID lzma
+!endif
 
 VIAddVersionKey /LANG=1033 "ProductName"     "${NAME}"
 VIAddVersionKey /LANG=1033 "ProductVersion"  "${LONGVERSION}"
