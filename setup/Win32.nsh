@@ -15,6 +15,8 @@
 !define IsProcessorFeaturePresent 'kernel32::IsProcessorFeaturePresent(i) i'
 !define SetThreadExecutionState  'kernel32::SetThreadExecutionState(i) i'
 !define OpenEvent                'kernel32::OpenEvent(i, i, t) i'
+!define OpenMutex                'kernel32::OpenMutex(i, i, t) i'
+!define CreateMutex              'kernel32::CreateMutex(i, i, t) i'
 !define SetEvent                 'kernel32::SetEvent(i) i'
 !define CloseHandle              'kernel32::CloseHandle(i) i'
 !define DeleteFile               'kernel32::DeleteFile(t) i'

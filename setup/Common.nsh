@@ -66,14 +66,25 @@ SetPluginUnload alwaysoff
 !define VerbosePrint `!insertmacro -DetailPrint 0`
 !define DetailPrint  `!insertmacro -DetailPrint 1`
 
+Var /GLOBAL SetupMutexHandle
 Var /GLOBAL TermsrvUserModeChanged
 
-Function InitChecks
-	${If} ${IsHelp}
-		MessageBox MB_USERICON "$(MsgBoxUsage)"
+Function CheckSetupMutex
+	!define SetupMutexName "Global\$(^Name)"
+	System::Call '${OpenMutex}(${SYNCHRONIZE}, 0, "${SetupMutexName}") .r0'
+	${If} $0 != 0
+		System::Call '${CloseHandle}($0)'
+		${VerbosePrint} "Setup is already running"
+		MessageBox MB_USERICON "$(MsgBoxSetupAlreadyRunning)" /SD IDOK
+		SetErrorLevel 1
 		Quit
 	${EndIf}
 
+	System::Call '${CreateMutex}(0, 1, "${SetupMutexName}") .r0'
+	StrCpy $SetupMutexHandle $0
+FunctionEnd
+
+Function InitChecks
 	SetShellVarContext all
 	${If} ${IsVerbose}
 		SetDetailsPrint both
@@ -102,6 +113,13 @@ Function InitChecks
 		Quit
 	${EndIf}
 !endif
+
+	${If} ${IsHelp}
+		MessageBox MB_USERICON "$(MsgBoxUsage)"
+		Quit
+	${EndIf}
+
+	Call CheckSetupMutex
 
 	ClearErrors
 	LegacyUpdateNSIS::IsAdmin
