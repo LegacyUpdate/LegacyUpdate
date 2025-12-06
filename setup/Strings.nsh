@@ -73,7 +73,7 @@ LangString MsgBoxSetupAlreadyRunning ${LANG_ENGLISH} \
 	"Legacy Update setup is already running."
 
 LangString MsgBoxInstallInProgress ${LANG_ENGLISH} \
-	"An update installation is currently in progress. Please wait for that installation to finish before continuing."
+	"An update is currently being installed. Please wait for that installation to finish before running Legacy Update setup again."
 
 LangString MsgBoxTermsrvAppInstallMode ${LANG_ENGLISH} \
 	"Terminal Services is currently in Execute mode. To install Legacy Update, Terminal Services will be changed to Install mode."
