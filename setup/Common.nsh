@@ -214,6 +214,28 @@ Function InitChecks
 	${EndIf}
 !endif
 
+	; Check for a service pack or hotfix install in progress
+	StrCpy $1 0
+	System::Call '${OpenMutex}(${SYNCHRONIZE}, 0, "Global\ServicePackOrHotfix") .r0'
+	${If} $0 != 0
+		System::Call '${CloseHandle}($0)'
+		StrCpy $1 1
+	${Else}
+		; This mutex string is also used by Vista SP2 and 7 SP1, and yes, it has a typo
+		System::Call '${OpenMutex}(${SYNCHRONIZE}, 0, "Global\Microsoft® Windows® Vista Sevice Pack 1 Installer") .r0'
+		${If} $0 != 0
+			System::Call '${CloseHandle}($0)'
+			StrCpy $1 1
+		${EndIf}
+	${EndIf}
+
+	${If} $1 == 1
+		${VerbosePrint} "Found a service pack or hotfix installer running"
+		MessageBox MB_USERICON "$(MsgBoxInstallInProgress)" /SD IDOK
+		SetErrorLevel 1
+		Quit
+	${EndIf}
+
 	; Check for Terminal Services execute mode
 	${If} ${IsServerOS}
 	${AndIf} ${IsTerminalServer}
