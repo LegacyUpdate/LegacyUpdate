@@ -127,11 +127,14 @@ Function NeedsVistaPostSP2
 	${OrIf} ${NeedsPatch} KB4012583
 	${OrIf} ${NeedsPatch} KB4015195
 	${OrIf} ${NeedsPatch} KB4015380
-	${OrIf} ${NeedsPatch} KB4493730
 		Push 1
 	${Else}
 		Push 0
 	${EndIf}
+FunctionEnd
+
+Function NeedsVistaESU
+	Call NeedsKB4493730
 FunctionEnd
 
 Function NeedsWin7PostSP1

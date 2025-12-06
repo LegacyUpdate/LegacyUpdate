@@ -187,6 +187,7 @@ LangString SectionWUA       ${LANG_ENGLISH} "Windows Update Agent update"
 LangString SectionRootCerts ${LANG_ENGLISH} "Root certificates store update"
 LangString SectionEnableMU  ${LANG_ENGLISH} "Enable Microsoft Update"
 LangString SectionActivate  ${LANG_ENGLISH} "Activate Windows"
+LangString SectionESU       ${LANG_ENGLISH} "Prepare for Extended Security Updates"
 
 LangString SectionSupEULA   ${LANG_ENGLISH} \
 	"By installing, you are agreeing to the Supplemental End User License Agreement for this update."
@@ -207,8 +208,10 @@ LangString Section2003SP2Desc   ${LANG_ENGLISH} \
 	"Updates Windows XP Professional x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. $(SectionSupEULA)"
 LangString SectionVistaSP2Desc  ${LANG_ENGLISH} \
 	"Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. $(SectionMSLT)"
-LangString SectionVistaSSUDesc  ${LANG_ENGLISH} \
-	"Updates Windows Vista or Windows Server 2008 with additional updates required to resolve issues with the Windows Update Agent."
+LangString SectionVistaSSUDesc ${LANG_ENGLISH} \
+	"Installs additional updates required to resolve issues with the Windows Update Agent."
+LangString SectionVistaESUDesc  ${LANG_ENGLISH} \
+	"Installs additional updates that prepare the system to receive Extended Security Updates (ESU). Additional tools are required to enable ESU updates to be installed. Please note that using ESU without a valid license is a violation of the Microsoft Software License Terms."
 LangString SectionVistaIE9Desc  ${LANG_ENGLISH} \
 	"Updates Internet Explorer to 9.0.$\r$\n$(SectionMSLT)"
 LangString SectionWin7SP1Desc   ${LANG_ENGLISH} \

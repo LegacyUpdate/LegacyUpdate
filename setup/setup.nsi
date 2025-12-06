@@ -243,16 +243,21 @@ Section "Windows Vista $(SP) 2" VISTASP2
 	${RebootIfRequired}
 SectionEnd
 
-Section "$(SectionSSU)" VISTASSU
+Section "Windows Vista $(PostSP) 2 Updates" VISTASSU
 	SectionIn Ro
 	${RebootIfRequired}
 	Call InstallKB3205638
 	Call InstallKB4012583
 	Call InstallKB4015195
 	Call InstallKB4015380
-	Call InstallKB4493730
 	${RebootIfRequired}
 SectionEnd
+
+${MementoUnselectedSection} "$(SectionESU)" VISTAESU
+	${RebootIfRequired}
+	Call InstallKB4493730
+	${RebootIfRequired}
+${MementoSectionEnd}
 
 ${MementoSection} "$(IE) 9" VISTAIE9
 	${RebootIfRequired}
@@ -621,6 +626,7 @@ SectionEnd
 	!insertmacro DESCRIPTION_STRING 2003SP2
 	!insertmacro DESCRIPTION_STRING VISTASP2
 	!insertmacro DESCRIPTION_STRING VISTASSU
+	!insertmacro DESCRIPTION_STRING VISTAESU
 	!insertmacro DESCRIPTION_STRING VISTAIE9
 	!insertmacro DESCRIPTION_STRING WIN7SP1
 	!insertmacro DESCRIPTION_STRING WIN7SSU
@@ -726,12 +732,17 @@ Function .onInit
 			!insertmacro RemoveSection ${VISTASSU}
 		${EndIf}
 
+		${IfNot} ${NeedsPatch} VistaESU
+			!insertmacro RemoveSection ${VISTAESU}
+		${EndIf}
+
 		${IfNot} ${NeedsPatch} IE9
 			!insertmacro RemoveSection ${VISTAIE9}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${VISTASP2}
 		!insertmacro RemoveSection ${VISTASSU}
+		!insertmacro RemoveSection ${VISTAESU}
 		!insertmacro RemoveSection ${VISTAIE9}
 	${EndIf}
 
