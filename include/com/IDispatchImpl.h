@@ -1,6 +1,7 @@
 #pragma once
 
 #include <combaseapi.h>
+#include <cguid.h>
 #include <oleauto.h>
 #include <ocidl.h>
 #include "ComPtr.h"

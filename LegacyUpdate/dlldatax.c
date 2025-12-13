@@ -1,6 +1,7 @@
 // wrapper for dlldata.c
 
 #include <windows.h>
+#include <ole2.h>
 
 #define REGISTER_PROXY_DLL
 #define USE_STUBLESS_PROXY

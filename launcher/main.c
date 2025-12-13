@@ -2,7 +2,9 @@
 #include "main.h"
 #include "resource.h"
 #include <windows.h>
+#include <combaseapi.h>
 #include <commctrl.h>
+#include <shellapi.h>
 #include "MsgBox.h"
 #include "RegisterServer.h"
 #include "Startup.h"

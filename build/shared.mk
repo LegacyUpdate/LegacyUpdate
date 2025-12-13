@@ -53,6 +53,7 @@ CFLAGS   += \
 	-municode \
 	-DUNICODE \
 	-D_UNICODE \
+	-DWIN32_LEAN_AND_MEAN \
 	$(if $(filter 1,$(DEBUG)),-D_DEBUG -g,-DNDEBUG -Os -s) \
 	-fPIE \
 	-ffunction-sections \

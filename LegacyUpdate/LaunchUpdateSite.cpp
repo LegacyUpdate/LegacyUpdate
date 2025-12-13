@@ -1,6 +1,7 @@
 #include "Exec.h"
 #include "HResult.h"
 #include "Utils.h"
+#include <comdef.h>
 
 // Function signature required by Rundll32.exe.
 EXTERN_C __declspec(dllexport)
