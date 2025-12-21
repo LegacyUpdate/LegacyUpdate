@@ -17,7 +17,7 @@ static DWORD g_timerStart = 0;
 static DWORD g_timerInterval = 0;
 static DWORD g_timerMultiplier = 0;
 static UINT_PTR g_timer = 0;
-static WCHAR g_timerPrefix[1024] = L"";
+static WCHAR g_timerPrefix[NSIS_MAX_STRLEN] = L"";
 
 static INT_PTR CALLBACK RebootDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
@@ -29,7 +29,7 @@ static INT_PTR CALLBACK RebootDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 			SendDlgItemMessage(hwnd, IDC_PROGRESS, PBM_SETPOS, progress, 0);
 
 			DWORD remaining = max(COUNTDOWN_LENGTH - elapsedSecs, 0);
-			WCHAR timerDisplay[1024];
+			WCHAR timerDisplay[NSIS_MAX_STRLEN];
 			wsprintf(timerDisplay, L"%s%02d:%02d", g_timerPrefix, remaining / 60, remaining % 60);
 			SetDlgItemText(hwnd, IDC_TEXT1, timerDisplay);
 
@@ -75,7 +75,7 @@ static LRESULT CALLBACK RebootMainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 PLUGIN_METHOD(RebootPageCreate) {
 	PLUGIN_INIT();
 
-	WCHAR introText[1024], nextText[1024], cancelText[1024];
+	WCHAR introText[NSIS_MAX_STRLEN], nextText[NSIS_MAX_STRLEN], cancelText[NSIS_MAX_STRLEN];
 	popstringn(introText, sizeof(introText) / sizeof(WCHAR));
 	popstringn(g_timerPrefix, sizeof(g_timerPrefix) / sizeof(WCHAR));
 	popstringn(nextText, sizeof(nextText) / sizeof(WCHAR));

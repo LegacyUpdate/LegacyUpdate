@@ -21,6 +21,8 @@
 
 EXTERN_C HWND g_hwndParent;
 
+#define NSIS_MAX_STRLEN 8192
+
 #define PLUGIN_METHOD(name) \
 	EXTERN_C __declspec(dllexport) \
 	void __cdecl name(HWND hwndParent, int string_size, TCHAR *variables, stack_t **stacktop, extra_parameters *extra)

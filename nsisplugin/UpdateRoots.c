@@ -7,7 +7,7 @@ PLUGIN_METHOD(UpdateRoots) {
 	PLUGIN_INIT();
 
 	HRESULT hr = E_FAIL;
-	WCHAR stateStr[1024], store[1024], path[1024];
+	WCHAR stateStr[NSIS_MAX_STRLEN], store[NSIS_MAX_STRLEN], path[NSIS_MAX_STRLEN];
 	popstringn(stateStr, sizeof(stateStr) / sizeof(WCHAR));
 	popstringn(store, sizeof(store) / sizeof(WCHAR));
 	popstringn(path, sizeof(path) / sizeof(WCHAR));

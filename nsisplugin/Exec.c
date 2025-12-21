@@ -301,7 +301,7 @@ params:
     int utfSource = sizeof(TCHAR) > 1 && !forceNarrowInput ? -1 : FALSE, utfOutput = sizeof(TCHAR) > 1;
     DWORD cbRead, dwLastOutput;
     DWORD dwExit = 0, waitResult = WAIT_TIMEOUT;
-    static BYTE bufSrc[1024];
+    static BYTE bufSrc[NSIS_MAX_STRLEN];
     BYTE *pSrc;
     SIZE_T cbSrcTot = sizeof(bufSrc), cbSrc = 0, cbSrcFree;
     TCHAR *bufOutput = 0, *pNewAlloc, *pD;
@@ -559,7 +559,7 @@ int WINAPI AsExeWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpC
   DWORD               Ret;
   STARTUPINFO         si   = {0};
   PROCESS_INFORMATION pi   = {0};
-  TCHAR command_line[1024]; //BUGBUG
+  TCHAR command_line[NSIS_MAX_STRLEN]; //BUGBUG
   TCHAR seekchar=_T(' ');
   TCHAR *cmdline;
 
