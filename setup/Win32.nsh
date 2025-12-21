@@ -11,6 +11,7 @@
 !define ES_CONTINUOUS      0x80000000
 !define ES_SYSTEM_REQUIRED 0x00000001
 
+!define GetVersion               'kernel32::GetVersion() i'
 !define GetVersionEx             'kernel32::GetVersionEx(pr) i'
 !define IsProcessorFeaturePresent 'kernel32::IsProcessorFeaturePresent(i) i'
 !define SetThreadExecutionState  'kernel32::SetThreadExecutionState(i) i'

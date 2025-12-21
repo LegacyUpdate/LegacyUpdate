@@ -104,6 +104,7 @@ BEGIN
 
 	// Launch
 	IDS_IENOTINSTALLED      "Internet Explorer is not installed. Use Optional Features in Control Panel to install it before using Legacy Update."
+	IDS_OSUPGRADED          "Windows has been upgraded since Legacy Update was installed. Run Legacy Update setup again to ensure all prerequisites are installed."
 
 	// RegisterServer
 	IDS_REGISTERFAILED      "Failed to register Legacy Update ActiveX control"

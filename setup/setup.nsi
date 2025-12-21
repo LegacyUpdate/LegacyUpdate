@@ -1023,6 +1023,8 @@ FunctionEnd
 Function .onInstSuccess
 	${MementoSectionSave}
 
+	Call SetLastOSVersion
+
 	; Reboot now if we need to. Nothing further in this function will be run if we do need to reboot.
 	${RebootIfRequired}
 

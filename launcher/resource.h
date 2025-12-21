@@ -13,5 +13,6 @@
 #define IDS_UNREGISTERFAILED            9
 #define IDS_RUNONCEFAILED              10
 #define IDS_RUNONCESAFEMODE            11
+#define IDS_OSUPGRADED                 12
 
 #define ID_MANIFEST                     1

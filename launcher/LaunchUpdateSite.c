@@ -87,6 +87,18 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	LPTSTR siteURL = NULL;
 	HMONITOR monitor = NULL;
 
+	// If this OS was upgraded, tell the user they need to re-run setup
+	DWORD lastOSVersion = 0;
+	if (!AtLeastWin10() && SUCCEEDED(GetRegistryDword(HKEY_LOCAL_MACHINE, L"Software\\Hashbang Productions\\Legacy Update\\Setup", L"LastOSVersion", KEY_WOW64_64KEY, &lastOSVersion))) {
+		// Allow Vista build 6002 -> 6003 (ESU)
+		if (lastOSVersion < GetVersion() && !(HIWORD(lastOSVersion) == 6002 && GetWinBuild() == 6003)) {
+			WCHAR message[4096];
+			LoadString(GetModuleHandle(NULL), IDS_OSUPGRADED, message, ARRAYSIZE(message));
+			MsgBox(NULL, message, NULL, MB_OK | MB_ICONEXCLAMATION);
+			goto end;
+		}
+	}
+
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
 	if (!AtLeastWinVista() && !IsUserAdmin()) {
 		LPWSTR args = (LPWSTR)LocalAlloc(LPTR, 512 * sizeof(WCHAR));

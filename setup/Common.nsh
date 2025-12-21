@@ -282,3 +282,8 @@ FunctionEnd
 !macroend
 
 !define DeleteWithErrorHandling `!insertmacro -DeleteWithErrorHandling`
+
+Function SetLastOSVersion
+	System::Call '${GetVersion}() .r0'
+	WriteRegDWORD HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "LastOSVersion" "$0"
+FunctionEnd
