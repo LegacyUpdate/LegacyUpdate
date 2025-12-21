@@ -90,6 +90,10 @@ FunctionEnd
 ; Windows Vista Servicing Stack Update
 !insertmacro MSUHandler "KB4493730" "2019-04 $(SSU) for Windows $(SRV) 2008"
 
+; Windows 7 Convenience Rollup Update
+!insertmacro MSUHandler "KB3020369" "2015-04 $(SSU) for Windows 7"
+!insertmacro MSUHandler "KB3125574" "$(CRU) for Windows 7"
+
 ; Windows 7 Servicing Stack Update
 !insertmacro MSUHandler "KB3138612" "2016-03 $(SSU) for Windows 7"
 !insertmacro MSUHandler "KB4474419" "$(SHA2) for Windows 7"
@@ -135,6 +139,18 @@ FunctionEnd
 
 Function NeedsVistaESU
 	Call NeedsKB4493730
+FunctionEnd
+
+Function NeedsWin7CRU
+	; Not released for Itanium. There are no superseding updates, but we assume the user might have
+	; already installed the rolled-up updates manually.
+	${If} ${NeedsPatch} KB2919355
+	${AndIf} ${NeedsPatch} Win7PostSP1
+	${AndIfNot} ${IsNativeIA64}
+		Push 1
+	${Else}
+		Push 0
+	${EndIf}
 FunctionEnd
 
 Function NeedsWin7PostSP1

@@ -275,6 +275,13 @@ Section "Windows 7 $(SP) 1" WIN7SP1
 	${RebootIfRequired}
 SectionEnd
 
+${MementoUnselectedSection} "Windows 7 $(CRU)" WIN7CRU
+	${RebootIfRequired}
+	Call InstallKB3020369
+	Call InstallKB3125574
+	${RebootIfRequired}
+${MementoSectionEnd}
+
 Section "$(SectionSSU)" WIN7SSU
 	SectionIn Ro
 	${RebootIfRequired}
@@ -629,6 +636,7 @@ SectionEnd
 	!insertmacro DESCRIPTION_STRING VISTAESU
 	!insertmacro DESCRIPTION_STRING VISTAIE9
 	!insertmacro DESCRIPTION_STRING WIN7SP1
+	!insertmacro DESCRIPTION_STRING WIN7CRU
 	!insertmacro DESCRIPTION_STRING WIN7SSU
 	!insertmacro DESCRIPTION_STRING WIN8SSU
 	!insertmacro DESCRIPTION_STRING WIN81U1
@@ -757,12 +765,17 @@ Function .onInit
 			!insertmacro RemoveSection ${WHS2011U4}
 		${EndIf}
 
+		${IfNot} ${NeedsPatch} Win7CRU
+			!insertmacro RemoveSection ${WIN7CRU}
+		${EndIf}
+
 		${IfNot} ${NeedsPatch} Win7PostSP1
 			!insertmacro RemoveSection ${WIN7SSU}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${WIN7SP1}
 		!insertmacro RemoveSection ${WHS2011U4}
+		!insertmacro RemoveSection ${WIN7CRU}
 		!insertmacro RemoveSection ${WIN7SSU}
 	${EndIf}
 
@@ -916,6 +929,11 @@ Function PreDownload
 			Call DownloadKB2757011
 		${Else}
 			Call DownloadWin7SP1
+		${EndIf}
+
+		${If} ${SectionIsSelected} ${WIN7CRU}
+			Call DownloadKB3020369
+			Call DownloadKB3125574
 		${EndIf}
 
 		Call DownloadKB3138612

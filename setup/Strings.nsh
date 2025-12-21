@@ -175,6 +175,7 @@ LangString WUA      ${LANG_ENGLISH} "Windows Update Agent"
 LangString PrepTool ${LANG_ENGLISH} "Preparation Tool"
 LangString PUS      ${LANG_ENGLISH} "Platform Update Supplement"
 LangString SRP      ${LANG_ENGLISH} "Security Rollup Package"
+LangString CRU      ${LANG_ENGLISH} "Convenience Rollup Update"
 LangString SHA2     ${LANG_ENGLISH} "SHA-2 Code Signing Support Update"
 LangString CTL      ${LANG_ENGLISH} "Certificate Trust List"
 LangString Unofficial ${LANG_ENGLISH} "(Unofficial)"
@@ -216,6 +217,8 @@ LangString SectionVistaIE9Desc  ${LANG_ENGLISH} \
 	"Updates Internet Explorer to 9.0.$\r$\n$(SectionMSLT)"
 LangString SectionWin7SP1Desc   ${LANG_ENGLISH} \
 	"Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. $(SectionMSLT)"
+LangString SectionWin7CRUDesc   ${LANG_ENGLISH} \
+	"Installs all updates released for Windows 7 and Windows Server 2008 R2 up to March 2016.$\r$\nThis update installs telemetry features that may not be desirable."
 LangString SectionWin7SSUDesc   ${LANG_ENGLISH} \
 	"Updates Windows 7 or Windows Server 2008 R2 with additional updates required to resolve issues with the Windows Update Agent."
 LangString SectionWin8SSUDesc   ${LANG_ENGLISH} \
