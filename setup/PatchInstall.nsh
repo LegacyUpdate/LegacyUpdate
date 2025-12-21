@@ -327,10 +327,8 @@ FunctionEnd
 
 !macro InstallSP name filename
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
-	${DetailPrint} "$(Extracting)${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '"$0" /X:"$PLUGINSDIR\${filename}"'
 	${DetailPrint} "$(Installing)${name}..."
-	!insertmacro ExecWithErrorHandling '${name}' '"$WINDIR\system32\cmd.exe" /c "$PLUGINSDIR\${filename}\spinstall.exe" /unattend /nodialog /warnrestart:600'
+	!insertmacro ExecWithErrorHandling '${name}' '"$0" /unattend /nodialog /warnrestart:600'
 
 	; If we successfully abort a shutdown, we'll get exit code 0, so we know a reboot is required.
 	LegacyUpdateNSIS::Exec '"$WINDIR\system32\shutdown.exe" /a'
