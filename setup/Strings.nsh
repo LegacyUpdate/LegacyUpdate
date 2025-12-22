@@ -181,6 +181,7 @@ LangString CTL      ${LANG_ENGLISH} "Certificate Trust List"
 LangString Unofficial ${LANG_ENGLISH} "(Unofficial)"
 
 LangString SectionWES09     ${LANG_ENGLISH} "Enable Windows Embedded 2009 updates"
+LangString SectionWS2008HVU ${LANG_ENGLISH} "Hyper-V $(Update) for Windows Server 2008"
 LangString SectionWHS2011U4 ${LANG_ENGLISH} "Windows Home Server 2011 $(Rollup) 4"
 LangString SectionW2KUR1    ${LANG_ENGLISH} "Update Rollup 1 for Windows 2000 $(SP) 4"
 LangString SectionSSU       ${LANG_ENGLISH} "Windows Servicing Stack update"
@@ -227,6 +228,8 @@ LangString SectionWin81U1Desc   ${LANG_ENGLISH} \
 	"Updates Windows 8.1 to Update 1, as required to resolve issues with the Windows Update Agent. Also required to upgrade to Windows 10."
 LangString SectionWin81SSUDesc  ${LANG_ENGLISH} \
 	"Updates Windows 8.1 or Windows Server 2012 R2 with additional updates required to resolve issues with the Windows Update Agent."
+LangString SectionWS2008HVUDesc ${LANG_ENGLISH} \
+	"Updates Windows Server 2008 to the released version of Hyper-V, as required to install Service Pack 2."
 LangString SectionWHS2011U4Desc ${LANG_ENGLISH} \
 	"Updates Windows Home Server 2011 to Update Rollup 4 to resolve issues with the Windows Update Agent. Also fixes data corruption problems."
 LangString SectionWUADesc       ${LANG_ENGLISH} \
