@@ -22,7 +22,7 @@ jobs:
 
     - name: MinGW toolchain cache
       id: mingw-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           /opt/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-i686
@@ -40,7 +40,7 @@ jobs:
 
     - name: NSIS cache
       id: nsis-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: /opt/nsis-3.11
         key: nsis-3.11
