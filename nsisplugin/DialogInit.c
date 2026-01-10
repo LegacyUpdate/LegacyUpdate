@@ -49,6 +49,8 @@ static _OpenThemeData $OpenThemeData;
 static _CloseThemeData $CloseThemeData;
 static _DrawThemeBackground $DrawThemeBackground;
 
+static const WCHAR BackgroundClassName[] = L"LegacyUpdateBackground";
+
 typedef enum Theme {
 	ThemeUnknown = -1,
 	ThemeClassic,
@@ -65,6 +67,8 @@ static Theme g_theme = ThemeUnknown;
 static WNDPROC g_dialogOrigWndProc;
 static WNDPROC g_bannerOrigWndProc;
 static WNDPROC g_bottomOrigWndProc;
+
+static HWND g_backgroundWindow;
 
 static Theme GetTheme(void) {
 	BOOL enabled = FALSE;
@@ -272,6 +276,13 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		}
 		break;
 
+	case WM_DESTROY:
+		if (g_backgroundWindow) {
+			DestroyWindow(g_backgroundWindow);
+			g_backgroundWindow = NULL;
+		}
+		break;
+
 	case WM_NCHITTEST: {
 		if (g_theme < ThemeBasic) {
 			break;
@@ -305,6 +316,70 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 
 	return CallWindowProc(g_dialogOrigWndProc, hwnd, uMsg, wParam, lParam);
+}
+
+static LRESULT CALLBACK BackgroundWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	switch (uMsg) {
+	case WM_PAINT: {
+		PAINTSTRUCT ps = {0};
+		HDC hdc = BeginPaint(hwnd, &ps);
+		RECT rect = {0};
+		GetClientRect(hwnd, &rect);
+
+		// Gradient
+		int height = rect.bottom - rect.top;
+		int width = rect.right - rect.left;
+
+		for (int i = 0; i < height; i++) {
+			float ratio = (float)(i - rect.top) / (float)(rect.bottom - rect.top);
+			COLORREF color = RGB(
+				(int)(0x00 * (1 - ratio) + 0x00 * ratio),
+				(int)(0x00 * (1 - ratio) + 0x00 * ratio),
+				(int)(0x80 * (1 - ratio) + 0x00 * ratio)
+			);
+
+			RECT lineRect = {rect.left, rect.top + i, rect.right, rect.top + i + 1};
+			HBRUSH brush = CreateSolidBrush(color);
+			FillRect(hdc, &lineRect, brush);
+			DeleteObject(brush);
+		}
+
+		HFONT font = CreateFont(-40, 0, 0, 0, FW_BOLD, TRUE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE | FIXED_PITCH, L"Times New Roman");
+		HFONT oldFont = (HFONT)SelectObject(hdc, font);
+
+		static LPWSTR text = L"Legacy Update";
+
+		// Shadow
+		SetTextColor(hdc, RGB(0x00, 0x00, 0x00));
+		SetBkMode(hdc, TRANSPARENT);
+		TextOut(hdc, 10 + 4, 4 + 4, text, lstrlen(text));
+
+		// Text
+		SetTextColor(hdc, RGB(0xff, 0xff, 0xff));
+		TextOut(hdc, 10, 4, text, lstrlen(text));
+		SelectObject(hdc, oldFont);
+		DeleteObject(font);
+
+		EndPaint(hwnd, &ps);
+		return 0;
+	}
+
+	case WM_ERASEBKGND:
+		return 1;
+
+	case WM_ACTIVATE:
+		// If we become foreground, bring the main dialog to front
+		if (LOWORD(wParam) != WA_INACTIVE) {
+			SetForegroundWindow(g_hwndParent);
+		}
+		return 0;
+
+	case WM_CLOSE:
+		// Don't allow closing
+		return 0;
+	}
+
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
 static UINT_PTR NSISPluginCallback(enum NSPIM event) {
@@ -374,4 +449,36 @@ PLUGIN_METHOD(DialogInit) {
 	g_dialogOrigWndProc = (WNDPROC)SetWindowLongPtr(g_hwndParent, GWLP_WNDPROC, (LONG_PTR)MainWndProc);
 	g_bannerOrigWndProc = (WNDPROC)SetWindowLongPtr(bannerWindow, GWLP_WNDPROC, (LONG_PTR)BannerWndProc);
 	g_bottomOrigWndProc = (WNDPROC)SetWindowLongPtr(bottomWindow, GWLP_WNDPROC, (LONG_PTR)BottomWndProc);
+
+	// Nothing in particular 👀
+	SYSTEMTIME date = {0};
+	GetLocalTime(&date);
+	if (date.wMonth == 4 && date.wDay == 1) {
+		WNDCLASS wndClass = {0};
+		wndClass.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_NOCLOSE;
+		wndClass.lpfnWndProc = BackgroundWndProc;
+		wndClass.hInstance = g_hInstance;
+		wndClass.lpszClassName = BackgroundClassName;
+		wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+
+		if (RegisterClass(&wndClass)) {
+			int width = GetSystemMetrics(SM_CXSCREEN);
+			int height = GetSystemMetrics(SM_CYSCREEN);
+
+			g_backgroundWindow = CreateWindowEx(
+				WS_EX_TOOLWINDOW,
+				wndClass.lpszClassName,
+				L"",
+				WS_POPUP,
+				0, 0, width, height,
+				NULL, NULL,
+				wndClass.hInstance,
+				NULL
+			);
+
+			if (g_backgroundWindow) {
+				ShowWindow(g_backgroundWindow, SW_SHOW);
+			}
+		}
+	}
 }
