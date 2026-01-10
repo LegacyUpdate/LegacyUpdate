@@ -105,7 +105,10 @@ Function Download
 		Pop $0
 		${If} $1 < 200
 		${OrIf} $1 >= 300
-			${If} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
+			${If} $1 == ${ERROR_INTERNET_NAME_NOT_RESOLVED}
+				StrCpy $2 "$Download.Name"
+				MessageBox MB_USERICON "$(MsgBoxDownloadDNSError)" /SD IDOK
+			${ElseIf} $1 != ${ERROR_INTERNET_OPERATION_CANCELLED}
 				StrCpy $2 "$Download.Name"
 				MessageBox MB_USERICON "$(MsgBoxDownloadFailed)" /SD IDOK
 			${EndIf}

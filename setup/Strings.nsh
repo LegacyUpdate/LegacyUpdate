@@ -99,6 +99,13 @@ LangString MsgBoxDownloadFailed ${LANG_ENGLISH} \
 	$\r$\n\
 	$0 ($1)"
 
+LangString MsgBoxDownloadDNSError ${LANG_ENGLISH} \
+	"$2 failed to download.$\r$\n\
+	$\r$\n\
+	Legacy Update requires an internet connection to download additional components from Microsoft. Check your internet connection and try again.$\r$\n\
+	$\r$\n\
+	$0 ($1)"
+
 LangString MsgBoxHashFailed ${LANG_ENGLISH} \
 	"$2 failed to download.$\r$\n\
 	$\r$\n\
