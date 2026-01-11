@@ -1,3 +1,28 @@
+Function IsAuditMode
+	; 2k/XP
+	ReadRegDword $0 HKLM "${REGPATH_SETUP}" "AuditInProgress"
+	${If} $0 == 1
+		Push 1
+	${Else}
+		; Vista+
+		ReadRegDword $0 HKLM "${REGPATH_SETUP}\Status" "AuditBoot"
+		${If} $0 == 1
+			Push 1
+		${Else}
+			Push 0
+		${EndIf}
+	${EndIf}
+FunctionEnd
+
+!macro _IsAuditMode _a _b _t _f
+	!insertmacro _LOGICLIB_TEMP
+	Call IsAuditMode
+	Pop $_LOGICLIB_TEMP
+	StrCmp $_LOGICLIB_TEMP 1 `${_t}` `${_f}`
+!macroend
+
+!define IsAuditMode `"" IsAuditMode ""`
+
 !macro PromptReboot
 	!insertmacro InhibitSleep 0
 	SetErrorLevel ${ERROR_SUCCESS_REBOOT_REQUIRED}
@@ -14,6 +39,7 @@
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
 		${If} ${IsRunOnce}
 		${AndIf} $0 == "SYSTEM"
+		${AndIfNot} ${IsAuditMode}
 			; Running in setup mode. Winlogon will reboot for us.
 			Quit
 		${Else}
@@ -112,18 +138,19 @@ Function PrepareRunOnce
 	${EndIf}
 	!endif
 
+	!if ${NT4} == 1
+		StrCpy $1 "${RUNONCEDIR}\LegacyUpdateSetup.exe"
+	!else
+		StrCpy $1 "${RUNONCEDIR}\LegacyUpdate.exe"
+	!endif
+
 	${If} $RunOnce.UseFallback == 1
-		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdateRunOnce" '"${RUNONCEDIR}\LegacyUpdateSetup.exe" /runonce'
+	${OrIf} ${IsAuditMode}
+		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdateRunOnce" '"$1" /runonce'
 	${Else}
 		; Somewhat documented in KB939857:
 		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
 		; See also Wine winternl.h
-		!if ${NT4} == 1
-			StrCpy $1 "${RUNONCEDIR}\LegacyUpdateSetup.exe"
-		!else
-			StrCpy $1 "${RUNONCEDIR}\LegacyUpdate.exe"
-		!endif
-
 		!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"$1" /runonce'
 		!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
@@ -260,13 +287,18 @@ Function OnRunOnceDone
 	${If} ${IsRunOnce}
 	${AndIfNot} ${Abort}
 		; Set up postinstall runonce
-		${VerbosePrint} "Preparing postinstall"
-		WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce postinstall'
+		${If} ${IsAuditMode}
+			${VerbosePrint} "Running postinstall"
+			Exec '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce postinstall'
+		${Else}
+			${VerbosePrint} "Preparing postinstall"
+			WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce postinstall'
 
-		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
-		${If} $0 == "SYSTEM"
-			; Configure winlogon to proceed to the logon dialog
-			Call CleanUpRunOnce
+			System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
+			${If} $0 == "SYSTEM"
+				; Configure winlogon to proceed to the logon dialog
+				Call CleanUpRunOnce
+			${EndIf}
 		${EndIf}
 	${EndIf}
 FunctionEnd

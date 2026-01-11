@@ -123,6 +123,50 @@ static void ResetSetupKey(void) {
 	RegCloseKey(key);
 }
 
+static BOOL IsSystemUser(void) {
+	static BOOL _isSystemUserInitialized = FALSE;
+	static BOOL _isSystemUser = FALSE;
+
+	if (!_isSystemUserInitialized) {
+		_isSystemUserInitialized = TRUE;
+
+		PTOKEN_USER tokenInfo = NULL;
+		PSID systemSid = NULL;
+		HANDLE token = NULL;
+		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+			goto end;
+		}
+
+		DWORD tokenInfoLen = 0;
+		GetTokenInformation(token, TokenUser, NULL, 0, &tokenInfoLen);
+		tokenInfo = (PTOKEN_USER)LocalAlloc(LPTR, tokenInfoLen);
+		if (!GetTokenInformation(token, TokenUser, tokenInfo, tokenInfoLen, &tokenInfoLen)) {
+			goto end;
+		}
+
+		DWORD sidSize = SECURITY_MAX_SID_SIZE;
+		systemSid = LocalAlloc(LPTR, sidSize);
+		if (!CreateWellKnownSid(WinLocalSystemSid, NULL, systemSid, &sidSize)) {
+			goto end;
+		}
+
+		_isSystemUser = EqualSid(tokenInfo->User.Sid, systemSid);
+
+end:
+		if (tokenInfo) {
+			LocalFree(tokenInfo);
+		}
+		if (systemSid) {
+			LocalFree(systemSid);
+		}
+		if (token) {
+			CloseHandle(token);
+		}
+	}
+
+	return _isSystemUser;
+}
+
 static void CreateRunOnceWindow(void) {
 	// Create window
 	WNDCLASS wndClass = {0};
@@ -155,61 +199,64 @@ static void CreateRunOnceWindow(void) {
 	// Register hotkey
 	RegisterHotKey(hwnd, HK_RUNCMD, MOD_SHIFT, VK_F10);
 
-	// Check if the display is 8-bit color or lower
-	HDC dc = GetDC(NULL);
-	int bpp = GetDeviceCaps(dc, BITSPIXEL);
-	ReleaseDC(NULL, dc);
-	if (bpp >= 8) {
-		// Set the wallpaper color
-		COLORREF color = GetSysColor(COLOR_DESKTOP);
-		if (AtLeastWin10()) {
-			color = WallpaperColorWin10;
-		} else if (AtLeastWin8()) {
-			color = WallpaperColorWin8;
-		} else if ((IsWinXP2002() || IsWinXP2003()) && color == RGB(0, 0, 0)) {
-			// XP uses a black wallpaper in fast user switching mode. Override to the default blue.
-			color = WallpaperColorWinXP;
-		}
-		SetSysColors(1, (const INT[1]){COLOR_DESKTOP}, (const COLORREF[1]){color});
+	// Set wallpaper on SYSTEM setup mode desktop
+	if (IsSystemUser()) {
+		// Check if the display is 8-bit color or lower
+		HDC dc = GetDC(NULL);
+		int bpp = GetDeviceCaps(dc, BITSPIXEL);
+		ReleaseDC(NULL, dc);
+		if (bpp >= 8) {
+			// Set the wallpaper color
+			COLORREF color = GetSysColor(COLOR_DESKTOP);
+			if (AtLeastWin10()) {
+				color = WallpaperColorWin10;
+			} else if (AtLeastWin8()) {
+				color = WallpaperColorWin8;
+			} else if ((IsWinXP2002() || IsWinXP2003()) && color == RGB(0, 0, 0)) {
+				// XP uses a black wallpaper in fast user switching mode. Override to the default blue.
+				color = WallpaperColorWinXP;
+			}
+			SetSysColors(1, (const INT[1]){COLOR_DESKTOP}, (const COLORREF[1]){color});
 
-		DWORD width = GetSystemMetrics(SM_CXSCREEN);
-		DWORD height = GetSystemMetrics(SM_CYSCREEN);
-		HBITMAP wallpaper = NULL;
+			DWORD width = GetSystemMetrics(SM_CXSCREEN);
+			DWORD height = GetSystemMetrics(SM_CYSCREEN);
+			HBITMAP wallpaper = NULL;
 
-		if (IsWin7()) {
-			// 7: Bitmap in oobe dir
-			WCHAR bmpPath[MAX_PATH];
-			ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
-			wallpaper = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		} else if (IsWinVista()) {
-			if (GetVersionInfo()->wProductType == VER_NT_WORKSTATION) {
-				// Vista: Resources in ooberesources.dll
-				WCHAR ooberesPath[MAX_PATH];
-				ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\ooberesources.dll", ooberesPath, ARRAYSIZE(ooberesPath));
-				HMODULE ooberes = LoadLibrary(ooberesPath);
-				if (ooberes) {
-					// Width logic is the same used by Vista msoobe.dll
-					LPWSTR resource = GetSystemMetrics(SM_CXSCREEN) < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0";
-					wallpaper = LoadPNGResource(ooberes, resource, RT_RCDATA);
+			if (IsWin7()) {
+				// 7: Bitmap in oobe dir
+				WCHAR bmpPath[MAX_PATH];
+				ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\background.bmp", bmpPath, ARRAYSIZE(bmpPath));
+				wallpaper = LoadImage(NULL, bmpPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+			} else if (IsWinVista()) {
+				if (GetVersionInfo()->wProductType == VER_NT_WORKSTATION) {
+					// Vista: Resources in ooberesources.dll
+					WCHAR ooberesPath[MAX_PATH];
+					ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\ooberesources.dll", ooberesPath, ARRAYSIZE(ooberesPath));
+					HMODULE ooberes = LoadLibrary(ooberesPath);
+					if (ooberes) {
+						// Width logic is the same used by Vista msoobe.dll
+						LPWSTR resource = GetSystemMetrics(SM_CXSCREEN) < 1200 ? L"OOBE_BACKGROUND_0" : L"OOBE_BACKGROUND_LARGE_0";
+						wallpaper = LoadPNGResource(ooberes, resource, RT_RCDATA);
+					}
+					FreeLibrary(ooberes);
+				} else {
+					// Server 2008: Bitmap in oobe dir
+					WCHAR jpegPath[MAX_PATH];
+					ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\msoobe_server.jpg", jpegPath, ARRAYSIZE(jpegPath));
+					wallpaper = LoadJPEGFile(jpegPath);
 				}
-				FreeLibrary(ooberes);
-			} else {
-				// Server 2008: Bitmap in oobe dir
-				WCHAR jpegPath[MAX_PATH];
-				ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\oobe\\msoobe_server.jpg", jpegPath, ARRAYSIZE(jpegPath));
-				wallpaper = LoadJPEGFile(jpegPath);
-			}
-		}
-
-		if (wallpaper) {
-			// Write to disk
-			WCHAR tempPath[MAX_PATH];
-			ExpandEnvironmentStrings(L"%ProgramData%\\Legacy Update\\background.bmp", tempPath, ARRAYSIZE(tempPath));
-			if (GetFileAttributes(tempPath) != INVALID_FILE_ATTRIBUTES || ScaleAndWriteToBMP(wallpaper, width, height, tempPath)) {
-				SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)tempPath, SPIF_SENDWININICHANGE);
 			}
 
-			DeleteObject(wallpaper);
+			if (wallpaper) {
+				// Write to disk
+				WCHAR tempPath[MAX_PATH];
+				ExpandEnvironmentStrings(L"%ProgramData%\\Legacy Update\\background.bmp", tempPath, ARRAYSIZE(tempPath));
+				if (GetFileAttributes(tempPath) != INVALID_FILE_ATTRIBUTES || ScaleAndWriteToBMP(wallpaper, width, height, tempPath)) {
+					SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)tempPath, SPIF_SENDWININICHANGE);
+				}
+
+				DeleteObject(wallpaper);
+			}
 		}
 	}
 
@@ -235,55 +282,7 @@ static void FixUserWallpaper(void) {
 	}
 }
 
-#ifndef _DEBUG
-static BOOL IsSystemUser(void) {
-	BOOL result = FALSE;
-	PTOKEN_USER tokenInfo = NULL;
-	PSID systemSid = NULL;
-	HANDLE token = NULL;
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
-		goto end;
-	}
-
-	DWORD tokenInfoLen = 0;
-	GetTokenInformation(token, TokenUser, NULL, 0, &tokenInfoLen);
-	tokenInfo = (PTOKEN_USER)LocalAlloc(LPTR, tokenInfoLen);
-	if (!GetTokenInformation(token, TokenUser, tokenInfo, tokenInfoLen, &tokenInfoLen)) {
-		goto end;
-	}
-
-	DWORD sidSize = SECURITY_MAX_SID_SIZE;
-	systemSid = LocalAlloc(LPTR, sidSize);
-	if (!CreateWellKnownSid(WinLocalSystemSid, NULL, systemSid, &sidSize)) {
-		goto end;
-	}
-
-	result = EqualSid(tokenInfo->User.Sid, systemSid);
-
-end:
-	if (tokenInfo) {
-		LocalFree(tokenInfo);
-	}
-	if (systemSid) {
-		LocalFree(systemSid);
-	}
-	if (token) {
-		CloseHandle(token);
-	}
-	return result;
-}
-#endif
-
 void RunOnce(BOOL postInstall) {
-#ifndef _DEBUG
-	// Only run in the matching context
-	BOOL isSystemUser = IsSystemUser();
-	if ((postInstall && isSystemUser) || (!postInstall && !isSystemUser)) {
-		PostQuitMessage(1);
-		return;
-	}
-#endif
-
 	// Allow breaking out by entering safe mode
 	if (GetSystemMetrics(SM_CLEANBOOT)) {
 		WCHAR message[4096];
@@ -298,28 +297,30 @@ void RunOnce(BOOL postInstall) {
 	if (postInstall) {
 		// Fix pre-logon wallpaper persisting into the user's desktop
 		FixUserWallpaper();
-
-		// Trick winlogon into thinking the shell has started, so it doesn't appear to be stuck at "Welcome" (XP) or
-		// "Preparing your desktop..." (Vista+)
-		// https://social.msdn.microsoft.com/Forums/WINDOWS/en-US/ca253e22-1ef8-4582-8710-9cd9c89b15c3
-		LPWSTR eventName = AtLeastWinVista() ? L"ShellDesktopSwitchEvent" : L"msgina: ShellReadyEvent";
-		HANDLE eventHandle = OpenEvent(EVENT_MODIFY_STATE, 0, eventName);
-		if (eventHandle) {
-			SetEvent(eventHandle);
-			CloseHandle(eventHandle);
-		}
 	} else {
-		// Start Themes on this desktop
-		StartThemes();
+		if (IsSystemUser()) {
+			// Start Themes on this desktop
+			StartThemes();
 
-		// Find and hide the FirstUxWnd window, if it exists (Windows 7+)
-		firstUxWnd = FindWindow(L"FirstUxWndClass", NULL);
-		if (firstUxWnd) {
-			ShowWindow(firstUxWnd, SW_HIDE);
+			// Find and hide the FirstUxWnd window, if it exists (Windows 7+)
+			firstUxWnd = FindWindow(L"FirstUxWndClass", NULL);
+			if (firstUxWnd) {
+				ShowWindow(firstUxWnd, SW_HIDE);
+			}
 		}
 
 		// Set up our window
 		CreateRunOnceWindow();
+	}
+
+	// Trick winlogon into thinking the shell has started, so it doesn't appear to be stuck at "Welcome" (XP) or
+	// "Preparing your desktop..." (Vista+)
+	// https://social.msdn.microsoft.com/Forums/WINDOWS/en-US/ca253e22-1ef8-4582-8710-9cd9c89b15c3
+	LPWSTR eventName = AtLeastWinVista() ? L"ShellDesktopSwitchEvent" : L"msgina: ShellReadyEvent";
+	HANDLE eventHandle = OpenEvent(EVENT_MODIFY_STATE, 0, eventName);
+	if (eventHandle) {
+		SetEvent(eventHandle);
+		CloseHandle(eventHandle);
 	}
 
 	// Construct path to LegacyUpdateSetup.exe
