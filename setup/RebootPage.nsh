@@ -6,6 +6,7 @@ Function RebootPage
 
 	; Not needed in runonce
 	${If} ${IsRunOnce}
+	${OrIf} ${IsPostInstall}
 		Abort
 	${EndIf}
 
