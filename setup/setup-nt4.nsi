@@ -75,22 +75,19 @@ ReserveFile "PatchesNT4.ini"
 !include DownloadIE.nsh
 !include DownloadNT4.nsh
 !include UpdateRoots.nsh
-; !include ActiveXPage.nsh
 
 !insertmacro GetParameters
 !insertmacro GetOptions
 
-!define MUI_PAGE_HEADER_TEXT         "Welcome to Legacy Update"
-!define MUI_COMPONENTSPAGE_TEXT_TOP  "Select what you would like Legacy Update to do. An internet connection is required to download additional components from Microsoft. Your computer will restart automatically if needed. Close all other programs before continuing."
+!define MUI_PAGE_HEADER_TEXT         "$(ComponentsPageTitle)"
+!define MUI_COMPONENTSPAGE_TEXT_TOP  "$(ComponentsPageText)"
 !define MUI_PAGE_CUSTOMFUNCTION_PRE  ComponentsPageCheck
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
 !define MUI_PAGE_FUNCTION_GUIINIT    OnShow
 
 !insertmacro MUI_PAGE_COMPONENTS
 
-; Page custom ActiveXPage
-
-!define MUI_PAGE_HEADER_TEXT         "Performing Actions"
+!define MUI_PAGE_HEADER_TEXT         "$(InstFilesPageTitle)"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
 
 !insertmacro MUI_PAGE_INSTFILES
@@ -132,7 +129,7 @@ SectionGroup /e "Windows NT 4.0 $(Updates)" NT4Updates
 		Call RebootIfRequired
 	SectionEnd
 
-	Section "Windows NT 4.0 Security Rollup Package" NT4ROLLUP
+	Section "Windows NT 4.0 $(SRP)" NT4ROLLUP
 		SectionIn Ro
 		Call InstallNT4Rollup ; Q299444
 	SectionEnd

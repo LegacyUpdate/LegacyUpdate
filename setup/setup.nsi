@@ -92,8 +92,8 @@ Var /GLOBAL UninstallInstalled
 !insertmacro GetParameters
 !insertmacro GetOptions
 
-!define MUI_PAGE_HEADER_TEXT         "Welcome to Legacy Update"
-!define MUI_COMPONENTSPAGE_TEXT_TOP  "Select what you would like Legacy Update to do. An internet connection is required to download additional components from Microsoft. Your computer will restart automatically if needed. Close all other programs before continuing."
+!define MUI_PAGE_HEADER_TEXT         "$(ComponentsPageTitle)"
+!define MUI_COMPONENTSPAGE_TEXT_TOP  "$(ComponentsPageText)"
 !define MUI_PAGE_CUSTOMFUNCTION_PRE  ComponentsPageCheck
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
 !define MUI_PAGE_FUNCTION_GUIINIT    OnShow
@@ -103,20 +103,20 @@ Var /GLOBAL UninstallInstalled
 
 ; Page custom ActiveXPage
 
-!define MUI_PAGE_HEADER_TEXT         "Performing Actions"
+!define MUI_PAGE_HEADER_TEXT         "$(InstFilesPageTitle)"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
 
 !insertmacro MUI_PAGE_INSTFILES
 
 Page custom RebootPage
 
-!define MUI_PAGE_HEADER_TEXT         "Uninstall Legacy Update"
-!define MUI_UNCONFIRMPAGE_TEXT_TOP   "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
+!define MUI_PAGE_HEADER_TEXT         "$(UnConfirmPageTitle)"
+!define MUI_UNCONFIRMPAGE_TEXT_TOP   "$(UnConfirmPageText)"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW un.OnShow
 
 !insertmacro MUI_UNPAGE_CONFIRM
 
-!define MUI_PAGE_HEADER_TEXT         "Performing Actions"
+!define MUI_PAGE_HEADER_TEXT         "$(InstFilesPageTitle)"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW un.OnShow
 
 !insertmacro MUI_UNPAGE_INSTFILES

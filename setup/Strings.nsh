@@ -129,9 +129,9 @@ LangString MsgBoxMUFailed ${LANG_ENGLISH} \
 ; Warnings
 LangString MsgBoxWES09NotSSE2 ${LANG_ENGLISH} \
 	"Your processor does not support the Streaming SIMD Extensions 2 (SSE2) instruction set, which is required to install Windows Embedded 2009 updates released after May 2018.$\r$\n\
-	Processors that initially implemented SSE2 instructions include the Intel Pentium 4, Pentium M, and AMD Athlon 64.$\r$\n\
+	For more information, visit http://legacyupdate.net/help/sse2.$\r$\n\
 	$\r$\n\
-	To protect your Windows installation from becoming corrupted by incompatible updates, this option will be disabled."
+	To protect your Windows installation from becoming damaged by incompatible updates, this option will be disabled."
 
 LangString MsgBoxActivateXP2002NotSP3 ${LANG_ENGLISH} \
 	"Windows XP must be updated to Service Pack 3 to activate over the internet. The Service Pack 3 update action will be enabled."
@@ -275,7 +275,7 @@ LangString SectionNT4USB        ${LANG_ENGLISH} \
 LangString SectionSPCleanup     ${LANG_ENGLISH} \
 	"Delete update uninstall data"
 
-LangString SectionNT4WDUDesc ${LANG_ENGLISH} \
+LangString SectionNT4WDUDesc    ${LANG_ENGLISH} \
 	"Installs the updated Windows 98-style Explorer experience. This choice can not be changed later. Requires installing Internet Explorer 6."
 LangString SectionNT4WDUYesDesc ${LANG_ENGLISH} \
 	"$(SectionNT4WDUDesc)"
@@ -305,9 +305,20 @@ LangString SectionNT4USBDesc    ${LANG_ENGLISH} \
 LangString SectionSPCleanupDesc ${LANG_ENGLISH} \
 	"Deletes backup files created during installation of updates. This frees up disk space, but you will not be able to uninstall updates."
 
+; Components page
+LangString ComponentsPageTitle     ${LANG_ENGLISH} "Welcome to Legacy Update"
+LangString ComponentsPageText      ${LANG_ENGLISH} "Select what you would like Legacy Update to do. An internet connection is required to download additional components from Microsoft. Your computer will restart automatically if needed. Close all other programs before continuing."
+
+; Install page
+LangString InstFilesPageTitle      ${LANG_ENGLISH} "Performing Actions"
+
+; Uninstall confirm page
+LangString UnConfirmPageTitle      ${LANG_ENGLISH} "Uninstall Legacy Update"
+LangString UnConfirmPageText       ${LANG_ENGLISH} "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
+
 ; Reboot page
 LangString RebootPageTitle   ${LANG_ENGLISH} "Restarting Windows"
-LangString RebootPageText    ${LANG_ENGLISH} "Your computer will not be up to date until you restart it. Please save any open files, photos or documents and restart now.$\r$\n\
+LangString RebootPageText    ${LANG_ENGLISH} "Your computer will not be up to date until you restart it. Save any open files, and then restart the computer.$\r$\n\
 $\r$\n\
 Setup will resume after restarting. Your computer may restart several times to complete installation."
 LangString RebootPageTimer   ${LANG_ENGLISH} "Restarting in "
