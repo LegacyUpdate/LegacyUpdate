@@ -176,7 +176,7 @@ Function InitChecks
 
 !if ${NT4} == 0
 		; Detect One-Core-API
-		ReadRegDword $0 HKLM "${REGPATH_HOTFIX_OCAB}" "Installed"
+		ReadRegDword $0 HKLM "${REGPATH_HOTFIX}\OCAB" "Installed"
 		${If} $0 == 1
 			${VerbosePrint} "One-Core-API detected"
 			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxOneCoreAPI)" /SD IDOK \

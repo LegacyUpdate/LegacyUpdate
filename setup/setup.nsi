@@ -224,6 +224,12 @@ ${MementoSectionEnd}
 ${MementoUnselectedSection} "$(SectionWES09)" WES09
 	${RebootIfRequired}
 	WriteRegDword HKLM "${REGPATH_POSREADY}" "Installed" 1
+
+	; KB2686509 is known to fail due to an edition check when the Embedded version of the update is installed on XP. It
+	; isn't actually a security fix - it just runs a one-time check and writes a log of bad registry keys. In my opinion,
+	; this update is pointless, so fake it as installed so it doesn't get offered.
+	; https://legacyupdate.net/help/kb2686509
+	WriteRegDword HKLM "${REGPATH_HOTFIX}\KB2686509" "Installed" 1
 ${MementoSectionEnd}
 
 ; XP 2003 prerequisities

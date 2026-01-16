@@ -105,5 +105,5 @@
 !define ROOTSUPDATE_GUID           "{EF289A85-8E57-408d-BE47-73B55609861A}"
 !define REGPATH_COMPONENTS         "Software\Microsoft\Active Setup\Installed Components"
 
-; One-Core-API keys
-!define REGPATH_HOTFIX_OCAB        "Software\Microsoft\Windows NT\CurrentVersion\HotFix\OCAB"
+; Hotfix keys
+!define REGPATH_HOTFIX             "Software\Microsoft\Windows NT\CurrentVersion\HotFix"
