@@ -276,8 +276,10 @@ Function RebootIfCbsRebootPending
 
 	StrCpy $1 0
 
+	ClearErrors
 	ReadRegDword $0 HKLM "${REGPATH_CBS}" "ExecuteState"
-	${If} $0 != ${CBS_EXECUTE_STATE_NONE}
+	${IfNot} ${Errors}
+	${AndIf} $0 != ${CBS_EXECUTE_STATE_NONE}
 	${AndIf} $0 != ${CBS_EXECUTE_STATE_NONE2}
 		StrCpy $1 1
 	${EndIf}
