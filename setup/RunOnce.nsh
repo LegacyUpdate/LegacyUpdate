@@ -245,18 +245,13 @@ Function PollCbsInstall
 		${EndIf}
 
 		; Poll TrustedInstaller execution state
-		${If} ${IsWinVista}
-		${AndIf} ${AtMostServicePack} 1
-			; Special case for Vista pre-SP1 servicing stack, which doesn't have ExecuteState
-			LegacyUpdateNSIS::CheckCCPProgress
-			Pop $0
-			${If} $0 == 2818 ; 0x0b02 (02 0b in registry)
-				${Break}
-			${EndIf}
-		${Else}
-			ReadRegDword $0 HKLM "${REGPATH_CBS}" "ExecuteState"
-			${If} $0 == ${CBS_EXECUTE_STATE_NONE}
-			${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
+		ReadRegDword $0 HKLM "${REGPATH_CBS}" "ExecuteState"
+		${If} $0 == ${CBS_EXECUTE_STATE_NONE}
+		${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
+			; Ignore under Vista RTM servicing stack. It can trick us by going to -1, then back to 0.
+			; This happens in the first 2 (of 3) reboots when installing SP1.
+			${IfNot} ${IsWinVista}
+			${OrIf} ${AtLeastServicePack} 1
 				${Break}
 			${EndIf}
 		${EndIf}
