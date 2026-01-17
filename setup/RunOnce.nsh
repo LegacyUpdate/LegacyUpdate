@@ -218,7 +218,7 @@ Function PollCbsInstall
 		Return
 	${EndIf}
 
-	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
+	ReadRegDword $0 HKLM "${REGPATH_CBS}" "ExecuteState"
 	${If} $0 == ${CBS_EXECUTE_STATE_NONE}
 	${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
 		Return
@@ -244,11 +244,21 @@ Function PollCbsInstall
 			${EndWhile}
 		${EndIf}
 
-		; Poll ExecuteState, waiting for TrustedInstaller to be done.
-		ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
-		${If} $0 == ${CBS_EXECUTE_STATE_NONE}
-		${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
-			${Break}
+		; Poll TrustedInstaller execution state
+		${If} ${IsWinVista}
+		${AndIf} ${AtMostServicePack} 1
+			; Special case for Vista pre-SP1 servicing stack, which doesn't have ExecuteState
+			LegacyUpdateNSIS::CheckCCPProgress
+			Pop $0
+			${If} $0 == 2818 ; 0x0b02 (02 0b in registry)
+				${Break}
+			${EndIf}
+		${Else}
+			ReadRegDword $0 HKLM "${REGPATH_CBS}" "ExecuteState"
+			${If} $0 == ${CBS_EXECUTE_STATE_NONE}
+			${OrIf} $0 == ${CBS_EXECUTE_STATE_NONE2}
+				${Break}
+			${EndIf}
 		${EndIf}
 
 		Sleep 1000
@@ -266,7 +276,7 @@ Function RebootIfCbsRebootPending
 
 	StrCpy $1 0
 
-	ReadRegDWORD $0 HKLM "${REGPATH_CBS}" "ExecuteState"
+	ReadRegDword $0 HKLM "${REGPATH_CBS}" "ExecuteState"
 	${If} $0 != ${CBS_EXECUTE_STATE_NONE}
 	${AndIf} $0 != ${CBS_EXECUTE_STATE_NONE2}
 		StrCpy $1 1
