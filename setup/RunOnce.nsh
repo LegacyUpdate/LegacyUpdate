@@ -235,7 +235,10 @@ Function PollCbsInstall
 		ClearErrors
 		EnumRegKey $1 HKLM "${REGPATH_CBS_REBOOTINPROGRESS}" 0
 		${IfNot} ${Errors}
-			; Spin forever. TrustedInstaller will reboot on its own.
+			; Prepare runonce now and spin forever. TrustedInstaller will reboot on its own.
+			SetRebootFlag true
+			Call PrepareRunOnce
+			${VerbosePrint} "System will restart automatically"
 			${While} 1 == 1
 				Sleep 10000
 			${EndWhile}
