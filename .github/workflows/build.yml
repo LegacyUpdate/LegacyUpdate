@@ -25,15 +25,15 @@ jobs:
       uses: actions/cache@v5
       with:
         path: |
-          /opt/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-i686
-          /opt/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-x86_64
-        key: gcc-15.2-binutils-2.45.1-mingw-v13.0.0
+          /opt/gcc-15.2-20260120-binutils-2.45.1-mingw-v13.0.0-i686
+          /opt/gcc-15.2-20260120-binutils-2.45.1-mingw-v13.0.0-x86_64
+        key: gcc-15.2-20260120-binutils-2.45.1-mingw-v13.0.0
 
     - name: Install MinGW toolchain
       if: steps.mingw-cache.outputs.cache-hit != 'true'
       run: |
-        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-i686.tar.xz -o /tmp/mingw32.tar.xz
-        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-x86_64.tar.xz -o /tmp/mingw64.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-15.2-20260120-binutils-2.45.1-mingw-v13.0.0-i686.tar.xz -o /tmp/mingw32.tar.xz
+        curl -fsSL https://linuxfromscratch.org/~renodr/gcc-15.2-20260120-binutils-2.45.1-mingw-v13.0.0-x86_64.tar.xz -o /tmp/mingw64.tar.xz
         sudo tar -xf /tmp/mingw32.tar.xz -C /opt
         sudo tar -xf /tmp/mingw64.tar.xz -C /opt
         rm /tmp/mingw{32,64}.tar.xz
@@ -55,8 +55,8 @@ jobs:
     - name: Build
       id: build
       run: |
-        export PATH=/opt/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-i686/bin:$PATH
-        export PATH=/opt/gcc-15.2-binutils-2.45.1-mingw-v13.0.0-x86_64/bin:$PATH
+        export PATH=/opt/gcc-15.2-20260120-binutils-2.45.1-mingw-v13.0.0-i686/bin:$PATH
+        export PATH=/opt/gcc-15.2-20260120-binutils-2.45.1-mingw-v13.0.0-x86_64/bin:$PATH
         export PATH=/opt/nsis-3.11/bin:$PATH
         make -j$(nproc) CI=1 DEBUG=0
 
