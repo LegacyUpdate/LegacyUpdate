@@ -885,6 +885,12 @@ Function .onInit
 	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
 	${If} ${AtLeastWin10}
 		!insertmacro RemoveSection ${ROOTCERTS}
+	${Else}
+		LegacyUpdateNSIS::NeedsRootsUpdate
+		Pop $0
+		${If} $0 == 0
+			!insertmacro RemoveSection ${ROOTCERTS}
+		${EndIf}
 	${EndIf}
 FunctionEnd
 

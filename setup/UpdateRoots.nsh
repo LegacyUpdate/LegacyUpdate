@@ -96,4 +96,6 @@ Function UpdateRoots
 	WriteRegStr   HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" "Version"     "1337,0,2195,0"
 	WriteRegStr   HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" "Locale"      "*"
 	WriteRegStr   HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" "ComponentID" "Windows Roots Update"
+
+	LegacyUpdateNSIS::SetRootsUpdateTime
 FunctionEnd
