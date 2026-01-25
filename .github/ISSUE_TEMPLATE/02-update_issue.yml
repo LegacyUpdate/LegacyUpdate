@@ -129,19 +129,18 @@ body:
         - 486
         - Intel Pentium
         - AMD K5/K6
-        - Cyrix 5x86
-        - Cyrix 6x86
-        - Intel Pentium II/III
+        - Cyrix 5x86/6x86
+        - Intel P6 (Pentium Pro/II/III)
         - AMD K7 (e.g. Athlon XP)
         - Cyrix III
         - Intel Pentium 4
-        - Intel Pentium D
         - Intel Pentium M
         - AMD K8 (e.g. Athlon 64)
+        - Intel Pentium D
         - Intel Core
         - Intel Core 2
-        - Intel Core i
         - AMD K10 (e.g. Phenom)
+        - Intel Core i
         - AMD Bulldozer
         - AMD Ryzen/Threadripper
         - Other (please describe below)
