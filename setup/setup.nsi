@@ -967,7 +967,10 @@ Function PreDownload
 		Call DownloadKB4012583
 		Call DownloadKB4015195
 		Call DownloadKB4015380
-		Call DownloadKB4493730
+
+		${If} ${SectionIsSelected} ${VISTAESU}
+			Call DownloadKB4493730
+		${EndIf}
 
 		${If} ${SectionIsSelected} ${VISTAIE9}
 			Call DownloadKB971512
