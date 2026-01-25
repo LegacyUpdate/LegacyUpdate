@@ -112,6 +112,10 @@ PLUGIN_METHOD(InitTaskbarProgress) {
 	}
 
 	hr = CoCreateInstance(&CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, &IID_ITaskbarList3, (void **)&g_taskbarList);
+	if (hr == E_NOTIMPL) {
+		// Expected when on the SYSTEM desktop
+		goto end;
+	}
 	CHECK_HR_OR_GOTO_END(L"CoCreateInstance");
 
 	hr = ITaskbarList3_HrInit(g_taskbarList);
