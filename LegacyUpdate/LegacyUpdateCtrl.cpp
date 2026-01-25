@@ -299,7 +299,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_SPVersionString: {
 		LPWSTR data = NULL;
 		DWORD size = 0;
-		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"BuildLab", KEY_WOW64_64KEY, &data, &size);
+		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_WINNT, L"BuildLab", KEY_WOW64_64KEY, &data, &size);
 		retval->vt = VT_BSTR;
 		retval->bstrVal = SUCCEEDED(hr)
 			? SysAllocStringLen(data, size - 1)
@@ -330,7 +330,7 @@ STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG sy
 	case e_displayVersion: {
 		LPWSTR data = NULL;
 		DWORD size = 0;
-		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"DisplayVersion", KEY_WOW64_64KEY, &data, &size);
+		HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_WINNT, L"DisplayVersion", KEY_WOW64_64KEY, &data, &size);
 		if (SUCCEEDED(hr)) {
 			retval->vt = VT_BSTR;
 			retval->bstrVal = SysAllocStringLen(data, size - 1);
@@ -424,7 +424,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 
 	// Check reboot flag in registry
 	HKEY subkey = NULL;
-	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired", 0, GetRegistryWow64Flag(KEY_READ | KEY_WOW64_64KEY), &subkey));
+	HRESULT hr = HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, REGPATH_WU_REBOOTREQUIRED, 0, GetRegistryWow64Flag(KEY_READ | KEY_WOW64_64KEY), &subkey));
 	if (SUCCEEDED(hr)) {
 		RegCloseKey(subkey);
 		*retval = VARIANT_TRUE;
@@ -441,14 +441,14 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval
 	// Future note: These are in HKCU on NT; HKLM on 9x.
 	// Remove links and access to Windows Update
 	DWORD value = 0;
-	HRESULT hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", L"NoWindowsUpdate", KEY_WOW64_64KEY, &value);
+	HRESULT hr = GetRegistryDword(HKEY_CURRENT_USER, REGPATH_POLICIES_EXPLORER, L"NoWindowsUpdate", KEY_WOW64_64KEY, &value);
 	if (SUCCEEDED(hr) && value == 1) {
 		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 
 	// Remove access to use all Windows Update features
-	hr = GetRegistryDword(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\WindowsUpdate", L"DisableWindowsUpdateAccess", KEY_WOW64_64KEY, &value);
+	hr = GetRegistryDword(HKEY_CURRENT_USER, REGPATH_POLICIES_WU, L"DisableWindowsUpdateAccess", KEY_WOW64_64KEY, &value);
 	if (SUCCEEDED(hr) && value == 1) {
 		*retval = VARIANT_TRUE;
 		return S_OK;
@@ -521,7 +521,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
 	DWORD useWUServer = 0;
-	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", L"UseWUServer", KEY_WOW64_64KEY, &useWUServer);
+	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_POLICIES_WU_AU, L"UseWUServer", KEY_WOW64_64KEY, &useWUServer);
 	*retval = SUCCEEDED(hr) && useWUServer == 1 ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
@@ -531,7 +531,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 
 	LPWSTR data = NULL;
 	DWORD size = 0;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUServer", KEY_WOW64_64KEY, &data, &size);
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_POLICIES_WU, L"WUServer", KEY_WOW64_64KEY, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	if (data) {
 		LocalFree(data);
@@ -544,7 +544,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 
 	LPWSTR data = NULL;
 	DWORD size = 0;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", L"WUStatusServer", KEY_WOW64_64KEY, &data, &size);
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_POLICIES_WU, L"WUStatusServer", KEY_WOW64_64KEY, &data, &size);
 	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
 	if (data) {
 		LocalFree(data);

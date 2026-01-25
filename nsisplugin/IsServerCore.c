@@ -44,8 +44,8 @@ PLUGIN_METHOD(IsServerCore) {
 		// Only need to test for full GUI, MinShell on 2012/2012 R2 does not have IE and is considered regular Core.
 		DWORD serverCore = 0;
 		DWORD serverGuiShell = 0;
-		GetRegistryDword(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows NT\\CurrentVersion\\Server\\ServerLevels", L"ServerCore", KEY_WOW64_64KEY, &serverCore);
-		GetRegistryDword(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows NT\\CurrentVersion\\Server\\ServerLevels", L"Server-Gui-Shell", KEY_WOW64_64KEY, &serverGuiShell);
+		GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_WINNT_SERVERLEVELS, L"ServerCore", KEY_WOW64_64KEY, &serverCore);
+		GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_WINNT_SERVERLEVELS, L"Server-Gui-Shell", KEY_WOW64_64KEY, &serverGuiShell);
 		pushint((serverCore && !serverGuiShell) ? 1 : 0);
 		return;
 	}

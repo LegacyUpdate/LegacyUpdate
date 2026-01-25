@@ -26,7 +26,7 @@ static LPWSTR GetUpdateSiteURL(void) {
 	// Get the Windows Update website URL set by Legacy Update setup
 	LPWSTR data = NULL;
 	DWORD size = 0;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate", L"URL", KEY_WOW64_64KEY, &data, &size);
+	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_WU, L"URL", KEY_WOW64_64KEY, &data, &size);
 	if (SUCCEEDED(hr)) {
 		// Return based on the URL value
 		if (wcscmp(data, UpdateSiteURLHttps) == 0) {
@@ -89,7 +89,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 
 	// If this OS was upgraded, tell the user they need to re-run setup
 	DWORD lastOSVersion = 0;
-	if (!AtLeastWin10() && SUCCEEDED(GetRegistryDword(HKEY_LOCAL_MACHINE, L"Software\\Hashbang Productions\\Legacy Update\\Setup", L"LastOSVersion", KEY_WOW64_64KEY, &lastOSVersion))) {
+	if (!AtLeastWin10() && SUCCEEDED(GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_LEGACYUPDATE_SETUP, L"LastOSVersion", KEY_WOW64_64KEY, &lastOSVersion))) {
 		// Allow Vista build 6002 -> 6003 (ESU)
 		if (lastOSVersion < GetVersion() && !(HIWORD(lastOSVersion) == 6002 && GetWinBuild() == 6003)) {
 			WCHAR message[4096];

@@ -260,7 +260,7 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 			// Get from registry
 			LPWSTR data = NULL;
 			DWORD size = 0;
-			HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", KEY_WOW64_64KEY, &data, &size);
+			HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_WINNT, L"ProductName", KEY_WOW64_64KEY, &data, &size);
 			CHECK_HR_OR_RETURN(L"GetRegistryString");
 
 			_productName.vt = VT_BSTR;

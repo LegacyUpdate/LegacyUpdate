@@ -79,7 +79,7 @@ static Theme GetTheme(void) {
 	if (enabled) {
 		DWORD light = 1;
 		if (AtLeastWin10_1809()) {
-			GetRegistryDword(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", 0, &light);
+			GetRegistryDword(HKEY_CURRENT_USER, REGPATH_WIN_PERSONALIZE, L"AppsUseLightTheme", 0, &light);
 		}
 		return light ? ThemeAeroLight : ThemeAeroDark;
 	}

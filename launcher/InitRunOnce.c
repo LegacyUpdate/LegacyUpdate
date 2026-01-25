@@ -98,7 +98,7 @@ static LRESULT CALLBACK RunOnceWndProc(HWND hwnd, UINT message, WPARAM wParam, L
 
 static void ResetSetupKey(void) {
 	HKEY key;
-	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"System\\Setup", 0, KEY_ALL_ACCESS, &key) != ERROR_SUCCESS) {
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, REGPATH_SETUP, 0, KEY_ALL_ACCESS, &key) != ERROR_SUCCESS) {
 		return;
 	}
 
@@ -270,7 +270,7 @@ static void FixUserWallpaper(void) {
 	// This also occurs if there is no wallpaper set and the background is a solid color (i.e. on Server Core).
 	LPWSTR wallpaper = NULL;
 	DWORD length = 0;
-	if (SUCCEEDED(GetRegistryString(HKEY_CURRENT_USER, L"Control Panel\\Desktop", L"Wallpaper", 0, &wallpaper, &length))) {
+	if (SUCCEEDED(GetRegistryString(HKEY_CURRENT_USER, REGPATH_CPL_DESKTOP, L"Wallpaper", 0, &wallpaper, &length))) {
 		if (length > 0) {
 			SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (PVOID)wallpaper, SPIF_SENDWININICHANGE);
 		}
