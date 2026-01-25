@@ -1,0 +1,216 @@
+name: "Update Issue"
+description: "Report a problem with an update"
+labels: ["Needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a problem! To help us resolve the problem quickly, please fill out the details below as best as you can.
+  - type: input
+    id: update
+    attributes:
+      label: "Update"
+      description: "Provide the name or KB number of the update(s) you’re reporting an issue with."
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Describe the issue
+        If applicable, please include the error code from Windows Update:
+        * From the Legacy Update website: Click “Update History”, then click ![Error and question mark icon](https://legacyupdate.net/windowsupdate/v6/shared/images/Status_Failed.png) next to the failed update.
+        * From the Windows Update control panel: Click “View update history”, then double-click the failed update.
+  - type: textarea
+    id: actual
+    attributes:
+      label: "What is happening?"
+      description: "Describe the issue you’re experiencing. If you have screenshots or log files, please paste them here."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "What should have happened?"
+      description: "What did you expect to happen instead?"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to reproduce the issue"
+      description: "Write the step-by-step instructions that lead to the bug happening."
+      placeholder: |
+        1. …
+        2. …
+        3. …
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Provide as many of these details as possible
+  - type: dropdown
+    id: os
+    attributes:
+      label: "Operating System"
+      options:
+        - Not applicable
+        - Windows NT 4.0
+        - Windows 2000
+        - Windows XP
+        - Windows Server 2003
+        - Windows Vista/Windows Server 2008
+        - Windows 7/Windows Server 2008 R2
+        - Windows 8/Windows Server 2012
+        - Windows 8.1/Windows Server 2012 R2
+        - Windows 10
+        - Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: sp
+    attributes:
+      label: "Service Pack"
+      options:
+        - Not applicable
+        - Don’t know
+        - RTM
+        - SP1
+        - SP2
+        - SP3
+        - SP4
+        - SP5
+        - SP6
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: "Architecture"
+      description: "Which architecture edition of Windows are you using?"
+      options:
+        - Not applicable
+        - Don’t know
+        - 32-bit (x86)
+        - 64-bit (x64)
+        - Itanium (ia64)
+    validations:
+      required: true
+  - type: dropdown
+    id: vm
+    attributes:
+      label: "Virtual Machine"
+      description: "Are you running Windows in a virtual machine or emulator?"
+      options:
+        - Not applicable
+        - "No"
+        - Yes, 86Box
+        - Yes, Hyper-V
+        - Yes, Parallels
+        - Yes, QEMU/KVM
+        - Yes, UTM
+        - Yes, VirtualBox
+        - Yes, Virtual PC
+        - Yes, VMware
+        - Yes, something else
+    validations:
+      required: true
+  - type: dropdown
+    id: hardware
+    attributes:
+      label: "Hardware"
+      description: "Select the option that best describes the hardware you are using."
+      options:
+        - Not applicable
+        - Don’t know
+        - 386
+        - 486
+        - Intel Pentium
+        - AMD K5/K6
+        - Cyrix 5x86
+        - Cyrix 6x86
+        - Intel Pentium II/III
+        - AMD K7 (e.g. Athlon XP)
+        - Cyrix III
+        - Intel Pentium 4
+        - Intel Pentium D
+        - Intel Pentium M
+        - AMD K8 (e.g. Athlon 64)
+        - Intel Core
+        - Intel Core 2
+        - Intel Core i
+        - AMD K10 (e.g. Phenom)
+        - AMD Bulldozer
+        - AMD Ryzen/Threadripper
+        - Other (please describe below)
+    validations:
+      required: true
+  - type: dropdown
+    id: software
+    attributes:
+      label: "Software"
+      description: "Select the software this issue is relevant to. If it isn’t listed here, please describe below."
+      options:
+        - Not applicable
+        - Office XP (2002)
+        - Office 2003
+        - Office 2007
+        - Office 2010
+        - Office 2013 or later
+        - Visual Studio .NET 2002
+        - Visual Studio .NET 2003
+        - Visual Studio 2005
+        - Visual Studio 2008
+        - Visual Studio 2010
+        - Visual Studio 2012 or later
+        - SQL Server 2000
+        - SQL Server 2005
+        - SQL Server 2008
+        - SQL Server 2012 or later
+        - Exchange Server 2000
+        - Exchange Server 2003
+        - Exchange Server 2007
+        - Exchange Server 2010 or later
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: software-arch
+    attributes:
+      label: "Software Architecture"
+      description: "Which architecture edition of the software are you using?"
+      options:
+        - Not applicable
+        - Don’t know
+        - 32-bit (x86)
+        - 64-bit (x64)
+        - Itanium (ia64)
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Any other details that might be relevant?
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Other details"
+      description: "You can list hardware specifications here if you know them."
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Before you submit…
+        Please check [Legacy Update Help](https://legacyupdate.net/help/) to learn more about common issues, and [search for issues](https://github.com/LegacyUpdate/LegacyUpdate/issues) that could be similar to this one. It helps us to keep this project organised. Thanks!
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Confirmation
+      options:
+        - label: "I have checked that this issue hasn’t already been reported"
+          required: true

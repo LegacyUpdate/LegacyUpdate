@@ -1,0 +1,42 @@
+name: "Feature Suggestion"
+description: "Suggest a feature to be added to Legacy Update"
+labels: ["Enhancement", "Needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to suggest a feature! To help us understand your idea better, please fill out the details below as best as you can.
+  - type: dropdown
+    id: component
+    attributes:
+      label: "Component"
+      description: "Which part of Legacy Update does this apply to?"
+      options:
+        - ActiveX control
+        - Download Center Archive
+        - Update server (WSUS)
+        - Update website
+        - Setup
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Details"
+      description: "Describe the feature you would like to see. How will it work? Does it fix an issue?"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Before you submit…
+        Please check [Legacy Update Help](https://legacyupdate.net/help/) to learn more about common issues, and [search for issues](https://github.com/LegacyUpdate/LegacyUpdate/issues) that could be similar to this one. It helps us to keep this project organised. Thanks!
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Confirmation
+      options:
+        - label: "I have checked that this issue hasn’t already been reported"
+          required: true

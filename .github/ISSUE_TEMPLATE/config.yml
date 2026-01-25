@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Legacy Update Help
+    url: https://legacyupdate.net/help/
+    about: Many common issues are already answered on our website.
+  - name: Get help on GitHub Discussions
+    url: https://github.com/orgs/LegacyUpdate/discussions
+    about: If this isn’t a bug with Legacy Update, you can post in our community discussion forum.
+  - name: Get help on Discord
+    url: https://legacyupdate.net/discord
+    about: If you prefer Discord, you can create a support thread in our Discord community.

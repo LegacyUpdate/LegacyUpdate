@@ -1,0 +1,47 @@
+name: "Download Center Issue"
+description: "Report a problem with the Microsoft Download Center Archive"
+labels: ["Component: Download Center", "Needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! To help us resolve the problem quickly, please fill out the details below as best as you can.
+  - type: input
+    id: url
+    attributes:
+      label: "URL"
+      description: "Paste the link to the download page you’re reporting an issue with."
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: "Type of Issue"
+      options:
+        - File missing (not shown on the page)
+        - File deleted (404 Not Found)
+        - File corrupted (error when downloading)
+        - Incorrect metadata
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Details"
+      description: "Include more information about the issue."
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Before you submit…
+        Please check [Legacy Update Help](https://legacyupdate.net/help/) to learn more about common issues, and [search for issues](https://github.com/LegacyUpdate/LegacyUpdate/issues) that could be similar to this one. It helps us to keep this project organised. Thanks!
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Confirmation
+      options:
+        - label: "I have checked that this issue hasn’t already been reported"
+          required: true
