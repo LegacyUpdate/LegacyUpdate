@@ -130,8 +130,14 @@ static BOOL IsSystemUser(void) {
 	if (!_isSystemUserInitialized) {
 		_isSystemUserInitialized = TRUE;
 
+		// NT AUTHORITY\SYSTEM (S-1-5-18)
+		SID systemSid = {0};
+		systemSid.Revision = SID_REVISION;
+		systemSid.SubAuthorityCount = 1;
+		systemSid.IdentifierAuthority.Value[5] = 5;
+		systemSid.SubAuthority[0] = 18;
+
 		PTOKEN_USER tokenInfo = NULL;
-		PSID systemSid = NULL;
 		HANDLE token = NULL;
 		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
 			goto end;
@@ -144,20 +150,11 @@ static BOOL IsSystemUser(void) {
 			goto end;
 		}
 
-		DWORD sidSize = SECURITY_MAX_SID_SIZE;
-		systemSid = LocalAlloc(LPTR, sidSize);
-		if (!CreateWellKnownSid(WinLocalSystemSid, NULL, systemSid, &sidSize)) {
-			goto end;
-		}
-
-		_isSystemUser = EqualSid(tokenInfo->User.Sid, systemSid);
+		_isSystemUser = EqualSid(tokenInfo->User.Sid, &systemSid);
 
 end:
 		if (tokenInfo) {
 			LocalFree(tokenInfo);
-		}
-		if (systemSid) {
-			LocalFree(systemSid);
 		}
 		if (token) {
 			CloseHandle(token);
