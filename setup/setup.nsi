@@ -209,7 +209,12 @@ SectionEnd
 ; XP 2002 prerequisities
 ${MementoSection} "Windows XP $(SP) 3" XPSP3
 	${RebootIfRequired}
-	Call InstallXPSP1a
+	${If} ${IsWinXPMediaCenter}
+	${OrIf} ${IsWinXPTabletPC}
+		Call InstallXPSP2
+	${Else}
+		Call InstallXPSP1a
+	${EndIf}
 	${RebootIfRequired}
 	Call InstallXPSP3
 	${RebootIfRequired}
@@ -740,8 +745,7 @@ Function .onInit
 			${EndIf}
 		${EndIf}
 
-		ReadRegDword $0 HKLM "${REGPATH_POSREADY}" "Installed"
-		${If} $0 == 1
+		${If} ${IsWinXPPOSReady}
 			!insertmacro RemoveSection ${WES09}
 		${EndIf}
 	${Else}
@@ -947,7 +951,12 @@ Function PreDownload
 	; XP 2002
 	${If} ${IsWinXP2002}
 	${AndIf} ${SectionIsSelected} ${XPSP3}
-		Call DownloadXPSP1a
+		${If} ${IsWinXPMediaCenter}
+		${OrIf} ${IsWinXPTabletPC}
+			Call DownloadXPSP2
+		${Else}
+			Call DownloadXPSP1a
+		${EndIf}
 		Call DownloadXPSP3
 	${EndIf}
 

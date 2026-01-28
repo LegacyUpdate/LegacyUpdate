@@ -148,6 +148,12 @@
 	!insertmacro _${op} $_LOGICLIB_TEMP 0 `${_t}` `${_f}`
 !macroend
 
+!macro __WinVer_TestXPWPAEdition _a key _t _f
+	!insertmacro _LOGICLIB_TEMP
+	ReadRegDword $_LOGICLIB_TEMP HKLM "${REGPATH_WPA}\${key}" "Installed"
+	!insertmacro _= $_LOGICLIB_TEMP 1 `${_t}` `${_f}`
+!macroend
+
 ; Defines
 
 ; TODO: This is apparently insufficient prior to NT4 SP6?
@@ -184,6 +190,10 @@
 	!define AtMostWin${os}   `<= _WinVer_TestBuild ${WINVER_BUILD_${os}}`
 !macroend
 
+!macro __WinVer_DefineXPWPAEdition key
+	!define IsWinXP${key}    `=  _WinVer_TestXPWPAEdition ${key}`
+!macroend
+
 !insertmacro __WinVer_DefineClient NT4
 !insertmacro __WinVer_DefineClient 2000
 !insertmacro __WinVer_DefineClient XP2002
@@ -203,3 +213,7 @@
 !insertmacro __WinVer_DefineServer 2016
 
 !insertmacro __WinVer_DefineBuild  11
+
+!insertmacro __WinVer_DefineXPWPAEdition MediaCenter
+!insertmacro __WinVer_DefineXPWPAEdition TabletPC
+!insertmacro __WinVer_DefineXPWPAEdition POSReady

@@ -63,8 +63,9 @@
 !define REGPATH_CONTROL_TERMSRV    "${REGPATH_CONTROL}\Terminal Server"
 !define REGPATH_CONTROL_WINDOWS    "${REGPATH_CONTROL}\Windows"
 
-; XP POSReady hack
-!define REGPATH_POSREADY           "System\WPA\PosReady"
+; XP WPA
+!define REGPATH_WPA                "System\WPA"
+!define REGPATH_POSREADY           "${REGPATH_WPA}\PosReady"
 
 ; RunOnce
 !define REGPATH_SETUP              "System\Setup"
