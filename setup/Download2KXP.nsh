@@ -10,7 +10,7 @@
 !insertmacro PatchHandler "W2KSP4"  "Windows 2000 $(SP) 4"      ${PATCH_FLAGS_SHORT} ""
 !insertmacro PatchHandler "W2KUR1"  "$(SectionW2KUR1)"          ${PATCH_FLAGS_LONG}  ""
 !insertmacro PatchHandler "XPSP1a"  "Windows XP $(SP) 1a"       ${PATCH_FLAGS_SHORT} ""
-!insertmacro PatchHandler "XPSP2"   "Windows XP $(SP) 2"        ${PATCH_FLAGS_LONG} ""
+!insertmacro PatchHandler "XPSP2"   "Windows XP $(SP) 2"        ${PATCH_FLAGS_LONG}  ""
 !insertmacro PatchHandler "XPSP3"   "Windows XP $(SP) 3"        ${PATCH_FLAGS_LONG}  ""
 !insertmacro PatchHandler "2003SP2" "Windows XP $(P64)/$(SRV) 2003 $(SP) 2" ${PATCH_FLAGS_LONG} ""
 !insertmacro PatchHandler "XPESP3"  "Windows XP $(EMB) $(SP) 3" ${PATCH_FLAGS_LONG}  ""
