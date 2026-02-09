@@ -18,7 +18,6 @@
 #include <oleidl.h>
 #include <shlobj.h>
 #include <wuapi.h>
-#include "IUpdateInstaller4.h"
 
 const WCHAR *permittedHosts[] = {
 	L"legacyupdate.net",
@@ -464,15 +463,6 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	VARIANT_BOOL isRebootRequired = VARIANT_FALSE;
 	HRESULT hr = get_IsRebootRequired(&isRebootRequired);
 	if (SUCCEEDED(hr) && isRebootRequired == VARIANT_TRUE) {
-		// Calling Commit() is recommended on Windows 10, to ensure feature updates are properly prepared prior to the
-		// reboot. If IUpdateInstaller4 doesn't exist, we can skip this.
-		CComPtr<IUpdateInstaller4> installer;
-		hr = installer.CoCreateInstance(CLSID_UpdateInstaller, NULL, CLSCTX_INPROC_SERVER);
-		if (SUCCEEDED(hr) && hr != REGDB_E_CLASSNOTREG) {
-			hr = installer->Commit(0);
-			CHECK_HR_OR_RETURN(L"Commit");
-		}
-
 		IElevationHelper *elevatedHelper;
 		hr = GetElevatedHelper(&elevatedHelper);
 		CHECK_HR_OR_RETURN(L"GetElevatedHelper");

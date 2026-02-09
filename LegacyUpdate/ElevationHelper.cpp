@@ -10,6 +10,7 @@
 #include "VersionInfo.h"
 #include <strsafe.h>
 #include <new>
+#include "IUpdateInstaller4.h"
 
 const WCHAR *permittedProgIDs[] = {
 	L"Microsoft.Update."
@@ -167,6 +168,16 @@ STDMETHODIMP CElevationHelper::SetBrowserHwnd(IUpdateInstaller *installer, HWND 
 }
 
 STDMETHODIMP CElevationHelper::Reboot(void) {
+	// Calling Commit() is recommended on Windows 10, to ensure feature updates are properly prepared prior to the reboot.
+	// If IUpdateInstaller4 doesn't exist, we can skip this.
+	CComPtr<IUpdateInstaller4> installer;
+	HRESULT hr = installer.CoCreateInstance(CLSID_UpdateInstaller, NULL, CLSCTX_INPROC_SERVER);
+	if (SUCCEEDED(hr) && hr != REGDB_E_CLASSNOTREG) {
+		hr = installer->Commit(0);
+		CHECK_HR_OR_GOTO_END(L"Commit");
+	}
+
+end:
 	return ::Reboot();
 }
 
