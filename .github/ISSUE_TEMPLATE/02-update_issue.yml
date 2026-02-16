@@ -19,7 +19,7 @@ body:
         ---
         ### Describe the issue
         If applicable, please include the error code from Windows Update:
-        * From the Legacy Update website: Click “Update History”, then click ![Error and question mark icon](https://legacyupdate.net/windowsupdate/v6/shared/images/Status_Failed.png) next to the failed update.
+        * From the Legacy Update website: Click “Update History”, then click ![Error and question mark icon](https://legacyupdate.net/windowsupdate/v6/shared/images/status_failed.gif) next to the failed update.
         * From the Windows Update control panel: Click “View update history”, then double-click the failed update.
   - type: textarea
     id: actual
