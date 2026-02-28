@@ -108,3 +108,11 @@
 
 ; Hotfix keys
 !define REGPATH_HOTFIX             "Software\Microsoft\Windows NT\CurrentVersion\HotFix"
+
+; MSI keys
+!define REGPATH_MSI_COMPONENTS     "Software\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Components"
+
+!define MSI_COMPONENT_MSO12        "00002119E20000000000000000F01FEC"
+!define MSI_COMPONENT_MSO12CONV    "00002109020090400000000000F01FEC"
+!define MSI_COMPONENT_MSO14_32     "00004119110000000000000000F01FEC"
+!define MSI_COMPONENT_MSO14_64     "00004109340000000100000000F01FEC"

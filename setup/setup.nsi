@@ -84,6 +84,7 @@ Var /GLOBAL UninstallInstalled
 !include AeroWizard.nsh
 !include Download2KXP.nsh
 !include DownloadIE.nsh
+!include DownloadMSO.nsh
 !include DownloadVista78.nsh
 !include UpdateRoots.nsh
 ; !include ActiveXPage.nsh
@@ -347,6 +348,36 @@ Section "$(SectionSSU)" WIN81SSU
 	Call InstallKB3021910
 	${RebootIfRequired}
 SectionEnd
+
+; Office Compatibility Pack
+${MementoSection} "Microsoft Office Compatibility Pack Service Pack 3" MSO12CONVSP3
+	${RebootIfRequired}
+	Call InstallMSO12ConvSP3
+	Call InstallKB4018354
+	Call InstallKB4461607
+	${RebootIfRequired}
+${MementoSectionEnd}
+
+; Office 2007
+${MementoSection} "Microsoft Office 2007 Service Pack 3" MSO12SP3
+	${RebootIfRequired}
+	Call InstallMSO12SP3
+	Call InstallKB4018353
+	Call InstallKB4018355
+	${RebootIfRequired}
+${MementoSectionEnd}
+
+; Office 2010
+${MementoSection} "Microsoft Office 2010 Service Pack 2" MSO14SP2
+	${RebootIfRequired}
+	Call InstallMSO14SP2-x86
+	Call InstallMSO14SP2-x64
+	Call InstallKB3017810-x86
+	Call InstallKB3017810-x64
+	Call InstallKB4493218-x86
+	Call InstallKB4493218-x64
+	${RebootIfRequired}
+${MementoSectionEnd}
 
 ; Shared prerequisites
 !include DownloadWUA.nsh
@@ -897,6 +928,44 @@ Function .onInit
 			!insertmacro RemoveSection ${ROOTCERTS}
 		${EndIf}
 	${EndIf}
+
+	; Office
+	Call GetMSOPaths
+
+	${If} $MSO12.ExcelCnvPath != ""
+	${OrIf} $MSO12.WordCnvPath != ""
+		${IfNot} ${NeedsPatch} MSO12ConvSP3
+		${AndIfNot} ${NeedsPatch} KB4018354
+		${AndIfNot} ${NeedsPatch} KB4461607
+			!insertmacro RemoveSection ${MSO12CONVSP3}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${MSO12CONVSP3}
+	${EndIf}
+
+	${If} $MSO12.WordPath != ""
+	${OrIf} $MSO12.ExcelPath != ""
+		${IfNot} ${NeedsPatch} MSO12SP3
+		${AndIfNot} ${NeedsPatch} KB4018354
+		${AndIfNot} ${NeedsPatch} KB4461607
+			!insertmacro RemoveSection ${MSO12SP3}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${MSO12SP3}
+	${EndIf}
+
+	${If} $MSO14.ExcelPath32 != ""
+	${OrIf} $MSO14.WordPath32 != ""
+	${OrIf} $MSO14.ExcelPath64 != ""
+	${OrIf} $MSO14.WordPath64 != ""
+		${IfNot} ${NeedsPatch} MSO14SP2
+		${AndIfNot} ${NeedsPatch} KB3017810
+		${AndIfNot} ${NeedsPatch} KB4493218
+			!insertmacro RemoveSection ${MSO14SP2}
+		${EndIf}
+	${Else}
+		!insertmacro RemoveSection ${MSO14SP2}
+	${EndIf}
 FunctionEnd
 
 Function ComponentsPageCheck
@@ -1028,6 +1097,30 @@ Function PreDownload
 		Call DownloadKB2937592
 		Call DownloadKB2934018
 		Call DownloadKB3021910
+	${EndIf}
+
+	; Office Compatibility Pack
+	${If} ${SectionIsSelected} ${MSO12CONVSP3}
+		Call DownloadMSO12ConvSP3
+		Call DownloadKB4018354
+		Call DownloadKB4461607
+	${EndIf}
+
+	; Office 2007
+	${If} ${SectionIsSelected} ${MSO12SP3}
+		Call DownloadMSO12SP3
+		Call DownloadKB4018353
+		Call DownloadKB4018355
+	${EndIf}
+
+	; Office 2010
+	${If} ${SectionIsSelected} ${MSO14SP2}
+		Call DownloadMSO14SP2-x86
+		Call DownloadMSO14SP2-x64
+		Call DownloadKB3017810-x86
+		Call DownloadKB3017810-x64
+		Call DownloadKB4493218-x86
+		Call DownloadKB4493218-x64
 	${EndIf}
 
 	; General
