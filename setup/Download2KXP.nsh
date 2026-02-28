@@ -5,7 +5,7 @@
 !insertmacro NeedsSPHandler "XPESP3"  "WinXP2002" 2
 !insertmacro NeedsSPHandler "2003SP2" "WinXP2003" 1
 
-!insertmacro NeedsFileVersionHandler "W2KUR1" "kernel32.dll" "5.00.2195.7006"
+!insertmacro NeedsFileVersionHandler "W2KUR1" "$WINDIR\system32\kernel32.dll" "5.00.2195.7006"
 
 !insertmacro PatchHandler "W2KSP4"  "Windows 2000 $(SP) 4"      ${PATCH_FLAGS_SHORT} ""
 !insertmacro PatchHandler "W2KUR1"  "$(SectionW2KUR1)"          ${PATCH_FLAGS_LONG}  ""

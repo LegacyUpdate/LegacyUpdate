@@ -220,7 +220,9 @@ FunctionEnd
 
 !macro NeedsFileVersionHandler name file version
 	Function Needs${name}
-		${GetFileVersion} "$SYSDIR\${file}" $0
+		${DisableX64FSRedirection}
+		${GetFileVersion} "${file}" $0
+		${EnableX64FSRedirection}
 		${VersionCompare} $0 ${version} $1
 		${If} $1 == 2 ; Less than
 			Push 1
@@ -328,6 +330,20 @@ FunctionEnd
 	FunctionEnd
 !macroend
 
+!macro ExtractCab name filename path
+	${DetailPrint} "$(Extracting)$Exec.Name..."
+	${IfNot} ${IsVerbose}
+		SetDetailsPrint none
+	${EndIf}
+	CreateDirectory "$PLUGINSDIR\$Exec.Patch"
+	StrCpy $Exec.Name "${name}"
+	StrCpy $Exec.Command '"$WINDIR\system32\expand.exe" -F:* "${filename}" "${path}"'
+	Call ExecWithErrorHandling
+	${IfNot} ${IsVerbose}
+		SetDetailsPrint lastused
+	${EndIf}
+!macroend
+
 !macro InstallSP name filename
 	; SPInstall.exe /norestart seems to be broken. We let it do a delayed restart, then cancel it.
 	${DetailPrint} "$(Installing)${name}..."
@@ -347,16 +363,8 @@ FunctionEnd
 
 Function InstallMSU
 	${DetailPrint} "$(Extracting)$Exec.Name..."
-	${IfNot} ${IsVerbose}
-		SetDetailsPrint none
-	${EndIf}
-	CreateDirectory "$PLUGINSDIR\$Exec.Patch"
+	!insertmacro ExtractCab '$Exec.Name' "$0" "$PLUGINSDIR\$Exec.Patch"
 	CreateDirectory "$PLUGINSDIR\$Exec.Patch\Temp"
-	StrCpy $Exec.Command '"$WINDIR\system32\expand.exe" -F:* "$0" "$PLUGINSDIR\$Exec.Patch"'
-	Call ExecWithErrorHandling
-	${IfNot} ${IsVerbose}
-		SetDetailsPrint lastused
-	${EndIf}
 
 	${DetailPrint} "$(Installing)$Exec.Name..."
 	${DisableX64FSRedirection}

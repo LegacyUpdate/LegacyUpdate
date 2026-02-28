@@ -1,4 +1,4 @@
-!insertmacro NeedsFileVersionHandler "IE6" "mshtml.dll" "6.0.2600.0"
+!insertmacro NeedsFileVersionHandler "IE6" "$WINDIR\system32\mshtml.dll" "6.0.2600.0"
 
 !macro DownloadIE ver title
 	${If} ${NeedsPatch} IE${ver}
@@ -9,8 +9,7 @@
 
 		${IfNot} ${FileExists} "$PLUGINSDIR\IE${ver}\ie${ver}setup.exe"
 			${DetailPrint} "$(Extracting)${title} $(Setup)..."
-			CreateDirectory "$PLUGINSDIR\IE${ver}"
-			!insertmacro ExecWithErrorHandling '$(IE) 6 $(SP) 1' '"$WINDIR\system32\expand.exe" -F:* $Patch.File "$PLUGINSDIR\IE${ver}"'
+			!insertmacro ExtractCab '${title}' "$Patch.File" "$PLUGINSDIR\IE${ver}"
 			${DetailPrint} "$(Downloading)${title}..."
 			!insertmacro ExecWithErrorHandling '${title}' '"$PLUGINSDIR\IE${ver}\ie${ver}setup.exe" /c:"ie${ver}wzd.exe /q /d /s:""#e"""'
 		${EndIf}

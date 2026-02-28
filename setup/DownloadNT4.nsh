@@ -76,7 +76,7 @@ FunctionEnd
 !insertmacro TODO "KB891711"
 
 ; Runtimes
-!insertmacro NeedsFileVersionHandler "MSI" "msiexec.exe" "3.1.4000.2435"
+!insertmacro NeedsFileVersionHandler "MSI" "$WINDIR\system32\msiexec.exe" "3.1.4000.2435"
 
 Function InstallMSI
 	${If} ${NeedsPatch} MSI

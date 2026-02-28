@@ -24,15 +24,12 @@ FunctionEnd
 	FunctionEnd
 
 	Function Download${kbid}
-		Call Needs${kbid}
-		Pop $0
-		${If} $0 == 1
-			Call GetArch
-			Pop $0
-			ReadINIStr $2 $PLUGINSDIR\Patches.ini "${kbid}" "$0-sha256"
-			ReadINIStr $0 $PLUGINSDIR\Patches.ini "${kbid}" $0
-			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" Prefix
-			!insertmacro Download "${title}" "$1$0" "${kbid}.exe" "$2" 1
+		StrCpy $Patch.Key   "${kbid}"
+		StrCpy $Patch.File  "${kbid}.exe"
+		StrCpy $Patch.Title "${title}"
+
+		${If} ${NeedsPatch} ${kbid}
+			Call -PatchHandler
 		${EndIf}
 	FunctionEnd
 
@@ -84,7 +81,7 @@ FunctionEnd
 !insertmacro MSUHandler "KB971512"  "$(Update) for Windows Vista"
 !insertmacro MSUHandler "KB2117917" "$(PUS) for Windows Vista"
 
-!insertmacro NeedsFileVersionHandler "IE9" "mshtml.dll" "9.0.8112.16421"
+!insertmacro NeedsFileVersionHandler "IE9" "$WINDIR\system32\mshtml.dll" "9.0.8112.16421"
 !insertmacro PatchHandler "IE9" "$(IE) 9 for Windows Vista" ${PATCH_FLAGS_OTHER} "/passive /norestart /update-no /closeprograms"
 
 ; Windows Vista Servicing Stack Update
