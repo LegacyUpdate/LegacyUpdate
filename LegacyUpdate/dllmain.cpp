@@ -41,10 +41,12 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 	case DLL_PROCESS_ATTACH:
 		g_hInstance = hInstance;
 		DisableThreadLibraryCalls(hInstance);
+		OpenLog();
 		break;
 
 	case DLL_PROCESS_DETACH:
 		g_hInstance = NULL;
+		CloseLog();
 		break;
 	}
 
@@ -202,15 +204,18 @@ end:
 
 // DllRegisterServer - Adds entries to the system registry
 STDAPI DllRegisterServer(void) {
+	LOG(L"DllRegisterServer");
 	return UpdateRegistration(TRUE);
 }
 
 // DllUnregisterServer - Removes entries from the system registry
 STDAPI DllUnregisterServer(void) {
+	LOG(L"DllUnregisterServer");
 	return UpdateRegistration(FALSE);
 }
 
 // DllInstall - Adds/Removes entries to the system registry per machine only.
 STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine) {
+	LOG(L"DllInstall(%d)", bInstall);
 	return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
 }

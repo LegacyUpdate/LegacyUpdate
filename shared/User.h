@@ -18,3 +18,45 @@ static inline BOOL IsUserAdmin(void) {
 	FreeSid(adminsSid);
 	return result;
 }
+
+static inline BOOL IsElevated(void) {
+	HANDLE hToken = NULL;
+
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+		return FALSE;
+	}
+
+	TOKEN_ELEVATION elevation;
+	DWORD size = sizeof(elevation);
+	if (!GetTokenInformation(hToken, TokenElevation, &elevation, sizeof(elevation), &size)) {
+		return FALSE;
+	}
+
+	BOOL result = elevation.TokenIsElevated;
+	CloseHandle(hToken);
+	return result;
+}
+
+static inline DWORD GetTokenIntegrity(void) {
+#if WINVER < _WIN32_WINNT_WIN2K
+	return MAXDWORD;
+#else
+	HANDLE hToken = NULL;
+
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+		return MAXDWORD;
+	}
+
+	BYTE buffer[sizeof(TOKEN_MANDATORY_LABEL) + SECURITY_MAX_SID_SIZE];
+	DWORD size = sizeof(buffer);
+	if (!GetTokenInformation(hToken, TokenIntegrityLevel, buffer, size, &size)) {
+		CloseHandle(hToken);
+		return MAXDWORD;
+	}
+
+	CloseHandle(hToken);
+
+	TOKEN_MANDATORY_LABEL *tokenLabel = (TOKEN_MANDATORY_LABEL *)buffer;
+	return *GetSidSubAuthority(tokenLabel->Label.Sid, *GetSidSubAuthorityCount(tokenLabel->Label.Sid) - 1);
+#endif
+}

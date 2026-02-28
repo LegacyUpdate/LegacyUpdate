@@ -1,3 +1,5 @@
+#pragma once
+
 #include <windows.h>
 
 HBITMAP LoadPNGResource(HINSTANCE hInstance, LPCWSTR resourceName, LPCWSTR resourceType);

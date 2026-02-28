@@ -4,6 +4,7 @@ FILES    = \
 	../shared/HResult.c \
 	../shared/LegacyUpdate.c \
 	../shared/LoadImage.c \
+	../shared/Log.c \
 	../shared/Registry.c \
 	../shared/Wow64.c
 RCFILES  = resource.rc
@@ -16,6 +17,9 @@ all:: all-archs
 all-archs: all-32 all-64
 
 include ../build/shared.mk
+
+CFLAGS  += \
+	-DLOG_NAME="\"Launcher\""
 
 LDFLAGS += \
 	-Wl,--subsystem,windows \

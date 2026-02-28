@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <nsis/pluginapi.h>
 #include "Startup.h"
+#include "Log.h"
 
 HINSTANCE g_hInstance;
 HWND g_hwndParent;
@@ -11,10 +12,12 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 	case DLL_PROCESS_ATTACH:
 		g_hInstance = hInstance;
 		Startup();
+		OpenLog();
 		break;
 
 	case DLL_PROCESS_DETACH:
 		g_hInstance = NULL;
+		CloseLog();
 		break;
 	}
 

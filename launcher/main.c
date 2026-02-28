@@ -5,6 +5,7 @@
 #include <combaseapi.h>
 #include <commctrl.h>
 #include <shellapi.h>
+#include "Log.h"
 #include "MsgBox.h"
 #include "RegisterServer.h"
 #include "Startup.h"
@@ -40,6 +41,7 @@ EXTERN_C __declspec(dllexport)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 	g_hInstance = hInstance;
 	Startup();
+	OpenLog();
 
 	// nCmdShow seems to give us garbage values. Get it from the startup info struct.
 	STARTUPINFO startupInfo;
@@ -132,6 +134,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	}
 
 end:
+	CloseLog();
 	CoUninitialize();
 	ExitProcess(hr);
 	return hr;

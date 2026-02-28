@@ -3,6 +3,7 @@ FILES    = \
 	../shared/HResult.c \
 	../shared/LegacyUpdate.c \
 	../shared/LoadImage.c \
+	../shared/Log.c \
 	../shared/ProductInfo.c \
 	../shared/Registry.c \
 	../shared/Wow64.c
@@ -15,6 +16,7 @@ all:: internal-all
 include ../build/shared.mk
 
 CFLAGS  += \
+	-DLOG_NAME="\"Setup\"" \
 	-mdll
 
 LDFLAGS += \

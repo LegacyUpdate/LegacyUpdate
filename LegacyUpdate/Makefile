@@ -4,6 +4,7 @@ FILES    = \
 	../shared/Exec.c \
 	../shared/HResult.c \
 	../shared/LegacyUpdate.c \
+	../shared/Log.c \
 	../shared/ProductInfo.c \
 	../shared/Registry.c \
 	../shared/WMI.c \
@@ -25,6 +26,9 @@ all:: all-archs
 all-archs: all-32 all-64
 
 include ../build/shared.mk
+
+CFLAGS  += \
+	-DLOG_NAME="\"Control\""
 
 LDFLAGS += \
 	-shared \

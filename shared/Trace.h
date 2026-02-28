@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Log.h"
+
 #ifdef _DEBUG
 	// Yeah, sue me lol
 	#define TRACE(...) { \
@@ -8,9 +10,10 @@
 		wsprintf(__traceMsg + wcslen(__traceMsg), __VA_ARGS__); \
 		MessageBox(NULL, __traceMsg, L"Debug", MB_OK); \
 		LocalFree(__traceMsg); \
+		LOG(__VA_ARGS__); \
 	}
 #else
-	#define TRACE(...)
+	#define TRACE(...) LOG(__VA_ARGS__)
 #endif
 
 #define CHECK_HR_OR_RETURN(thing) \

@@ -45,13 +45,14 @@ SetPluginUnload alwaysoff
 !define IsHelp        `"" HasFlag "/?"`
 
 !if ${DEBUG} == 1
-!define IsVerbose   `1 == 1`
-!define TestRunOnce `"" HasFlag "/testrunonce"`
+	!define IsVerbose   `1 == 1`
+	!define TestRunOnce `"" HasFlag "/testrunonce"`
 !else
-!define IsVerbose   `"" HasFlag "/v"`
+	!define IsVerbose   `"" HasFlag "/v"`
 !endif
 
 !macro -DetailPrint level text
+	LegacyUpdateNSIS::WriteLog "${text}"
 !if ${level} == 0
 	${If} ${IsVerbose}
 		DetailPrint "${text}"
@@ -119,25 +120,28 @@ Function InitChecks
 		Quit
 	${EndIf}
 
-	Call CheckSetupMutex
-
 	ClearErrors
-	LegacyUpdateNSIS::IsAdmin
+	LegacyUpdateNSIS::InitLog
 	${If} ${Errors}
 		MessageBox MB_USERICON "$(MsgBoxPluginFailed)" /SD IDOK
 		SetErrorLevel 1
 		Quit
 	${EndIf}
 
+	LegacyUpdateNSIS::IsAdmin
 	Pop $0
 	${If} $0 == 0
+		${VerbosePrint} "Not an admin"
 		MessageBox MB_USERICON "$(MsgBoxElevationRequired)" /SD IDOK
 		SetErrorLevel ${ERROR_ELEVATION_REQUIRED}
 		Quit
 	${EndIf}
 
+	Call CheckSetupMutex
+
 	${If} ${IsRunOnce}
 	${OrIf} ${IsPostInstall}
+		${VerbosePrint} "RunOnce logon"
 		Call OnRunOnceLogon
 	${ElseIfNot} ${AtLeastWin10}
 		GetWinVer $0 Build
@@ -245,12 +249,14 @@ Function InitChecks
 		${AndIf} $1 == 0
 			${IfNot} ${IsRunOnce}
 			${AndIfNot} ${IsPostInstall}
+				${VerbosePrint} "Terminal Server execute mode detected"
 				MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxTermsrvAppInstallMode)" /SD IDOK \
 					IDOK +3
 				SetErrorLevel 1
 				Quit
 			${EndIf}
 
+			${VerbosePrint} "Setting Terminal Server install mode"
 			StrCpy $TermsrvUserModeChanged 1
 			System::Call '${SetTermsrvAppInstallMode}(1)'
 		${EndIf}
@@ -259,6 +265,7 @@ FunctionEnd
 
 Function RevertTermsrvUserMode
 	${If} $TermsrvUserModeChanged == 1
+		${VerbosePrint} "Reverting Terminal Server install mode"
 		System::Call '${SetTermsrvAppInstallMode}(0)'
 	${EndIf}
 FunctionEnd
