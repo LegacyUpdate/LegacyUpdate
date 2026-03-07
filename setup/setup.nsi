@@ -411,17 +411,17 @@ ${MementoSection} "$(^Name)" LEGACYUPDATE
 		${If} $1 >= 200
 		${AndIf} $1 < 300
 			; HTTPS will work
-			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER_HTTPS}"
-			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER_HTTPS}"
-			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL_HTTPS}"
+			${WriteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER_HTTPS}"
+			${WriteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER_HTTPS}"
+			${WriteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL_HTTPS}"
 		${Else}
 			; Probably not supported; use HTTP
-			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
-			WriteRegStr HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
-			WriteRegStr HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
+			${WriteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
+			${WriteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
+			${WriteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
 		${EndIf}
 
-		WriteRegDword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
+		${WriteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
 
 		; Restart service
 		!insertmacro RestartWUAUService
@@ -566,23 +566,23 @@ Section "-un.Legacy Update Server" un.WUSERVER
 		${VerbosePrint} "WUServer: $0"
 		${If} $0 == "${WSUS_SERVER}"
 		${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
-			DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUServer"
-			DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"
+			${DeleteRegWithBackup} Str   HKLM "${REGPATH_WUPOLICY}"   "WUServer"    "-"
+			${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" "-"
 		${EndIf}
 
 		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
 		${VerbosePrint} "WUStatusServer: $0"
 		${If} $0 == "${WSUS_SERVER}"
 		${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
-			DeleteRegValue HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer"
-			DeleteRegValue HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"
+			${DeleteRegWithBackup} Str   HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer" "-"
+			${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"    "-"
 		${EndIf}
 
 		ReadRegStr $0 HKLM "${REGPATH_WU}" "URL"
 		${VerbosePrint} "URL: $0"
 		${If} $0 == "${UPDATE_URL}"
 		${OrIf} $0 == "${UPDATE_URL_HTTPS}"
-			DeleteRegValue HKLM "${REGPATH_WU}" "URL"
+			${DeleteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "-"
 		${EndIf}
 	${EndIf}
 SectionEnd

@@ -49,38 +49,14 @@ FunctionEnd
 	${EndIf}
 !macroend
 
-!macro RunOnceOverwriteReg type root subkey name value
-	ClearErrors
-	ReadReg${type} $0 ${root} "${subkey}" "${name}"
-	${IfNot} ${Errors}
-		WriteReg${type} ${root} "${subkey}" "${name}_LegacyUpdateTemp" $0
-	${EndIf}
-	WriteReg${type} ${root} "${subkey}" "${name}" `${value}`
-!macroend
-
-!macro RunOnceRestoreReg type root subkey name fallback
-	ClearErrors
-	ReadReg${type} $0 ${root} "${subkey}" "${name}_LegacyUpdateTemp"
-	${If} ${Errors}
-!if "${fallback}" == "-"
-		DeleteRegValue ${root} "${subkey}" "${name}"
-!else
-		WriteReg${type} ${root} "${subkey}" "${name}" `${fallback}`
-!endif
-	${Else}
-		WriteReg${type} ${root} "${subkey}" "${name}" $0
-		DeleteRegValue ${root} "${subkey}" "${name}_LegacyUpdateTemp"
-	${EndIf}
-!macroend
-
 Function CleanUpRunOnce
 	; The reboot has happened, so remove reboot flag if any
 	DeleteRegValue HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "RebootPending"
 
 	; Restore setup keys
 	; Be careful here. Doing this wrong can cause SYSTEM_LICENSE_VIOLATION bootloops!
-	!insertmacro RunOnceRestoreReg Str   HKLM "${REGPATH_SETUP}" "CmdLine"   ""
-	!insertmacro RunOnceRestoreReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NORMAL}
+	${DeleteRegWithBackup} Str   HKLM "${REGPATH_SETUP}" "CmdLine"   ""
+	${DeleteRegWithBackup} Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NORMAL}
 	DeleteRegValue HKLM "${REGPATH_SETUP}" "SetupShutdownRequired"
 
 	${If} ${Abort}
@@ -91,11 +67,11 @@ FunctionEnd
 Function CleanUpRunOnceFinal
 	; Enable keys we disabled if needed
 	${If} ${IsWinXP2002}
-		!insertmacro RunOnceRestoreReg Dword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled" "-"
+		${DeleteRegWithBackup} Dword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled" "-"
 	${EndIf}
 
 	${If} ${AtLeastWin8}
-		!insertmacro RunOnceRestoreReg Dword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" "-"
+		${DeleteRegWithBackup} Dword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" "-"
 	${EndIf}
 
 	; Delete runonce stuff
@@ -151,8 +127,8 @@ Function PrepareRunOnce
 		; Somewhat documented in KB939857:
 		; https://web.archive.org/web/20090723061647/http://support.microsoft.com/kb/939857
 		; See also Wine winternl.h
-		!insertmacro RunOnceOverwriteReg Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"$1" /runonce'
-		!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
+		${WriteRegWithBackup} Str   HKLM "${REGPATH_SETUP}" "CmdLine" '"$1" /runonce'
+		${WriteRegWithBackup} Dword HKLM "${REGPATH_SETUP}" "SetupType" ${SETUP_TYPE_NOREBOOT}
 		WriteRegDword HKLM "${REGPATH_SETUP}" "SetupShutdownRequired" ${SETUP_SHUTDOWN_REBOOT}
 	${EndIf}
 
@@ -160,13 +136,13 @@ Function PrepareRunOnce
 	${If} ${IsWinXP2002}
 	${AndIfNot} ${AtLeastServicePack} 2
 		${VerbosePrint} "Disabling Security Center first run"
-		!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled" 1
+		${WriteRegWithBackup} Dword HKLM "${REGPATH_SECURITYCENTER}" "FirstRunDisabled" 1
 	${EndIf}
 
 	; Temporarily disable logon animation if needed
 	${If} ${AtLeastWin8}
 		${VerbosePrint} "Disabling first logon animation"
-		!insertmacro RunOnceOverwriteReg Dword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
+		${WriteRegWithBackup} Dword HKLM "${REGPATH_POLICIES_SYSTEM}" "EnableFirstLogonAnimation" 0
 	${EndIf}
 FunctionEnd
 

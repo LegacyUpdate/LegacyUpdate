@@ -290,6 +290,33 @@ FunctionEnd
 
 !define DeleteWithErrorHandling `!insertmacro -DeleteWithErrorHandling`
 
+!macro -WriteRegWithBackup type root subkey name value
+	ClearErrors
+	ReadReg${type} $0 ${root} "${subkey}" "${name}"
+	${IfNot} ${Errors}
+		WriteReg${type} ${root} "${subkey}" "${name}_LegacyUpdateBackup" $0
+	${EndIf}
+	WriteReg${type} ${root} "${subkey}" "${name}" `${value}`
+!macroend
+
+!macro -DeleteRegWithBackup type root subkey name fallback
+	ClearErrors
+	ReadReg${type} $0 ${root} "${subkey}" "${name}_LegacyUpdateBackup"
+	${If} ${Errors}
+!if "${fallback}" == "-"
+		DeleteRegValue ${root} "${subkey}" "${name}"
+!else
+		WriteReg${type} ${root} "${subkey}" "${name}" `${fallback}`
+!endif
+	${Else}
+		WriteReg${type} ${root} "${subkey}" "${name}" $0
+		DeleteRegValue ${root} "${subkey}" "${name}_LegacyUpdateBackup"
+	${EndIf}
+!macroend
+
+!define WriteRegWithBackup  `!insertmacro -WriteRegWithBackup`
+!define DeleteRegWithBackup `!insertmacro -DeleteRegWithBackup`
+
 Function SetLastOSVersion
 	System::Call '${GetVersion}() .r0'
 	WriteRegDWORD HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "LastOSVersion" "$0"
