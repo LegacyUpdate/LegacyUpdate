@@ -3,7 +3,7 @@
 #include <winreg.h>
 #include "Exec.h"
 #include "LegacyUpdate.h"
-#include "WULog.h"
+#include "ViewLog.h"
 
 #ifndef SHUTDOWN_RESTART
 #define SHUTDOWN_RESTART 0x00000004

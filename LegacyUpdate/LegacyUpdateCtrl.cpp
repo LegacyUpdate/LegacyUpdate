@@ -13,7 +13,7 @@
 #include "Utils.h"
 #include "Version.h"
 #include "VersionInfo.h"
-#include "WULog.h"
+#include "ViewLog.h"
 #include <new>
 #include <oleidl.h>
 #include <shlobj.h>
@@ -474,17 +474,32 @@ STDMETHODIMP CLegacyUpdateCtrl::RebootIfRequired(void) {
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
+static LPCWSTR logTypeParams[] = {
+	L"/log system",
+	L"/log local",
+	L"/log locallow",
+	L"/log windowsupdate"
+};
+
+STDMETHODIMP CLegacyUpdateCtrl::ViewLog(ViewLogType logType) {
 	DoIsPermittedCheck();
 
-	HRESULT hr = StartLauncher(L"/log", FALSE);
-	if (!SUCCEEDED(hr)) {
-		// Try directly
-		hr = ::ViewWindowsUpdateLog(SW_SHOWDEFAULT);
+	if (logType < 0 || logType >= ARRAYSIZE(logTypeParams)) {
+		return E_INVALIDARG;
 	}
 
-	CHECK_HR_OR_RETURN(L"ViewWindowsUpdateLog");
+	HRESULT hr = StartLauncher(logTypeParams[logType], FALSE);
+	if (!SUCCEEDED(hr)) {
+		// Try directly
+		hr = ::ViewLog((LogAction)logType, SW_SHOWDEFAULT, TRUE);
+	}
+
+	CHECK_HR_OR_RETURN(L"ViewLog");
 	return hr;
+}
+
+STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
+	return ViewLog(e_windowsUpdate);
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {

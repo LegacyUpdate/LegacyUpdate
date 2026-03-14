@@ -7,6 +7,7 @@ FILES    = \
 	../shared/Log.c \
 	../shared/ProductInfo.c \
 	../shared/Registry.c \
+	../shared/ViewLog.c \
 	../shared/WMI.c \
 	../shared/Wow64.c \
 	$(OBJDIR)/LegacyUpdate_i.c

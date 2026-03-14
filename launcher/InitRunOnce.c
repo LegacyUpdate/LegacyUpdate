@@ -105,15 +105,15 @@ static void ResetSetupKey(void) {
 	// Reset CmdLine to empty string
 	LPWSTR cmdLine = L"";
 	DWORD cmdLineLength = 0;
-	if (SUCCEEDED(GetRegistryString(key, NULL, L"CmdLine_LegacyUpdateTemp", 0, &cmdLine, &cmdLineLength))) {
-		RegDeleteValue(key, L"CmdLine_LegacyUpdateTemp");
+	if (SUCCEEDED(GetRegistryString(key, NULL, L"CmdLine_LegacyUpdateBackup", 0, &cmdLine, &cmdLineLength))) {
+		RegDeleteValue(key, L"CmdLine_LegacyUpdateBackup");
 	}
 	RegSetValueEx(key, L"CmdLine", 0, REG_SZ, (const BYTE *)cmdLine, cmdLineLength * sizeof(WCHAR));
 
 	// Reset SetupType to 0
 	DWORD setupType = 0;
-	if (SUCCEEDED(GetRegistryDword(key, NULL, L"SetupType_LegacyUpdateTemp", 0, &setupType))) {
-		RegDeleteValue(key, L"SetupType_LegacyUpdateTemp");
+	if (SUCCEEDED(GetRegistryDword(key, NULL, L"SetupType_LegacyUpdateBackup", 0, &setupType))) {
+		RegDeleteValue(key, L"SetupType_LegacyUpdateBackup");
 	}
 	RegSetValueEx(key, L"SetupType", 0, REG_DWORD, (const BYTE *)&setupType, sizeof(setupType));
 

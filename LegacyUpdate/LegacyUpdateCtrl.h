@@ -69,6 +69,7 @@ public:
 	STDMETHODIMP get_IsRebootRequired(VARIANT_BOOL *retval);
 	STDMETHODIMP get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval);
 	STDMETHODIMP RebootIfRequired();
+	STDMETHODIMP ViewLog(ViewLogType logType);
 	STDMETHODIMP ViewWindowsUpdateLog();
 	STDMETHODIMP OpenWindowsUpdateSettings();
 	STDMETHODIMP get_IsUsingWsusServer(VARIANT_BOOL *retval);

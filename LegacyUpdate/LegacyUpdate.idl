@@ -34,6 +34,13 @@ typedef enum UserType {
 	e_elevated = 3
 } UserType;
 
+typedef enum ViewLogType {
+	e_legacyUpdate = 0,
+	e_legacyUpdateLocal = 1,
+	e_legacyUpdateLocalLow = 2,
+	e_windowsUpdate = 3,
+} ViewLogType;
+
 [
 	object,
 	uuid(C33085BB-C3E1-4D27-A214-AF01953DF5E5),
@@ -51,6 +58,7 @@ interface ILegacyUpdateCtrl : IDispatch {
 	[id(15)] HRESULT SetBrowserHwnd(IUpdateInstaller *installer);
 	[id(5)]  HRESULT GetUserType([out, retval] UserType *retval);
 	[id(8)]  HRESULT RebootIfRequired(void);
+	[id(18)] HRESULT ViewLog(ViewLogType logType);
 	[id(9)]  HRESULT ViewWindowsUpdateLog(void);
 	[id(13)] HRESULT OpenWindowsUpdateSettings(void);
 	[id(16)] HRESULT BeforeUpdate(void);
