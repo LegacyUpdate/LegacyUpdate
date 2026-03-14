@@ -8,6 +8,11 @@ Function ActiveXPage
 		Abort
 	${EndIf}
 
+	; Skip if ActiveX install (user already opted for it)
+	${If} ${IsActiveX}
+		Abort
+	${EndIf}
+
 	; Skip if not required
 	${If} ${AtLeastWin7}
 	; TODO: Fix ordering of setup.nsi so we can do this
@@ -15,7 +20,7 @@ Function ActiveXPage
 		Abort
 	${EndIf}
 
-	!insertmacro MUI_HEADER_TEXT "How do you want to use Windows Update?" ""
+	!insertmacro MUI_HEADER_TEXT "$(ActiveXPageTitle)" ""
 
 	nsDialogs::Create 1018
 	Pop $Dialog
@@ -24,7 +29,7 @@ Function ActiveXPage
 
 	StrCpy $Dialog.Y 0
 
-	${NSD_CreateLabel} 0 $Dialog.Y -1u 24u "Legacy Update configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service. You can choose between two options to access Windows Update."
+	${NSD_CreateLabel} 0 $Dialog.Y -1u 24u "$(ActiveXPageText)"
 	Pop $0
 	${AeroWizardDialogControl} $0
 
@@ -35,7 +40,7 @@ Function ActiveXPage
 	${AeroWizardDialogControl} $0
 	${NSD_SetIconFromInstaller} $0 103
 
-	${NSD_CreateRadioButton} 30u $Dialog.Y -30u 10u "Use the Legacy Update website"
+	${NSD_CreateRadioButton} 30u $Dialog.Y -30u 10u "$(ActiveXPageYesTitle)"
 	Pop $0
 	${AeroWizardDialogControl} $0
 	${NSD_OnClick} $0 ActiveXPageSelectionChanged
@@ -44,9 +49,9 @@ Function ActiveXPage
 	${NSD_SetFocus} $0
 
 	${If} ${AtLeastWinVista}
-		StrCpy $0 "The Legacy Update website is a replacement for the original Windows Update website. If you select this, you can still use the Windows Update Control Panel."
+		StrCpy $0 "$(ActiveXPageYesTextVista)"
 	${Else}
-		StrCpy $0 "The Legacy Update website is a replacement for the original Windows Update website, allowing you to download optional updates and drivers."
+		StrCpy $0 "$(ActiveXPageYesText2KXP)"
 	${EndIf}
 
 	IntOp $Dialog.Y $Dialog.Y + 17
@@ -63,12 +68,12 @@ Function ActiveXPage
 
 	${If} ${AtLeastWinVista}
 		${NSD_SetIcon} $0 "$WINDIR\System32\wucltux.dll" $1
-		StrCpy $1 "Use the Windows Update Control Panel"
-		StrCpy $2 "Legacy Update is compatible with the built-in Windows Update Control Panel. Make sure to check for updates $\"managed by your system administrator$\" to use the Legacy Update proxy server."
+		StrCpy $1 "$(ActiveXPageNoTitleVista)"
+		StrCpy $2 "$(ActiveXPageNoTextVista)"
 	${Else}
 		${NSD_SetIcon} $0 "res://$WINDIR\System32\wupdmgr.exe/#Icon/APPICON" $1
-		StrCpy $1 "Use Automatic Updates"
-		StrCpy $2 "Use the built-in Automatic Updates feature to download and install updates. You will only be able to download critical updates."
+		StrCpy $1 "$(ActiveXPageNoTitle2KXP)"
+		StrCpy $2 "$(ActiveXPageNoText2KXP)"
 	${EndIf}
 
 	${NSD_CreateRadioButton} 30u $Dialog.Y -30u 10u "$1"

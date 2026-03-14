@@ -316,6 +316,17 @@ LangString InstFilesPageTitle      ${LANG_ENGLISH} "Performing Actions"
 LangString UnConfirmPageTitle      ${LANG_ENGLISH} "Uninstall Legacy Update"
 LangString UnConfirmPageText       ${LANG_ENGLISH} "Legacy Update will be uninstalled. Your Windows Update configuration will be reset to directly use Microsoft servers."
 
+; ActiveX page
+LangString ActiveXPageTitle        ${LANG_ENGLISH} "How do you want to use Windows Update?"
+LangString ActiveXPageText         ${LANG_ENGLISH} "Legacy Update configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service. You can choose between two options to access Windows Update."
+LangString ActiveXPageYesTitle     ${LANG_ENGLISH} "Use the Legacy Update website"
+LangString ActiveXPageYesTextVista ${LANG_ENGLISH} "The Legacy Update website is a replacement for the original Windows Update website. If you select this, you can still use the Windows Update Control Panel."
+LangString ActiveXPageYesText2KXP  ${LANG_ENGLISH} "The Legacy Update website is a replacement for the original Windows Update website, allowing you to download optional updates and drivers."
+LangString ActiveXPageNoTitleVista ${LANG_ENGLISH} "Use the Windows Update Control Panel"
+LangString ActiveXPageNoTextVista  ${LANG_ENGLISH} "Legacy Update is compatible with the built-in Windows Update Control Panel. Make sure to check for updates $\"managed by your system administrator$\" to use the Legacy Update proxy server"
+LangString ActiveXPageNoTitle2KXP  ${LANG_ENGLISH} "Use Automatic Updates"
+LangString ActiveXPageNoText2KXP   ${LANG_ENGLISH} "Use the built-in Automatic Updates feature to download and install updates. You will only be able to download critical updates."
+
 ; Reboot page
 LangString RebootPageTitle   ${LANG_ENGLISH} "Restarting Windows"
 LangString RebootPageText    ${LANG_ENGLISH} "Your computer will not be up to date until you restart it. Save any open files, and then restart the computer.$\r$\n\
