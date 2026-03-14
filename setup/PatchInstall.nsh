@@ -362,7 +362,6 @@ FunctionEnd
 !macroend
 
 Function InstallMSU
-	${DetailPrint} "$(Extracting)$Exec.Name..."
 	!insertmacro ExtractCab '$Exec.Name' "$0" "$PLUGINSDIR\$Exec.Patch"
 	CreateDirectory "$PLUGINSDIR\$Exec.Patch\Temp"
 
