@@ -87,10 +87,11 @@ static void WriteLogBanner() {
 	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
 	LPCWSTR productType = versionInfo->wProductType == VER_NT_WORKSTATION ? L"Workstation" : L"Server";
 
-	LOG(L"OS: %d.%d.%d %ls %ls (%ls, Suite: %05x)",
+	LOG(L"OS: %d.%d.%d%ls%ls %ls (%ls, Suite: %05x)",
 		versionInfo->dwMajorVersion,
 		versionInfo->dwMinorVersion,
 		versionInfo->dwBuildNumber,
+		versionInfo->szCSDVersion == NULL || lstrlen(versionInfo->szCSDVersion) == 0 ? L"" : L" ",
 		versionInfo->szCSDVersion,
 		archName,
 		productType,
