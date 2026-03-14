@@ -212,7 +212,7 @@ LangString SectionXPSP3Desc     ${LANG_ENGLISH} \
 LangString SectionXPESP3Desc    ${LANG_ENGLISH} \
 	"Updates Windows XP Embedded to Service Pack 3. Required if you would like to activate Windows online. $(SectionSupEULA)"
 LangString SectionWES09Desc     ${LANG_ENGLISH} \
-	"Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this."
+	"Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this. This change can not be undone."
 LangString Section2003SP2Desc   ${LANG_ENGLISH} \
 	"Updates Windows XP Professional x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. $(SectionSupEULA)"
 LangString SectionVistaSP2Desc  ${LANG_ENGLISH} \
@@ -220,7 +220,7 @@ LangString SectionVistaSP2Desc  ${LANG_ENGLISH} \
 LangString SectionVistaSSUDesc ${LANG_ENGLISH} \
 	"Installs additional updates required to resolve issues with the Windows Update Agent."
 LangString SectionVistaESUDesc  ${LANG_ENGLISH} \
-	"Installs additional updates that prepare the system to receive Extended Security Updates (ESU). Additional tools are required to enable ESU updates to be installed. Please note that using ESU without a valid license is a violation of the Microsoft Software License Terms."
+	"Installs additional updates that prepare the system to receive Extended Security Updates (ESU). This may cause compatibility issues. Using ESU without a valid license is a violation of the Microsoft Software License Terms. This change can not be undone."
 LangString SectionVistaIE9Desc  ${LANG_ENGLISH} \
 	"Updates Internet Explorer to 9.0.$\r$\n$(SectionMSLT)"
 LangString SectionWin7SP1Desc   ${LANG_ENGLISH} \
