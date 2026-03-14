@@ -149,8 +149,8 @@ HRESULT OpenLog() {
 
 	// No other processes have the log open, start it ourselves
 	WCHAR logPath[MAX_PATH];
-	GetWindowsDirectory(logPath, MAX_PATH);
-	lstrcat(logPath, L"\\Temp\\LegacyUpdate.log");
+	GetWindowsDirectory(logPath, ARRAYSIZE(logPath));
+	lstrcat(logPath, AtLeastWinVista() ? L"\\Logs\\LegacyUpdate.log" : L"\\Temp\\LegacyUpdate.log");
 
 	SECURITY_ATTRIBUTES sa = {0};
 	sa.nLength = sizeof(sa);
@@ -161,7 +161,7 @@ HRESULT OpenLog() {
 	g_hLogFile = CreateFile(logPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (g_hLogFile == INVALID_HANDLE_VALUE) {
 		// Access denied? Use user temp instead
-		GetTempPath(MAX_PATH, logPath);
+		GetTempPath(ARRAYSIZE(logPath), logPath);
 		lstrcat(logPath, L"LegacyUpdate.log");
 		g_hLogFile = CreateFile(logPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		isLocalTemp = TRUE;

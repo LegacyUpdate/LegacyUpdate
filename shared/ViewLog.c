@@ -9,7 +9,8 @@ HRESULT ViewLog(LogAction log, int nCmdShow, BOOL showErrors) {
 
 	switch (log) {
 	case LogActionSystem: {
-		ExpandEnvironmentStrings(L"%SystemRoot%\\Temp", workDir, ARRAYSIZE(workDir));
+		LPCWSTR logsPath = AtLeastWinVista() ? L"%SystemRoot%\\Logs" : L"%SystemRoot%\\Temp";
+		ExpandEnvironmentStrings(logsPath, workDir, ARRAYSIZE(workDir));
 		break;
 	}
 
