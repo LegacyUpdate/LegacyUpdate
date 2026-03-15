@@ -2,12 +2,12 @@
 #include <windows.h>
 #include <richedit.h>
 
-#define OUTER_WIDTH         355
-#define OUTER_HEIGHT        233
+#define OUTER_WIDTH         363
+#define OUTER_HEIGHT        246
 
 #define INNER_LEFT          25
-#define INNER_WIDTH         317
-#define INNER_HEIGHT        119
+#define INNER_WIDTH         325
+#define INNER_HEIGHT        131
 #define INNER_WIDTH_ALIGNED INNER_WIDTH - 12
 
 /////////////////////////////////////////////////////////////////////////////
@@ -30,15 +30,15 @@ CAPTION "Template"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
 	// Bottom divider
-	LTEXT      "",         6900,                0, 207, OUTER_WIDTH + 2, 1, SS_ETCHEDHORZ | WS_CHILD | WS_GROUP
+	LTEXT      "",         6900,                0, OUTER_HEIGHT - 26, OUTER_WIDTH + 2, 1, SS_ETCHEDHORZ | WS_CHILD | WS_GROUP
 	// Bottom background
-	LTEXT      "",         6901,                0, 208, OUTER_WIDTH, 25, WS_CHILD | WS_GROUP
+	LTEXT      "",         6901,                0, OUTER_HEIGHT - 25, OUTER_WIDTH, 25, WS_CHILD | WS_GROUP
 	// Buttons
-	PUSHBUTTON "Back",     IDABORT,             207, 213, 45, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP
-	PUSHBUTTON "Next",     IDOK,                253, 213, 45, 14, BS_PUSHBUTTON | WS_TABSTOP
-	PUSHBUTTON "Cancel",   IDCANCEL,            303, 213, 45, 14, BS_PUSHBUTTON | WS_TABSTOP
+	PUSHBUTTON "Back",     IDABORT,             OUTER_WIDTH - 148, OUTER_HEIGHT - 20, 45, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP
+	PUSHBUTTON "Next",     IDOK,                OUTER_WIDTH - 102, OUTER_HEIGHT - 20, 45, 14, BS_PUSHBUTTON | WS_TABSTOP
+	PUSHBUTTON "Cancel",   IDCANCEL,            OUTER_WIDTH - 52, OUTER_HEIGHT - 20, 45, 14, BS_PUSHBUTTON | WS_TABSTOP
 	// Branding
-	LTEXT      "Branding", IDC_VERSTR,          INNER_LEFT, 216, 180, 11, WS_DISABLED
+	LTEXT      "Branding", IDC_VERSTR,          INNER_LEFT, OUTER_HEIGHT - 17, OUTER_WIDTH - 183, 11, WS_DISABLED
 	// Inner content
 	LTEXT      "",         IDC_CHILDRECT,       INNER_LEFT, 75, INNER_WIDTH, INNER_HEIGHT, SS_BLACKRECT | WS_GROUP | NOT WS_VISIBLE
 	// Title
@@ -73,9 +73,9 @@ BEGIN
 	// Intro text
 	LTEXT      "Text\nText\nText", IDC_INTROTEXT, 0, 0, INNER_WIDTH, 31, 0
 	// Selection
-	CONTROL    "",         IDC_TREE1,           "SysTreeView32", TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP, 0, 32, INNER_WIDTH_ALIGNED, 53
+	CONTROL    "",         IDC_TREE1,           "SysTreeView32", TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP, 0, 32, INNER_WIDTH_ALIGNED, 60
 	// Description
-	LTEXT      "",         1043,                0, 91, INNER_WIDTH, 29, 0
+	LTEXT      "",         1043,                0, 99, INNER_WIDTH, 32, 0
 	// Unused
 	COMBOBOX               IDC_COMBO1,          0, 0, 0, 0, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP | NOT WS_VISIBLE
 END
@@ -91,7 +91,7 @@ BEGIN
 	// Intro text
 	LTEXT      "",         IDC_INTROTEXT,       0, 0, INNER_WIDTH, 16, SS_LEFTNOWORDWRAP | SS_NOPREFIX
 	// Details list
-	CONTROL    "",         IDC_LIST1,           "SysListView32", LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP | NOT WS_VISIBLE, 0, 33, INNER_WIDTH_ALIGNED, 85
+	CONTROL    "",         IDC_LIST1,           "SysListView32", LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP | NOT WS_VISIBLE, 0, 33, INNER_WIDTH_ALIGNED, INNER_HEIGHT - 34
 END
 
 IDD_UNINST DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
@@ -101,7 +101,7 @@ BEGIN
 	// Uninstall path label
 	LTEXT      "",         IDC_UNINSTFROM,      0, 42, 65, 8, 0
 	// Uninstall path
-	EDITTEXT               IDC_EDIT1,           70, 40, 234, 12, ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_TABSTOP
+	EDITTEXT               IDC_EDIT1,           70, 40, INNER_WIDTH_ALIGNED - 79, 12, ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_TABSTOP
 	// Intro text
 	LTEXT      "",         IDC_INTROTEXT,       0, 0, INNER_WIDTH, 30, 0
 END
