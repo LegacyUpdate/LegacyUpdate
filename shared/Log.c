@@ -5,13 +5,6 @@
 #include "User.h"
 #include "Wow64.h"
 
-#define LOG_SHARED_NAME L"LegacyUpdateLog"
-
-typedef struct {
-	DWORD ownerPid;
-	HANDLE hFile;
-} LogSharedData;
-
 static const struct {
 	DWORD arch;
 	LPCWSTR name;
@@ -38,7 +31,6 @@ static const struct {
 
 static BOOL g_logInitialized = FALSE;
 static HANDLE g_hLogFile  = INVALID_HANDLE_VALUE;
-static HANDLE g_hSharedMem = NULL;
 
 void LogInternal(LPCWSTR text) {
 	if (g_hLogFile == INVALID_HANDLE_VALUE || text == NULL || wcslen(text) > LOG_LINE_MAXLEN) {
@@ -120,34 +112,8 @@ HRESULT OpenLog() {
 
 	g_logInitialized = TRUE;
 
-	// Use already-open global log if possible, otherwise try local
-	g_hSharedMem = OpenFileMapping(FILE_MAP_READ, FALSE, L"Global\\" LOG_SHARED_NAME);
-	if (!g_hSharedMem && GetLastError() == ERROR_FILE_NOT_FOUND) {
-		g_hSharedMem = OpenFileMapping(FILE_MAP_READ, FALSE, L"Local\\" LOG_SHARED_NAME);
-	}
-	if (g_hSharedMem) {
-		LogSharedData *sharedData = (LogSharedData *)MapViewOfFile(g_hSharedMem, FILE_MAP_READ, 0, 0, sizeof(LogSharedData));
-		if (sharedData) {
-			HANDLE hOwner = OpenProcess(PROCESS_DUP_HANDLE, FALSE, sharedData->ownerPid);
-			if (hOwner) {
-				DuplicateHandle(hOwner, sharedData->hFile, GetCurrentProcess(), &g_hLogFile, 0, FALSE, DUPLICATE_SAME_ACCESS);
-				CloseHandle(hOwner);
-			}
 
-			UnmapViewOfFile(sharedData);
-		}
-
-		if (g_hLogFile != INVALID_HANDLE_VALUE) {
-			SetFilePointer(g_hLogFile, 0, NULL, FILE_END);
-			WriteLogBanner();
-			return S_OK;
-		}
-
-		CloseHandle(g_hSharedMem);
-		g_hSharedMem = NULL;
-	}
-
-	// No other processes have the log open, start it ourselves
+	// Get system log path
 	WCHAR logPath[MAX_PATH];
 	GetWindowsDirectory(logPath, ARRAYSIZE(logPath));
 	lstrcat(logPath, AtLeastWinVista() ? L"\\Logs\\LegacyUpdate.log" : L"\\Temp\\LegacyUpdate.log");
@@ -157,14 +123,13 @@ HRESULT OpenLog() {
 	sa.lpSecurityDescriptor = NULL;
 	sa.bInheritHandle = FALSE;
 
-	BOOL isLocalTemp = FALSE;
+	// Try to open in the preferred location
 	g_hLogFile = CreateFile(logPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (g_hLogFile == INVALID_HANDLE_VALUE) {
 		// Access denied? Use user temp instead
 		GetTempPath(ARRAYSIZE(logPath), logPath);
 		lstrcat(logPath, L"LegacyUpdate.log");
 		g_hLogFile = CreateFile(logPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-		isLocalTemp = TRUE;
 	}
 
 	HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
@@ -180,18 +145,6 @@ HRESULT OpenLog() {
 		WriteFile(g_hLogFile, &bom, sizeof(WCHAR), &written, NULL);
 	}
 
-	// Publish for other processes to use
-	LPCWSTR fileMappingName = isLocalTemp ? L"Local\\" LOG_SHARED_NAME : L"Global\\" LOG_SHARED_NAME;
-	g_hSharedMem = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(LogSharedData), fileMappingName);
-	if (g_hSharedMem) {
-		LogSharedData *sharedData = (LogSharedData *)MapViewOfFile(g_hSharedMem, FILE_MAP_WRITE, 0, 0, sizeof(LogSharedData));
-		if (sharedData) {
-			sharedData->ownerPid = GetCurrentProcessId();
-			sharedData->hFile = g_hLogFile;
-			UnmapViewOfFile(sharedData);
-		}
-	}
-
 	WriteLogBanner();
 	return S_OK;
 }
@@ -200,9 +153,5 @@ void CloseLog(void) {
 	if (g_hLogFile != INVALID_HANDLE_VALUE) {
 		CloseHandle(g_hLogFile);
 		g_hLogFile = INVALID_HANDLE_VALUE;
-	}
-	if (g_hSharedMem) {
-		CloseHandle(g_hSharedMem);
-		g_hSharedMem = NULL;
 	}
 }
