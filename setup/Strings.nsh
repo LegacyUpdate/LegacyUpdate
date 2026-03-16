@@ -208,23 +208,23 @@ LangString SectionW2KSP4Desc    ${LANG_ENGLISH} \
 LangString SectionIE6SP1Desc    ${LANG_ENGLISH} \
 	"Updates Internet Explorer to 6.0 SP1, as required for Legacy Update.$\r$\n$(SectionSupEULA)"
 LangString SectionXPSP3Desc     ${LANG_ENGLISH} \
-	"Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online. $(SectionSupEULA)"
+	"Updates Windows XP to Service Pack 3. Required if you would like to activate Windows online.$\r$\n$(SectionSupEULA)"
 LangString SectionXPESP3Desc    ${LANG_ENGLISH} \
-	"Updates Windows XP Embedded to Service Pack 3. Required if you would like to activate Windows online. $(SectionSupEULA)"
+	"Updates Windows XP Embedded to Service Pack 3. Required if you would like to activate Windows online.$\r$\n$(SectionSupEULA)"
 LangString SectionWES09Desc     ${LANG_ENGLISH} \
 	"Configures Windows to appear as Windows Embedded POSReady 2009 to Windows Update, enabling access to Windows XP security updates released between 2014 and 2019. Please note that Microsoft officially advises against doing this. This change can not be undone."
 LangString Section2003SP2Desc   ${LANG_ENGLISH} \
-	"Updates Windows XP Professional x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online. $(SectionSupEULA)"
+	"Updates Windows XP Professional x64 Edition or Windows Server 2003 to Service Pack 2. Required if you would like to activate Windows online.$\r$\n$(SectionSupEULA)"
 LangString SectionVistaSP2Desc  ${LANG_ENGLISH} \
-	"Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent. $(SectionMSLT)"
+	"Updates Windows Vista or Windows Server 2008 to Service Pack 2, as required to install the Windows Update Agent.$\r$\n$(SectionMSLT)"
 LangString SectionVistaSSUDesc ${LANG_ENGLISH} \
 	"Installs additional updates required to resolve issues with the Windows Update Agent."
 LangString SectionVistaESUDesc  ${LANG_ENGLISH} \
-	"Installs additional updates that prepare the system to receive Extended Security Updates (ESU). This may cause compatibility issues. Using ESU without a valid license is a violation of the Microsoft Software License Terms. This change can not be undone."
+	"Installs additional updates that prepare the system to receive Extended Security Updates (ESU). This fixes Windows Update stalling at $\"Checking for updates$\", but may cause compatibility issues. Using ESU without a valid license is a violation of the Microsoft Software License Terms. This change can not be undone."
 LangString SectionVistaIE9Desc  ${LANG_ENGLISH} \
-	"Updates Internet Explorer to 9.0.$\r$\n$(SectionMSLT)"
+	"Updates Internet Explorer to 9.0, improving website compatibility.$\r$\n$(SectionMSLT)"
 LangString SectionWin7SP1Desc   ${LANG_ENGLISH} \
-	"Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent. $(SectionMSLT)"
+	"Updates Windows 7 or Windows Server 2008 R2 to Service Pack 1, as required to install the Windows Update Agent.$\r$\n$(SectionMSLT)"
 LangString SectionWin7CRUDesc   ${LANG_ENGLISH} \
 	"Installs all updates released for Windows 7 and Windows Server 2008 R2 up to March 2016.$\r$\nThis update installs telemetry features that may not be desirable."
 LangString SectionWin7SSUDesc   ${LANG_ENGLISH} \
