@@ -65,7 +65,7 @@
 
 ; XP WPA
 !define REGPATH_WPA                "System\WPA"
-!define REGPATH_POSREADY           "${REGPATH_WPA}\PosReady"
+!define REGPATH_POSREADY           "${REGPATH_WPA}\POSReady"
 
 ; RunOnce
 !define REGPATH_SETUP              "System\Setup"

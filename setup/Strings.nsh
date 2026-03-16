@@ -127,11 +127,19 @@ LangString MsgBoxMUFailed ${LANG_ENGLISH} \
 	$1 ($0)"
 
 ; Warnings
-LangString MsgBoxWES09NotSSE2 ${LANG_ENGLISH} \
+LangString MsgBoxWES09NotSSE2Main ${LANG_ENGLISH} \
 	"Your processor does not support the Streaming SIMD Extensions 2 (SSE2) instruction set, which is required to install Windows Embedded 2009 updates released after May 2018.$\r$\n\
-	For more information, visit http://legacyupdate.net/help/sse2.$\r$\n\
+	For more information, visit http://legacyupdate.net/help/sse2."
+
+LangString MsgBoxWES09NotSSE2Block ${LANG_ENGLISH} \
+	"$(MsgBoxWES09NotSSE2Main)$\r$\n\
 	$\r$\n\
 	To protect your Windows installation from becoming damaged by incompatible updates, this option will be disabled."
+
+LangString MsgBoxWES09NotSSE2Pre ${LANG_ENGLISH} \
+	"Your current operating system is Windows Embedded 2009, or updates from Windows Embedded 2009 have been enabled on this system by another tool.$\r$\n\
+	$\r$\n\
+	$(MsgBoxWES09NotSSE2Main)"
 
 LangString MsgBoxActivateXP2002NotSP3 ${LANG_ENGLISH} \
 	"Windows XP must be updated to Service Pack 3 to activate over the internet. The Service Pack 3 update action will be enabled."

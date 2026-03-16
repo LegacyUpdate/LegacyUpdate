@@ -216,4 +216,5 @@
 
 !insertmacro __WinVer_DefineXPWPAEdition MediaCenter
 !insertmacro __WinVer_DefineXPWPAEdition TabletPC
+!insertmacro __WinVer_DefineXPWPAEdition WES
 !insertmacro __WinVer_DefineXPWPAEdition POSReady

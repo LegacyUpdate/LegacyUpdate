@@ -938,6 +938,18 @@ Function ComponentsPageCheck
 	${AndIf} ${IsDatacenter}
 		!insertmacro UnselectSection ${LEGACYUPDATE}
 	${EndIf}
+
+	; Handle WES09 already enabled on non-SSE2
+	${If} ${IsWinXP2002}
+		${If} ${IsWinXPWES}
+		${OrIf} ${IsWinXPPOSReady}
+			; Check for SSE2
+			System::Call '${IsProcessorFeaturePresent}(${PF_XMMI64_INSTRUCTIONS_AVAILABLE}) .r0'
+			${If} $0 == 0
+				MessageBox MB_USERICON "$(MsgBoxWES09NotSSE2Pre)" /SD IDOK
+			${EndIf}
+		${EndIf}
+	${EndIf}
 FunctionEnd
 
 Function PreDownload
@@ -1115,7 +1127,7 @@ Function .onSelChange
 		; Check for SSE2
 		System::Call '${IsProcessorFeaturePresent}(${PF_XMMI64_INSTRUCTIONS_AVAILABLE}) .r0'
 		${If} $0 == 0
-			MessageBox MB_USERICON "$(MsgBoxWES09NotSSE2)" /SD IDOK
+			MessageBox MB_USERICON "$(MsgBoxWES09NotSSE2Block)" /SD IDOK
 			!insertmacro UnselectSection ${WES09}
 		${EndIf}
 	${ElseIf} ${SectionIsSelected} ${ACTIVATE}
