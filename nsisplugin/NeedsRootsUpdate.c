@@ -29,7 +29,11 @@ PLUGIN_METHOD(NeedsRootsUpdate) {
 		return;
 	}
 
-	ULONGLONG difference = *(ULONGLONG *)&currentTime - *(ULONGLONG *)&lastUpdateTime;
+	ULONGLONG currentTime64 = 0, lastUpdateTime64 = 0;
+	memcpy(&currentTime64, &currentTime, sizeof(currentTime64));
+	memcpy(&lastUpdateTime64, &lastUpdateTime, sizeof(lastUpdateTime64));
+
+	ULONGLONG difference = currentTime64 - lastUpdateTime64;
 	pushint(difference > ROOTS_UPDATE_THRESHOLD ? 1 : 0);
 }
 
