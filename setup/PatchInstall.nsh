@@ -365,6 +365,11 @@ Function InstallMSU
 	!insertmacro ExtractCab '$Exec.Name' "$0" "$PLUGINSDIR\$Exec.Patch"
 	CreateDirectory "$PLUGINSDIR\$Exec.Patch\Temp"
 
+	; Set %ConfigSetRoot% to where the files are stored. Lenovo Windows 7 RTM images have been found to globally set this
+	; to C:\Windows\ConfigSetRoot, which doesn't exist. When Dism reads the unattend xml, it tries to look for the cab
+	; there, and fails.
+	System::Call '${SetEnvironmentVariable}("ConfigSetRoot", "$PLUGINSDIR\$Exec.Patch")'
+
 	${DetailPrint} "$(Installing)$Exec.Name..."
 	${DisableX64FSRedirection}
 	FindFirst $0 $1 "$PLUGINSDIR\$Exec.Patch\*.xml"

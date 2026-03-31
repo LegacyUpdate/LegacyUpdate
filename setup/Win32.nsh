@@ -23,6 +23,7 @@
 !define DeleteFile               'kernel32::DeleteFile(t) i'
 !define TermsrvAppInstallMode    'kernel32::TermsrvAppInstallMode() i'
 !define SetTermsrvAppInstallMode 'kernel32::SetTermsrvAppInstallMode(i) i'
+!define SetEnvironmentVariable   'kernel32::SetEnvironmentVariable(t, t) i'
 
 ; ntdll
 !define RtlGetNtVersionNumbers   'ntdll::RtlGetNtVersionNumbers(*i, *i, *i)'
