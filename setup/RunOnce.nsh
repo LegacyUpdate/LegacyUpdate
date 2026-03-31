@@ -5,8 +5,8 @@ Function IsAuditMode
 		Push 1
 	${Else}
 		; Vista+
-		ReadRegDword $0 HKLM "${REGPATH_SETUP}\Status" "AuditBoot"
-		${If} $0 == 1
+		ReadRegDword $0 HKLM "${REGPATH_SETUP_STATUS}" "AuditBoot"
+		${If} $0 > 0
 			Push 1
 		${Else}
 			Push 0
