@@ -266,23 +266,36 @@ Var /GLOBAL Patch.Params
 !macroend
 
 Function -PatchHandler
+	; Language specific, platform neutral
 	Call GetUpdateLanguage
-	Call GetArch
-	Pop $1
 	Pop $0
-	StrCpy $2 "$0-$1"
 	ClearErrors
-	ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2"
+	ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" "$0"
 	${If} ${Errors}
-		; Language neutral
-		StrCpy $2 "$1"
+		; Language/platform neutral
 		ClearErrors
-		ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2"
+		ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" "Neutral"
 		${If} ${Errors}
-			StrCpy $0 "$Patch.Title"
-			MessageBox MB_USERICON "$(MsgBoxPatchNotFound)" /SD IDOK
-			SetErrorLevel 1
-			Abort
+			; Language/platform specific
+			Call GetUpdateLanguage
+			Call GetArch
+			Pop $1
+			Pop $0
+			StrCpy $2 "$0-$1"
+			ClearErrors
+			ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2"
+			${If} ${Errors}
+				; Language neutral, platform specific
+				StrCpy $2 "$1"
+				ClearErrors
+				ReadINIStr $0 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2"
+				${If} ${Errors}
+					StrCpy $0 "$Patch.Title"
+					MessageBox MB_USERICON "$(MsgBoxPatchNotFound)" /SD IDOK
+					SetErrorLevel 1
+					Abort
+				${EndIf}
+			${EndIf}
 		${EndIf}
 	${EndIf}
 	ReadINIStr $1 $PLUGINSDIR\Patches.ini "$Patch.Key" Prefix
@@ -404,4 +417,13 @@ FunctionEnd
 	StrCpy $Exec.Patch '${kbid}'
 	StrCpy $Exec.Name '${name} (${kbid})'
 	Call InstallMSU
+!macroend
+
+!macro InstallMSI name filename patch
+	${DetailPrint} "$(Installing)${name}..."
+!if ${patch} == 1
+	!insertmacro ExecWithErrorHandling '${name}' '"$WINDIR\system32\msiexec.exe" /p "${filename}" /passive /norestart'
+!else
+	!insertmacro ExecWithErrorHandling '${name}' '"$WINDIR\system32\msiexec.exe" /i "${filename}" /passive /norestart'
+!endif
 !macroend
