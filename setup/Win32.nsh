@@ -39,6 +39,9 @@
 
 !define GetSystemMetrics         'user32::GetSystemMetrics(i) i'
 
+; winerror
+!define RPC_S_SERVER_UNAVAILABLE 1722
+
 ; winhttp
 !define WINHTTP_FLAG_SECURE_PROTOCOL_TLS1   0x00000080
 !define WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_1 0x00000200

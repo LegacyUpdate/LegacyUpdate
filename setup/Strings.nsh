@@ -15,6 +15,7 @@ LangString ExitCode    ${LANG_ENGLISH} "Exit code: "
 LangString RestartRequired  ${LANG_ENGLISH} "Success - restart required"
 LangString AlreadyInstalled ${LANG_ENGLISH} "Installation skipped - already installed"
 LangString NotApplicable    ${LANG_ENGLISH} "Installation skipped - not applicable"
+LangString ExecRetry        ${LANG_ENGLISH} "Trying again..."
 
 ; Download
 LangString DownloadStatusSingle ${LANG_ENGLISH} "{TIMEREMAINING} left - {RECVSIZE} of {FILESIZE} ({SPEED})"

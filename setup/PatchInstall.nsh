@@ -155,31 +155,42 @@ Var /GLOBAL Exec.Patch
 Var /GLOBAL Exec.Name
 
 Function ExecWithErrorHandling
-	${VerbosePrint} "$(^Exec)$Exec.Command"
-	LegacyUpdateNSIS::ExecToLog `$Exec.Command`
-	Pop $R0
-	${VerbosePrint} "$(ExitCode)$R0"
+	${For} $R1 1 4
+		${VerbosePrint} "$(^Exec)$Exec.Command"
+		LegacyUpdateNSIS::ExecToLog `$Exec.Command`
+		Pop $R0
+		${VerbosePrint} "$(ExitCode)$R0"
 
-	${If} $R0 == ${ERROR_SUCCESS_REBOOT_REQUIRED}
-		${VerbosePrint} "$(RestartRequired)"
-		SetRebootFlag true
-	${ElseIf} $R0 == ${ERROR_INSTALL_USEREXIT}
-		SetErrorLevel ${ERROR_INSTALL_USEREXIT}
-		Abort
-	${ElseIf} $R0 == ${WU_S_ALREADY_INSTALLED}
-		${DetailPrint} "$(AlreadyInstalled)"
-	${ElseIf} $R0 == ${WU_E_NOT_APPLICABLE}
-		${DetailPrint} "$(NotApplicable)"
-	${ElseIf} $R0 != 0
-		StrCpy $0 $R0
-		LegacyUpdateNSIS::MessageForHresult $R0
-		Pop $1
-		${DetailPrint} "$1 ($0)"
-		StrCpy $2 "$Exec.Name"
-		MessageBox MB_USERICON "$(MsgBoxInstallFailed)" /SD IDOK
-		SetErrorLevel $R0
-		Abort
-	${EndIf}
+		${If} $R0 == ${RPC_S_SERVER_UNAVAILABLE}
+		${AndIf} $R1 < 4
+			${DetailPrint} "$(ExecRetry)"
+			Sleep 5000
+			${Continue}
+		${EndIf}
+
+		${If} $R0 == ${ERROR_SUCCESS_REBOOT_REQUIRED}
+			${VerbosePrint} "$(RestartRequired)"
+			SetRebootFlag true
+		${ElseIf} $R0 == ${ERROR_INSTALL_USEREXIT}
+			SetErrorLevel ${ERROR_INSTALL_USEREXIT}
+			Abort
+		${ElseIf} $R0 == ${WU_S_ALREADY_INSTALLED}
+			${DetailPrint} "$(AlreadyInstalled)"
+		${ElseIf} $R0 == ${WU_E_NOT_APPLICABLE}
+			${DetailPrint} "$(NotApplicable)"
+		${ElseIf} $R0 != 0
+			StrCpy $0 $R0
+			LegacyUpdateNSIS::MessageForHresult $R0
+			Pop $1
+			${DetailPrint} "$1 ($0)"
+			StrCpy $2 "$Exec.Name"
+			MessageBox MB_USERICON "$(MsgBoxInstallFailed)" /SD IDOK
+			SetErrorLevel $R0
+			Abort
+		${EndIf}
+
+		${Break}
+	${Next}
 FunctionEnd
 
 !macro ExecWithErrorHandling name command
