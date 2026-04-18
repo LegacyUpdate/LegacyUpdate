@@ -331,11 +331,11 @@ FunctionEnd
 !macroend
 
 !macro ExtractCab name filename path
-	${DetailPrint} "$(Extracting)$Exec.Name..."
+	${DetailPrint} "$(Extracting)${name}..."
 	${IfNot} ${IsVerbose}
 		SetDetailsPrint none
 	${EndIf}
-	CreateDirectory "$PLUGINSDIR\$Exec.Patch"
+	CreateDirectory "${path}"
 	StrCpy $Exec.Name "${name}"
 	StrCpy $Exec.Command '"$WINDIR\system32\expand.exe" -F:* "${filename}" "${path}"'
 	Call ExecWithErrorHandling

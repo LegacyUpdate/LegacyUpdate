@@ -8,7 +8,7 @@
 		Call -PatchHandler
 
 		${IfNot} ${FileExists} "$PLUGINSDIR\IE${ver}\ie${ver}setup.exe"
-			!insertmacro ExtractCab '${title} $(Setup)' "$Patch.File" "$PLUGINSDIR\IE${ver}"
+			!insertmacro ExtractCab "$Patch.Title" "$Patch.File" "$PLUGINSDIR\IE${ver}"
 			${DetailPrint} "$(Downloading)${title}..."
 			!insertmacro ExecWithErrorHandling '${title}' '"$PLUGINSDIR\IE${ver}\ie${ver}setup.exe" /c:"ie${ver}wzd.exe /q /d /s:""#e"""'
 		${EndIf}
