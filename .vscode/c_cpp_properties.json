@@ -6,7 +6,7 @@
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/shared"
             ],
-            "compilerPath": "/usr/bin/i686-w64-mingw32-g++",
+            "compilerPath": "/opt/gcc-15.2-20260228-binutils-2.46.0-mingw-v13.0.0-i686/bin/i686-w64-mingw32-g++",
             "cStandard": "c17",
             "cppStandard": "c++11",
             "intelliSenseMode": "windows-gcc-x86",
