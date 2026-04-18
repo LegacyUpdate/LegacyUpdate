@@ -296,6 +296,7 @@ Function -PatchHandler
 			Abort
 		${EndIf}
 	${EndIf}
+	StrCpy $Patch.File "$Patch.Key-$2.exe"
 	ReadINIStr $1 $PLUGINSDIR\Patches.ini "$Patch.Key" Prefix
 	ReadINIStr $3 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2-sha256"
 	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" "$3" 1
@@ -308,7 +309,6 @@ FunctionEnd
 !macro PatchHandler kbid title type params
 	Function Download${kbid}
 		StrCpy $Patch.Key   "${kbid}"
-		StrCpy $Patch.File  "${kbid}.exe"
 		StrCpy $Patch.Title "${title}"
 
 		${If} ${NeedsPatch} ${kbid}
@@ -366,10 +366,6 @@ FunctionEnd
 	${If} $0 == 0
 		SetRebootFlag true
 	${EndIf}
-!macroend
-
-!macro DownloadMSU kbid name url sha256
-	!insertmacro Download '${name} (${kbid})' '${url}' '${kbid}.msu' '${sha256}' 1
 !macroend
 
 Function InstallMSU

@@ -1,3 +1,5 @@
+Var /GLOBAL WUA.File
+
 Function DetermineWUAVersion
 	; WUA refuses to install on 2000 Datacenter Server. Maybe we can hack around this in future.
 	${If} ${IsWin2000}
@@ -45,6 +47,7 @@ Function DetermineWUAVersion
 	${If} $3 == 2
 		Call GetArch
 		Pop $0
+		StrCpy $WUA.File "WindowsUpdateAgent-$2-$0.exe"
 		ReadINIStr $3 $PLUGINSDIR\Patches.ini WUA "$2-$0-sha256"
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini WUA "$2-$0"
 		${If} $0 == ""
@@ -68,7 +71,7 @@ FunctionEnd
 Function DownloadWUA
 	Call DetermineWUAVersion
 	${If} $0 != ""
-		!insertmacro Download "$(WUA)" "$0" "WindowsUpdateAgent.exe" "$3" 1
+		!insertmacro Download "$(WUA)" "$0" "$WUA.File" "$3" 1
 	${EndIf}
 FunctionEnd
 

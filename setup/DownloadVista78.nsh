@@ -25,7 +25,6 @@ FunctionEnd
 
 	Function Download${kbid}
 		StrCpy $Patch.Key   "${kbid}"
-		StrCpy $Patch.File  "${kbid}.exe"
 		StrCpy $Patch.Title "${title}"
 
 		${If} ${NeedsPatch} ${kbid}
@@ -54,7 +53,7 @@ FunctionEnd
 			ReadINIStr $1 $PLUGINSDIR\Patches.ini "${kbid}" $0
 			ReadINIStr $2 $PLUGINSDIR\Patches.ini "${kbid}" Prefix
 			ReadINIStr $3 $PLUGINSDIR\Patches.ini "${kbid}" "$0-sha256"
-			!insertmacro DownloadMSU "${kbid}" "${title}" "$2$1" "$3"
+			!insertmacro Download "${title} (${kbid})" "$2$1" "${kbid}-$0.msu" "$3" 1
 		${EndIf}
 	FunctionEnd
 
