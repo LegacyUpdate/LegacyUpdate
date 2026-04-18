@@ -259,7 +259,7 @@ Var /GLOBAL SPCleanup
 ; FunctionEnd
 
 Var /GLOBAL Patch.Key
-Var /GLOBAL Patch.File
+Var /GLOBAL Patch.Ext
 Var /GLOBAL Patch.Title
 Var /GLOBAL Patch.Params
 
@@ -298,10 +298,9 @@ Function -PatchHandler
 			Abort
 		${EndIf}
 	${EndIf}
-	StrCpy $Patch.File "$Patch.Key-$2.exe"
 	ReadINIStr $1 $PLUGINSDIR\Patches.ini "$Patch.Key" Prefix
 	ReadINIStr $3 $PLUGINSDIR\Patches.ini "$Patch.Key" "$2-sha256"
-	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.File" "$3" 1
+	!insertmacro Download "$Patch.Title" "$1$0" "$Patch.Key-$2.$Patch.Ext" "$3" 1
 FunctionEnd
 
 Function InstallPatch
@@ -311,6 +310,7 @@ FunctionEnd
 !macro PatchHandler kbid title type params
 	Function Download${kbid}
 		StrCpy $Patch.Key   "${kbid}"
+		StrCpy $Patch.Ext   "exe"
 		StrCpy $Patch.Title "${title}"
 
 		${If} ${NeedsPatch} ${kbid}

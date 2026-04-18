@@ -85,10 +85,10 @@ FunctionEnd
 
 Function UpdateRoots
 	${DetailPrint} "$(Installing)$(CTL)..."
-	!insertmacro _InstallRoots /update AuthRoot authroots.sst
-	!insertmacro _InstallRoots /update AuthRoot updroots.sst
-	!insertmacro _InstallRoots /update Root roots.sst
-	!insertmacro _InstallRoots /delete AuthRoot delroots.sst
+	!insertmacro _InstallRoots /update AuthRoot   authroots.sst
+	!insertmacro _InstallRoots /update AuthRoot   updroots.sst
+	!insertmacro _InstallRoots /update Root       roots.sst
+	!insertmacro _InstallRoots /delete AuthRoot   delroots.sst
 	!insertmacro _InstallRoots /update Disallowed disallowedcert.sst
 
 	WriteRegStr   HKLM "${REGPATH_COMPONENTS}\${ROOTSUPDATE_GUID}" ""            "RootsUpdate"

@@ -25,6 +25,7 @@ FunctionEnd
 
 	Function Download${kbid}
 		StrCpy $Patch.Key   "${kbid}"
+		StrCpy $Patch.Ext   "exe"
 		StrCpy $Patch.Title "${title}"
 
 		${If} ${NeedsPatch} ${kbid}

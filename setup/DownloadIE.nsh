@@ -3,12 +3,12 @@
 !macro DownloadIE ver title
 	${If} ${NeedsPatch} IE${ver}
 		StrCpy $Patch.Key   "IE${ver}"
-		StrCpy $Patch.File  "ie${ver}setup.cab"
+		StrCpy $Patch.Ext   "cab"
 		StrCpy $Patch.Title "${title} $(Setup)"
 		Call -PatchHandler
 
 		${IfNot} ${FileExists} "$PLUGINSDIR\IE${ver}\ie${ver}setup.exe"
-			!insertmacro ExtractCab "$Patch.Title" "$Patch.File" "$PLUGINSDIR\IE${ver}"
+			!insertmacro ExtractCab "$Patch.Title" "$0" "$PLUGINSDIR\IE${ver}"
 			${DetailPrint} "$(Downloading)${title}..."
 			!insertmacro ExecWithErrorHandling '${title}' '"$PLUGINSDIR\IE${ver}\ie${ver}setup.exe" /c:"ie${ver}wzd.exe /q /d /s:""#e"""'
 		${EndIf}
