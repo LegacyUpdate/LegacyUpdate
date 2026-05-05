@@ -17,5 +17,17 @@
 
 Function FixW2KUR1
 	; Fix idling on multi-CPU systems when Update Rollup 1 is installed
-	WriteRegDWORD HKLM "${REGPATH_CONTROL_HAL}" "14140000FFFFFFFF" 0x10
+	WriteRegDword HKLM "${REGPATH_CONTROL_HAL}" "14140000FFFFFFFF" 0x10
+FunctionEnd
+
+Function FixBootDir
+	; Fix BootDir being unset in Boot Camp installs of XP, breaking the SP3 installer
+	; This seems to be the parent folder of the Windows directory, e.g. "C:\"
+	; https://legacyupdate.net/help/windows-xp-sp3-not-enough-disk-space
+	ClearErrors
+	ReadRegStr $0 HKLM "${REGPATH_WINDOWS_SETUP}" "BootDir"
+	${If} ${Errors}
+		${GetParent} $WINDIR $0
+		WriteRegStr HKLM "${REGPATH_WINDOWS_SETUP}" "BootDir" "$0\"
+	${EndIf}
 FunctionEnd

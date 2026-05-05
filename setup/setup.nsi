@@ -216,6 +216,7 @@ ${MementoSection} "Windows XP $(SP) 3" XPSP3
 		Call InstallXPSP1a
 	${EndIf}
 	${RebootIfRequired}
+	Call FixBootDir
 	Call InstallXPSP3
 	${RebootIfRequired}
 ${MementoSectionEnd}

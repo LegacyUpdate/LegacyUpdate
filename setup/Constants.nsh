@@ -47,12 +47,16 @@
 ; IE elevation policy
 !define ELEVATIONPOLICY_GUID "{3D800943-0434-49F2-89A1-472A259AD982}"
 
+; Windows keys
+!define REGPATH_WINDOWS            "Software\Microsoft\Windows\CurrentVersion"
+!define REGPATH_WINDOWS_SETUP      "${REGPATH_WINDOWS}\Setup"
+
 ; Legacy Update keys
 !define REGPATH_LEGACYUPDATE_SETUP "Software\Hashbang Productions\Legacy Update\Setup"
-!define REGPATH_UNINSTSUBKEY       "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
+!define REGPATH_UNINSTSUBKEY       "${REGPATH_WINDOWS}\Uninstall\${NAME}"
 
 ; Control Panel entry
-!define REGPATH_CPLNAMESPACE       "Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
+!define REGPATH_CPLNAMESPACE       "${REGPATH_WINDOWS}\Explorer\ControlPanel\NameSpace\${CPL_GUID}"
 !define REGPATH_HKCR_CPLCLSID      "CLSID\${CPL_GUID}"
 
 ; System
@@ -70,12 +74,12 @@
 ; RunOnce
 !define REGPATH_SETUP              "System\Setup"
 !define REGPATH_SETUP_STATUS       "${REGPATH_SETUP}\Status"
-!define REGPATH_RUNONCE            "Software\Microsoft\Windows\CurrentVersion\RunOnce"
-!define REGPATH_POLICIES_SYSTEM    "Software\Microsoft\Windows\CurrentVersion\Policies\System"
+!define REGPATH_RUNONCE            "${REGPATH_WINDOWS}\RunOnce"
+!define REGPATH_POLICIES_SYSTEM    "${REGPATH_WINDOWS}\Policies\System"
 !define REGPATH_SECURITYCENTER     "Software\Microsoft\Security Center"
 
 ; Windows Update keys
-!define REGPATH_WU                 "Software\Microsoft\Windows\CurrentVersion\WindowsUpdate"
+!define REGPATH_WU                 "${REGPATH_WINDOWS}\WindowsUpdate"
 !define REGPATH_WU_SERVICES        "${REGPATH_WU}\Services"
 
 ; Windows Update policies
@@ -83,13 +87,13 @@
 !define REGPATH_WUAUPOLICY         "${REGPATH_WUPOLICY}\AU"
 
 ; CBS keys
-!define REGPATH_CBS                "Software\Microsoft\Windows\CurrentVersion\Component Based Servicing"
+!define REGPATH_CBS                "${REGPATH_WINDOWS}\Component Based Servicing"
 !define REGPATH_CBS_REBOOTPENDING  "${REGPATH_CBS}\RebootPending"
 !define REGPATH_CBS_PACKAGESPENDING  "${REGPATH_CBS}\PackagesPending"
 !define REGPATH_CBS_REBOOTINPROGRESS "${REGPATH_CBS}\RebootInProgress"
 
 ; IE zone keys
-!define REGPATH_INETSETTINGS       "Software\Microsoft\Windows\CurrentVersion\Internet Settings"
+!define REGPATH_INETSETTINGS       "${REGPATH_WINDOWS}\Internet Settings"
 !define REGPATH_INETSETTINGS_WINHTTP "${REGPATH_INETSETTINGS}\WinHttp"
 !define REGPATH_ZONEDOMAINS        "${REGPATH_INETSETTINGS}\ZoneMap\Domains"
 !define REGPATH_ZONEESCDOMAINS     "${REGPATH_INETSETTINGS}\ZoneMap\EscDomains"
