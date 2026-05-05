@@ -47,7 +47,7 @@ Function DetermineWUAVersion
 	${If} $3 == 2
 		Call GetArch
 		Pop $0
-		StrCpy $WUA.File "WindowsUpdateAgent-$2-$0.exe"
+		StrCpy $WUA.File "WUA-$2-$0.exe"
 		ReadINIStr $3 $PLUGINSDIR\Patches.ini WUA "$2-$0-sha256"
 		ReadINIStr $0 $PLUGINSDIR\Patches.ini WUA "$2-$0"
 		${If} $0 == ""
