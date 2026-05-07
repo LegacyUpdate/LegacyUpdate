@@ -1,6 +1,7 @@
 // ElevationHelper.cpp : Implementation of CElevationHelper
 
 #include "ElevationHelper.h"
+#include "dllmain.h"
 #include "Compat.h"
 #include "HResult.h"
 #include "LegacyUpdate.h"
@@ -58,10 +59,10 @@ STDMETHODIMP CElevationHelper::Create(IUnknown *pUnkOuter, REFIID riid, void **p
 	}
 
 	new(pThis) CElevationHelper();
+	InterlockedIncrement(&g_serverLocks);
 	// TODO: Only do this if we're in dllhost
 	BecomeDPIAware();
 	HRESULT hr = pThis->QueryInterface(riid, ppv);
-	CHECK_HR_OR_RETURN(L"QueryInterface");
 	pThis->Release();
 	return hr;
 }
@@ -120,6 +121,7 @@ STDMETHODIMP_(ULONG) CElevationHelper::AddRef(void) {
 STDMETHODIMP_(ULONG) CElevationHelper::Release(void) {
 	ULONG count = InterlockedDecrement(&m_refCount);
 	if (count == 0) {
+		InterlockedDecrement(&g_serverLocks);
 		this->~CElevationHelper();
 		CoTaskMemFree(this);
 	}
@@ -152,7 +154,7 @@ STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
 	return hr;
 }
 
-STDMETHODIMP CElevationHelper::SetBrowserHwnd(IUpdateInstaller *installer, HWND hwnd) {
+STDMETHODIMP CElevationHelper::SetBrowserHwnd(IUpdateInstaller *installer, LONG_PTR hwnd) {
 	if (installer == NULL) {
 		return E_INVALIDARG;
 	}
@@ -161,7 +163,7 @@ STDMETHODIMP CElevationHelper::SetBrowserHwnd(IUpdateInstaller *installer, HWND 
 	HRESULT hr = installer->QueryInterface(IID_IUpdateInstaller, (void **)&updateInstaller);
 	CHECK_HR_OR_RETURN(L"QueryInterface IID_IUpdateInstaller");
 
-	hr = updateInstaller->put_ParentHwnd(hwnd);
+	hr = updateInstaller->put_ParentHwnd((HWND)hwnd);
 	CHECK_HR_OR_RETURN(L"put_ParentHwnd");
 
 	return S_OK;

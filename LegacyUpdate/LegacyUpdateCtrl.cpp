@@ -390,7 +390,7 @@ STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
 	hr = GetIEWindowHWND(&hwnd);
 	CHECK_HR_OR_RETURN(L"GetIEWindowHWND");
 
-	return elevatedHelper->SetBrowserHwnd(installer, hwnd);
+	return elevatedHelper->SetBrowserHwnd(installer, (LONG_PTR)hwnd);
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
