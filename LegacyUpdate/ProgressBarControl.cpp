@@ -1,6 +1,7 @@
 // ProgressBarControl.cpp : Implementation of CProgressBarControl
 
 #include "ProgressBarControl.h"
+#include "dllmain.h"
 #include <commctrl.h>
 #include <new>
 #include "Compat.h"
@@ -23,8 +24,8 @@ STDMETHODIMP CProgressBarControl::Create(IUnknown *pUnkOuter, REFIID riid, void 
 	}
 
 	new(pThis) CProgressBarControl();
+	InterlockedIncrement(&g_serverLocks);
 	HRESULT hr = pThis->QueryInterface(riid, ppv);
-	CHECK_HR_OR_RETURN(L"QueryInterface");
 	pThis->Release();
 
 	return hr;
@@ -117,6 +118,7 @@ STDMETHODIMP_(ULONG) CProgressBarControl::AddRef(void) {
 STDMETHODIMP_(ULONG) CProgressBarControl::Release(void) {
 	ULONG count = InterlockedDecrement(&m_refCount);
 	if (count == 0) {
+		InterlockedDecrement(&g_serverLocks);
 		this->~CProgressBarControl();
 		CoTaskMemFree(this);
 	}

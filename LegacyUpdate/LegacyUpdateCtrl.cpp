@@ -1,6 +1,7 @@
 // LegacyUpdateCtrl.cpp : Implementation of the CLegacyUpdateCtrl ActiveX Control class.
 
 #include "LegacyUpdateCtrl.h"
+#include "dllmain.h"
 #include "Compat.h"
 #include "ElevationHelper.h"
 #include "Exec.h"
@@ -39,6 +40,7 @@ STDMETHODIMP CLegacyUpdateCtrl::Create(IUnknown *pUnkOuter, REFIID riid, void **
 	}
 
 	new(pThis) CLegacyUpdateCtrl();
+	InterlockedIncrement(&g_serverLocks);
 	HRESULT hr = pThis->QueryInterface(riid, ppv);
 	pThis->Release();
 
@@ -123,6 +125,7 @@ STDMETHODIMP_(ULONG) CLegacyUpdateCtrl::AddRef(void) {
 STDMETHODIMP_(ULONG) CLegacyUpdateCtrl::Release(void) {
 	ULONG count = InterlockedDecrement(&m_refCount);
 	if (count == 0) {
+		InterlockedDecrement(&g_serverLocks);
 		this->~CLegacyUpdateCtrl();
 		CoTaskMemFree(this);
 	}

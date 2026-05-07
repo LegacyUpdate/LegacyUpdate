@@ -18,7 +18,6 @@ STDMETHODIMP CClassFactory::Create(IUnknown *pUnkOuter, REFIID riid, void **ppv)
 
 	new(pThis) CClassFactory();
 	HRESULT hr = pThis->QueryInterface(riid, ppv);
-	CHECK_HR_OR_RETURN(L"QueryInterface");
 	pThis->Release();
 	return hr;
 }
