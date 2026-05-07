@@ -15,34 +15,40 @@ static _WICConvertBitmapSource $WICConvertBitmapSource;
 static _SHCreateStreamOnFileEx $SHCreateStreamOnFileEx;
 
 static HGLOBAL GetRawResource(HINSTANCE hInstance, LPCWSTR name, LPCWSTR type) {
+	HRESULT hr = S_OK;
 	HRSRC resource = FindResource(hInstance, name, type);
 	if (!resource) {
-		TRACE(L"FindResource failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"FindResource failed");
 		return NULL;
 	}
 
 	DWORD resourceSize = SizeofResource(hInstance, resource);
 	HGLOBAL imageHandle = LoadResource(hInstance, resource);
 	if (!imageHandle) {
-		TRACE(L"LoadResource failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"LoadResource failed");
 		return NULL;
 	}
 
 	LPVOID sourceResourceData = LockResource(imageHandle);
 	if (!sourceResourceData) {
-		TRACE(L"LockResource failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"LockResource failed");
 		return NULL;
 	}
 
 	HGLOBAL resourceDataHandle = GlobalAlloc(GMEM_MOVEABLE, resourceSize);
 	if (!resourceDataHandle) {
-		TRACE(L"GlobalAlloc failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GlobalAlloc failed");
 		return NULL;
 	}
 
 	LPVOID resourceData = GlobalLock(resourceDataHandle);
 	if (!resourceData) {
-		TRACE(L"GlobalLock failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GlobalLock failed");
 		GlobalFree(resourceDataHandle);
 		return NULL;
 	}
@@ -56,7 +62,8 @@ static IStream *GetResourceStream(HINSTANCE hInstance, LPCWSTR name, LPCWSTR typ
 	IStream *stream = NULL;
 	HGLOBAL resource = GetRawResource(hInstance, name, type);
 	if (!resource) {
-		TRACE(L"GetResource failed: %d", GetLastError());
+		HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GetRawResource failed");
 		return NULL;
 	}
 
@@ -144,14 +151,17 @@ HBITMAP LoadPNGResource(HINSTANCE hInstance, LPCWSTR resourceName, LPCWSTR resou
 	}
 
 	IStream *imageStream = GetResourceStream(hInstance, resourceName, resourceType);
+	HRESULT hr = S_OK;
 	if (!imageStream) {
-		TRACE(L"GetResourceStream failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GetResourceStream failed");
 		return NULL;
 	}
 
 	IWICBitmapSource *bitmap = GetWICBitmap(imageStream, &CLSID_WICPngDecoder);
 	if (!bitmap) {
-		TRACE(L"GetWICBitmap failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GetWICBitmap failed");
 		IStream_Release(imageStream);
 		return NULL;
 	}
@@ -186,13 +196,14 @@ HBITMAP LoadJPEGFile(LPCWSTR filePath) {
 	IStream *imageStream = NULL;
 	HRESULT hr = $SHCreateStreamOnFileEx(filePath, STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, NULL, &imageStream);
 	if (!SUCCEEDED(hr)) {
-		TRACE(L"SHCreateStreamOnFileEx failed: 0x%08x", hr);
+		CHECK_HR(L"SHCreateStreamOnFileEx failed");
 		return NULL;
 	}
 
 	IWICBitmapSource *bitmap = GetWICBitmap(imageStream, &CLSID_WICJpegDecoder);
 	if (!bitmap) {
-		TRACE(L"GetWICBitmap failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GetWICBitmap failed");
 		IStream_Release(imageStream);
 		return NULL;
 	}
@@ -217,16 +228,19 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outp
 	HANDLE file = INVALID_HANDLE_VALUE;
 	HBITMAP oldBitmap = NULL;
 	HBITMAP oldScaledBitmap = NULL;
+	HRESULT hr = S_OK;
 
 	HBITMAP scaledBitmap = CreateCompatibleBitmap(hdc, width, height);
 	if (!scaledBitmap) {
-		TRACE(L"CreateCompatibleBitmap failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"CreateCompatibleBitmap failed");
 		goto end;
 	}
 
 	BITMAP bmp = {0};
 	if (!GetObject(hBitmap, sizeof(BITMAP), &bmp)) {
-		TRACE(L"GetObject failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GetObject failed");
 		goto end;
 	}
 
@@ -239,7 +253,8 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outp
 	if (!StretchBlt(hdcMemScaled,
 		0, 0, width, height, hdcMem,
 		0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY)) {
-		TRACE(L"StretchBlt failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"StretchBlt failed");
 		goto end;
 	}
 
@@ -259,24 +274,28 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outp
 
 	handle = GlobalAlloc(GMEM_MOVEABLE, bmih.biSizeImage);
 	if (!handle) {
-		TRACE(L"GlobalAlloc failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GlobalAlloc failed");
 		goto end;
 	}
 
 	BYTE *bitmapData = (BYTE *)GlobalLock(handle);
 	if (!bitmapData) {
-		TRACE(L"GlobalLock failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GlobalLock failed");
 		goto end;
 	}
 
 	if (!GetDIBits(hdcMemScaled, scaledBitmap, 0, height, bitmapData, (BITMAPINFO *)&bmih, DIB_RGB_COLORS)) {
-		TRACE(L"GetDIBits failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"GetDIBits failed");
 		goto end;
 	}
 
 	file = CreateFile(outputPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file == INVALID_HANDLE_VALUE) {
-		TRACE(L"CreateFile failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"CreateFile failed");
 		goto end;
 	}
 
@@ -284,7 +303,8 @@ BOOL ScaleAndWriteToBMP(HBITMAP hBitmap, DWORD width, DWORD height, LPCWSTR outp
 	if (!WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &written, NULL) ||
 		!WriteFile(file, &bmih, sizeof(BITMAPINFOHEADER), &written, NULL) ||
 		!WriteFile(file, bitmapData, bmih.biSizeImage, &written, NULL)) {
-		TRACE(L"WriteFile failed: %d", GetLastError());
+		hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"WriteFile failed");
 		goto end;
 	}
 

@@ -92,21 +92,21 @@ end_slc:
 		}
 
 		if (!SUCCEEDED(hr)) {
-			TRACE(L"COMLicenseAgent load failed: %x", hr);
+			CHECK_HR(L"COMLicenseAgent load failed");
 			goto end_xp;
 		}
 
 		ULONG result = 0;
 		hr = ICOMLicenseAgent_Initialize(agent, 0xC475, 3, NULL, &result);
 		if (!SUCCEEDED(hr) || result != 0) {
-			TRACE(L"COMLicenseAgent init failed: %x", hr);
+			CHECK_HR(L"COMLicenseAgent init failed");
 			goto end_xp;
 		}
 
 		ULONG wpaLeft = 0, evalLeft = 0;
 		hr = ICOMLicenseAgent_GetExpirationInfo(agent, &wpaLeft, &evalLeft);
 		if (!SUCCEEDED(hr)) {
-			TRACE(L"COMLicenseAgent GetExpirationInfo failed: %x", hr);
+			CHECK_HR(L"COMLicenseAgent GetExpirationInfo failed");
 			goto end_xp;
 		}
 

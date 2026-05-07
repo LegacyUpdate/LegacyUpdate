@@ -16,14 +16,19 @@
 	#define TRACE(...) LOG(__VA_ARGS__)
 #endif
 
-#define CHECK_HR_OR_RETURN(thing) \
+#define CHECK_HR(thing) \
 	if (!SUCCEEDED(hr)) { \
 		TRACE(thing L" failed: %08x", hr); \
+	}
+
+#define CHECK_HR_OR_RETURN(thing) \
+	CHECK_HR(thing); \
+	if (!SUCCEEDED(hr)) { \
 		return hr; \
 	}
 
 #define CHECK_HR_OR_GOTO_END(thing) \
+	CHECK_HR(thing); \
 	if (!SUCCEEDED(hr)) { \
-		TRACE(thing L" failed: %08x", hr); \
 		goto end; \
 	}

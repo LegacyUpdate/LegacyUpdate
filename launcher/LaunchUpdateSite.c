@@ -139,7 +139,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	//  - Class not registered: mshtml.dll unregistered, deleted, or uninstalled in Optional Features.
 	//  - Path not found: iexplore.exe is not present.
 	if (hr == REGDB_E_CLASSNOTREG || hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND) || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)) {
-		TRACE(L"IE not installed: %08x", hr);
+		CHECK_HR(L"IE not installed");
 		hr = HandleIENotInstalled();
 		goto end;
 	} else if (!SUCCEEDED(hr)) {

@@ -174,7 +174,8 @@ static void CreateRunOnceWindow(void) {
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 
 	if (!RegisterClass(&wndClass)) {
-		TRACE(L"RegisterClass failed: %d", GetLastError());
+		HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"RegisterClass");
 		return;
 	}
 
@@ -189,7 +190,8 @@ static void CreateRunOnceWindow(void) {
 		NULL
 	);
 	if (!hwnd) {
-		TRACE(L"CreateWindow failed: %d", GetLastError());
+		HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
+		CHECK_HR(L"CreateWindowEx");
 		return;
 	}
 

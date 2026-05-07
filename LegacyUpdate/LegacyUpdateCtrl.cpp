@@ -510,7 +510,7 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 
 	HRESULT hr = StartLauncher(L"/options", FALSE);
 	if (!SUCCEEDED(hr)) {
-		TRACE(L"OpenWindowsUpdateSettings() failed, falling back: %08x", hr);
+		CHECK_HR(L"OpenWindowsUpdateSettings() failed, falling back");
 
 		// Might happen if the site isn't trusted, and the user rejected the IE medium integrity prompt.
 		// Use the basic Automatic Updates dialog directly from COM.

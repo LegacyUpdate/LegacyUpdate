@@ -30,8 +30,8 @@ PLUGIN_METHOD(UpdateRoots) {
 	HCERTSTORE srcStore = CertOpenStore(CERT_STORE_PROV_FILENAME_W, 0, 0, CERT_STORE_READONLY_FLAG, path);
 	HCERTSTORE dstStore = NULL;
 	if (!srcStore) {
-		TRACE(L"CertOpenStore for %ls failed: %08x", path, hr);
 		hr = HRESULT_FROM_WIN32(GetLastError());
+		TRACE(L"CertOpenStore for %ls failed: %08x", path, hr);
 		goto end;
 	}
 
@@ -48,8 +48,8 @@ PLUGIN_METHOD(UpdateRoots) {
 			? CertAddCertificateContextToStore(dstStore, cert, CERT_STORE_ADD_REPLACE_EXISTING, NULL)
 			: CertDeleteCertificateFromStore(CertDuplicateCertificateContext(cert));
 		if (!result) {
-			TRACE(L"cert %ls in %ls failed: %d\n", add ? L"add" : L"delete", store, GetLastError());
 			hr = HRESULT_FROM_WIN32(GetLastError());
+			TRACE(L"Certificate %ls in %ls failed: %08x", add ? L"add" : L"delete", store, hr);
 			goto end;
 		}
 	}

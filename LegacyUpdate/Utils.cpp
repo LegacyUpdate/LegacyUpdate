@@ -69,7 +69,7 @@ HRESULT Reboot(void) {
 
 	// Try InitiateSystemShutdownEx (2k/XP)
 	if (!SUCCEEDED(hr)) {
-		TRACE(L"InitiateShutdown failed: %08x", hr);
+		CHECK_HR(L"InitiateShutdown failed");
 
 		if (InitiateSystemShutdownEx(NULL, NULL, 0, FALSE, TRUE, SHTDN_REASON_MAJOR_OPERATINGSYSTEM | SHTDN_REASON_MINOR_SECURITYFIX) == 0) {
 			hr = HRESULT_FROM_WIN32(GetLastError());

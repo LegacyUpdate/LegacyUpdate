@@ -25,7 +25,8 @@ HRESULT ExecEx(LPSHELLEXECUTEINFO execInfo, BOOL wait, LPDWORD exitCode) {
 
 	if (wait) {
 		if (execInfo->hProcess == NULL) {
-			TRACE(L"ShellExecuteEx() didn't return a handle: %u", GetLastError());
+			hr = HRESULT_FROM_WIN32(GetLastError());
+			CHECK_HR(L"ShellExecuteEx didn't return a handle");
 			hr = E_FAIL;
 		}
 
@@ -33,7 +34,7 @@ HRESULT ExecEx(LPSHELLEXECUTEINFO execInfo, BOOL wait, LPDWORD exitCode) {
 
 		if (exitCode != NULL && GetExitCodeProcess(execInfo->hProcess, exitCode) == 0) {
 			hr = HRESULT_FROM_WIN32(GetLastError());
-			TRACE(L"GetExitCodeProcess() failed: %p\n", hr);
+			CHECK_HR(L"GetExitCodeProcess failed");
 		}
 
 		CloseHandle(execInfo->hProcess);
