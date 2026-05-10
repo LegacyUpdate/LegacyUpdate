@@ -131,8 +131,11 @@ STDMETHODIMP_(ULONG) CElevationHelper::Release(void) {
 #pragma mark - IElevationHelper
 
 STDMETHODIMP CElevationHelper::CreateObject(BSTR progID, IDispatch **retval) {
-	if (progID == NULL || retval == NULL) {
+	if (progID == NULL) {
 		return E_INVALIDARG;
+	}
+	if (retval == NULL) {
+		return E_POINTER;
 	}
 
 	*retval = NULL;

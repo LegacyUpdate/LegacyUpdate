@@ -138,6 +138,9 @@ STDMETHODIMP CLegacyUpdateCtrl::GetHTMLDocument(IHTMLDocument2 **retval) {
 	if (m_clientSite == NULL) {
 		return E_ACCESSDENIED;
 	}
+	if (retval == NULL) {
+		return E_POINTER;
+	}
 
 	CComPtr<IOleContainer> container;
 	HRESULT hr = m_clientSite->GetContainer(&container);
@@ -233,6 +236,10 @@ STDMETHODIMP CLegacyUpdateCtrl::GetIEWindowHWND(HWND *retval) {
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::GetElevatedHelper(IElevationHelper **retval) {
+	if (retval == NULL) {
+		return E_POINTER;
+	}
+
 	IElevationHelper *elevatedHelper = m_elevatedHelper ? m_elevatedHelper : m_nonElevatedHelper;
 	if (elevatedHelper == NULL) {
 		// Use the helper directly, without elevation. It's the responsibility of the caller to ensure it
@@ -269,6 +276,11 @@ STDMETHODIMP CLegacyUpdateCtrl::CheckControl(VARIANT_BOOL *retval) {
 
 STDMETHODIMP CLegacyUpdateCtrl::MessageForHresult(LONG inHresult, BSTR *retval) {
 	DoIsPermittedCheck();
+
+	if (retval == NULL) {
+		return E_POINTER;
+	}
+
 	LPWSTR message = GetMessageForHresult(inHresult);
 	*retval = SysAllocString(message);
 	LocalFree(message);
@@ -277,6 +289,10 @@ STDMETHODIMP CLegacyUpdateCtrl::MessageForHresult(LONG inHresult, BSTR *retval) 
 
 STDMETHODIMP CLegacyUpdateCtrl::GetOSVersionInfo(OSVersionField osField, LONG systemMetric, VARIANT *retval) {
 	DoIsPermittedCheck();
+
+	if (retval == NULL) {
+		return E_POINTER;
+	}
 
 	VariantInit(retval);
 	OSVERSIONINFOEX *versionInfo = GetVersionInfo();
@@ -395,6 +411,9 @@ STDMETHODIMP CLegacyUpdateCtrl::CreateObject(BSTR progID, IDispatch **retval) {
 	if (progID == NULL) {
 		return E_INVALIDARG;
 	}
+	if (retval == NULL) {
+		return E_POINTER;
+	}
 
 	if (!ProgIDIsPermitted(progID)) {
 		return E_ACCESSDENIED;
@@ -428,6 +447,10 @@ STDMETHODIMP CLegacyUpdateCtrl::SetBrowserHwnd(IUpdateInstaller *installer) {
 STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 	DoIsPermittedCheck();
 
+	if (retval == NULL) {
+		return E_POINTER;
+	}
+
 	if (IsUserAdmin()) {
 		// Entire process is elevated.
 		*retval = e_admin;
@@ -444,6 +467,10 @@ STDMETHODIMP CLegacyUpdateCtrl::GetUserType(UserType *retval) {
 
 STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
+
+	if (retval == NULL) {
+		return E_POINTER;
+	}
 
 	// Ask WU itself whether a reboot is required
 	CComPtr<ISystemInformation> systemInfo;
@@ -468,6 +495,10 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsRebootRequired(VARIANT_BOOL *retval) {
 
 STDMETHODIMP CLegacyUpdateCtrl::get_IsWindowsUpdateDisabled(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
+
+	if (retval == NULL) {
+		return E_POINTER;
+	}
 
 	// Future note: These are in HKCU on NT; HKLM on 9x.
 	// Remove links and access to Windows Update
@@ -557,6 +588,10 @@ STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 	DoIsPermittedCheck();
 
+	if (retval == NULL) {
+		return E_POINTER;
+	}
+
 	DWORD useWUServer = 0;
 	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_POLICIES_WU_AU, L"UseWUServer", KEY_WOW64_64KEY, &useWUServer);
 	*retval = SUCCEEDED(hr) && useWUServer == 1 ? VARIANT_TRUE : VARIANT_FALSE;
@@ -565,6 +600,10 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 
 STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 	DoIsPermittedCheck();
+
+	if (retval == NULL) {
+		return E_POINTER;
+	}
 
 	LPWSTR data = NULL;
 	DWORD size = 0;
@@ -578,6 +617,10 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 
 STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 	DoIsPermittedCheck();
+
+	if (retval == NULL) {
+		return E_POINTER;
+	}
 
 	LPWSTR data = NULL;
 	DWORD size = 0;
