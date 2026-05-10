@@ -37,7 +37,10 @@
 !define PBS_SMOOTH  0x02
 !define PBS_MARQUEE 0x08
 
+!define SMTO_ABORTIFHUNG         0x0002
+
 !define GetSystemMetrics         'user32::GetSystemMetrics(i) i'
+!define SendMessageTimeout       'user32::SendMessageTimeout(i, i, i, t, i, i, *i) i'
 
 ; winerror
 !define RPC_S_SERVER_UNAVAILABLE 1722

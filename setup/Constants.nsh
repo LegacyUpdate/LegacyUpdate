@@ -66,6 +66,7 @@
 !define REGPATH_CONTROL_LANGUAGE   "${REGPATH_CONTROL}\Nls\Language"
 !define REGPATH_CONTROL_TERMSRV    "${REGPATH_CONTROL}\Terminal Server"
 !define REGPATH_CONTROL_WINDOWS    "${REGPATH_CONTROL}\Windows"
+!define REGPATH_CONTROL_ENVIRONMENT "${REGPATH_CONTROL}\Session Manager\Environment"
 
 ; XP WPA
 !define REGPATH_WPA                "System\WPA"

@@ -163,6 +163,9 @@ Section -BeforeInstall PREREQS_START
 
 	${IfNot} ${IsRunOnce}
 	${AndIfNot} ${IsPostInstall}
+		; Handle Lenovo Windows 7 RTM bug
+		Call FixLenovoEnvironment
+
 		; Download files
 		Call PreDownload
 

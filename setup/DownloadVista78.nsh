@@ -204,3 +204,16 @@ FunctionEnd
 ; 		Push 0
 ; 	${EndIf}
 ; FunctionEnd
+
+Function FixLenovoEnvironment
+	; Some Lenovo Windows 7 RTM system images have %ConfigSetRoot% globally set to %SystemRoot%\ConfigSetRoot, which
+	; doesn't exist. When Dism reads the unattend xml, it tries to look for the cab there, and fails. Fix it globally by
+	; deleting the broken registry value if it matches %SystemRoot%\ConfigSetRoot and that path doesn't exist.
+	ReadRegStr $0 HKLM "${REGPATH_CONTROL_ENVIRONMENT}" "ConfigSetRoot"
+	${If} $0 == "%SystemRoot%\ConfigSetRoot"
+	${AndIfNot} ${FileExists} "$WINDIR\ConfigSetRoot"
+		${VerbosePrint} "Fixing Lenovo ConfigSetRoot issue"
+		DeleteRegValue HKLM "${REGPATH_CONTROL_ENVIRONMENT}" "ConfigSetRoot"
+		System::Call '${SendMessageTimeout}(${HWND_BROADCAST}, ${WM_SETTINGCHANGE}, 0, "Environment", ${SMTO_ABORTIFHUNG}, 5000, .r0)'
+	${EndIf}
+FunctionEnd
