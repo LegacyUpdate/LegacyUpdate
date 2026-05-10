@@ -35,4 +35,5 @@ public:
 	STDMETHODIMP Reboot();
 	STDMETHODIMP BeforeUpdate();
 	STDMETHODIMP AfterUpdate();
+	STDMETHODIMP GetProcessId(DWORD *retval);
 };

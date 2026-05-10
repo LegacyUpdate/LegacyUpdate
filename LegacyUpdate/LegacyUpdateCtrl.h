@@ -54,6 +54,7 @@ private:
 
 	STDMETHODIMP GetHTMLDocument(IHTMLDocument2 **retval);
 	STDMETHODIMP IsPermitted();
+	STDMETHODIMP GetDocumentWindowHWND(HWND *retval);
 	STDMETHODIMP GetIEWindowHWND(HWND *retval);
 	STDMETHODIMP GetElevatedHelper(IElevationHelper **retval);
 

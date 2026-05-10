@@ -183,6 +183,15 @@ end:
 	return ::Reboot();
 }
 
+STDMETHODIMP CElevationHelper::GetProcessId(DWORD *retval) {
+	if (retval == NULL) {
+		return E_POINTER;
+	}
+
+	*retval = GetCurrentProcessId();
+	return S_OK;
+}
+
 STDMETHODIMP CElevationHelper::BeforeUpdate(void) {
 	return PauseResumeNGenQueue(FALSE);
 }

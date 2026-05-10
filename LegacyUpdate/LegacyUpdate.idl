@@ -99,6 +99,7 @@ interface IElevationHelper : IDispatch
 	[id(2)] HRESULT Reboot(void);
 	[id(3)] HRESULT BeforeUpdate(void);
 	[id(4)] HRESULT AfterUpdate(void);
+	[id(6)] HRESULT GetProcessId([out, retval] DWORD *retval);
 };
 
 [

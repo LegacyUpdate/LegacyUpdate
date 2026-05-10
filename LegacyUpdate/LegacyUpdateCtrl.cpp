@@ -187,7 +187,11 @@ end:
 	return hr;
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::GetIEWindowHWND(HWND *retval) {
+STDMETHODIMP CLegacyUpdateCtrl::GetDocumentWindowHWND(HWND *retval) {
+	if (retval == NULL) {
+		return E_POINTER;
+	}
+
 	*retval = NULL;
 
 	if (m_clientSite == NULL) {
@@ -200,6 +204,31 @@ STDMETHODIMP CLegacyUpdateCtrl::GetIEWindowHWND(HWND *retval) {
 
 	hr = oleWindow->GetWindow(retval);
 	CHECK_HR_OR_RETURN(L"GetWindow");
+	return hr;
+}
+
+STDMETHODIMP CLegacyUpdateCtrl::GetIEWindowHWND(HWND *retval) {
+	if (retval == NULL) {
+		return E_POINTER;
+	}
+
+	*retval = NULL;
+
+	HWND hwnd = NULL;
+	HRESULT hr = GetDocumentWindowHWND(&hwnd);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	// Get the true top-level IE window, rather than the IE8+ subprocess
+	if (hwnd) {
+		HWND rootHwnd = GetAncestor(hwnd, GA_ROOT);
+		if (rootHwnd) {
+			hwnd = rootHwnd;
+		}
+	}
+
+	*retval = hwnd;
 	return hr;
 }
 
@@ -354,7 +383,7 @@ STDMETHODIMP CLegacyUpdateCtrl::RequestElevation(void) {
 
 	// https://learn.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker
 	HWND hwnd;
-	GetIEWindowHWND(&hwnd);
+	GetDocumentWindowHWND(&hwnd);
 	HRESULT hr = CoCreateInstanceAsAdmin(hwnd, CLSID_ElevationHelper, IID_IElevationHelper, (void**)&m_elevatedHelper);
 	CHECK_HR_OR_RETURN(L"CoCreateInstanceAsAdmin");
 	return hr;
@@ -566,6 +595,33 @@ STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate(void) {
 	IElevationHelper *elevatedHelper;
 	HRESULT hr = GetElevatedHelper(&elevatedHelper);
 	CHECK_HR_OR_RETURN(L"GetElevatedHelper");
+
+	// Allow IUpdateInstaller->RunWizard() dialog to come to foreground while this process is in foreground.
+	// Without this, Windows will see it as a disruption and ignore the request.
+	DWORD pid;
+	hr = elevatedHelper->GetProcessId(&pid);
+	if (SUCCEEDED(hr)) {
+		HWND hwnd = NULL;
+		GetIEWindowHWND(&hwnd);
+
+		// Do some thread magic to execute in the thread context of the top-level IE process
+		BOOL attached = FALSE;
+		DWORD brokerThread = 0;
+		DWORD currentThread = GetCurrentThreadId();
+		if (hwnd) {
+			brokerThread = GetWindowThreadProcessId(hwnd, NULL);
+
+			if (brokerThread != 0 && brokerThread != currentThread) {
+				attached = AttachThreadInput(currentThread, brokerThread, TRUE);
+			}
+		}
+
+		AllowSetForegroundWindow(pid);
+
+		if (attached) {
+			AttachThreadInput(currentThread, brokerThread, FALSE);
+		}
+	}
 
 	return elevatedHelper->BeforeUpdate();
 }
