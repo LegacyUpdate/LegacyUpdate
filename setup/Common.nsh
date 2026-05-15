@@ -292,9 +292,13 @@ FunctionEnd
 
 !macro -WriteRegWithBackup type root subkey name value
 	ClearErrors
-	ReadReg${type} $0 ${root} "${subkey}" "${name}"
-	${IfNot} ${Errors}
-		WriteReg${type} ${root} "${subkey}" "${name}_LegacyUpdateBackup" $0
+	ReadReg${type} $0 ${root} "${subkey}_LegacyUpdateBackup" "${name}"
+	${If} ${Errors}
+		ClearErrors
+		ReadReg${type} $0 ${root} "${subkey}" "${name}"
+		${IfNot} ${Errors}
+			WriteReg${type} ${root} "${subkey}" "${name}_LegacyUpdateBackup" $0
+		${EndIf}
 	${EndIf}
 	WriteReg${type} ${root} "${subkey}" "${name}" `${value}`
 !macroend

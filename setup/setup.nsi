@@ -566,28 +566,31 @@ ${MementoSectionDone}
 Section "-un.Legacy Update Server" un.WUSERVER
 	; Clear WSUS server
 	${If} ${AtMostWinVista}
-		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUServer"
-		${VerbosePrint} "WUServer: $0"
-		${If} $0 == "${WSUS_SERVER}"
-		${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
-			${DeleteRegWithBackup} Str   HKLM "${REGPATH_WUPOLICY}"   "WUServer"    "-"
-			${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" "-"
-		${EndIf}
+		; Do this twice in case the backup is still set to our server
+		${For} $R0 1 2
+			ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUServer"
+			${VerbosePrint} "WUServer: $0"
+			${If} $0 == "${WSUS_SERVER}"
+			${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
+				${DeleteRegWithBackup} Str   HKLM "${REGPATH_WUPOLICY}"   "WUServer"    "-"
+				${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" "-"
+			${EndIf}
 
-		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
-		${VerbosePrint} "WUStatusServer: $0"
-		${If} $0 == "${WSUS_SERVER}"
-		${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
-			${DeleteRegWithBackup} Str   HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer" "-"
-			${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"    "-"
-		${EndIf}
+			ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
+			${VerbosePrint} "WUStatusServer: $0"
+			${If} $0 == "${WSUS_SERVER}"
+			${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
+				${DeleteRegWithBackup} Str   HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer" "-"
+				${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"    "-"
+			${EndIf}
 
-		ReadRegStr $0 HKLM "${REGPATH_WU}" "URL"
-		${VerbosePrint} "URL: $0"
-		${If} $0 == "${UPDATE_URL}"
-		${OrIf} $0 == "${UPDATE_URL_HTTPS}"
-			${DeleteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "-"
-		${EndIf}
+			ReadRegStr $0 HKLM "${REGPATH_WU}" "URL"
+			${VerbosePrint} "URL: $0"
+			${If} $0 == "${UPDATE_URL}"
+			${OrIf} $0 == "${UPDATE_URL_HTTPS}"
+				${DeleteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "-"
+			${EndIf}
+		${Next}
 	${EndIf}
 SectionEnd
 
