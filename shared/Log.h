@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include <strsafe.h>
+#include <SafeString.h>
 
 // Same as NSIS_MAX_STRLEN
 #define LOG_LINE_MAXLEN 4096
