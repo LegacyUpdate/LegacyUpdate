@@ -34,7 +34,7 @@ STDMETHODIMP PauseResumeNGenQueue(BOOL state) {
 			}
 
 			WCHAR path[MAX_PATH], expandedPath[MAX_PATH];
-			wsprintf(path, L"%%SystemRoot%%\\Microsoft.NET\\Framework%ls\\%ls\\ngen.exe", j == 1 ? L"64": L"", versions[i]);
+			StringCchPrintf(path, ARRAYSIZE(path), L"%%SystemRoot%%\\Microsoft.NET\\Framework%ls\\%ls\\ngen.exe", j == 1 ? L"64": L"", versions[i]);
 			ExpandEnvironmentStrings(path, expandedPath, ARRAYSIZE(expandedPath));
 
 			if (PathFileExists(expandedPath)) {

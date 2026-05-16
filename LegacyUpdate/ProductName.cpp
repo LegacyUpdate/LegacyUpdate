@@ -232,15 +232,15 @@ HRESULT GetOSProductName(LPVARIANT productName) {
 					if (i == 1) {
 						UINT lastID = variant.stringIDs[i - 1];
 						if (lastID == STR_SRV03 && !$IsOS(OS_SMALLBUSINESSSERVER)) {
-							wcscat(brandStr, L",");
+							StringCchCat(brandStr, ARRAYSIZE(brandStr), L",");
 						}
 					}
 
 					if (i > 0) {
-						wcscat(brandStr, L" ");
+						StringCchCat(brandStr, ARRAYSIZE(brandStr), L" ");
 					}
 
-					wcscat(brandStr, str);
+					StringCchCat(brandStr, ARRAYSIZE(brandStr), str);
 				}
 
 				if (wcslen(brandStr) > 0) {

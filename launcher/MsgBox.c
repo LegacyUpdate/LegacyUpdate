@@ -26,7 +26,7 @@ int MsgBox(HWND hwnd, LPCTSTR instruction, LPCTSTR body, UINT type) {
 		if (body && lstrlen(body) > 0) {
 			size_t length = lstrlen(instruction) + lstrlen(body) + 3;
 			finalBody = (LPWSTR)LocalAlloc(LPTR, length * sizeof(TCHAR));
-			wsprintf(finalBody, L"%ls\n\n%ls", instruction, body);
+			StringCchPrintf(finalBody, length, L"%ls\n\n%ls", instruction, body);
 		}
 
 		MSGBOXPARAMS params = {0};

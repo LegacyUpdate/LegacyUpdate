@@ -6,6 +6,7 @@ FILES    = \
 	../shared/LoadImage.c \
 	../shared/Log.c \
 	../shared/Registry.c \
+	../shared/SafeString.c \
 	../shared/ViewLog.c \
 	../shared/Wow64.c
 RCFILES  = resource.rc

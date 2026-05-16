@@ -19,10 +19,10 @@ static inline void HardenDllSearchPaths(void) {
 
 	// Reset %PATH% to just system32
 	WCHAR path[MAX_PATH];
-	wsprintf(path, L"%ls;%ls", sysdir, windir);
+	StringCchPrintf(path, ARRAYSIZE(path), L"%ls;%ls", sysdir, windir);
 	SetEnvironmentVariable(L"PATH", path);
 
-	wcscat(sysdir, L"\\kernel32.dll");
+	StringCchCat(sysdir, ARRAYSIZE(sysdir), L"\\kernel32.dll");
 	HMODULE kernel32 = GetModuleHandle(windir);
 	if (!kernel32) {
 		return;

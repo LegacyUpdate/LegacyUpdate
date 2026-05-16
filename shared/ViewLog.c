@@ -36,13 +36,13 @@ HRESULT ViewLog(LogAction log, int nCmdShow, BOOL showErrors) {
 			HRESULT hr = $SHGetKnownFolderPath(&FOLDERID_LocalAppDataLow, CSIDL_FLAG_CREATE, NULL, &localLow);
 			CHECK_HR_OR_RETURN(L"SHGetKnownFolderPath");
 
-			wsprintf(workDir, L"%ls\\Temp", localLow);
+			StringCchPrintf(workDir, ARRAYSIZE(workDir), L"%ls\\Temp", localLow);
 			LocalFree(localLow);
 		} else {
 			// AppData\Local\Temp\Low
 			WCHAR localTemp[MAX_PATH];
 			GetTempPath(ARRAYSIZE(localTemp), localTemp);
-			wsprintf(workDir, L"%ls\\Low", localTemp);
+			StringCchPrintf(workDir, ARRAYSIZE(workDir), L"%ls\\Low", localTemp);
 		}
 		break;
 	}
@@ -74,7 +74,7 @@ HRESULT ViewLog(LogAction log, int nCmdShow, BOOL showErrors) {
 
 	LPCWSTR logFileName = log == LogActionWindowsUpdate ? L"WindowsUpdate.log" : L"LegacyUpdate.log";
 	WCHAR finalPath[MAX_PATH];
-	wsprintf(finalPath, L"%ls\\%ls", workDir, logFileName);
+	StringCchPrintf(finalPath, ARRAYSIZE(finalPath), L"%ls\\%ls", workDir, logFileName);
 
 	SHELLEXECUTEINFO execInfo = {0};
 	execInfo.cbSize = sizeof(execInfo);

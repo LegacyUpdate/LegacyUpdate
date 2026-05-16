@@ -52,7 +52,7 @@ HRESULT HandleIENotInstalled(void) {
 		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\fondue.exe", fondue, ARRAYSIZE(fondue));
 
 		WCHAR fondueArgs[256];
-		wsprintf(fondueArgs, L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
+		StringCchPrintf(fondueArgs, ARRAYSIZE(fondueArgs), L"/enable-feature:Internet-Explorer-Optional-%ls", archSuffix);
 
 		HRESULT hr = Exec(NULL, fondue, fondueArgs, NULL, SW_SHOWDEFAULT, FALSE, NULL);
 		if (SUCCEEDED(hr)) {
@@ -102,7 +102,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
 	if (!AtLeastWinVista() && !IsUserAdmin()) {
 		LPWSTR args = (LPWSTR)LocalAlloc(LPTR, 512 * sizeof(WCHAR));
-		wsprintf(args, L"/launch %ls", argc > 0 ? argv[0] : L"");
+		StringCchPrintf(args, 512, L"/launch %ls", argc > 0 ? argv[0] : L"");
 		hr = SelfElevate(args, NULL);
 		LocalFree(args);
 
@@ -152,7 +152,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	// Is this a first run launch? Append first run flag if so.
 	if (argc > 0 && lstrcmpi(argv[0], L"/firstrun") == 0) {
 		WCHAR newSiteURL[256];
-		wsprintf(newSiteURL, L"%ls%ls", siteURL, UpdateSiteFirstRunFlag);
+		StringCchPrintf(newSiteURL, ARRAYSIZE(newSiteURL), L"%ls%ls", siteURL, UpdateSiteFirstRunFlag);
 		siteURL = newSiteURL;
 	}
 

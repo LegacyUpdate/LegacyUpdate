@@ -7,6 +7,7 @@ FILES    = \
 	../shared/Log.c \
 	../shared/ProductInfo.c \
 	../shared/Registry.c \
+	../shared/SafeString.c \
 	../shared/ViewLog.c \
 	../shared/WMI.c \
 	../shared/Wow64.c \

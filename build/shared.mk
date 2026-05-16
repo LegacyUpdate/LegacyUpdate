@@ -161,6 +161,8 @@ $(OBJDIR)/%.o: %.c
 $(OBJDIR)/%.o: %.cpp
 	$(CC) -x $(CXX_LANG) $< $(CXXFLAGS) -c -o $@
 
+$(OBJDIR)/SafeString.o: CFLAGS += -fno-lto -D__CRT_STRSAFE_IMPL
+
 $(OBJDIR)/%.o: ../shared/%.c
 	$(CC) -x $(C_LANG) $< $(CFLAGS) -c -o $@
 

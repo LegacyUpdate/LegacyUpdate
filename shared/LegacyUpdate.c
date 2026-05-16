@@ -12,7 +12,7 @@ EXTERN_C HRESULT GetInstallPath(LPWSTR *path) {
 		DWORD size = 0;
 		hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_LEGACYUPDATE_UNINSTALL, L"InstallLocation", KEY_WOW64_64KEY, &_installPath, &size);
 		if (SUCCEEDED(hr)) {
-			lstrcpy(*path, _installPath);
+			lstrcpyn(*path, _installPath, MAX_PATH);
 			return S_OK;
 		}
 
@@ -21,11 +21,11 @@ EXTERN_C HRESULT GetInstallPath(LPWSTR *path) {
 		hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_WIN, L"ProgramFilesDir", KEY_WOW64_64KEY, &programFiles, &size);
 		if (SUCCEEDED(hr)) {
 			_installPath = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-			wsprintf(_installPath, L"%ls\\Legacy Update", programFiles);
+			StringCchPrintf(_installPath, MAX_PATH, L"%ls\\Legacy Update", programFiles);
 			LocalFree(programFiles);
 		}
 	}
 
-	lstrcpy(*path, _installPath);
+	lstrcpyn(*path, _installPath, MAX_PATH);
 	return hr;
 }

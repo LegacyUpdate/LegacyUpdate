@@ -41,7 +41,7 @@ void LogInternal(LPCWSTR text) {
 	GetLocalTime(&time);
 
 	WCHAR line[LOG_LINE_MAXLEN + 39];
-	int length = wsprintf(line, L"%04d-%02d-%02d %02d:%02d:%02d\t%ls[%d]\t%ls\r\n",
+	int length = StringCchPrintf(line, ARRAYSIZE(line), L"%04d-%02d-%02d %02d:%02d:%02d\t%ls[%d]\t%ls\r\n",
 		time.wYear, time.wMonth, time.wDay,
 		time.wHour, time.wMinute, time.wSecond,
 		L"" LOG_NAME, GetCurrentProcessId(),
@@ -116,7 +116,7 @@ HRESULT OpenLog() {
 	// Get system log path
 	WCHAR logPath[MAX_PATH];
 	GetWindowsDirectory(logPath, ARRAYSIZE(logPath));
-	lstrcat(logPath, AtLeastWinVista() ? L"\\Logs\\LegacyUpdate.log" : L"\\Temp\\LegacyUpdate.log");
+	StringCchCat(logPath, ARRAYSIZE(logPath), AtLeastWinVista() ? L"\\Logs\\LegacyUpdate.log" : L"\\Temp\\LegacyUpdate.log");
 
 	SECURITY_ATTRIBUTES sa = {0};
 	sa.nLength = sizeof(sa);
@@ -128,7 +128,7 @@ HRESULT OpenLog() {
 	if (g_hLogFile == INVALID_HANDLE_VALUE) {
 		// Access denied? Use user temp instead
 		GetTempPath(ARRAYSIZE(logPath), logPath);
-		lstrcat(logPath, L"LegacyUpdate.log");
+		StringCchCat(logPath, ARRAYSIZE(logPath), L"LegacyUpdate.log");
 		g_hLogFile = CreateFile(logPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	}
 

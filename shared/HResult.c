@@ -18,7 +18,7 @@ EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
 			LPWSTR installPath = NULL;
 			if (GetInstallPath(&installPath)) {
 				WCHAR path[MAX_PATH];
-				wsprintf(path, L"%ls\\LegacyUpdate.dll", installPath);
+				StringCchPrintf(path, ARRAYSIZE(path), L"%ls\\LegacyUpdate.dll", installPath);
 				g_messagesHModule = LoadLibrary(path);
 				LocalFree(installPath);
 			}
@@ -34,7 +34,7 @@ EXTERN_C LPWSTR GetMessageForHresult(HRESULT hr) {
 
 	if (message == NULL && !FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, hr, LANG_NEUTRAL, (LPWSTR)&message, 0, NULL)) {
 		message = (LPWSTR)LocalAlloc(LPTR, 17 * sizeof(WCHAR));
-		wsprintf(message, L"Error 0x%08X", hr);
+		StringCchPrintf(message, 17, L"Error 0x%08X", hr);
 		return message;
 	}
 

@@ -9,7 +9,6 @@
 #include "Registry.h"
 #include "Utils.h"
 #include "VersionInfo.h"
-#include <strsafe.h>
 #include <new>
 #include "IUpdateInstaller4.h"
 
@@ -38,7 +37,7 @@ STDMETHODIMP CoCreateInstanceAsAdmin(HWND hwnd, REFCLSID rclsid, REFIID riid, vo
 	StringFromGUID2(rclsid, clsidString, ARRAYSIZE(clsidString));
 
 	WCHAR monikerName[67];
-	wsprintf(monikerName, L"Elevation:Administrator!new:%ls", clsidString);
+	StringCchPrintf(monikerName, ARRAYSIZE(monikerName), L"Elevation:Administrator!new:%ls", clsidString);
 
 	BIND_OPTS3 bindOpts;
 	ZeroMemory(&bindOpts, sizeof(bindOpts));

@@ -5,9 +5,10 @@
 #ifdef _DEBUG
 	// Yeah, sue me lol
 	#define TRACE(...) { \
-		LPWSTR __traceMsg = (LPWSTR)LocalAlloc(LPTR, 4096 * sizeof(WCHAR)); \
-		wsprintf(__traceMsg, L"%hs(%d): %hs: ", __FILE__, __LINE__, __func__); \
-		wsprintf(__traceMsg + wcslen(__traceMsg), __VA_ARGS__); \
+		LPWSTR __traceMsg = (LPWSTR)LocalAlloc(LPTR, LOG_LINE_MAXLEN * sizeof(WCHAR)); \
+		StringCchPrintf(__traceMsg, LOG_LINE_MAXLEN, L"%hs(%d): %hs: ", __FILE__, __LINE__, __func__); \
+		int __tracePrefix = lstrlenW(__traceMsg); \
+		StringCchPrintf(__traceMsg + __tracePrefix, LOG_LINE_MAXLEN - __tracePrefix, __VA_ARGS__); \
 		MessageBox(NULL, __traceMsg, L"Debug", MB_OK); \
 		LocalFree(__traceMsg); \
 		LOG(__VA_ARGS__); \

@@ -326,14 +326,15 @@ void RunOnce(BOOL postInstall) {
 	LPWSTR setupPath;
 	GetOwnFileName(&setupPath);
 	wcsrchr(setupPath, L'\\')[1] = L'\0';
-	wcsncat(setupPath, L"LegacyUpdateSetup.exe", MAX_PATH - wcslen(setupPath) - 1);
+	StringCchCat(setupPath, MAX_PATH, L"LegacyUpdateSetup.exe");
 
 	// Execute and wait for completion
 	STARTUPINFO startupInfo = {0};
 	startupInfo.cb = sizeof(startupInfo);
 
-	LPWSTR cmdLine = (LPWSTR)LocalAlloc(LPTR, (lstrlen(setupPath) + 16) * sizeof(WCHAR));
-	wsprintf(cmdLine, L"\"%ls\" %ls", setupPath, postInstall ? L"/postinstall" : L"/runonce");
+	DWORD cmdLineLength = lstrlen(setupPath) + 16;
+	LPWSTR cmdLine = (LPWSTR)LocalAlloc(LPTR, cmdLineLength * sizeof(WCHAR));
+	StringCchPrintf(cmdLine, cmdLineLength, L"\"%ls\" %ls", setupPath, postInstall ? L"/postinstall" : L"/runonce");
 	PROCESS_INFORMATION processInfo = {0};
 	if (!CreateProcess(setupPath, cmdLine, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo)) {
 		LocalFree(setupPath);

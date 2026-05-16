@@ -30,7 +30,7 @@ static INT_PTR CALLBACK RebootDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 
 			DWORD remaining = max(COUNTDOWN_LENGTH - elapsedSecs, 0);
 			WCHAR timerDisplay[NSIS_MAX_STRLEN];
-			wsprintf(timerDisplay, L"%s%02d:%02d", g_timerPrefix, remaining / 60, remaining % 60);
+			StringCchPrintf(timerDisplay, ARRAYSIZE(timerDisplay), L"%s%02d:%02d", g_timerPrefix, remaining / 60, remaining % 60);
 			SetDlgItemText(hwnd, IDC_TEXT1, timerDisplay);
 
 			if (elapsedSecs >= COUNTDOWN_LENGTH) {

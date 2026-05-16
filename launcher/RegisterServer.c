@@ -37,8 +37,9 @@ static HRESULT RegisterDllExternal(LPWSTR path, BOOL state) {
 	WCHAR regsvr32[MAX_PATH];
 	ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\regsvr32.exe", regsvr32, ARRAYSIZE(regsvr32));
 
-	LPWSTR args = (LPWSTR)LocalAlloc(LPTR, (lstrlen(path) + 6) * sizeof(WCHAR));
-	wsprintf(args, L"/s %ls\"%ls\"", state ? L"" : L"/u ", path);
+	int argsLen = lstrlen(path) + 6;
+	LPWSTR args = (LPWSTR)LocalAlloc(LPTR, argsLen * sizeof(WCHAR));
+	StringCchPrintf(args, argsLen, L"/s %ls\"%ls\"", state ? L"" : L"/u ", path);
 
 	DWORD status = 0;
 	HRESULT hr = Exec(NULL, regsvr32, args, NULL, SW_HIDE, TRUE, &status);
@@ -49,7 +50,7 @@ static HRESULT RegisterDllExternal(LPWSTR path, BOOL state) {
 
 	if (status != 0) {
 		// Run again without /s, so the user can see the error
-		wsprintf(args, L"%ls\"%ls\"", state ? L"" : L"/u ", path);
+		StringCchPrintf(args, argsLen, L"%ls\"%ls\"", state ? L"" : L"/u ", path);
 		hr = Exec(NULL, regsvr32, args, NULL, SW_SHOWDEFAULT, TRUE, &status);
 	}
 
@@ -64,7 +65,7 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 
 	if (!IsUserAdmin()) {
 		LPWSTR args = (LPWSTR)LocalAlloc(LPTR, 512 * sizeof(WCHAR));
-		wsprintf(args, L"%ls %i", state ? L"/regserver" : L"/unregserver", hwnd);
+		StringCchPrintf(args, 512, L"%ls %i", state ? L"/regserver" : L"/unregserver", hwnd);
 
 		DWORD code = 0;
 		hr = SelfElevate(args, &code);
@@ -84,7 +85,7 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 	CHECK_HR_OR_GOTO_END(L"GetInstallPath");
 
 	dllPath = (LPWSTR)LocalAlloc(LPTR, MAX_PATH * sizeof(WCHAR));
-	wsprintf(dllPath, L"%ls\\LegacyUpdate.dll", installPath);
+	StringCchPrintf(dllPath, MAX_PATH, L"%ls\\LegacyUpdate.dll", installPath);
 
 #ifdef _DEBUG
 	// Warn if registration path differs, to help with debugging
@@ -113,7 +114,7 @@ HRESULT RegisterServer(HWND hwnd, BOOL state, BOOL forLaunch) {
 		goto end;
 	}
 
-	wsprintf(dllPath, L"%ls\\LegacyUpdate32.dll", installPath);
+	StringCchPrintf(dllPath, MAX_PATH, L"%ls\\LegacyUpdate32.dll", installPath);
 
 #ifdef _DEBUG
 	// Warn if registration path differs, to help with debugging

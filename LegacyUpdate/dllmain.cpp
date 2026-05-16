@@ -11,7 +11,6 @@
 #include "ProgressBarControl.h"
 #include "Registry.h"
 #include "VersionInfo.h"
-#include <strsafe.h>
 #include <shlwapi.h>
 
 static LPCWSTR APPID_LegacyUpdateLib = L"{D0A82CD0-B6F0-4101-83ED-DA47D0D04830}";
