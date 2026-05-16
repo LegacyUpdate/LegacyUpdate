@@ -83,9 +83,7 @@ Function Download
 		Return
 	${EndIf}
 
-	${If} ${FileExists} "$EXEDIR\$Download.Filename"
-		CopyFiles /SILENT "$EXEDIR\$Download.Filename" "${RUNONCEDIR}\$Download.Filename"
-	${ElseIf} ${FileExists} "$EXEDIR\patches\$Download.Filename"
+	${If} ${FileExists} "$EXEDIR\patches\$Download.Filename"
 		CopyFiles /SILENT "$EXEDIR\patches\$Download.Filename" "${RUNONCEDIR}\$Download.Filename"
 	${Else}
 		${If} $Download.Verbose == 1
