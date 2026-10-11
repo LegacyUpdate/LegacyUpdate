@@ -88,7 +88,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	DWORD hasActiveX = 0;
 	GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_LEGACYUPDATE_SETUP, L"MementoSection_LEGACYUPDATE", KEY_WOW64_64KEY, &hasActiveX);
 	if (hasActiveX != 1) {
-		LaunchOptions(nCmdShow);
+		LaunchOptions();
 		return;
 	}
 
