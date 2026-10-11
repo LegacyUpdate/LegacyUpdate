@@ -38,7 +38,7 @@ FunctionEnd
 		; Reboot immediately
 		System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
 		${If} ${IsRunOnce}
-		${AndIf} $0 == "SYSTEM"
+		${AndIf} $0 S== "SYSTEM"
 		${AndIfNot} ${IsAuditMode}
 			; Running in setup mode. Winlogon will reboot for us.
 			Quit
@@ -280,7 +280,7 @@ Function OnRunOnceDone
 			WriteRegStr HKLM "${REGPATH_RUNONCE}" "LegacyUpdatePostInstall" '"${RUNONCEDIR}\LegacyUpdate.exe" /runonce postinstall'
 
 			System::Call '${GetUserName}(.r0, ${NSIS_MAX_STRLEN}) .r1'
-			${If} $0 == "SYSTEM"
+			${If} $0 S== "SYSTEM"
 				; Configure winlogon to proceed to the logon dialog
 				Call CleanUpRunOnce
 			${EndIf}
