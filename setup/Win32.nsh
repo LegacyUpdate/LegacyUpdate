@@ -11,8 +11,6 @@
 !define ES_CONTINUOUS      0x80000000
 !define ES_SYSTEM_REQUIRED 0x00000001
 
-!define LOAD_LIBRARY_AS_DATAFILE 0x00000002
-
 !define GetVersion               'kernel32::GetVersion() i'
 !define GetVersionEx             'kernel32::GetVersionEx(pr) i'
 !define IsProcessorFeaturePresent 'kernel32::IsProcessorFeaturePresent(i) i'
@@ -26,8 +24,6 @@
 !define TermsrvAppInstallMode    'kernel32::TermsrvAppInstallMode() i'
 !define SetTermsrvAppInstallMode 'kernel32::SetTermsrvAppInstallMode(i) i'
 !define SetEnvironmentVariable   'kernel32::SetEnvironmentVariable(t, t) i'
-!define LoadLibraryEx            'kernel32::LoadLibraryEx(t, p, i) p'
-!define FreeLibrary              'kernel32::FreeLibrary(p) i'
 
 ; ntdll
 !define RtlGetNtVersionNumbers   'ntdll::RtlGetNtVersionNumbers(*i, *i, *i)'
@@ -44,7 +40,6 @@
 !define SMTO_ABORTIFHUNG         0x0002
 
 !define GetSystemMetrics         'user32::GetSystemMetrics(i) i'
-!define LoadImage                'user32::LoadImage(p, t, i, i, i, i) p'
 !define SendMessageTimeout       'user32::SendMessageTimeout(i, i, i, t, i, i, *i) i'
 
 ; winerror

@@ -24,13 +24,30 @@ STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
 	// Icon
-	CONTROL    "",         IDI_ICON2,     "STATIC", SS_ICON, 0, 0, 21, 20
+	CONTROL    "",         IDI_ICON2,           "STATIC", SS_ICON, 0, 0, 21, 20
 	// Intro text
 	LTEXT      "Text\nText\nText", IDC_INTROTEXT, 27, 0, INNER_WIDTH - 28, 65
 	// Countdown text
 	LTEXT      "",         IDC_TEXT1,           0, 68, INNER_WIDTH, 16, SS_LEFTNOWORDWRAP | SS_NOPREFIX
 	// Progress
 	CONTROL    "",         IDC_PROGRESS,        "msctls_progress32", WS_BORDER, 0, 84, INNER_WIDTH_ALIGNED, 10
+END
+
+IDD_ACTIVEX DIALOGEX 0, 0, INNER_WIDTH, INNER_HEIGHT
+STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Intro text
+	LTEXT      "",         IDC_INTROTEXT,       0, 0, INNER_WIDTH, 24
+	// Radio buttons
+	AUTORADIOBUTTON "",    IDC_YESRADIO,        30, 37, INNER_WIDTH - 30, 10, WS_GROUP | WS_TABSTOP
+	AUTORADIOBUTTON "",    IDC_NORADIO,         30, 74, INNER_WIDTH - 30, 10, NOT WS_TABSTOP
+	// Yes icon and text
+	CONTROL    "",         IDC_YESICON,         "STATIC", SS_ICON | WS_GROUP, 3, 37, 21, 20
+	LTEXT      "",         IDC_YESTEXT,         41, 47, INNER_WIDTH - 41, 24
+	// No icon and text
+	CONTROL    "",         IDC_NOICON,          "STATIC", SS_ICON, 3, 74, 21, 20
+	LTEXT      "",         IDC_NOTEXT,          41, 84, INNER_WIDTH - 41, 24
 END
 
 
