@@ -33,8 +33,8 @@ BEGIN
 	AUTORADIOBUTTON "Use the &Windows Update service directly", IDC_WURADIO, 45, 33, PAGE_WIDTH - 61, 10, WS_GROUP | WS_TABSTOP
 	AUTORADIOBUTTON "Use the &Legacy Update proxy server (recommended)",  IDC_LURADIO, 45, 74, PAGE_WIDTH - 61, 10, NOT WS_TABSTOP
 	// Descriptions
-	LTEXT      "Connect directly to the Microsoft Windows Update service. This service will be discontinued for your operating system in June 2027.", IDC_WUTEXT, 55, 45, PAGE_WIDTH - 63, 25
-	LTEXT      "Connect to Windows Update via our proxy service. Your use of this free service is subject to our terms, found at legacyupdate.net.", -1, 55, 86, PAGE_WIDTH - 63, 25
+	LTEXT      "Connect directly to the Microsoft Windows Update service. This service will be discontinued for your operating system in June 2027.", IDC_WUTEXT, 55, 45, PAGE_WIDTH - 68, 25
+	LTEXT      "Connect to Windows Update via our proxy service. Your use of this free service is subject to our terms, found at legacyupdate.net.", -1, 55, 86, PAGE_WIDTH - 68, 25
 	LTEXT      "Changing this setting will restart the Windows Update service.", -1, 45, 115, PAGE_WIDTH - 61, 10
 END
 
