@@ -124,8 +124,9 @@ static HRESULT StopWuService(void) {
 		SC_HANDLE service = OpenService(manager, L"wuauserv", SERVICE_STOP | SERVICE_START | SERVICE_QUERY_STATUS);
 		if (service) {
 			SERVICE_STATUS status;
+			DWORD start = GetTickCount();
 			if (ControlService(service, SERVICE_CONTROL_STOP, &status)) {
-				while (QueryServiceStatus(service, &status) && status.dwCurrentState != SERVICE_STOPPED) {
+				while (QueryServiceStatus(service, &status) && status.dwCurrentState != SERVICE_STOPPED && GetTickCount() - start < 10000) {
 					Sleep(100);
 				}
 			}
