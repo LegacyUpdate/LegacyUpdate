@@ -8,7 +8,8 @@ FILES    = \
 	../shared/Registry.c \
 	../shared/SafeString.c \
 	../shared/ViewLog.c \
-	../shared/Wow64.c
+	../shared/Wow64.c \
+	../shared/WsusServer.c
 RCFILES  = resource.rc
 DEFFILES = ../LegacyUpdate/LegacyUpdate.def
 
@@ -38,7 +39,8 @@ LDFLAGS += \
 	-lshlwapi \
 	-lversion \
 	-lgdi32 \
-	-lmsimg32
+	-lmsimg32 \
+	-luuid
 
 ifeq ($(ARCH),64)
 	LDFLAGS += -Wl,-ewWinMain

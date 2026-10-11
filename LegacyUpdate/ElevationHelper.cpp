@@ -9,6 +9,7 @@
 #include "Registry.h"
 #include "Utils.h"
 #include "VersionInfo.h"
+#include "WsusServer.h"
 #include <new>
 #include "IUpdateInstaller4.h"
 
@@ -200,4 +201,8 @@ STDMETHODIMP CElevationHelper::BeforeUpdate(void) {
 
 STDMETHODIMP CElevationHelper::AfterUpdate(void) {
 	return PauseResumeNGenQueue(TRUE);
+}
+
+STDMETHODIMP CElevationHelper::SetWsusServer(WsusServer server) {
+	return ::SetWsusServer(server);
 }

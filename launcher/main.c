@@ -7,19 +7,20 @@
 #include <shellapi.h>
 #include "Log.h"
 #include "MsgBox.h"
+#include "Options.h"
 #include "RegisterServer.h"
 #include "Startup.h"
 
 HINSTANCE g_hInstance;
 
 extern void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow);
-extern void LaunchOptions(int nCmdShow);
 extern void LaunchLog(int argc, LPWSTR *argv, int nCmdShow);
 extern void RunOnce(BOOL postInstall);
 
 typedef enum Action {
 	ActionLaunch,
 	ActionOptions,
+	ActionWuOptions,
 	ActionLog,
 	ActionRunOnce,
 	ActionRegServer,
@@ -29,6 +30,7 @@ typedef enum Action {
 static const LPWSTR actions[] = {
 	L"/launch",
 	L"/options",
+	L"/wusettings",
 	L"/log",
 	L"/runonce",
 	L"/regserver",
@@ -39,7 +41,7 @@ static const LPWSTR actions[] = {
 EXTERN_C __declspec(dllexport)
 #endif
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
-	g_hInstance = hInstance;
+	g_hInstance = GetModuleHandle(NULL);
 	Startup();
 	OpenLog();
 
@@ -89,7 +91,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		break;
 
 	case ActionOptions:
-		LaunchOptions(nCmdShow);
+		LaunchOptions();
+		break;
+
+	case ActionWuOptions:
+		LaunchWuSettings();
 		break;
 
 	case ActionLog:

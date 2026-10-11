@@ -36,4 +36,5 @@ public:
 	STDMETHODIMP BeforeUpdate();
 	STDMETHODIMP AfterUpdate();
 	STDMETHODIMP GetProcessId(DWORD *retval);
+	STDMETHODIMP SetWsusServer(WsusServer server);
 };

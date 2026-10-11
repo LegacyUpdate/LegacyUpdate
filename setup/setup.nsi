@@ -39,6 +39,7 @@ ReserveFile "..\LegacyUpdate\obj\LegacyUpdate64.dll"
 ReserveFile "..\launcher\obj\LegacyUpdate32.exe"
 ReserveFile "..\launcher\obj\LegacyUpdate64.exe"
 
+Var /GLOBAL LauncherInstalled
 Var /GLOBAL UninstallInstalled
 
 !define RUNONCEDIR "$COMMONPROGRAMDATA\Legacy Update"
@@ -154,6 +155,36 @@ Function MakeUninstallEntry
 		WriteRegDword HKLM "${REGPATH_UNINSTSUBKEY}" "NoRepair"             1
 		${MakeARPInstallDate} $0
 		WriteRegStr   HKLM "${REGPATH_UNINSTSUBKEY}" "InstallDate" $0
+	${EndIf}
+FunctionEnd
+
+Function InstallLauncher
+	${IfNot} $LauncherInstalled == 1
+		StrCpy $LauncherInstalled 1
+		SetOutPath $INSTDIR
+		Call CopyLauncher
+
+		; Add Control Panel entry
+		; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
+		; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    ""                "${NAME}"
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-2'
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon"        ""                '"$OUTDIR\LegacyUpdate.exe",-100'
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" ""                '"$OUTDIR\LegacyUpdate.exe"'
+		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder"        "Attributes"      0
+		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName"             "${CPL_APPNAME}"
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory"        "5,10"
+		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl"       '"$OUTDIR\LegacyUpdate.exe",-202'
+
+		${If} ${IsWin2000}
+			; Doesn't seem to support @ syntax with an exe?
+			WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         'Check for software and driver updates via Legacy Update.'
+		${Else}
+			WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         '@"$OUTDIR\LegacyUpdate.exe",-4'
+		${EndIf}
+
+		WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 	${EndIf}
 FunctionEnd
 
@@ -391,8 +422,9 @@ SectionEnd
 
 ; Main installation
 
-${MementoSection} "Legacy Update Server" WUSERVER
+${MementoSection} "-Legacy Update Server" WUSERVER
 	Call MakeUninstallEntry
+	Call InstallLauncher
 
 	; Check if SChannel is going to work with modern TLS
 	${If} ${AtLeastWin8.1}
@@ -475,30 +507,8 @@ ${MementoSection} "-Legacy Update ActiveX control" LEGACYUPDATE
 	${EndIf}
 
 	${If} $0 != 1
+		Call InstallLauncher
 		SetOutPath $INSTDIR
-		; Call MakeUninstallEntry
-
-		; Add Control Panel entry
-		; Category 5:  XP Performance and Maintenance, Vista System and Maintenance, 7+ System and Security
-		; Category 10: XP SP2 Security Center, Vista Security, 7+ System and Security
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    ""                "${NAME}"
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                    "LocalizedString" '@"$OUTDIR\LegacyUpdate.exe",-2'
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\DefaultIcon"        ""                '"$OUTDIR\LegacyUpdate.exe",-100'
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}\Shell\Open\Command" ""                '"$OUTDIR\LegacyUpdate.exe"'
-		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}\ShellFolder"        "Attributes"      0
-		WriteRegDword HKCR "${REGPATH_HKCR_CPLCLSID}" "{305CA226-D286-468e-B848-2B2E8E697B74} 2" 5
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ApplicationName"             "${CPL_APPNAME}"
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.ControlPanelCategory"        "5,10"
-		WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}" "System.Software.TasksFileUrl"       '"$OUTDIR\LegacyUpdate.exe",-202'
-
-		${If} ${IsWin2000}
-			; Doesn't seem to support @ syntax with an exe?
-			WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         'Check for software and driver updates via Legacy Update.'
-		${Else}
-			WriteRegStr   HKCR "${REGPATH_HKCR_CPLCLSID}"                  "InfoTip"         '@"$OUTDIR\LegacyUpdate.exe",-4'
-		${EndIf}
-
-		WriteRegStr   HKLM "${REGPATH_CPLNAMESPACE}" "" "${NAME}"
 
 		; Install DLLs
 		${DetailPrint} "$(StatusClosingIE)"
@@ -514,7 +524,6 @@ ${MementoSection} "-Legacy Update ActiveX control" LEGACYUPDATE
 			Rename "LegacyUpdate.dll" "LegacyUpdate32.dll"
 			File /ONAME=LegacyUpdate.dll "..\LegacyUpdate\obj\LegacyUpdate64.dll"
 		${EndIf}
-		Call CopyLauncher
 
 		; Register DLLs
 		ExecWait '"$OUTDIR\LegacyUpdate.exe" /regserver $HWNDPARENT' $0
@@ -658,6 +667,7 @@ Section "-un.Legacy Update Website" un.ACTIVEX
 
 	; Unregister DLLs
 	${If} ${FileExists} "$INSTDIR\LegacyUpdate.exe"
+	${AndIf} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
 		ExecWait '"$OUTDIR\LegacyUpdate.exe" /unregserver $HWNDPARENT' $0
 		${If} $0 != 0
 			Abort
@@ -668,6 +678,7 @@ Section "-un.Legacy Update Website" un.ACTIVEX
 	${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate.exe"
 	${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate.dll"
 	${DeleteWithErrorHandling} "$OUTDIR\LegacyUpdate32.dll"
+	DeleteRegValue HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "ActiveXInstalled"
 
 	; Remove from trusted sites
 	DeleteRegKey HKLM "${REGPATH_ZONEDOMAINS}\${DOMAIN}"
@@ -1118,7 +1129,9 @@ FunctionEnd
 
 Function PostInstall
 	; Handle first run flag if needed
-	${If} ${FileExists} "$INSTDIR\LegacyUpdate.exe"
+	StrCpy $0 ""
+
+	${If} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
 	${AndIfNot} ${IsRunOnce}
 		ClearErrors
 		ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "ActiveXInstalled"

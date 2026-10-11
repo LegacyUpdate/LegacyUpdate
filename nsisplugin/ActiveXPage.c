@@ -2,8 +2,8 @@
 #include <nsis/pluginapi.h>
 #include "main.h"
 #include "resource.h"
+#include "LoadImage.h"
 #include "SafeString.h"
-#include "VersionInfo.h"
 
 #define INSTALLER_ICON_ID 103
 
@@ -14,17 +14,6 @@ static WNDPROC g_dialogOrigWndProc;
 
 static HICON g_yesIcon;
 static HICON g_noIcon;
-
-static HICON LoadSystemIcon(LPWSTR module, LPCWSTR name) {
-	HMODULE hModule = LoadLibraryEx(module, NULL, LOAD_LIBRARY_AS_DATAFILE);
-	if (!hModule) {
-		return NULL;
-	}
-
-	HICON hIcon = LoadImage(hModule, name, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE);
-	FreeLibrary(hModule);
-	return hIcon;
-}
 
 static INT_PTR CALLBACK ActiveXDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
@@ -89,16 +78,7 @@ PLUGIN_METHOD(ActiveXPageCreate) {
 		SendDlgItemMessage(g_activeXHwnd, IDC_YESICON, STM_SETICON, (WPARAM)g_yesIcon, 0);
 	}
 
-	WCHAR noIconModule[MAX_PATH];
-	if (AtLeastWinVista()) {
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\shell32.dll", noIconModule, ARRAYSIZE(noIconModule));
-		LPCWSTR resource = AtLeastWin10() ? MAKEINTRESOURCE(16826) : MAKEINTRESOURCE(47);
-		g_noIcon = LoadSystemIcon(noIconModule, resource);
-	} else {
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\wupdmgr.exe", noIconModule, ARRAYSIZE(noIconModule));
-		g_noIcon = LoadSystemIcon(noIconModule, L"APPICON");
-	}
-
+	g_noIcon = LoadWuIcon();
 	if (g_noIcon) {
 		SendDlgItemMessage(g_activeXHwnd, IDC_NOICON, STM_SETICON, (WPARAM)g_noIcon, 0);
 	}

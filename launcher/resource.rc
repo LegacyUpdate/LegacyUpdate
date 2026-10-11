@@ -2,12 +2,56 @@
 #include <windows.h>
 #include "Version.h"
 
+#define PAGE_WIDTH          262
+#define PAGE_HEIGHT         223
+
 /////////////////////////////////////////////////////////////////////////////
 // English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(65001)
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialogs
+//
+
+IDD_OPTIONS_SERVER DIALOGEX 0, 0, PAGE_WIDTH, PAGE_HEIGHT
+STYLE DS_SHELLFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Server"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Group box
+	GROUPBOX   "Server Selection", -1, 7, 7, PAGE_WIDTH - 14, 123
+	// Icon
+	CONTROL    "",         IDC_PAGEICON,        "STATIC", SS_ICON, 14, 19, 21, 20
+	// Intro text
+	LTEXT      "How should this computer connect to Windows Update?", -1, 45, 19, PAGE_WIDTH - 61, 10
+	// Radio buttons
+	AUTORADIOBUTTON "Use the &Windows Update service directly", IDC_WURADIO, 45, 33, PAGE_WIDTH - 61, 10, WS_GROUP | WS_TABSTOP
+	AUTORADIOBUTTON "Use the &Legacy Update proxy server (recommended)",  IDC_LURADIO, 45, 74, PAGE_WIDTH - 61, 10, NOT WS_TABSTOP
+	// Descriptions
+	LTEXT      "Connect directly to the Microsoft Windows Update service. This service will be discontinued for your operating system in June 2027.", IDC_WUTEXT, 55, 45, PAGE_WIDTH - 63, 25
+	LTEXT      "Connect to Windows Update via our proxy service. Your use of this free service is subject to our terms, found at legacyupdate.net.", -1, 55, 86, PAGE_WIDTH - 63, 25
+	LTEXT      "Changing this setting will restart the Windows Update service.", -1, 45, 115, PAGE_WIDTH - 61, 10
+END
+
+IDD_OPTIONS_AUTOUPDATE DIALOGEX 0, 0, PAGE_WIDTH, PAGE_HEIGHT
+STYLE DS_SHELLFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Automatic Updates"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+	// Group box
+	GROUPBOX   "Settings", -1, 7, 7, PAGE_WIDTH - 14, 57
+	// Icon
+	CONTROL    "",         IDC_PAGEICON,        "STATIC", SS_ICON, 14, 19, 21, 20
+	// Intro text
+	LTEXT      "Open Windows Update Settings to choose when updates are installed.", -1, 40, 19, PAGE_WIDTH - 56, 20
+	// Button
+	PUSHBUTTON "&Settings...", IDC_WUSETTINGS, PAGE_WIDTH - 65, 42, 49, 14
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -83,13 +127,16 @@ BEGIN
 	// Usage
 	IDS_USAGE_TITLE         "LegacyUpdate.exe usage"
 	IDS_USAGE_BODY          ""
-		"LegacyUpdate.exe [/launch|/options|/log|/regserver|/unregserver]\n"
+		"LegacyUpdate.exe [/launch|/options|/wusettings|/log|/regserver|/unregserver]\n"
 		"\n"
 		"/launch\n"
 		"    Launch Legacy Update website in Internet Explorer\n"
 		"\n"
 		"/options\n"
-		"    Open the Windows Update Options control panel\n"
+		"    Open Legacy Update options\n"
+		"\n"
+		"/wusettings\n"
+		"    Open the Windows Update Settings control panel\n"
 		"\n"
 		"/log [system|local|locallow|windowsupdate]\n"
 		"    Open the specified log file\n"
@@ -113,6 +160,10 @@ BEGIN
 	// RunOnce
 	IDS_RUNONCEFAILED       "Continuing Legacy Update setup failed"
 	IDS_RUNONCESAFEMODE     "Legacy Update setup was cancelled because the system is running in Safe Mode."
+
+	// Settings
+	IDS_WURADIO_WIN10_1809  "Connect directly to the Microsoft Windows Update service. This service will be discontinued for your operating system in May 2027."
+	IDS_WURADIO_DEADLINE    "The Microsoft Windows Update service has been discontinued for this operating system."
 END
 
 

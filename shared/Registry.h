@@ -9,6 +9,8 @@
 #define REGPATH_WIN                L"Software\\Microsoft\\Windows\\CurrentVersion"
 #define REGPATH_WIN_PERSONALIZE    REGPATH_WIN L"\\Themes\\Personalize"
 
+#define REGPATH_PROPSHEET_AU       REGPATH_WIN L"\\Controls Folder\\System\\shellex\\PropertySheetHandlers\\Auto Update Property Sheet Extension"
+
 #define REGPATH_WINNT              L"Software\\Microsoft\\Windows NT\\CurrentVersion"
 #define REGPATH_WINNT_SERVERLEVELS REGPATH_WINNT L"\\Server\\ServerLevels"
 

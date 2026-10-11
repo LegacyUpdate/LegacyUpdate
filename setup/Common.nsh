@@ -222,7 +222,7 @@ Function InitChecks
 	${If} ${AtLeastWin11_25H2}
 		StrCpy $IsBeforeCertRolloverDeadline 1
 	${ElseIf} ${AtLeastWin7}
-		LegacyUpdateNSIS::IsBeforeCertRolloverDeadline
+		LegacyUpdateNSIS::BeforeCertRolloverDeadline
 		Pop $0
 		StrCpy $IsBeforeCertRolloverDeadline $0
 	${Else}

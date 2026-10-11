@@ -5,12 +5,14 @@
 #include "Exec.h"
 #include "HResult.h"
 #include "MsgBox.h"
+#include "Options.h"
 #include "RegisterServer.h"
 #include "Registry.h"
 #include "SelfElevate.h"
 #include "User.h"
 #include "VersionInfo.h"
 #include "Wow64.h"
+#include "WsusServer.h"
 
 const LPCWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
 const LPCWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
@@ -20,25 +22,7 @@ DEFINE_GUID(IID_ILegacyUpdateCtrl,  0xC33085BB, 0xC3E1, 0x4D27, 0xA2, 0x14, 0xAF
 DEFINE_GUID(CLSID_LegacyUpdateCtrl, 0xAD40983C, 0xFB56, 0x4AAC, 0xBE, 0xDB, 0xC4, 0x07, 0xC3, 0x53, 0xE2, 0xCB);
 
 static LPCWSTR GetUpdateSiteURL(void) {
-	// Fallback: Use SSL only on Vista and up
-	BOOL useHTTPS = AtLeastWinVista();
-
-	// Get the Windows Update website URL set by Legacy Update setup
-	LPWSTR data = NULL;
-	DWORD size = 0;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_WU, L"URL", KEY_WOW64_64KEY, &data, &size);
-	if (SUCCEEDED(hr)) {
-		// Return based on the URL value
-		if (wcscmp(data, UpdateSiteURLHttps) == 0) {
-			useHTTPS = TRUE;
-		} else if (wcscmp(data, UpdateSiteURLHttp) == 0) {
-			useHTTPS = FALSE;
-		}
-
-		LocalFree(data);
-	}
-
-	return useHTTPS ? UpdateSiteURLHttps : UpdateSiteURLHttp;
+	return IsUpdateSiteHttps() ? UpdateSiteURLHttps : UpdateSiteURLHttp;
 }
 
 HRESULT HandleIENotInstalled(void) {
@@ -85,7 +69,7 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 	VARIANT url = {0};
 	VARIANT flags = {0};
 	VARIANT nullVariant = {0};
-	LPTSTR siteURL = NULL;
+	LPCWSTR siteURL = NULL;
 	HMONITOR monitor = NULL;
 
 	// If this OS was upgraded, tell the user they need to re-run setup
@@ -98,6 +82,14 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 			MsgBox(NULL, message, NULL, MB_OK | MB_ICONEXCLAMATION);
 			goto end;
 		}
+	}
+
+	// If the ActiveX control isn't installed, show options instead
+	DWORD activeXInstalled = 0;
+	GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_LEGACYUPDATE_SETUP, L"ActiveXInstalled", KEY_WOW64_64KEY, &activeXInstalled);
+	if (activeXInstalled != 1) {
+		LaunchOptions(nCmdShow);
+		return;
 	}
 
 	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.

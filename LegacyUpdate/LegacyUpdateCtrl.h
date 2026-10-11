@@ -89,10 +89,12 @@ public:
 	STDMETHODIMP RebootIfRequired();
 	STDMETHODIMP ViewLog(ViewLogType logType);
 	STDMETHODIMP ViewWindowsUpdateLog();
+	STDMETHODIMP OpenSettings();
 	STDMETHODIMP OpenWindowsUpdateSettings();
 	STDMETHODIMP get_IsUsingWsusServer(VARIANT_BOOL *retval);
 	STDMETHODIMP get_WsusServerUrl(BSTR *retval);
 	STDMETHODIMP get_WsusStatusServerUrl(BSTR *retval);
 	STDMETHODIMP BeforeUpdate();
 	STDMETHODIMP AfterUpdate();
+	STDMETHODIMP SetWsusServer(WsusServer server);
 };

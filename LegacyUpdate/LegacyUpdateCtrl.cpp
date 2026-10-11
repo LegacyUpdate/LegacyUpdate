@@ -15,6 +15,7 @@
 #include "Version.h"
 #include "VersionInfo.h"
 #include "ViewLog.h"
+#include "WsusServer.h"
 #include <new>
 #include <oleidl.h>
 #include <shlobj.h>
@@ -656,10 +657,18 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	return ViewLog(e_windowsUpdate);
 }
 
+STDMETHODIMP CLegacyUpdateCtrl::OpenSettings(void) {
+	DoIsPermittedCheck();
+
+	HRESULT hr = StartLauncher(L"/settings", FALSE);
+	CHECK_HR_OR_RETURN(L"OpenSettings");
+	return hr;
+}
+
 STDMETHODIMP CLegacyUpdateCtrl::OpenWindowsUpdateSettings(void) {
 	DoIsPermittedCheck();
 
-	HRESULT hr = StartLauncher(L"/options", FALSE);
+	HRESULT hr = StartLauncher(L"/wusettings", FALSE);
 	if (!SUCCEEDED(hr)) {
 		CHECK_HR(L"OpenWindowsUpdateSettings() failed, falling back");
 
@@ -683,10 +692,10 @@ STDMETHODIMP CLegacyUpdateCtrl::get_IsUsingWsusServer(VARIANT_BOOL *retval) {
 		return E_POINTER;
 	}
 
-	DWORD useWUServer = 0;
-	HRESULT hr = GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_POLICIES_WU_AU, L"UseWUServer", KEY_WOW64_64KEY, &useWUServer);
-	*retval = SUCCEEDED(hr) && useWUServer == 1 ? VARIANT_TRUE : VARIANT_FALSE;
-	return S_OK;
+	BOOL value = FALSE;
+	HRESULT hr = IsUsingWsusServer(&value);
+	*retval = SUCCEEDED(hr) && value ? VARIANT_TRUE : VARIANT_FALSE;
+	return hr;
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
@@ -696,14 +705,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusServerUrl(BSTR *retval) {
 		return E_POINTER;
 	}
 
-	LPWSTR data = NULL;
-	DWORD size = 0;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_POLICIES_WU, L"WUServer", KEY_WOW64_64KEY, &data, &size);
-	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
-	if (data) {
-		LocalFree(data);
-	}
-	return S_OK;
+	return GetWsusServerUrl(retval);
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
@@ -713,14 +715,7 @@ STDMETHODIMP CLegacyUpdateCtrl::get_WsusStatusServerUrl(BSTR *retval) {
 		return E_POINTER;
 	}
 
-	LPWSTR data = NULL;
-	DWORD size = 0;
-	HRESULT hr = GetRegistryString(HKEY_LOCAL_MACHINE, REGPATH_POLICIES_WU, L"WUStatusServer", KEY_WOW64_64KEY, &data, &size);
-	*retval = SUCCEEDED(hr) ? SysAllocStringLen(data, size - 1) : NULL;
-	if (data) {
-		LocalFree(data);
-	}
-	return S_OK;
+	return GetWsusStatusServerUrl(retval);
 }
 
 STDMETHODIMP CLegacyUpdateCtrl::BeforeUpdate(void) {
@@ -768,4 +763,14 @@ STDMETHODIMP CLegacyUpdateCtrl::AfterUpdate(void) {
 	CHECK_HR_OR_RETURN(L"GetElevatedHelper");
 
 	return elevatedHelper->AfterUpdate();
+}
+
+STDMETHODIMP CLegacyUpdateCtrl::SetWsusServer(WsusServer server) {
+	DoIsPermittedCheck();
+
+	IElevationHelper *elevatedHelper;
+	HRESULT hr = GetElevatedHelper(&elevatedHelper);
+	CHECK_HR_OR_RETURN(L"GetElevatedHelper");
+
+	return elevatedHelper->SetWsusServer(server);
 }

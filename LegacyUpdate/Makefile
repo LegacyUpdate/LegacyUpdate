@@ -11,6 +11,7 @@ FILES    = \
 	../shared/ViewLog.c \
 	../shared/WMI.c \
 	../shared/Wow64.c \
+	../shared/WsusServer.c \
 	$(OBJDIR)/LegacyUpdate_i.c
 
 RCFILES  = LegacyUpdate.rc

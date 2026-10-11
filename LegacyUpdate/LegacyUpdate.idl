@@ -41,6 +41,13 @@ typedef enum ViewLogType {
 	e_windowsUpdate = 3,
 } ViewLogType;
 
+typedef enum WsusServer {
+	e_none = 0,
+	e_other = 1,
+	e_legacyUpdateProxy = 2,
+	e_legacyUpdateCustom = 3
+} WsusServer;
+
 [
 	object,
 	uuid(C33085BB-C3E1-4D27-A214-AF01953DF5E5),
@@ -60,9 +67,11 @@ interface ILegacyUpdateCtrl : IDispatch {
 	[id(8)]  HRESULT RebootIfRequired(void);
 	[id(18)] HRESULT ViewLog(ViewLogType logType);
 	[id(9)]  HRESULT ViewWindowsUpdateLog(void);
+	[id(20)] HRESULT OpenSettings(void);
 	[id(13)] HRESULT OpenWindowsUpdateSettings(void);
 	[id(16)] HRESULT BeforeUpdate(void);
 	[id(17)] HRESULT AfterUpdate(void);
+	[id(19)] HRESULT SetWsusServer(WsusServer server);
 
 	[id(6),  propget] HRESULT IsRebootRequired([out, retval] VARIANT_BOOL *retval);
 	[id(7),  propget] HRESULT IsWindowsUpdateDisabled([out, retval] VARIANT_BOOL *retval);
@@ -78,8 +87,7 @@ interface ILegacyUpdateCtrl : IDispatch {
 	nonextensible,
 	pointer_default(unique)
 ]
-interface IProgressBarControl : IDispatch
-{
+interface IProgressBarControl : IDispatch {
 	[id(1), propget] HRESULT Value([out, retval] SHORT *retval);
 	[id(1), propput] HRESULT Value([in] SHORT newVal);
 };
@@ -92,14 +100,14 @@ interface IProgressBarControl : IDispatch
 	pointer_default(unique),
 	oleautomation
 ]
-interface IElevationHelper : IDispatch
-{
+interface IElevationHelper : IDispatch {
 	[id(1)] HRESULT CreateObject(BSTR progID, [out, retval] IDispatch **retval);
 	[id(5)] HRESULT SetBrowserHwnd(IUpdateInstaller *installer, LONG_PTR hwnd);
 	[id(2)] HRESULT Reboot(void);
 	[id(3)] HRESULT BeforeUpdate(void);
 	[id(4)] HRESULT AfterUpdate(void);
 	[id(6)] HRESULT GetProcessId([out, retval] DWORD *retval);
+	[id(7)] HRESULT SetWsusServer(WsusServer server);
 };
 
 [
@@ -124,8 +132,7 @@ library LegacyUpdateLib {
 		control,
 		helpstring("ProgressBarControl Class")
 	]
-	coclass ProgressBarControl
-	{
+	coclass ProgressBarControl {
 		[default] interface IProgressBarControl;
 	};
 
@@ -133,8 +140,7 @@ library LegacyUpdateLib {
 		uuid(84F517AD-6438-478F-BEA8-F0B808DC257F),
 		helpstring("ElevationHelper Class")
 	]
-	coclass ElevationHelper
-	{
+	coclass ElevationHelper {
 		[default] interface IElevationHelper;
 	};
 };

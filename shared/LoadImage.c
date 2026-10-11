@@ -2,6 +2,7 @@
 #include <wincodec.h>
 #include <gdiplus.h>
 #include "LoadSystemLibrary.h"
+#include "VersionInfo.h"
 
 // Adapted from https://faithlife.codes/blog/2008/09/displaying_a_splash_screen_with_c_part_i/
 //  1. Get resource as an IStream
@@ -360,4 +361,26 @@ end:
 	}
 
 	return result;
+}
+
+HICON LoadSystemIcon(LPCWSTR module, LPCWSTR name) {
+	WCHAR path[MAX_PATH];
+	ExpandEnvironmentStrings(module, path, ARRAYSIZE(path));
+
+	HMODULE hModule = LoadLibraryEx(path, NULL, LOAD_LIBRARY_AS_DATAFILE);
+	if (!hModule) {
+		return NULL;
+	}
+
+	HICON hIcon = LoadImage(hModule, name, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE);
+	FreeLibrary(hModule);
+	return hIcon;
+}
+
+HICON LoadWuIcon(void) {
+	if (AtLeastWinVista()) {
+		return LoadSystemIcon(L"%SystemRoot%\\System32\\shell32.dll", AtLeastWin10() ? MAKEINTRESOURCE(16826) : MAKEINTRESOURCE(47));
+	} else {
+		return LoadSystemIcon(L"%SystemRoot%\\System32\\wupdmgr.exe", L"APPICON");
+	}
 }
