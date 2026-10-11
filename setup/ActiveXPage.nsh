@@ -21,6 +21,13 @@ Var Dialog.NoRadio
 !define NSD_SetIconFromModule `!insertmacro NSD_SetIconFromModule`
 
 Function ActiveXPage
+	; Skip if already installed
+	${If} ${FileExists} "$INSTDIR\LegacyUpdate.exe"
+	${OrIf} ${FileExists} "$INSTDIR\LegacyUpdate.dll"
+		!insertmacro SelectSection ${LEGACYUPDATE}
+		Abort
+	${EndIf}
+
 	; Skip the page if we're being launched with /runonce, /postinstall, or /passive
 	${If} ${IsRunOnce}
 	${OrIf} ${IsPostInstall}
