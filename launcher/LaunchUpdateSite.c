@@ -84,15 +84,15 @@ void LaunchUpdateSite(int argc, LPWSTR *argv, int nCmdShow) {
 		}
 	}
 
-	// If the ActiveX control isn't installed, show options instead
-	DWORD activeXInstalled = 0;
-	GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_LEGACYUPDATE_SETUP, L"ActiveXInstalled", KEY_WOW64_64KEY, &activeXInstalled);
-	if (activeXInstalled != 1) {
+	// If installed without ActiveX, launch options instead
+	DWORD hasActiveX = 0;
+	GetRegistryDword(HKEY_LOCAL_MACHINE, REGPATH_LEGACYUPDATE_SETUP, L"MementoSection_LEGACYUPDATE", KEY_WOW64_64KEY, &hasActiveX);
+	if (hasActiveX != 1) {
 		LaunchOptions(nCmdShow);
 		return;
 	}
 
-	// If running on 2k/XP, make sure we're elevated. If not, show Run As prompt.
+	// If running on 2k/XP, make sure we’re elevated. If not, show Run As prompt.
 	if (!AtLeastWinVista() && !IsUserAdmin()) {
 		LPCWSTR flag = argc > 0 ? argv[0] : L"";
 		DWORD argsLen = lstrlen(flag) + 16;
