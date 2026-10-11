@@ -383,7 +383,7 @@ ${MementoSection} "$(SectionEnableMU)" ENABLEMU
 	!insertmacro RestartWUAUService
 ${MementoSectionEnd}
 
-${MementoSection} "$(SectionActivate)" ACTIVATE
+${MementoUnselectedSection} "$(SectionActivate)" ACTIVATE
 	; No-op; we'll launch the activation wizard in post-install.
 ${MementoSectionEnd}
 
