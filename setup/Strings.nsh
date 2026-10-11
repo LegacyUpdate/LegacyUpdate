@@ -159,6 +159,16 @@ LangString MsgBoxVistaSPInstall ${LANG_ENGLISH} \
 LangString MsgBoxWUA2000Datacenter ${LANG_ENGLISH} \
 	"Windows Update Agent is not supported on Windows 2000 Datacenter Server. The Legacy Update action will be disabled."
 
+LangString MsgBoxWUServerCertDeadline ${LANG_ENGLISH} \
+	"Your device will continue connecting directly to Windows Update, which will no longer work on this device after July 2027.$\r$\n\
+	$\r$\n\
+	We recommend clicking Cancel to avoid issues in future."
+
+LangString MsgBoxWUServerWin10_1809 ${LANG_ENGLISH} \
+	"Your device will continue connecting directly to Windows Update, which will no longer work on this device after May 2027.$\r$\n\
+	$\r$\n\
+	We recommend clicking Cancel to avoid issues in future."
+
 ; Statuses
 LangString StatusRestarting     ${LANG_ENGLISH} "Restarting..."
 LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update service..."

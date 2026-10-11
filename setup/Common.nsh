@@ -69,6 +69,7 @@ SetPluginUnload alwaysoff
 
 Var /GLOBAL SetupMutexHandle
 Var /GLOBAL TermsrvUserModeChanged
+Var /GLOBAL IsBeforeCertRolloverDeadline
 
 Function CheckSetupMutex
 	!define SetupMutexName "Global\$(^Name)"
@@ -216,6 +217,17 @@ Function InitChecks
 		SetErrorLevel 1
 		Quit
 	${EndIf}
+
+	; Check certificate rollover deadline if relevant to this OS
+	${If} ${AtLeastWin11_25H2}
+		StrCpy $IsBeforeCertRolloverDeadline 1
+	${ElseIf} ${AtLeastWin7}
+		LegacyUpdateNSIS::IsBeforeCertRolloverDeadline
+		Pop $0
+		StrCpy $IsBeforeCertRolloverDeadline $0
+	${Else}
+		StrCpy $IsBeforeCertRolloverDeadline 0
+	${EndIf}
 !endif
 
 	; Check for a service pack or hotfix install in progress
@@ -278,6 +290,10 @@ FunctionEnd
 !endif
 !macroend
 
+!macro SetSectionRequired section
+	!insertmacro SetSectionFlag ${section} ${SF_SELECTED}|${SF_RO}
+!macroend
+
 !macro -DeleteWithErrorHandling file
 	ClearErrors
 	Delete "${file}"
@@ -292,7 +308,7 @@ FunctionEnd
 
 !macro -WriteRegWithBackup type root subkey name value
 	ClearErrors
-	ReadReg${type} $0 ${root} "${subkey}_LegacyUpdateBackup" "${name}"
+	ReadReg${type} $0 ${root} "${subkey}" "${name}_LegacyUpdateBackup"
 	${If} ${Errors}
 		ClearErrors
 		ReadReg${type} $0 ${root} "${subkey}" "${name}"
@@ -301,6 +317,28 @@ FunctionEnd
 		${EndIf}
 	${EndIf}
 	WriteReg${type} ${root} "${subkey}" "${name}" `${value}`
+!macroend
+
+!macro -StoreRegWithBackup type root subkey name value
+	ClearErrors
+	ReadReg${type} $0 ${root} "${subkey}" "${name}_LegacyUpdateBackup"
+	${If} ${Errors}
+		ClearErrors
+		ReadReg${type} $0 ${root} "${subkey}" "${name}"
+		${IfNot} ${Errors}
+		${AndIf} $0 S!= `${value}`
+			WriteReg${type} ${root} "${subkey}" "${name}_LegacyUpdateBackup" $0
+		${EndIf}
+	${EndIf}
+	ClearErrors
+	ReadReg${type} $0 ${root} "${subkey}" "${name}"
+	${If} ${Errors}
+	${OrIf} $0 S!= `${value}`
+		WriteReg${type} ${root} "${subkey}" "${name}" `${value}`
+		Push 1
+	${Else}
+		Push 0
+	${EndIf}
 !macroend
 
 !macro -DeleteRegWithBackup type root subkey name fallback
@@ -319,6 +357,7 @@ FunctionEnd
 !macroend
 
 !define WriteRegWithBackup  `!insertmacro -WriteRegWithBackup`
+!define StoreRegWithBackup  `!insertmacro -StoreRegWithBackup`
 !define DeleteRegWithBackup `!insertmacro -DeleteRegWithBackup`
 
 Function SetLastOSVersion

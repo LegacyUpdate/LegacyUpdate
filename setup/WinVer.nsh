@@ -42,7 +42,9 @@
 !define WINVER_BUILD_8           9200
 !define WINVER_BUILD_8.1         9600
 !define WINVER_BUILD_10          10240
+!define WINVER_BUILD_10_1809     17763
 !define WINVER_BUILD_11          22000
+!define WINVER_BUILD_11_25H2     26200
 
 !define /ifndef VER_NT_WORKSTATION 1
 
@@ -212,7 +214,9 @@
 !insertmacro __WinVer_DefineServer 2012R2
 !insertmacro __WinVer_DefineServer 2016
 
+!insertmacro __WinVer_DefineBuild  10_1809
 !insertmacro __WinVer_DefineBuild  11
+!insertmacro __WinVer_DefineBuild  11_25H2
 
 !insertmacro __WinVer_DefineXPWPAEdition MediaCenter
 !insertmacro __WinVer_DefineXPWPAEdition TabletPC

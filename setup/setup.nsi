@@ -391,47 +391,72 @@ Section - PREREQS_END
 SectionEnd
 
 ; Main installation
-${MementoSection} "$(^Name)" LEGACYUPDATE
-	${RebootIfRequired}
 
-	; WUSERVER section
+${MementoSection} "Legacy Update Server" WUSERVER
 	Call MakeUninstallEntry
 
-	${If} ${AtMostWinVista}
-		; Check if SChannel is going to work with modern TLS
-		${If} ${AtLeastWinVista}
-			${DetailPrint} "$(StatusCheckingSSL)"
-			!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
-				`/TIMEOUTCONNECT 0 /TIMEOUTRECONNECT 0`
-			Pop $0
-			Call DownloadWaitSilent
-			Pop $1
-			Pop $0
-			${VerbosePrint} "Ping result: $0 ($1)"
-		${Else}
-			StrCpy $1 0
-		${EndIf}
-
-		${If} $1 >= 200
-		${AndIf} $1 < 300
-			; HTTPS will work
-			${WriteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER_HTTPS}"
-			${WriteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER_HTTPS}"
-			${WriteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL_HTTPS}"
-		${Else}
-			; Probably not supported; use HTTP
-			${WriteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
-			${WriteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
-			${WriteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
-		${EndIf}
-
-		${WriteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
-
-		; Restart service
-		!insertmacro RestartWUAUService
+	; Check if SChannel is going to work with modern TLS
+	${If} ${AtLeastWin8.1}
+		; Will always work (for now)
+		StrCpy $1 200
+	${ElseIf} ${AtLeastWinVista}
+		; It Depends™
+		${DetailPrint} "$(StatusCheckingSSL)"
+		!insertmacro DownloadRequest "${WSUS_SERVER_HTTPS}/ClientWebService/ping.bin" NONE \
+			`/TIMEOUTCONNECT 0 /TIMEOUTRECONNECT 0`
+		Pop $0
+		Call DownloadWaitSilent
+		Pop $1
+		Pop $0
+		${VerbosePrint} "Ping result: $0 ($1)"
+	${Else}
+		; Will basically never work
+		StrCpy $1 0
 	${EndIf}
 
-	; Server Core does not have IE, do not install ActiveX control
+	StrCpy $2 0
+
+	${If} $1 >= 200
+	${AndIf} $1 < 400
+		; HTTPS will work
+		${StoreRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER_HTTPS}"
+		Pop $0
+		IntOp $2 $2 | $0
+		${StoreRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER_HTTPS}"
+		Pop $0
+		IntOp $2 $2 | $0
+		${StoreRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL_HTTPS}"
+		Pop $0
+		IntOp $2 $2 | $0
+	${Else}
+		; Probably not supported; use HTTP
+		${StoreRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUServer" "${WSUS_SERVER}"
+		Pop $0
+		IntOp $2 $2 | $0
+		${StoreRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "${WSUS_SERVER}"
+		Pop $0
+		IntOp $2 $2 | $0
+		${StoreRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "${UPDATE_URL}"
+		Pop $0
+		IntOp $2 $2 | $0
+	${EndIf}
+
+	${StoreRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" 1
+	Pop $0
+	IntOp $2 $2 | $0
+
+	; Restart service
+	${If} $2 == 1
+		!insertmacro RestartWUAUService
+	${EndIf}
+${MementoSectionEnd}
+
+${MementoSection} "-Legacy Update ActiveX control" LEGACYUPDATE
+	${RebootIfRequired}
+
+	Call MakeUninstallEntry
+
+	; Server Core does not have IE by default, do not install ActiveX control
 	${If} ${AtLeastWinVista}
 	${AndIf} ${IsServerOS}
 		LegacyUpdateNSIS::IsServerCore
@@ -575,33 +600,37 @@ ${MementoSectionDone}
 ; Uninstaller
 Section "-un.Legacy Update Server" un.WUSERVER
 	; Clear WSUS server
-	${If} ${AtMostWinVista}
-		; Do this twice in case the backup is still set to our server
-		${For} $R0 1 2
-			ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUServer"
-			${VerbosePrint} "WUServer: $0"
-			${If} $0 == "${WSUS_SERVER}"
-			${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
-				${DeleteRegWithBackup} Str   HKLM "${REGPATH_WUPOLICY}"   "WUServer"    "-"
-				${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" "-"
-			${EndIf}
+	; Do this twice in case the backup is still set to our server
+	${For} $R0 1 2
+		StrCpy $1 0
 
-			ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
-			${VerbosePrint} "WUStatusServer: $0"
-			${If} $0 == "${WSUS_SERVER}"
-			${OrIf} $0 == "${WSUS_SERVER_HTTPS}"
-				${DeleteRegWithBackup} Str   HKLM "${REGPATH_WUPOLICY}"   "WUStatusServer" "-"
-				${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer"    "-"
-			${EndIf}
+		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUServer"
+		${VerbosePrint} "WUServer: $0"
+		${If} $0 S== "${WSUS_SERVER}"
+		${OrIf} $0 S== "${WSUS_SERVER_HTTPS}"
+			${DeleteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUServer"    "-"
+			StrCpy $1 1
+		${EndIf}
 
-			ReadRegStr $0 HKLM "${REGPATH_WU}" "URL"
-			${VerbosePrint} "URL: $0"
-			${If} $0 == "${UPDATE_URL}"
-			${OrIf} $0 == "${UPDATE_URL_HTTPS}"
-				${DeleteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "-"
-			${EndIf}
-		${Next}
-	${EndIf}
+		ReadRegStr $0 HKLM "${REGPATH_WUPOLICY}" "WUStatusServer"
+		${VerbosePrint} "WUStatusServer: $0"
+		${If} $0 S== "${WSUS_SERVER}"
+		${OrIf} $0 S== "${WSUS_SERVER_HTTPS}"
+			${DeleteRegWithBackup} Str HKLM "${REGPATH_WUPOLICY}" "WUStatusServer" "-"
+			StrCpy $1 1
+		${EndIf}
+
+		${If} $1 == 1
+			${DeleteRegWithBackup} Dword HKLM "${REGPATH_WUAUPOLICY}" "UseWUServer" "-"
+		${EndIf}
+
+		ReadRegStr $0 HKLM "${REGPATH_WU}" "URL"
+		${VerbosePrint} "URL: $0"
+		${If} $0 S== "${UPDATE_URL}"
+		${OrIf} $0 S== "${UPDATE_URL_HTTPS}"
+			${DeleteRegWithBackup} Str HKLM "${REGPATH_WU}" "URL" "-"
+		${EndIf}
+	${Next}
 SectionEnd
 
 Section "-un.Legacy Update website" un.ACTIVEX
@@ -697,18 +726,18 @@ SectionEnd
 	!insertmacro DESCRIPTION_STRING ROOTCERTS
 	!insertmacro DESCRIPTION_STRING ENABLEMU
 	!insertmacro DESCRIPTION_STRING ACTIVATE
-	; !insertmacro DESCRIPTION_STRING LEGACYUPDATE
-	; !insertmacro DESCRIPTION_STRING WUSERVER
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function OnMouseOverSection
-	${If} $0 == ${LEGACYUPDATE}
-		${If} ${AtMostWinXP2003}
-			StrCpy $0 "$(SectionActiveX2KXPDesc)"
-		${ElseIf} ${AtMostWin8.1}
-			StrCpy $0 "$(SectionActiveXVista78Desc)"
+	${If} $0 == ${WUSERVER}
+		${If} ${AtMostWinVista}
+			StrCpy $0 "$(SectionWUServer2KXPVistaDesc)"
+		${ElseIfNot} ${AtLeastWin10_1809}
+			StrCpy $0 "$(SectionWUServerCertDeadlineDesc)"
+		${ElseIfNot} ${AtLeastWin11_25H2}
+			StrCpy $0 "$(SectionWUServerWin10_1809Desc)"
 		${Else}
-			StrCpy $0 "$(SectionActiveXWin10Desc)"
+			StrCpy $0 "$(SectionWUServerWin11_25H2Desc)"
 		${EndIf}
 		SendMessage $mui.ComponentsPage.DescriptionText ${WM_SETTEXT} 0 "STR:"
 		EnableWindow $mui.ComponentsPage.DescriptionText 1
@@ -747,7 +776,8 @@ Function .onInit
 
 		; Handle 2000 Datacenter Server
 		${If} ${IsDatacenter}
-			!insertmacro UnselectSection ${LEGACYUPDATE}
+			!insertmacro RemoveSection ${LEGACYUPDATE}
+			!insertmacro RemoveSection ${WUSERVER}
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${W2KSP4}
@@ -890,7 +920,8 @@ Function .onInit
 		!insertmacro RemoveSection ${ACTIVATE}
 	${EndIf}
 
-	${If} ${AtLeastWin7}
+	${If} $IsBeforeCertRolloverDeadline == 1
+	${AndIf} ${AtLeastWin7}
 	${AndIf} ${AtMostWin8.1}
 		ClearErrors
 		EnumRegKey $0 HKLM "${REGPATH_WU_SERVICES}\${WU_MU_SERVICE_ID}" 0
@@ -901,7 +932,7 @@ Function .onInit
 		!insertmacro RemoveSection ${ENABLEMU}
 	${EndIf}
 
-	; Server Core does not have activation wizard
+	; Server Core does not have an activation wizard
 	${If} ${AtLeastWinVista}
 	${AndIf} ${IsServerOS}
 		LegacyUpdateNSIS::IsServerCore
@@ -911,12 +942,16 @@ Function .onInit
 		${EndIf}
 	${EndIf}
 
-	; ${IfNot} ${AtMostWinVista}
-	; 	!insertmacro RemoveSection ${LEGACYUPDATE}
-	; ${EndIf}
+	; Require WU server on 2000/XP/Vista; require pre-Win11 25H2 only past the deadline
+	${If} ${AtMostWinVista}
+		!insertmacro SetSectionRequired ${WUSERVER}
+	${ElseIf} $IsBeforeCertRolloverDeadline == 0
+	${AndIfNot} ${AtLeastWin11_25H2}
+		!insertmacro SetSectionRequired ${WUSERVER}
+	${EndIf}
 
-	; Try not to be too intrusive on Windows 10 and newer, which are (for now) fine
-	${If} ${AtLeastWin10}
+	; Try not to be too intrusive on Windows 11 25H2 and newer, which are (for now) fine
+	${If} ${AtLeastWin11_25H2}
 		!insertmacro RemoveSection ${ROOTCERTS}
 	${Else}
 		LegacyUpdateNSIS::NeedsRootsUpdate
@@ -964,7 +999,7 @@ Function ComponentsPageCheck
 	; Handle 2000 Datacenter Server
 	${If} ${IsWin2000}
 	${AndIf} ${IsDatacenter}
-		!insertmacro UnselectSection ${LEGACYUPDATE}
+		MessageBox MB_USERICON "$(MsgBoxWUA2000Datacenter)" /SD IDOK
 	${EndIf}
 
 	; Handle WES09 already enabled on non-SSE2
@@ -1158,7 +1193,9 @@ Function .onSelChange
 			MessageBox MB_USERICON "$(MsgBoxWES09NotSSE2Block)" /SD IDOK
 			!insertmacro UnselectSection ${WES09}
 		${EndIf}
-	${ElseIf} ${SectionIsSelected} ${ACTIVATE}
+	${EndIf}
+
+	${If} ${SectionIsSelected} ${ACTIVATE}
 		; Make sure the service pack prerequisite is selected
 		${If} ${IsWinXP2002}
 		${AndIfNot} ${AtLeastServicePack} 3
@@ -1171,12 +1208,21 @@ Function .onSelChange
 			MessageBox MB_USERICON "$(MsgBoxActivateXP2003NotSP2)" /SD IDOK
 			!insertmacro SelectSection ${2003SP2}
 		${EndIf}
-	${ElseIf} ${SectionIsSelected} ${LEGACYUPDATE}
-		; Handle 2000 Datacenter Server
-		${If} ${IsWin2000}
-		${AndIf} ${IsDatacenter}
-			MessageBox MB_USERICON "$(MsgBoxWUA2000Datacenter)" /SD IDOK
-			!insertmacro UnselectSection ${LEGACYUPDATE}
+	${EndIf}
+
+	${IfNot} ${SectionIsSelected} ${WUSERVER}
+		; Handle WU certificate expiry
+		${If} ${AtLeastWin7}
+		${AndIfNot} ${AtLeastWin10_1809}
+			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxWUServerCertDeadline)" /SD IDOK \
+				IDCANCEL +2
+			Return
+			!insertmacro SelectSection ${WUSERVER}
+		${ElseIfNot} ${AtLeastWin11_25H2}
+			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxWUServerWin10_1809)" /SD IDOK \
+				IDCANCEL +2
+			Return
+			!insertmacro SelectSection ${WUSERVER}
 		${EndIf}
 	${EndIf}
 FunctionEnd

@@ -12,14 +12,14 @@
 #include "VersionInfo.h"
 #include "Wow64.h"
 
-const LPWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
-const LPWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
-const LPWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
+const LPCWSTR UpdateSiteURLHttp      = L"http://legacyupdate.net/windowsupdate/v6/";
+const LPCWSTR UpdateSiteURLHttps     = L"https://legacyupdate.net/windowsupdate/v6/";
+const LPCWSTR UpdateSiteFirstRunFlag = L"?firstrun=true";
 
 DEFINE_GUID(IID_ILegacyUpdateCtrl,  0xC33085BB, 0xC3E1, 0x4D27, 0xA2, 0x14, 0xAF, 0x01, 0x95, 0x3D, 0xF5, 0xE5);
 DEFINE_GUID(CLSID_LegacyUpdateCtrl, 0xAD40983C, 0xFB56, 0x4AAC, 0xBE, 0xDB, 0xC4, 0x07, 0xC3, 0x53, 0xE2, 0xCB);
 
-static LPWSTR GetUpdateSiteURL(void) {
+static LPCWSTR GetUpdateSiteURL(void) {
 	// Fallback: Use SSL only on Vista and up
 	BOOL useHTTPS = AtLeastWinVista();
 
@@ -34,6 +34,7 @@ static LPWSTR GetUpdateSiteURL(void) {
 		} else if (wcscmp(data, UpdateSiteURLHttp) == 0) {
 			useHTTPS = FALSE;
 		}
+
 		LocalFree(data);
 	}
 
