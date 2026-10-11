@@ -422,7 +422,11 @@ SectionEnd
 
 ; Main installation
 
-${MementoSection} "-Legacy Update Server" WUSERVER
+Section "Legacy Update" WUSERVER
+	SectionIn Ro
+
+	${RebootIfRequired}
+
 	Call MakeUninstallEntry
 	Call InstallLauncher
 
@@ -480,7 +484,7 @@ ${MementoSection} "-Legacy Update Server" WUSERVER
 	${If} $2 == 1
 		!insertmacro RestartWUAUService
 	${EndIf}
-${MementoSectionEnd}
+SectionEnd
 
 ${MementoSection} "-Legacy Update ActiveX control" LEGACYUPDATE
 	${RebootIfRequired}
@@ -1145,12 +1149,14 @@ Function PostInstall
 
 	${IfNot} ${Silent}
 	${AndIfNot} ${IsRunOnce}
-		${If} ${FileExists} "$INSTDIR\LegacyUpdate.exe"
+		${If} ${SectionIsSelected} ${LEGACYUPDATE}
 			Exec '"$INSTDIR\LegacyUpdate.exe" /launch $0'
 		${ElseIf} ${AtLeastWin10}
 			ExecShell "" "ms-settings:windowsupdate"
 		${ElseIf} ${AtLeastWinVista}
 			Exec '"$WINDIR\system32\wuauclt.exe" /ShowWUAutoScan'
+		${Else}
+			Sleep 1000
 		${EndIf}
 
 		; Launch activation wizard if requested by the user

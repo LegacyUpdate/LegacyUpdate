@@ -40,11 +40,11 @@ BEGIN
 	// Intro text
 	LTEXT      "",         IDC_INTROTEXT,       0, 0, INNER_WIDTH, 24
 	// Radio buttons
-	AUTORADIOBUTTON "",    IDC_YESRADIO,        30, 37, INNER_WIDTH - 30, 10, WS_GROUP | WS_TABSTOP
+	AUTORADIOBUTTON "",    IDC_YESRADIO,        30, 30, INNER_WIDTH - 30, 10, WS_GROUP | WS_TABSTOP
 	AUTORADIOBUTTON "",    IDC_NORADIO,         30, 74, INNER_WIDTH - 30, 10, NOT WS_TABSTOP
 	// Yes icon and text
-	CONTROL    "",         IDC_YESICON,         "STATIC", SS_ICON | WS_GROUP, 3, 37, 21, 20
-	LTEXT      "",         IDC_YESTEXT,         41, 47, INNER_WIDTH - 41, 24
+	CONTROL    "",         IDC_YESICON,         "STATIC", SS_ICON | WS_GROUP, 3, 30, 21, 20
+	LTEXT      "",         IDC_YESTEXT,         41, 40, INNER_WIDTH - 41, 24
 	// No icon and text
 	CONTROL    "",         IDC_NOICON,          "STATIC", SS_ICON, 3, 74, 21, 20
 	LTEXT      "",         IDC_NOTEXT,          41, 84, INNER_WIDTH - 41, 24
