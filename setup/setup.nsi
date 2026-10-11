@@ -1095,13 +1095,15 @@ Function PreDownload
 
 	; 8.1
 	${If} ${IsWin8.1}
-		Call DownloadKB3021910
-		Call DownloadClearCompressionFlag
-		Call DownloadKB2919355
-		Call DownloadKB2932046
-		Call DownloadKB2959977
-		Call DownloadKB2937592
-		Call DownloadKB2934018
+		${If} ${NeedsPatch} Win81Update1
+			Call DownloadClearCompressionFlag
+			Call DownloadKB2919355
+			Call DownloadKB2932046
+			Call DownloadKB2959977
+			Call DownloadKB2937592
+			Call DownloadKB2934018
+		${EndIf}
+
 		Call DownloadKB3021910
 	${EndIf}
 
