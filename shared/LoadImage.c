@@ -381,6 +381,6 @@ HICON LoadWuIcon(void) {
 	if (AtLeastWinVista()) {
 		return LoadSystemIcon(L"%SystemRoot%\\System32\\shell32.dll", AtLeastWin10() ? MAKEINTRESOURCE(16826) : MAKEINTRESOURCE(47));
 	} else {
-		return LoadSystemIcon(L"%SystemRoot%\\System32\\wupdmgr.exe", L"APPICON");
+		return LoadSystemIcon(L"%SystemRoot%\\System32\\wupdmgr.exe", AtLeastWinXP2002() ? L"APPICON" : L"LARGEICON");
 	}
 }
