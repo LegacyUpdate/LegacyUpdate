@@ -271,12 +271,15 @@ LangString SectionEnableMUDesc  ${LANG_ENGLISH} \
 	"Configures Windows Update to receive updates for Microsoft Office and other Microsoft software."
 LangString SectionActivateDesc  ${LANG_ENGLISH} \
 	"Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
-LangString SectionActiveX2KXPDesc ${LANG_ENGLISH} \
-	"Installs the Legacy Update ActiveX control, enabling access to the full Windows Update interface via the legacyupdate.net website."
-LangString SectionActiveXVista78Desc ${LANG_ENGLISH} \
-	"Installs the Legacy Update ActiveX control, enabling access to the classic Windows Update interface via the legacyupdate.net website. Not required if you want to use the built-in Windows Update Control Panel."
-LangString SectionActiveXWin10Desc ${LANG_ENGLISH} \
-	"Installs the Legacy Update ActiveX control, enabling access to the classic Windows Update interface via the legacyupdate.net website."
+
+LangString SectionWUServer2KXPVistaDesc ${LANG_ENGLISH} \
+	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service."
+LangString SectionWUServerCertDeadlineDesc ${LANG_ENGLISH} \
+	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service. This ensures continued access to Windows Update after June 2027."
+LangString SectionWUServerWin10_1809Desc ${LANG_ENGLISH} \
+	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service. This ensures continued access to Windows Update after May 2027."
+LangString SectionWUServerWin11_25H2Desc ${LANG_ENGLISH} \
+	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service. Not required, but allows us to preserve update data your device receives."
 
 ; LangString SectionLegacyUpdateDesc ${LANG_ENGLISH} \
 ; 	"Installs Legacy Update, enabling access to Windows Update."
