@@ -19,9 +19,9 @@ void LaunchOptions(int nCmdShow) {
 		hr = Exec(NULL, L"ms-settings:windowsupdate-options", NULL, NULL, SW_SHOWDEFAULT, FALSE, NULL);
 	} else if (AtLeastWinVista()) {
 		// Windows Vista, 7, 8: Open Windows Update control panel
-		WCHAR wuauclt[MAX_PATH];
-		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\wuauclt.exe", wuauclt, ARRAYSIZE(wuauclt));
-		hr = Exec(NULL, wuauclt, L"/ShowOptions", NULL, SW_SHOWDEFAULT, FALSE, NULL);
+		WCHAR control[MAX_PATH];
+		ExpandEnvironmentStrings(L"%SystemRoot%\\System32\\control.exe", control, ARRAYSIZE(control));
+		hr = Exec(NULL, control, L"/name Microsoft.WindowsUpdate /page pageSettings", NULL, SW_SHOWDEFAULT, FALSE, NULL);
 	} else {
 		// Windows 2000, XP: Open Automatic Updates control panel
 		WCHAR wuaucpl[MAX_PATH];
