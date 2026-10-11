@@ -65,7 +65,8 @@ static INT_PTR CALLBACK ServerPageProc(HWND hwnd, UINT message, WPARAM wParam, L
 		SendDlgItemMessage(hwnd, IDC_PAGEICON, STM_SETICON, (WPARAM)icon, 0);
 
 		UINT wuTextId = 0;
-		if (AtMostWinVista() || !IsBeforeCertRolloverDeadline()) {
+		BOOL wuBroken = AtMostWinVista() || !IsBeforeCertRolloverDeadline();
+		if (wuBroken) {
 			wuTextId = IDS_WURADIO_DEADLINE;
 			EnableWindow(GetDlgItem(hwnd, IDC_WURADIO), FALSE);
 
@@ -85,7 +86,12 @@ static INT_PTR CALLBACK ServerPageProc(HWND hwnd, UINT message, WPARAM wParam, L
 		GetWsusServer(&g_wsusServer);
 		switch (g_wsusServer) {
 		case e_none:
-			CheckDlgButton(hwnd, IDC_WURADIO, BST_CHECKED);
+			if (wuBroken) {
+				CheckDlgButton(hwnd, IDC_LURADIO, BST_CHECKED);
+				PropSheet_Changed(GetParent(hwnd), hwnd);
+			} else {
+				CheckDlgButton(hwnd, IDC_WURADIO, BST_CHECKED);
+			}
 			break;
 
 		case e_legacyUpdateProxy:
