@@ -1154,7 +1154,9 @@ Function PostInstall
 		${ElseIf} ${AtLeastWin10}
 			ExecShell "" "ms-settings:windowsupdate"
 		${ElseIf} ${AtLeastWinVista}
+			${DisableX64FSRedirection}
 			Exec '"$WINDIR\system32\wuauclt.exe" /ShowWUAutoScan'
+			${EnableX64FSRedirection}
 		${Else}
 			Sleep 1000
 		${EndIf}
