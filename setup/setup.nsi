@@ -86,7 +86,6 @@ Var /GLOBAL UninstallInstalled
 !include DownloadIE.nsh
 !include DownloadVista78.nsh
 !include UpdateRoots.nsh
-; !include ActiveXPage.nsh
 !include RebootPage.nsh
 
 !insertmacro GetParameters
@@ -101,7 +100,7 @@ Var /GLOBAL UninstallInstalled
 
 !insertmacro MUI_PAGE_COMPONENTS
 
-; Page custom ActiveXPage
+Page custom ActiveXPage
 
 !define MUI_PAGE_HEADER_TEXT         "$(InstFilesPageTitle)"
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
@@ -476,7 +475,6 @@ ${MementoSection} "-Legacy Update ActiveX control" LEGACYUPDATE
 	${EndIf}
 
 	${If} $0 != 1
-		; ACTIVEX section
 		SetOutPath $INSTDIR
 		; Call MakeUninstallEntry
 
@@ -597,6 +595,8 @@ ${MementoSectionEnd}
 
 ${MementoSectionDone}
 
+!include ActiveXPage.nsh
+
 ; Uninstaller
 Section "-un.Legacy Update Server" un.WUSERVER
 	; Clear WSUS server
@@ -633,7 +633,7 @@ Section "-un.Legacy Update Server" un.WUSERVER
 	${Next}
 SectionEnd
 
-Section "-un.Legacy Update website" un.ACTIVEX
+Section "-un.Legacy Update Website" un.ACTIVEX
 	SetOutPath $INSTDIR
 
 	; Delete shortcut
