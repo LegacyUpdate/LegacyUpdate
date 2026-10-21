@@ -1208,6 +1208,9 @@ Function .onInstFailed
 	Call CleanUp
 FunctionEnd
 
+Var /GLOBAL WUServerCertDeadlineWarned
+Var /GLOBAL RootCertsWarned
+
 Function .onSelChange
 	${If} ${SectionIsSelected} ${WES09}
 		; Check for SSE2
@@ -1233,20 +1236,38 @@ Function .onSelChange
 		${EndIf}
 	${EndIf}
 
-	${IfNot} ${SectionIsSelected} ${WUSERVER}
+	${If} ${SectionIsSelected} ${WUSERVER}
+		StrCpy $WUServerCertDeadlineWarned 0
+	${ElseIf} $WUServerCertDeadlineWarned != 1
 		; Handle WU certificate expiry
+		StrCpy $WUServerCertDeadlineWarned 1
+
 		${If} ${AtLeastWin7}
 		${AndIfNot} ${AtLeastWin10_1809}
 			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxWUServerCertDeadline)" /SD IDOK \
 				IDCANCEL +2
 			Return
 			!insertmacro SelectSection ${WUSERVER}
+			StrCpy $WUServerCertDeadlineWarned 0
 		${ElseIfNot} ${AtLeastWin11_25H2}
 			MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxWUServerWin10_1809)" /SD IDOK \
 				IDCANCEL +2
 			Return
 			!insertmacro SelectSection ${WUSERVER}
+			StrCpy $WUServerCertDeadlineWarned 0
 		${EndIf}
+	${EndIf}
+
+	${If} ${SectionIsSelected} ${ROOTCERTS}
+		StrCpy $RootCertsWarned 0
+	${ElseIf} $RootCertsWarned != 1
+		; Handle root certs security warning
+		StrCpy $RootCertsWarned 1
+		MessageBox MB_USERICON|MB_OKCANCEL "$(MsgBoxRootCertsWarning)" /SD IDOK \
+			IDCANCEL +2
+		Return
+		!insertmacro SelectSection ${ROOTCERTS}
+		StrCpy $RootCertsWarned 0
 	${EndIf}
 FunctionEnd
 

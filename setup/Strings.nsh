@@ -169,6 +169,11 @@ LangString MsgBoxWUServerWin10_1809 ${LANG_ENGLISH} \
 	$\r$\n\
 	We recommend clicking Cancel to avoid issues in future."
 
+LangString MsgBoxRootCertsWarning ${LANG_ENGLISH} \
+	"Your device may be at risk of compromised root and intermediate certificates, which could be used to impersonate trusted servers as you use the internet.$\r$\n\
+	$\r$\n\
+	We recommend clicking Cancel to ensure the latest trusted certificates are installed."
+
 ; Statuses
 LangString StatusRestarting     ${LANG_ENGLISH} "Restarting..."
 LangString StatusRestartingWUAU ${LANG_ENGLISH} "Restarting Windows Update service..."
@@ -217,7 +222,7 @@ LangString SectionWHS2011U4 ${LANG_ENGLISH} "Windows Home Server 2011 $(Rollup) 
 LangString SectionW2KUR1    ${LANG_ENGLISH} "Update Rollup 1 for Windows 2000 $(SP) 4"
 LangString SectionSSU       ${LANG_ENGLISH} "Windows Servicing Stack update"
 LangString SectionWUA       ${LANG_ENGLISH} "Windows Update Agent update"
-LangString SectionRootCerts ${LANG_ENGLISH} "Root certificates store update"
+LangString SectionRootCerts ${LANG_ENGLISH} "Update trusted certificates store"
 LangString SectionEnableMU  ${LANG_ENGLISH} "Enable Microsoft Update"
 LangString SectionActivate  ${LANG_ENGLISH} "Activate Windows"
 LangString SectionESU       ${LANG_ENGLISH} "Prepare for Extended Security Updates"
@@ -266,7 +271,7 @@ LangString SectionWHS2011U4Desc ${LANG_ENGLISH} \
 LangString SectionWUADesc       ${LANG_ENGLISH} \
 	"Updates the Windows Update Agent to the latest version, as required for Legacy Update."
 LangString SectionRootCertsDesc ${LANG_ENGLISH} \
-	"Updates the root certificate store to the latest from Microsoft, and enables additional modern security features. Root certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites."
+	"Updates the trusted certificates store to the latest from Microsoft, and enables additional modern security features. Certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites, and ensures known compromised certificates are blocked."
 LangString SectionEnableMUDesc  ${LANG_ENGLISH} \
 	"Configures Windows Update to receive updates for Microsoft Office and other Microsoft software."
 LangString SectionActivateDesc  ${LANG_ENGLISH} \
