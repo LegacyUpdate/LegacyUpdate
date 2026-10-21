@@ -25,10 +25,14 @@ LangString DownloadStatusMulti  ${LANG_ENGLISH} "{TIMEREMAINING} left - {TOTALRE
 LangString MsgBoxUsage ${LANG_ENGLISH} \
 	"Usage: setup.exe [/S] [/v] [/passive] [/norestart]$\r$\n\
 	$\r$\n\
-	/S$\tExecute Legacy Update setup silently.$\r$\n\
-	/v$\tDisplay verbose details during installation.$\r$\n\
-	/passive$\tInstall without user interaction.$\r$\n\
-	/norestart$\tDisable automatic restart during installation.$\r$\n\
+	/S$\r$\n\
+	    Execute Legacy Update setup silently$\r$\n\
+	/v$\r$\n\
+	    Display verbose details during installation$\r$\n\
+	/passive$\r$\n\
+	    Install without user interaction$\r$\n\
+	/norestart$\r$\n\
+	    Disable automatic restart during installation$\r$\n\
 	$\r$\n\
 	If no flags are passed, Legacy Update will launch its full user interface.$\r$\n\
 	For more information on these flags, visit legacyupdate.net."
@@ -147,12 +151,6 @@ LangString MsgBoxWES09NotSSE2Pre ${LANG_ENGLISH} \
 	$\r$\n\
 	$(MsgBoxWES09NotSSE2Main)"
 
-LangString MsgBoxActivateXP2002NotSP3 ${LANG_ENGLISH} \
-	"Windows XP must be updated to Service Pack 3 to activate over the internet. The Service Pack 3 update action will be enabled."
-
-LangString MsgBoxActivateXP2003NotSP2 ${LANG_ENGLISH} \
-	"Windows XP Professional x64 Edition or Windows Server 2003 must be updated to Service Pack 2 to activate over the internet. The Service Pack 2 update action will be enabled."
-
 LangString MsgBoxVistaSPInstall ${LANG_ENGLISH} \
 	"Your computer will restart several times to install Windows Vista Service Pack 2. Your screen may appear blank for an extended period of time. Do not turn off your computer during this process."
 
@@ -224,7 +222,6 @@ LangString SectionSSU       ${LANG_ENGLISH} "Windows Servicing Stack update"
 LangString SectionWUA       ${LANG_ENGLISH} "Windows Update Agent update"
 LangString SectionRootCerts ${LANG_ENGLISH} "Update trusted certificates store"
 LangString SectionEnableMU  ${LANG_ENGLISH} "Enable Microsoft Update"
-LangString SectionActivate  ${LANG_ENGLISH} "Activate Windows"
 LangString SectionESU       ${LANG_ENGLISH} "Prepare for Extended Security Updates"
 
 LangString SectionSupEULA   ${LANG_ENGLISH} \
@@ -274,8 +271,6 @@ LangString SectionRootCertsDesc ${LANG_ENGLISH} \
 	"Updates the trusted certificates store to the latest from Microsoft, and enables additional modern security features. Certificates are used to verify the security of encrypted (https) connections. This fixes connection issues with some websites, and ensures known compromised certificates are blocked."
 LangString SectionEnableMUDesc  ${LANG_ENGLISH} \
 	"Configures Windows Update to receive updates for Microsoft Office and other Microsoft software."
-LangString SectionActivateDesc  ${LANG_ENGLISH} \
-	"Your copy of Windows is not activated. If you update the root certificates store, Windows Product Activation can be completed over the internet. Legacy Update can start the activation wizard after installation so you can activate your copy of Windows."
 
 LangString SectionWUServer2KXPVistaDesc ${LANG_ENGLISH} \
 	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service."
@@ -285,11 +280,6 @@ LangString SectionWUServerWin10_1809Desc ${LANG_ENGLISH} \
 	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service. This ensures continued access to Windows Update after May 2027."
 LangString SectionWUServerWin11_25H2Desc ${LANG_ENGLISH} \
 	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service. Not required, but allows us to preserve update data your device receives."
-
-; LangString SectionLegacyUpdateDesc ${LANG_ENGLISH} \
-; 	"Installs Legacy Update, enabling access to Windows Update."
-; LangString SectionWUServerDesc     ${LANG_ENGLISH} \
-; 	"Configures Windows Update to use the Legacy Update proxy server, resolving connection issues to the official Microsoft Windows Update service."
 
 ; NT 4.0
 LangString MsgBoxNT4PostInstall ${LANG_ENGLISH} \
@@ -358,7 +348,7 @@ LangString ActiveXPageYesText2KXP  ${LANG_ENGLISH} "The Legacy Update website is
 LangString ActiveXPageNoTitleWin10 ${LANG_ENGLISH} "Use Windows Update via Settings"
 LangString ActiveXPageNoTextWin10  ${LANG_ENGLISH} "Legacy Update is compatible with the built-in Windows Update Settings."
 LangString ActiveXPageNoTitleVista ${LANG_ENGLISH} "Use the Windows Update Control Panel"
-LangString ActiveXPageNoTextVista  ${LANG_ENGLISH} "Legacy Update is compatible with the built-in Windows Update Control Panel. Make sure to check for updates $\"managed by your system administrator$\" to use the Legacy Update proxy server."
+LangString ActiveXPageNoTextVista  ${LANG_ENGLISH} "Components that support the Legacy Update website will not be installed. You can install them at any time by running Legacy Update setup again."
 LangString ActiveXPageNoTitle2KXP  ${LANG_ENGLISH} "Use Automatic Updates"
 LangString ActiveXPageNoText2KXP   ${LANG_ENGLISH} "Use the built-in Automatic Updates feature to download and install updates. You will only be able to download critical updates."
 

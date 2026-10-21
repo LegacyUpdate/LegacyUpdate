@@ -413,10 +413,6 @@ ${MementoSection} "$(SectionEnableMU)" ENABLEMU
 	!insertmacro RestartWUAUService
 ${MementoSectionEnd}
 
-${MementoUnselectedSection} "$(SectionActivate)" ACTIVATE
-	; No-op; we'll launch the activation wizard in post-install.
-${MementoSectionEnd}
-
 Section - PREREQS_END
 SectionEnd
 
@@ -740,7 +736,6 @@ SectionEnd
 	!insertmacro DESCRIPTION_STRING WUA
 	!insertmacro DESCRIPTION_STRING ROOTCERTS
 	!insertmacro DESCRIPTION_STRING ENABLEMU
-	!insertmacro DESCRIPTION_STRING ACTIVATE
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function OnMouseOverSection
@@ -923,18 +918,6 @@ Function .onInit
 		!insertmacro RemoveSection ${WUA}
 	${EndIf}
 
-	${If} ${AtLeastWinXP2002}
-	${AndIf} ${AtMostWin8.1}
-		; Check if the OS needs activation
-		LegacyUpdateNSIS::IsActivated
-		Pop $0
-		${If} $0 == 1
-			!insertmacro RemoveSection ${ACTIVATE}
-		${EndIf}
-	${Else}
-		!insertmacro RemoveSection ${ACTIVATE}
-	${EndIf}
-
 	${If} $IsBeforeCertRolloverDeadline == 1
 	${AndIf} ${AtLeastWin7}
 	${AndIf} ${AtMostWin8.1}
@@ -945,16 +928,6 @@ Function .onInit
 		${EndIf}
 	${Else}
 		!insertmacro RemoveSection ${ENABLEMU}
-	${EndIf}
-
-	; Server Core does not have an activation wizard
-	${If} ${AtLeastWinVista}
-	${AndIf} ${IsServerOS}
-		LegacyUpdateNSIS::IsServerCore
-		Pop $0
-		${If} $0 == 1
-			!insertmacro RemoveSection ${ACTIVATE}
-		${EndIf}
 	${EndIf}
 
 	; Require WU server on 2000/XP/Vista; require pre-Win11 25H2 only past the deadline
@@ -1160,17 +1133,6 @@ Function PostInstall
 		${Else}
 			Sleep 1000
 		${EndIf}
-
-		; Launch activation wizard if requested by the user
-		${If} ${SectionIsSelected} ${ACTIVATE}
-			${DisableX64FSRedirection}
-			${If} ${AtLeastWinVista}
-				Exec '"$WINDIR\system32\slui.exe"'
-			${Else}
-				Exec '"$WINDIR\system32\oobe\msoobe.exe" /a'
-			${EndIf}
-			${EnableX64FSRedirection}
-		${EndIf}
 	${EndIf}
 FunctionEnd
 
@@ -1218,21 +1180,6 @@ Function .onSelChange
 		${If} $0 == 0
 			MessageBox MB_USERICON "$(MsgBoxWES09NotSSE2Block)" /SD IDOK
 			!insertmacro UnselectSection ${WES09}
-		${EndIf}
-	${EndIf}
-
-	${If} ${SectionIsSelected} ${ACTIVATE}
-		; Make sure the service pack prerequisite is selected
-		${If} ${IsWinXP2002}
-		${AndIfNot} ${AtLeastServicePack} 3
-		${AndIfNot} ${SectionIsSelected} ${XPSP3}
-			MessageBox MB_USERICON "$(MsgBoxActivateXP2002NotSP3)" /SD IDOK
-			!insertmacro SelectSection ${XPSP3}
-		${ElseIf} ${IsWinXP2003}
-		${AndIfNot} ${AtLeastServicePack} 2
-		${AndIfNot} ${SectionIsSelected} ${2003SP2}
-			MessageBox MB_USERICON "$(MsgBoxActivateXP2003NotSP2)" /SD IDOK
-			!insertmacro SelectSection ${2003SP2}
 		${EndIf}
 	${EndIf}
 
