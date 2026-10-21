@@ -5,6 +5,9 @@
 
 #define ROOTS_UPDATE_THRESHOLD (30LL * 24LL * 60LL * 60LL * 10000000LL)
 
+// 2026-10-20T18:02:59Z, when disallowedcert.sst was updated to revoke leaked eMudhra certs
+#define CERT_REVOKE_EMUDHRA (134369929790000000ULL)
+
 PLUGIN_METHOD(NeedsRootsUpdate) {
 	PLUGIN_INIT();
 
@@ -32,6 +35,11 @@ PLUGIN_METHOD(NeedsRootsUpdate) {
 	ULONGLONG currentTime64 = 0, lastUpdateTime64 = 0;
 	memcpy(&currentTime64, &currentTime, sizeof(currentTime64));
 	memcpy(&lastUpdateTime64, &lastUpdateTime, sizeof(lastUpdateTime64));
+
+	if (lastUpdateTime64 < CERT_REVOKE_EMUDHRA) {
+		pushint(1);
+		return;
+	}
 
 	ULONGLONG difference = currentTime64 - lastUpdateTime64;
 	pushint(difference > ROOTS_UPDATE_THRESHOLD ? 1 : 0);
