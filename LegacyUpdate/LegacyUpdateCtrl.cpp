@@ -657,11 +657,11 @@ STDMETHODIMP CLegacyUpdateCtrl::ViewWindowsUpdateLog(void) {
 	return ViewLog(e_windowsUpdate);
 }
 
-STDMETHODIMP CLegacyUpdateCtrl::OpenSettings(void) {
+STDMETHODIMP CLegacyUpdateCtrl::OpenOptions(void) {
 	DoIsPermittedCheck();
 
-	HRESULT hr = StartLauncher(L"/settings", FALSE);
-	CHECK_HR_OR_RETURN(L"OpenSettings");
+	HRESULT hr = StartLauncher(L"/options", FALSE);
+	CHECK_HR_OR_RETURN(L"OpenOptions");
 	return hr;
 }
 

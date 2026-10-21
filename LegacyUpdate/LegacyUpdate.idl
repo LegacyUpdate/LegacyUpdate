@@ -67,7 +67,7 @@ interface ILegacyUpdateCtrl : IDispatch {
 	[id(8)]  HRESULT RebootIfRequired(void);
 	[id(18)] HRESULT ViewLog(ViewLogType logType);
 	[id(9)]  HRESULT ViewWindowsUpdateLog(void);
-	[id(20)] HRESULT OpenSettings(void);
+	[id(20)] HRESULT OpenOptions(void);
 	[id(13)] HRESULT OpenWindowsUpdateSettings(void);
 	[id(16)] HRESULT BeforeUpdate(void);
 	[id(17)] HRESULT AfterUpdate(void);
