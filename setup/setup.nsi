@@ -92,11 +92,12 @@ Var /GLOBAL UninstallInstalled
 !insertmacro GetParameters
 !insertmacro GetOptions
 
-!define MUI_PAGE_HEADER_TEXT         "$(ComponentsPageTitle)"
-!define MUI_COMPONENTSPAGE_TEXT_TOP  "$(ComponentsPageText)"
-!define MUI_PAGE_CUSTOMFUNCTION_PRE  ComponentsPageCheck
-!define MUI_PAGE_CUSTOMFUNCTION_SHOW OnShow
-!define MUI_PAGE_FUNCTION_GUIINIT    OnShow
+!define MUI_PAGE_HEADER_TEXT          "$(ComponentsPageTitle)"
+!define MUI_COMPONENTSPAGE_TEXT_TOP   "$(ComponentsPageText)"
+!define MUI_PAGE_CUSTOMFUNCTION_PRE   ComponentsPageCheck
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW  OnShow
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE ComponentsPageLeave
+!define MUI_PAGE_FUNCTION_GUIINIT     OnShow
 !define MUI_CUSTOMFUNCTION_ONMOUSEOVERSECTION OnMouseOverSection
 
 !insertmacro MUI_PAGE_COMPONENTS
@@ -391,14 +392,14 @@ Section "$(SectionWUA)" WUA
 	Call InstallWUA
 SectionEnd
 
-${MementoSection} "$(SectionRootCerts)" ROOTCERTS
+Section "$(SectionRootCerts)" ROOTCERTS
 	${RebootIfRequired}
 	Call ConfigureCrypto
 
 	${IfNot} ${IsPostInstall}
 		Call UpdateRoots
 	${EndIf}
-${MementoSectionEnd}
+SectionEnd
 
 ${MementoSection} "$(SectionEnableMU)" ENABLEMU
 	${RebootIfRequired}
@@ -946,6 +947,13 @@ Function .onInit
 		Pop $0
 		${If} $0 == 0
 			!insertmacro RemoveSection ${ROOTCERTS}
+		${Else}
+			ClearErrors
+			ReadRegDword $0 HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "UpdateRootsSection"
+			${IfNot} ${Errors}
+			${AndIf} $0 == 0
+				!insertmacro UnselectSection ${ROOTCERTS}
+			${EndIf}
 		${EndIf}
 	${EndIf}
 FunctionEnd
@@ -1000,6 +1008,20 @@ Function ComponentsPageCheck
 				MessageBox MB_USERICON "$(MsgBoxWES09NotSSE2Pre)" /SD IDOK
 			${EndIf}
 		${EndIf}
+	${EndIf}
+FunctionEnd
+
+Function ComponentsPageLeave
+	; Manually store selection state of the root certs option. When hidden, Memento loses the user’s preference.
+	SectionGetText ${ROOTCERTS} $0
+	${If} $0 != ""
+		${If} ${SectionIsSelected} ${ROOTCERTS}
+			StrCpy $0 1
+		${Else}
+			StrCpy $0 0
+		${EndIf}
+
+		WriteRegDword HKLM "${REGPATH_LEGACYUPDATE_SETUP}" "UpdateRootsSection" $0
 	${EndIf}
 FunctionEnd
 
